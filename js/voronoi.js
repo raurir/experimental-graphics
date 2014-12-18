@@ -2,7 +2,7 @@ var con = console;
 
 // con.log(colours)
 
-// colours.setRandomPalette(75);
+colours.setRandomPalette(0);
 
 var dot = 1;
 var N_SITES = 1 + frand(200);
@@ -220,9 +220,9 @@ function gen_edges() {
 	for (k = 0; k < N_SITES; k++) {
 		var edge = edges[k];
 
-    ctx.beginPath();
-   	ctx.lineWidth = 10;
-   	ctx.strokeStyle = crand();
+	    ctx.beginPath();
+	   	ctx.lineWidth = 10;
+	   	ctx.strokeStyle = crand();
 
 		for(l = 0; l < edge.length; l++) {
 
@@ -273,7 +273,11 @@ function creatPattern() {
 	ctx.rotate(frand(Math.PI * 2));
 	// ctx.rotate(1/8 * (Math.PI * 2));
 	ctx.translate(-width / 2, -height / 2);
-	ctx.fillStyle = colours.getRandomColour();//crand();
+
+	colours.setColourIndex(1);
+
+	ctx.fillStyle = colours.getCurrentColour();//crand();
+	// ctx.fillStyle = colours.getRandomColour();//crand();
 
 	var half = width / 2;
 
@@ -281,13 +285,18 @@ function creatPattern() {
 
 	ctx.fillRect(-padding, -padding, width + padding * 2, height + padding * 2);
 
-	var lineScale = 0.5 + frand(thisScale);
+	var lineScale = 0.5;// + frand(thisScale);
+	var lineSize = 1;// 1 + frand(10) * lineScale;
+	var lineGap = 4;// 2+ frand(3) * lineScale;
 
+
+	var colour = colours.getNextColour();//crand();;
 	var y = -padding;
 	while(y < height + padding) {
-		var lineSize = 1 + frand(10) * lineScale;
-		var lineGap = 2 + frand(3) * lineScale;
-		ctx.fillStyle = colours.getRandomColour();//crand();
+		//lineSize = 1 + frand(10) * lineScale;
+		//lineGap = 2 + frand(3) * lineScale;
+		// ctx.fillStyle = colours.getRandomColour();//crand();
+		ctx.fillStyle = colour;//crand();
 		ctx.fillRect(-padding, y, width + padding * 2, lineSize);
 		y += lineSize + lineGap;
 	}

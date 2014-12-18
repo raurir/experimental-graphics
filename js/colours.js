@@ -1,6 +1,7 @@
 var colours = (function() {
 
   var paletteIndex = -1, currentPalette = null;
+  var colourIndex = 0;
 
   function getRandomPalette() {
     paletteIndex = ~~(Math.random() * palettes.length);
@@ -13,11 +14,33 @@ var colours = (function() {
   }
   function getRandomColour() {
     if (currentPalette == null ) getRandomPalette();
-    var colourIndex = ~~(Math.random() * currentPalette.length);
+    colourIndex = ~~(Math.random() * currentPalette.length);
     return currentPalette[colourIndex];
   }
 
+  function getCurrentColour() {
+    if (currentPalette == null ) getRandomPalette();
+    return currentPalette[colourIndex];
+  }
+
+  function getNextColour(offset) {
+    if (currentPalette == null ) getRandomPalette();
+    if (offset != undefined) {
+        colourIndex += offset;
+    } else {
+        colourIndex++;
+    }
+    colourIndex += currentPalette.length
+    colourIndex %= currentPalette.length;
+    return currentPalette[colourIndex];
+  }
+  function setColourIndex(index) {
+    colourIndex = index;
+  }
+
   var palettes = [
+
+    ['#333','#ccc'],
 
     // from kuler
     ['#A0C9D9','#F2F0D0','#735438','#A64941','#0D0D0D'],
@@ -149,8 +172,11 @@ var colours = (function() {
   return {
     getRandomPalette: getRandomPalette,
     getRandomColour: getRandomColour,
+    getCurrentColour: getCurrentColour,
+    getNextColour: getNextColour, 
     getPalleteIndex: function() { return paletteIndex;},
-    setRandomPalette: setRandomPalette
+    setRandomPalette: setRandomPalette,
+    setColourIndex: setColourIndex
   }
 
 })();
