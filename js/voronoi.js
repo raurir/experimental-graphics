@@ -1,336 +1,292 @@
-var con = console;
+var isNode = (typeof module !== 'undefined');
+var voronoi = (function() {
 
-// con.log(colours); // colours is colours.js
+	var con = console;
 
-// voronoi code was largely lifted from http://rosettacode.org/wiki/Voronoi_diagram
-// c ported to javascript
+	// con.log(colours); // colours is colours.js
+	// voronoi code was largely lifted from http://rosettacode.org/wiki/Voronoi_diagram
+	// c ported to javascript
 
-var dot = 1;
-var N_SITES = 1 + frand(200);
-var site = [];
-var rgb = [];
-// var edges = [];
-var regions = [];
-var size_x = 500, size_y = 500;
-var width = size_x * dot, height = size_y * dot;
+	// proper (ie vector) voronoi code is here: https://code.google.com/p/javascript-voronoi/downloads/detail?name=JSVoronoi.zip 
 
+	var dot; // pixel size
+	var sites;
+	var site = [];
+	// var rgb = [];
+	// var edges = [];
+	var regions = [];
+	var bounds = [];
+	var sizeX, sizeY;
+	var width, height;
 
-var thisScale = 0.5 + frand(13);
-var lineScale = 0.5;
-var lineSize = 1;
-var lineGap = 4;
-
-var varyRotation = Math.random() > 0.5 ? Math.PI * 2 : Math.PI * 0.2;
-var varyPerRegion = Math.random() > 0.5;
-var varyPerLine = Math.random() > 0.5;
-var varyDuotone = Math.random() > 0.5;
-
-if (varyDuotone) {
-	colours.setRandomPalette(0); // this sets black and white (or greys really.)
-}
-
-
-
-
-function frand(x) {
-	return Math.random() * x;;
-}
-
-
-function sq2(x1, x2, y1, y2)
-{
-	var dx = x1 - x2, dy = y1 - y2;
-	return dx * dx + dy * dy;
-}
-
-function manhattan(x, x2, y, y2) {
-	return Math.abs(x - x2) + Math.abs(y - y2);
-}
-
-function minkowsky(X1, X2, Y1, Y2) {
-	return (Math.abs(X2 - X1) * 3 + Math.abs(Y2-Y1) * 3) * 0.33
-}
-
-function nearest_site(x1, y1)
-{
-	var k, ret = 0;
-	var d, dist = 0;
-	for (k = 0; k < N_SITES; k++) {
-
-		var x2 = site[k][0];
-		var y2 = site[k][1];
-
-		d = sq2(x1, x2, y1, y2); // flip this for manhattan... 
-
-		if (!k || d < dist) {
-			dist = d;
-			ret = k;
+	function init(options) {
+		dot = options.dot || 1;
+		sites = options.sites || 10;
+		sizeX = options.sizeX || 200;
+		sizeY = options.sizeY || 200;
+		width = sizeX * dot;
+		height = sizeY * dot;
+		return {
+			width: width,
+			height: height
 		}
 	}
-	return ret;
-}
 
-
-/*
-// see if a pixel is different from any neighboring ones 
-function at_edge(color, y, x) {
-	var i, j, c = color[y * size_x + x];
-	for (i = y - 1; i <= y + 1; i++) {
-		if (i < 0 || i >= size_y) continue;
-
-		for (j = x - 1; j <= x + 1; j++) {
-			if (j < 0 || j >= size_x) continue;
-			if (color[i * size_x + j] != c) return 1;
-		}
+	function sq2(x1, x2, y1, y2) {
+		var dx = x1 - x2, dy = y1 - y2;
+		return dx * dx + dy * dy;
 	}
-	return 0;
-}
 
+	function manhattan(x, x2, y, y2) {
+		return Math.abs(x - x2) + Math.abs(y - y2);
+	}
 
+	function minkowsky(X1, X2, Y1, Y2) {
+		return (Math.abs(X2 - X1) * 3 + Math.abs(Y2-Y1) * 3) * 0.33
+	}
 
-// count number of colours neighbouring a pixel 
-function at_corner(color, y, x) {
-	var colours = [];
-	var i, j, c = color[y * size_x + x];
-	for (i = y - 1; i <= y + 1; i++) {
-		if (i < 0 || i >= size_y) continue;
+	function nearest_site(x1, y1)
+	{
+		var k, ret = 0;
+		var d, dist = 0;
+		for (k = 0; k < sites; k++) {
 
-		for (j = x - 1; j <= x + 1; j++) {
-			if (j < 0 || j >= size_x) continue;
+			var x2 = site[k][0];
+			var y2 = site[k][1];
 
-			var otherColour = color[i * size_x + j];
+			d = sq2(x1, x2, y1, y2); // exchange this for manhattan... 
 
-			if (colours.indexOf(otherColour) == -1) {
-				// colours++;
-				colours.push(otherColour);
+			if (!k || d < dist) {
+				dist = d;
+				ret = k;
 			}
-
-			// con.log(otherColour, colours)
-
 		}
-	}
-	return colours.length;
-}
-
-
-
-var AA_RES = 4; // average over 4x4 supersampling grid
-function aa_color(y, x)
-{
-	var i, j, n, r = 0, g = 0, b = 0, xx, yy;
-	for (i = 0; i < AA_RES; i++) {
-		yy = y + 1. / AA_RES * i + .5;
-		for (j = 0; j < AA_RES; j++) {
-			xx = x + 1. / AA_RES * j + .5;
-			n = nearest_site(xx, yy);
-			r += rgb[n][0];
-			g += rgb[n][1];
-			b += rgb[n][2];
-		}
-	}
-	return [
-		r / (AA_RES * AA_RES),
-		g / (AA_RES * AA_RES),
-		b / (AA_RES * AA_RES)
-	];
-}
-*/
-
-
-function gen_map()
-{
-	var i, j, k, nearest = [], color;
-
-	for (i = 0; i < size_y; i++) {
-		for (j = 0; j < size_x; j++) {
-			nearest[i * size_x + j] = nearest_site(j, i);
-		}
+		return ret;
 	}
 
-	for (i = 0; i < size_y; i++) {
-		for (j = 0; j < size_x; j++) {
 
-			var index = i * size_x + j;
+	/*
+	// see if a pixel is different from any neighboring ones 
+	function at_edge(color, y, x) {
+		var i, j, c = color[y * sizeX + x];
+		for (i = y - 1; i <= y + 1; i++) {
+			if (i < 0 || i >= sizeY) continue;
 
-			var nearestSite = nearest[index];
+			for (j = x - 1; j <= x + 1; j++) {
+				if (j < 0 || j >= sizeX) continue;
+				if (color[i * sizeX + j] != c) return 1;
+			}
+		}
+		return 0;
+	}
 
-			regions[nearestSite].push([j,i]);
 
-			/*
 
-			// not really interested in antialiasing.
-			// ... but the at edge function is fascinatingly rudimentary
+	// count number of colours neighbouring a pixel 
+	function at_corner(color, y, x) {
+		var colours = [];
+		var i, j, c = color[y * sizeX + x];
+		for (i = y - 1; i <= y + 1; i++) {
+			if (i < 0 || i >= sizeY) continue;
 
-			var color = rgb[nearest[index]];
-			if (at_edge(nearest, i, j)) {
+			for (j = x - 1; j <= x + 1; j++) {
+				if (j < 0 || j >= sizeX) continue;
 
-				if (at_corner(nearest, i, j) > 2) {
-					// edges[ nearest[index] ].push([j,i]);
-					color = [255,255,255];
-				} else {
-					color = [0,0,0];
+				var otherColour = color[i * sizeX + j];
+
+				if (colours.indexOf(otherColour) == -1) {
+					// colours++;
+					colours.push(otherColour);
 				}
 
-				// color = [0,0,0];
-				// color = aa_color(i, j);
-				// color = color.map(function(v) { return v * 1.5} );
+				// con.log(otherColour, colours)
 
 			}
-			*/
-
-
-
 		}
+		return colours.length;
 	}
 
-	/* draw regions / sites */
-	for (k = 0; k < N_SITES; k++) {
 
-		var r, region = regions[k];
 
-		var pattern = createPattern();
-
-		var regionCanvas = createCanvas(width, height);
-
-		regionCanvas.ctx.globalCompositeOperation = "source-over";
-		regionCanvas.ctx.fillStyle = "red";
-
-		for (r = 0; r < region.length; r++) {
-			var x = region[r][0];
-			var y = region[r][1];
-			regionCanvas.ctx.fillRect(x * dot, y * dot, dot, dot);
-		}
-		regionCanvas.ctx.globalCompositeOperation = "source-in";
-		regionCanvas.ctx.drawImage(pattern,0,0);
-
-		ctx.drawImage(regionCanvas.canvas,0,0);
-
-		// ctx.drawImage(pattern,0,0);
-
-		/*
-		for (i = site[k][1] - 1; i <= site[k][1] + 1; i++) {
-			for (j = site[k][0] - 1; j <= site[k][0] + 1; j++) {
-				ctx.fillStyle = "blue";
-				var centreMarker = 2;
-				var x = site[k][0] * dot;
-				var y = site[k][1] * dot;
-				ctx.fillRect(x - centreMarker / 2, y - centreMarker / 2, centreMarker, centreMarker);
+	var AA_RES = 4; // average over 4x4 supersampling grid
+	function aa_color(y, x)
+	{
+		var i, j, n, r = 0, g = 0, b = 0, xx, yy;
+		for (i = 0; i < AA_RES; i++) {
+			yy = y + 1. / AA_RES * i + .5;
+			for (j = 0; j < AA_RES; j++) {
+				xx = x + 1. / AA_RES * j + .5;
+				n = nearest_site(xx, yy);
+				r += rgb[n][0];
+				g += rgb[n][1];
+				b += rgb[n][2];
 			}
 		}
-		*/
+		return [
+			r / (AA_RES * AA_RES),
+			g / (AA_RES * AA_RES),
+			b / (AA_RES * AA_RES)
+		];
+	}
+	*/
+
+	function genPoints(pointIterator) {
+		if (pointIterator == undefined) return con.warn("need to pass in a pointIterator function, which returns an array");
+		for (var k = 0; k < sites; k++) {
+
+			site[k] = pointIterator(k, sites);
+
+			// edges[k] = [];
+			regions[k] = [];
+			bounds[k] = []; // top, right, bottom, left
+		}
 	}
 
-}
+	function genMap()
+	{
+		var i, j, k, nearest = [], color, index, pixels = sizeX * sizeY;
 
-/*
-function gen_edges() {
-	// somwhat failed attempt at getting polygons from pixels, but vertices were out of order, so i gave up.
-	// a more intelligent approach is required to get vectors. 
-	var k, l;
-	for (k = 0; k < N_SITES; k++) {
-		var edge = edges[k];
+		var a = new Date().getTime()
 
-		ctx.beginPath();
-		ctx.lineWidth = 10;
-		ctx.strokeStyle = "blue";
+		for (i = 0; i < sizeY; i++) {
+			for (j = 0; j < sizeX; j++) {
+				index = i * sizeX + j;
+				nearest[index] = nearest_site(j, i);
 
-		for(l = 0; l < edge.length; l++) {
+				if (index % 100000 == 0) con.log("findSites", Math.round(index / pixels * 100) + "%");
 
-			var x = edge[l][0] * dot;
-			var y = edge[l][1] * dot;
-
-			if (l == 0) {
-				ctx.moveTo(x, y);
-			} else {
-				ctx.lineTo(x, y);
 			}
 		}
-		ctx.closePath();
-		ctx.stroke();
-	}
-}
-*/
+
+		var b = new Date().getTime()
+
+		con.log("Found sites", b - a);
+
+		for (i = 0; i < sizeY; i++) {
+			for (j = 0; j < sizeX; j++) {
+
+				var index = i * sizeX + j;
+				var ns = nearest[index];
+				regions[ns].push([j,i]);
+
+				if (bounds[ns][0] == undefined) { bounds[ns][0] = i; } else if ( i < bounds[ns][0]) { bounds[ns][0] = i; }
+				if (bounds[ns][1] == undefined) { bounds[ns][1] = j; } else if ( j > bounds[ns][1]) { bounds[ns][1] = j; }
+				if (bounds[ns][2] == undefined) { bounds[ns][2] = i; } else if ( i > bounds[ns][2]) { bounds[ns][2] = i; }
+				if (bounds[ns][3] == undefined) { bounds[ns][3] = j; } else if ( j < bounds[ns][3]) { bounds[ns][3] = j; }
+
+				if (index % 100000 == 0) con.log("generatingRegion", Math.round(index / pixels * 100) + "%");
+
+				/*
+
+				// not really interested in antialiasing.
+				// ... but the at edge function is fascinatingly rudimentary
+
+				var color = rgb[nearest[index]];
+				if (at_edge(nearest, i, j)) {
+
+					if (at_corner(nearest, i, j) > 2) {
+						// edges[ nearest[index] ].push([j,i]);
+						color = [255,255,255];
+					} else {
+						color = [0,0,0];
+					}
+
+					// color = [0,0,0];
+					// color = aa_color(i, j);
+					// color = color.map(function(v) { return v * 1.5} );
+
+				}
+				*/
 
 
-for (var k = 0; k < N_SITES; k++) {
 
-	site[k] = [];
-	site[k][0] = frand(size_x);
-	site[k][1] = frand(size_y);
-
-	// edges[k] = [];
-	regions[k] = [];
-
-	// rgb[k] = [];
-	// rgb[k][0] = frand(256);
-	// rgb[k][1] = frand(256);
-	// rgb[k][2] = frand(256);
-}
-
-
-function createPattern() {
-	var canvas = createCanvas(width, height);
-	var ctx = canvas.ctx;
-	// puts the canvas centre so the whole area has a pattern
-	ctx.translate(width / 2, height / 2);
-	ctx.rotate(frand(varyRotation));
-	ctx.translate(-width / 2, -height / 2);
-
-	if (varyDuotone) {
-		colours.setColourIndex(1);
-		ctx.fillStyle = colours.getCurrentColour();
-	} else {
-		ctx.fillStyle = colours.getRandomColour();
-	}
-
-	var half = width / 2;
-	var padding = Math.sqrt( half * half * 2) - half; // the gaps between the corner when rotated 45 degrees
-
-	ctx.fillRect(-padding, -padding, width + padding * 2, height + padding * 2);
-
-	if (varyPerRegion) {
-		lineScale = 0.5 + frand(thisScale);
-		lineSize = 1 + frand(10) * lineScale;
-		lineGap = 2 + frand(3) * lineScale;
-	}
-
-	var colour;
-	if (varyDuotone) {
-		colour = colours.getNextColour();
-	}
-	var y = -padding;
-	while(y < height + padding) {
-		if (varyPerLine) {		
-			lineSize = 1 + frand(10) * lineScale;
-			lineGap = 2 + frand(3) * lineScale;
+			}
 		}
-		if (!varyDuotone) {
-			colour = colours.getRandomColour();
-		}
-		ctx.fillStyle = colour;
-		ctx.fillRect(-padding, y, width + padding * 2, lineSize);
-		y += lineSize + lineGap;
+
+		var c = new Date().getTime();
+
+		con.log("Generated regions", c - b);
+
+		// sites = 1;
+
+		calcRegionBounds();
 	}
 
-	return canvas.canvas;
-}
+	/*
+	function gen_edges() {
+		// somwhat failed attempt at getting polygons from pixels, but vertices were out of order, so i gave up.
+		// a more intelligent approach is required to get vectors. 
+		var k, l;
+		for (k = 0; k < sites; k++) {
+			var edge = edges[k];
 
+			ctx.beginPath();
+			ctx.lineWidth = 10;
+			ctx.strokeStyle = "blue";
 
-function createCanvas(w, h) {
-	var c = document.createElement("canvas");
-	c.width = w;
-	c.height = h;
-	var ctx = c.getContext("2d");
+			for(l = 0; l < edge.length; l++) {
+
+				var x = edge[l][0] * dot;
+				var y = edge[l][1] * dot;
+
+				if (l == 0) {
+					ctx.moveTo(x, y);
+				} else {
+					ctx.lineTo(x, y);
+				}
+			}
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+	*/
+
+	function drawRegions(renderRegion) {
+		if (renderRegion == undefined) con.warn("need to pass in a renderRegion function.")
+		for (k = 0; k < sites; k++) {
+			renderRegion(regions[k], bounds[k]);
+			//if (k % 5 == 0)
+			con.log("drawRegions", Math.round(k / sites * 100) + "%");
+		}
+		
+	}
+
+	function drawSites(ctx) {
+		for (k = 0; k < sites; k++) {
+			ctx.fillStyle = "blue";
+			var centreMarker = 2;
+			var x = site[k][0] * dot;
+			var y = site[k][1] * dot;
+			ctx.fillRect(x - centreMarker / 2, y - centreMarker / 2, centreMarker, centreMarker);
+		}
+	}
+
+	function calcRegionBounds() {
+		for (k = 0; k < sites; k++) {
+			bounds[k] = { // overwriting bounds... no need for xmax or ymax at this point.
+				x: bounds[k][3] * dot,
+				y: bounds[k][0] * dot,
+				width: (bounds[k][1] - bounds[k][3]) * dot,
+				height: (bounds[k][2] - bounds[k][0]) * dot
+			};
+		}
+	}
+	function drawRegionBounds(ctx) {
+		for (k = 0; k < sites; k++) {
+			ctx.fillStyle = "rgba(0,0,255,0.2)";
+			var b = bounds[k];
+			ctx.fillRect(b.x, b.y, b.width, b.height);
+		}
+	}
+
 	return {
-		canvas: c,
-		ctx: ctx
+		init: init,
+		genMap: genMap,
+		genPoints: genPoints,
+		drawRegions: drawRegions,
+		drawRegionBounds: drawRegionBounds,
+		drawSites: drawSites,
 	}
-}
 
-var canvas = createCanvas(width, height);
-document.body.appendChild(canvas.canvas);
-var ctx = canvas.ctx;
-
-gen_map();
-
-// gen_edges();
+})();
+if(isNode) module.exports = voronoi
