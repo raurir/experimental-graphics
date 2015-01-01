@@ -20,17 +20,17 @@ function frand(x) {
 
 
 var settings = {};
+settings.overallScale = 50 + frand(150);
 settings.pointMethod = ~~(Math.random() * 4);
 settings.pointBias = frand(2);
-settings.overallScale = 34.5 + frand(13);
 settings.lineScale = settings.overallScale;
-settings.lineSize = 1 + frand(10);
-settings.lineGap = 1 + frand(10);
+settings.lineSize = 1 + frand(100);
+settings.lineGap = 1 + frand(100);
 settings.baseRotation = Math.PI * 2;
 settings.varyRotation = Math.PI * (Math.random() > 0.5 ? 2 : 0.2);
-settings.varyPerRegion = Math.random() > 0.5;
-settings.varyPerLine = Math.random() > 0.5;
-settings.varyDuotone = Math.random() > 0.5;
+settings.varyPerRegion = false;////Math.random() > 0.5;
+settings.varyPerLine = false;//Math.random() > 0.5;
+settings.varyDuotone = false;//Math.random() > 0.5;
 
 if (settings.varyDuotone) {
 	colours.setRandomPalette(0); // this sets black and white (or greys really.)
@@ -238,10 +238,27 @@ function generate(num) {
 
 	// con.log("generate", settings, this);
 
-	settings.sites = 1 + frand(80);
+	settings.sites = 16 + frand(20);
+	// settings.sites = 1 + frand(80);
+	// settings.varyRotation = Math.PI * (Math.random() > 0.5 ? 2 : 0.2);
+	// settings.varyPerRegion = Math.random() > 0.5;
+	// settings.varyPerLine = Math.random() > 0.5;
+	settings.varyDuotone = Math.random() > 0.5;
 
-	var txt = ["sites", "pointMethod", "pointBias", "baseRotation", "varyRotation", "varyDuotone", "varyPerRegion", 
-		"varyPerLine", "overallScale", "lineSize", "lineGap"].map(function(v){ return v + ":" + settings[v]; }).join("\n");
+	var txt = [
+		"sites", 
+		"overallScale", 
+		"pointMethod", 
+		"pointBias", 
+		"baseRotation", 
+		"varyRotation", 
+		"varyDuotone", 
+		"varyPerRegion", 
+		"varyPerLine", 
+		"lineScale", 
+		"lineSize", 
+		"lineGap"
+	].map(function(v){ return v + ":" + settings[v]; }).join("\n");
 
 	fs.writeFile(__dirname + '/../export/_shirt' + current + '.txt', txt);
 
@@ -257,10 +274,6 @@ function generate(num) {
 		sizeY: sizeY
 	});
 
-	settings.varyRotation = Math.PI * (Math.random() > 0.5 ? 2 : 0.2);
-	settings.varyPerRegion = Math.random() > 0.5;
-	settings.varyPerLine = Math.random() > 0.5;
-	settings.varyDuotone = Math.random() > 0.5;	
 	colours.setRandomPalette();
 
 	con.log("generate", current, total);

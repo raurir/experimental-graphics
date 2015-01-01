@@ -1,0 +1,1 @@
+a.map(function(v,i){ i = 49 + i; return "mv " + v + " print_" + (String(i).length == 1 ? "0" + i : i) + ".png";}).join("\n")
