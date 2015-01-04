@@ -1,85 +1,133 @@
-var sw = 600, sh = 600;
-
-function genRan(min, max) {
-	return Math.random() * (max - min) + min;	
-}
-
+var sw = 400, sh = 400;
 var bmp = dom.createCanvas(sw,sh);
-document.body.appendChild(bmp.canvas);
-var ctx = bmp.ctx;
 
+var ctx = bmp.ctx;
 var cx = sw / 2;
 var cy = sh / 2;
-
 var frame = 0;
 
 function newLine() {
 
-	ctx.setTransform(1, 0, 0, 1, 0, 0);
+	// ctx.setTransform(1, 0, 0, 1, 0, 0);
 	ctx.clearRect(0, 0, sw, sh); 
 
-	var dot = 50, cols = 4, rows = 4;
+	var dot = 60, cols = 8, rows = 10;
+	
+	var gap, osc, perc;
 
-	var osc = Math.sin(frame * 0.004) * 30
+	var anim = frame % 300;
+	if (anim < 100) {	
+		gap = anim / 100;
+		perc = 0;
+	} else if (anim < 200) {
+		gap = 1;
+		perc = (anim - 100) / 100;
+	} else if (anim < 300) {
+		gap = 1 - ((anim - 200) / 100);
+		perc = 1;
+	} //else if (anim < 400) {
+	// 	gap = 0;
+	// 	perc = (anim - 300) / 100;
+	// }
 
-	var angle = osc / 360 * Math.PI * 2;
-
+	var angle = perc * 30 / 360 * Math.PI * 2;
 	var cos = dot * Math.cos(angle);
 	var sin = dot * Math.sin(angle);
 
-	var x, y;
+	function drawCube(x,y) {
 
-	function drawCube() {
+		// if (y > sh + 20) y -= (sh);
 
+		/*
+
+            b
+           / \
+          /   \
+		 /     \
+		a       c
+        |\     /|
+		| \   / |
+		|  \ /  |
+		f   g   d
+		 \  |  /
+		  \ | /
+		   \|/
+		    e    
+
+		*/
+
+		var ax = x, 
+			ay = y,
+
+			bx = x + cos * perc, 
+			by = y - sin,
+			
+			cx = x + cos + cos * perc, 
+			cy = y,
+
+			dx = cx, 
+			dy = y + dot,
+
+			ex = x + cos, 
+			ey = y + sin + dot,
+
+			fx = x, 
+			fy = y + dot,
+
+			gx = ex, 
+			gy = y + sin;
 		
 
-		ctx.fillStyle = "#aa0";
-		ctx.strokeStyle = "#ff0";
+		ctx.fillStyle = "#444";
+		// ctx.strokeStyle = "#000";
 		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(x + cos, y + sin);
-		ctx.lineTo(x + cos, y + sin + dot);
-		ctx.lineTo(x, y + dot);
+		ctx.moveTo(ax, ay);
+		ctx.lineTo(gx, gy);
+		ctx.lineTo(ex, ey);
+		ctx.lineTo(fx, fy);
 		ctx.closePath();
 		ctx.fill();
-		ctx.stroke();
-		
-		ctx.fillStyle = "#a0a";
-		ctx.strokeStyle = "#f0f";
+		// ctx.stroke();
+		/*
+		ctx.fillStyle = "#666";
+		// ctx.strokeStyle = "#f0f";
 		ctx.beginPath();
-		ctx.moveTo(x + cos, y + sin);
-		ctx.lineTo(x + cos * 2, y);
-		ctx.lineTo(x + cos * 2, y + dot);
-		ctx.lineTo(x + cos, y + sin + dot);
+		ctx.moveTo(gx, gy);
+		ctx.lineTo(cx, cy);
+		ctx.lineTo(dx, dy);
+		ctx.lineTo(ex, ey);
 		ctx.closePath();
 		ctx.fill();
 		ctx.stroke();
 				
-		ctx.fillStyle = "#0aa";
-		ctx.strokeStyle = "#0ff";
+		ctx.fillStyle = "#888";
+		// ctx.strokeStyle = "#0ff";
 		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(x + cos, y + sin);
-		ctx.lineTo(x + cos * 2, y);
-		ctx.lineTo(x + cos, y - sin);
+		ctx.moveTo(ax, ay);
+		ctx.lineTo(gx, gy);
+		ctx.lineTo(cx, cy);
+		ctx.lineTo(bx, by);
 		ctx.closePath();
 		ctx.fill();
 		ctx.stroke();
+		*/
 	}
-
+	
+	var gapX = gapY = 0.5 + gap * 0.5;
 	for (var i = 0; i < cols; i++) {
-		for (var j = 0; j < rows; j++) {
-			x = 100 + i * cos * 2;
-			y = cy + j * sin * 4; 
-
-			if (i%2 == 0) y += sin * 2;
-
-			drawCube();
+		var x = -10 + i * cos * 2 * gapX;
+		for (var j = 0; j < rows; j++) {			
+			var y = -200 + j * dot * 2 * gapY + i * sin * 2 * gapY;
+			drawCube(x, y);
 		}
 	}
 
-	frame += 1;
+	// con.log(cos,);
+
+	frame += 0.5;
 	requestAnimationFrame(newLine)
 }
+
+document.body.appendChild(bmp.canvas);
 
 newLine();
