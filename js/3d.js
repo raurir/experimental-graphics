@@ -1,3 +1,6 @@
+// 3d to 2d code from: https://gist.github.com/1334810/0cb4cf5d1fa5d22d85bd4c51078af0f12c707e53
+
+
 //focal length to determine perspective scaling
 var focalLength = 300
 
@@ -127,21 +130,7 @@ function CalculateSurfaceNormal (p1, p2, p3) {
 
 
 
-
-
-// clearPlanes = function(group)
-// 	if group.numChildren then
-// 		for i = group.numChildren, 1, -1 do
-// 			group[i]:removeSelf()
-// 		}
-// 	}
-// }
-
-
-
 renderPlanes = function(group, planesArray, options ) {
-
-
 
 	// var zeds = []
 
@@ -158,8 +147,6 @@ renderPlanes = function(group, planesArray, options ) {
 
 		var vertices = []
 
-		var zIndex = 0
-
 		var av = {x: 0, y: 0}
 
 		// con.log("plane", i, "screenPoints",screenPoints);
@@ -168,10 +155,10 @@ renderPlanes = function(group, planesArray, options ) {
 		var vil = screenPoints.length;
 		for (var vi = 0; vi < vil; vi++) {
 
-
 			var v = screenPoints[vi];
 			vertices.push({x:v.x,y:v.y})
 			// vertices[vi] = v.y
+
 			if(v.x < minX) minX = v.x;
 			if(v.x > maxX) maxX = v.x;
 			if(v.y < minY) minY = v.y;
@@ -187,58 +174,45 @@ renderPlanes = function(group, planesArray, options ) {
 		av.x = av.x / vil
 		av.y = av.y / vil
 
-		zIndex = minZ + (maxZ - minZ) / 2
+		var zIndex = minZ + (maxZ - minZ) / 2
 
-		// if zIndex > 10 then
+		var normal3D = CalculateSurfaceNormal(screenPoints[0], screenPoints[1], screenPoints[2])
 
-		var o = {}
-		o = vertices
-		// o.x = vertices[0]
-		// o.y = vertices[1]
+		var normalLength = Math.sqrt(normal3D.x * normal3D.x + normal3D.y * normal3D.y + normal3D.z * normal3D.z)
 
-
-
-		//if i == 1 then
-
-			var normal3D = CalculateSurfaceNormal(screenPoints[0], screenPoints[1], screenPoints[2])
-
-			var normalLength = Math.sqrt(normal3D.x * normal3D.x + normal3D.y * normal3D.y + normal3D.z * normal3D.z)
-
-			var normalised3D = {
-				x: normal3D.x / normalLength,
-				y: normal3D.y / normalLength,
-				z: normal3D.z / normalLength
-			}
+		var normalised3D = {
+			x: normal3D.x / normalLength,
+			y: normal3D.y / normalLength,
+			z: normal3D.z / normalLength
+		}
 
 
-			// var normal2D = calc2D({normal3D}, make3DPoint(0,0,0))
-			// normal2D = normal2D[1]
+		var normal2D = calc2D([normal3D], make3DPoint(0,0,0))
+		normal2D = normal2D[0];
 
-			// var n = display.newLine( group, av.x, av.y, normal2D.x, normal2D.y)
-			// n:setStrokeColor(1,0,0,0.5)
+		group.beginPath()
+		group.moveTo(av.x, av.y)
+		group.lineTo(normal2D.x, normal2D.y)
+		// group.stroke();
+		group.stroke();
 
 
 
 
 
-			var slope = {
-				x: Math.acos(normalised3D.x),
-				// y = math.acos(normalised3D.y),
-				y: Math.asin(normal3D.y / normalLength),
-				z: Math.acos(normalised3D.z)
-			}
+		var slope = {
+			x: Math.acos(normalised3D.x),
+			// y = math.acos(normalised3D.y),
+			y: Math.asin(normal3D.y / normalLength),
+			z: Math.acos(normalised3D.z)
+		}
 
-			// var txtZ = display.newText(group, slope, av.x, av.y, "helvetica", 15)
-			// txtZ:setFillColor(0, 1, 1, 1)
-
-		//}
-
+		// var txtZ = display.newText(group, slope, av.x, av.y, "helvetica", 15)
+		// txtZ:setFillColor(0, 1, 1, 1)
 
 		// var p = display.newPolygon( o, 0, 0, vertices )
 		// p.anchorX = (vertices[1] - minX) / (maxX - minX)
 		// p.anchorY = (vertices[2] - minY) / (maxY - minY)
-
-
 
 		// display 2d bounds
 		// display.newLine(group, minX, 0, minX, sh)
@@ -269,45 +243,22 @@ renderPlanes = function(group, planesArray, options ) {
 			if (options.strokeColor) p:setStrokeColor( options.strokeColor(params) )
 		}
 
-		// var insertAt = 1
-		// for z = 1, #zeds do
-		// 	if zIndex < zeds[z] then
-		// 		insertAt = z + 1
-		// 	else
-		// 		z = #zeds
-		// 	}
-		// }
-		// table.insert(zeds, insertAt, zIndex)
-
 		// con.log("i, list", i, list);
 
 		list[i] = {
 			z: zIndex,
-			o: o,
+			o: vertices,
 			fillStyle: fillStyle
 		}
 
 		// print( #zeds)
 
-		// var w = maxX - minX
-		// var h = maxY - minY
-		// var cx = w / 2 - p.anchorX * w
-		// var cy = h / 2 - p.anchorY * h
-
-		// o.cx = cx
-		// o.cy = cy
-		// o.zIndex = zIndex
-
-		// table.insert(list, insertAt, o)
-
-		// group:insert(insertAt, o)
-
 	// }
 	}
 
-	// table.sort(list, function( a, b )
-	// 	return a.z > b.z
-	// })
+	list.sort(function( a, b ) {
+		return a.z < b.z ? 1 : -1;
+	})
 
 	// for i = 1, #list do
 	// con.log(list);
