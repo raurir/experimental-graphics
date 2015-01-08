@@ -105,7 +105,7 @@ function animation() {
 			// if (r > 1) r = 1;
 			// if (g > 1) g = 1;
 			// if (b > 1) b = 1;
-			return [r,g,b,1];
+			return "rgba(" + [r,g,b,1].join(",") + ")";
 		}
 	})
 
@@ -114,7 +114,12 @@ function animation() {
 	cubeAxisRotations.x -= 0.01;
 	cubeAxisRotations.y += 0.01;
 
-	requestAnimationFrame(animation);
+	// requestAnimationFrame(animation);
 
 }
 animation();
+//
+window.addEventListener("keydown", function() {
+	// con.log("down")
+	animation();
+})
