@@ -2,7 +2,7 @@
 
 
 //focal length to determine perspective scaling
-var focalLength = 300
+var focalLength = 1200
 
 
 // here we set up a function to make an object with
@@ -107,7 +107,7 @@ function calc2D (points, axisRotations) {
 	return t
 }
 
-function CalculateSurfaceNormal (p1, p2, p3) {
+function calcNormal (p1, p2, p3) {
 
     var u = {}
     u.x = p2.x - p1.x
@@ -136,10 +136,8 @@ renderPlanes = function(group, planesArray, options ) {
 
 	var list = []
 
-	// for i=1,#planesArray do
+	// for (var i = 0, il = 4; i< il; i++) {
 	for (var i = 0, il = planesArray.length; i< il; i++) {
-
-		// con.log("planesArray[i], cubeAxisRotations", planesArray, il, cubeAxisRotations);
 
 		var screenPoints = calc2D(planesArray[i], cubeAxisRotations)
 
@@ -149,9 +147,6 @@ renderPlanes = function(group, planesArray, options ) {
 
 		var av = {x: 0, y: 0}
 
-		// con.log("plane", i, "screenPoints",screenPoints);
-
-		// for vi, v in pairs(screenPoints) do
 		var vil = screenPoints.length;
 		for (var vi = 0; vi < vil; vi++) {
 
@@ -176,10 +171,8 @@ renderPlanes = function(group, planesArray, options ) {
 
 		var zIndex = minZ + (maxZ - minZ) / 2
 
-		var normal3D = CalculateSurfaceNormal(screenPoints[0], screenPoints[1], screenPoints[2])
-
+		var normal3D = calcNormal(screenPoints[0], screenPoints[1], screenPoints[2])
 		var normalLength = Math.sqrt(normal3D.x * normal3D.x + normal3D.y * normal3D.y + normal3D.z * normal3D.z)
-
 		var normalised3D = {
 			x: normal3D.x / normalLength,
 			y: normal3D.y / normalLength,
@@ -187,25 +180,14 @@ renderPlanes = function(group, planesArray, options ) {
 		}
 
 
-		var normal2D = calc2D([normal3D], make3DPoint(0,0,0))
-		normal2D = normal2D[0];
+		// var normal2D = calc2D([normal3D], make3DPoint(0,0,0))
+		// normal2D = normal2D[0];
 
-		group.beginPath()
-		group.moveTo(av.x, av.y)
-		group.lineTo(normal2D.x, normal2D.y)
+		// group.beginPath()
+		// group.moveTo(av.x, av.y)
+		// group.lineTo(normal2D.x, normal2D.y)
+		// // group.stroke();
 		// group.stroke();
-		group.stroke();
-
-
-
-
-
-		var slope = {
-			x: Math.acos(normalised3D.x),
-			// y = math.acos(normalised3D.y),
-			y: Math.asin(normal3D.y / normalLength),
-			z: Math.acos(normalised3D.z)
-		}
 
 		// var txtZ = display.newText(group, slope, av.x, av.y, "helvetica", 15)
 		// txtZ:setFillColor(0, 1, 1, 1)
@@ -228,32 +210,31 @@ renderPlanes = function(group, planesArray, options ) {
 
 		var fillStyle;
 
+		var face = {
+			z: zIndex,
+			o: vertices
+		}
+
 		if (options) {
+
+			var slope = {
+				x: Math.acos(normalised3D.x),
+				// y = math.acos(normalised3D.y),
+				y: Math.asin(normal3D.y / normalLength),
+				z: Math.acos(normalised3D.z)
+			}
+
 			var params = {
 				slope: slope,
 				bounds: [minX, minY, maxX, maxY],
 				vertices: vil
 			}
-			// if (options.fillColor) p:setFillColor( options.fillColor(params) )
-			if (options.fillColor) {
-				var colour = options.fillColor(params);
-				fillStyle = "rgba(" + colour.join(",") + ")";				
-			}
-			if (options.strokeWidth) p.strokeWidth = options.strokeWidth(params)
-			if (options.strokeColor) p:setStrokeColor( options.strokeColor(params) )
+			face.params = params;
+
 		}
 
-		// con.log("i, list", i, list);
+		list[i] = face;
 
-		list[i] = {
-			z: zIndex,
-			o: vertices,
-			fillStyle: fillStyle
-		}
-
-		// print( #zeds)
-
-	// }
 	}
 
 	list.sort(function( a, b ) {
@@ -267,17 +248,21 @@ renderPlanes = function(group, planesArray, options ) {
 	// 	group.fillRect(list[i].o.x,list[i].o.y,10,10)
 	// }
 	// con.log(vertices);
-	
-	
+
+
 	// group.fillStyle = "red"
 	for (var i = 0, il = list.length; i < il; i++) {
 
 		var vertices = list[i].o;
-		group.fillStyle = list[i].fillStyle;
+
+		if (options.fillColor) group.fillStyle = options.fillColor(list[i].params);
+		// if (options.strokeWidth) p.strokeWidth = options.strokeWidth(params)
+		// if (options.strokeColor) p:setStrokeColor( options.strokeColor(params) )
+
 		group.beginPath();
 		for (var v = 0, vl = vertices.length; v < vl; v++) {
 			var x = vertices[v].x, y = vertices[v].y;
-			var dot = 5;group.fillRect(x - dot / 2, y - dot / 2, dot, dot);
+			// var dot = 5;group.fillRect(x - dot / 2, y - dot / 2, dot, dot);
 			if (v == 0) {
 				group.moveTo(x,y);
 			} else {
@@ -286,6 +271,31 @@ renderPlanes = function(group, planesArray, options ) {
 		}
 		group.closePath();
 		group.fill();
+
+
+		// function drawLine(indexStart) {
+		// 	var lines = 5, indices = 3;
+		// 	for (var j = 0; j < lines; j++) {
+		// 		var xs = vertices[indexStart].x,
+		// 			ys = vertices[indexStart].y,
+		// 			indexLeft = (indexStart + 2) % indices,
+		// 			indexRight = (indexStart + 1) % indices,
+		// 			xe = (vertices[indexLeft].x - vertices[indexRight].x) * j / lines + vertices[indexRight].x,
+		// 			ye = (vertices[indexLeft].y - vertices[indexRight].y) * j / lines + vertices[indexRight].y;
+		// 		group.beginPath();
+		// 		group.moveTo(xs,ys);
+		// 		group.lineTo(xe,ye);
+		// 		group.stroke();
+		// 	}
+		// }
+		// drawLine(0);
+		// drawLine(01);
+		// drawLine(2);
+
+
+
+
+
 
 	}
 
