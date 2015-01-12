@@ -40,8 +40,8 @@ createPlanet(0, {
 function newPlanet( index ) {
 
 	var planet = {
-		x: cx + Math.sin(rotation) * diameter,
-		y: cy + Math.cos(rotation) * diameter,
+		x: cx + Math.sin(rotation) * diameter + (Math.random() - 0.5) * 20,
+		y: cy + Math.cos(rotation) * diameter + (Math.random() - 0.5) * 20,
 		rotation: rotation,
 		distance: diameter
 	};

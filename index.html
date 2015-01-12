@@ -28,24 +28,37 @@ canvas { border:1px solid #444;}
 		script.src = s;
 		document.body.appendChild(script);
 	}
-
-	for(var e in experiments) {
-		var button = dom.createElement("button");
-		button.addEventListener("click", function(event){
-			var index = event.target.index;
-			var exp = experiments[index];
-			for (var i = exp.length - 1; i > -1;i--) {
-				var src = "js/" + exp[i] +  ".js";
-				if (exp[i] == "THREE") {
-					src = "lib/three/three.min.js";
-				}
-				createScript(src);
+	function loadExperiment(index) {
+		var exp = experiments[index];
+		for (var i = exp.length - 1; i > -1;i--) {
+			var src = "js/" + exp[i] +  ".js";
+			if (exp[i] == "THREE") {
+				src = "lib/three/three.min.js";
 			}
-		});
-		button.index = e;
-		button.innerHTML = experiments[e][0];
-		document.body.appendChild(button);
+			createScript(src);
+		}
+
 	}
+	function showButtons() {
+		for(var e in experiments) {
+			var button = dom.createElement("button");
+			button.addEventListener("click", function(event){
+				var index = event.target.index;
+				window.location = "?" + index;
+			});
+			button.index = e;
+			button.innerHTML = experiments[e][0];
+			document.body.appendChild(button);
+		}
+	}
+
+	if (window.location.search) {
+		var index = window.location.search.split("?")[1];
+		loadExperiment(index);
+	} else {
+		showButtons();
+	}
+
 }).call(this);
 </script>
 </html>
