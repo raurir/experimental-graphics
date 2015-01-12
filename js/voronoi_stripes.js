@@ -7,7 +7,7 @@ if (isNode) {
 }
 var con = console;
 
-var dot = 1, sizeX = sizeY = 4000;
+var dot = 1, sizeX = sizeY = isNode ? 4000 : 400;
 
 var total = 10, current = 8;
 
@@ -260,7 +260,7 @@ function generate(num) {
 		"lineGap"
 	].map(function(v){ return v + ":" + settings[v]; }).join("\n");
 
-	fs.writeFile(__dirname + '/../export/_shirt' + current + '.txt', txt);
+	if (isNode) fs.writeFile(__dirname + '/../export/_shirt' + current + '.txt', txt);
 
 	con.log(txt);
 	con.log("===================");
@@ -305,6 +305,7 @@ function next() {
 	}
 }
 
+if (!isNode) generate(0);
 
 if(typeof module !== 'undefined') module.exports = {generate:generate};
 

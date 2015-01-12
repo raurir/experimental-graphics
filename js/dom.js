@@ -3,13 +3,17 @@ var con = console;
 var dom = (function() {
 	var isNode = false;
 
+	function createElement(element) {
+		return document.createElement(element);
+	}
+
 	function createCanvas(w, h) {
 
 		var c;
 		if (isNode) {
 			c = new Canvas(w,h);
 		} else {
-			c = document.createElement("canvas");
+			c = createElement("canvas");
 			c.width = w;
 			c.height = h;
 		}
@@ -21,6 +25,7 @@ var dom = (function() {
 	}
 
 	return {
+		createElement:createElement,
 		createCanvas:createCanvas
 	}
 

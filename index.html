@@ -3,38 +3,49 @@
 body { margin:0;padding:0;background: #ccc;}
 canvas { border:1px solid #444;}
 </style>
-
 <body>
 </body>
-
-<script src='js/colours.js'></script>
 <script src='js/dom.js'></script>
+<script src='js/colours.js'></script>
+<script>
+(function() {
+	var experiments = [
+		["additive"],
+		["isometric_cubes"],
+		["mining_branches"],
+		["oscillate_curtain"],
+		["recursive"],
+		["spiral_even"],
+		["squaretracer"],
+		["tea"],
+		["polyhedra","3d"],
+		["polyhedra_three","THREE"],
+		["voronoi_stripes", "voronoi"],
+	];
 
-<!-- <script src='lib/three/three.min.js'></script> -->
+	function createScript(s) {
+		var script = dom.createElement("script");
+		script.src = s;
+		document.body.appendChild(script);
+	}
 
-<!--script src='js/squaretracer.js'></script-->
-<!-- <script src='js/recursive.js'></script> -->
-<!-- <script src='js/additive.js'></script> -->
-
-<!-- <script src='js/voronoi.js'></script>
-<script src='js/voronoi_stripes.js'></script> -->
-
-
-<!-- <script src='js/tea.js'></script> -->
-
-<!-- <script src='js/oscillate_curtain.js'></script> -->
-
-<!-- <script src='js/spiral_even.js'></script> -->
-
-<!-- <script src='js/isometric_cubes.js'></script> -->
-
-<!-- <script src='js/3d.js'></script> -->
-<!-- <script src='js/polyhedra.js'></script> -->
-
-<!-- <script src='js/polyhedra_three.js'></script> -->
-
-
-<script src='js/mining_branches.js'></script>
-
-
+	for(var e in experiments) {
+		var button = dom.createElement("button");
+		button.addEventListener("click", function(event){
+			var index = event.target.index;
+			var exp = experiments[index];
+			for (var i = exp.length - 1; i > -1;i--) {
+				var src = "js/" + exp[i] +  ".js";
+				if (exp[i] == "THREE") {
+					src = "lib/three/three.min.js";
+				}
+				createScript(src);
+			}
+		});
+		button.index = e;
+		button.innerHTML = experiments[e][0];
+		document.body.appendChild(button);
+	}
+}).call(this);
+</script>
 </html>

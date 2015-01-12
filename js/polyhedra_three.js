@@ -197,6 +197,9 @@ function animate() {
 	render();
 }
 
-init();
-animate();
+setTimeout(function() {
+	init();
+	animate();
+},100);
+
 
