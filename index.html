@@ -1,21 +1,12 @@
 <html>
 <style>
 body { margin:0;padding:0;background: #ccc;}
-
-body {
- /*background-image: url();*/
-
- background-repeat: repeat;
-}
-
-canvas { border:1px solid #444;}
+canvas {/* border:1px solid #444;*/}
 </style>
 <body>
-
-	<img src='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMD…V83jv41+rjBv1cU2/VvV+Z+scOaYFwW0alaKXRRjWqRjFdlGKSSWiSSWiCiiiuM90KKKKAP//Z='>
 </body>
-<script src='js/dom.js'></script>
-<script src='js/colours.js'></script>
+<script src="js/dom.js"></script>
+<script src="js/colours.js"></script>
 <script>
 (function() {
 	var experiments = [
@@ -23,7 +14,7 @@ canvas { border:1px solid #444;}
 		["isometric_cubes"],
 		["mining_branches"],
 		["oscillate_curtain"],
-		["pattern_check"],
+		["pattern_check", "css/pattern_check"],
 		["recursive"],
 		["spiral_even"],
 		["squaretracer"],
@@ -38,14 +29,30 @@ canvas { border:1px solid #444;}
 		script.src = s;
 		document.body.appendChild(script);
 	}
+
+	function creatStyleSheet(s) {
+    var link  = dom.createElement("link");
+    // link.id = cssId;
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = s + ".css";
+    // link.media = "all";
+    document.head.appendChild(link);
+	}
+
 	function loadExperiment(index) {
 		var exp = experiments[index];
 		for (var i = exp.length - 1; i > -1;i--) {
-			var src = "js/" + exp[i] +  ".js";
-			if (exp[i] == "THREE") {
-				src = "lib/three/three.min.js";
+			var file = exp[i]
+			if (/css/.test(file)) {
+				creatStyleSheet(file);
+			} else {
+				var src = "js/" + file +  ".js";
+				if (file == "THREE") {
+					src = "lib/three/three.min.js";
+				}
+				createScript(src);
 			}
-			createScript(src);
 		}
 
 	}

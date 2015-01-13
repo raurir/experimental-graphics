@@ -63,20 +63,36 @@ function newPattern() {
 
 }
 
+
+var preview;
 var buttonExport = dom.createElement("button");
 buttonExport.className = "export";
 buttonExport.innerHTML = "Create CSS";
 buttonExport.addEventListener("click", function(e) {
+
+  preview = dom.createElement("div");
+  preview.className = "preview";
+  document.body.appendChild(preview);
+
+  var previewCSS = dom.createElement("div");
+  previewCSS.className = "previewCSS";
+  preview.appendChild(previewCSS);
+
   var img = pattern.canvas.toDataURL("image/jpeg");
   var style = [
-    "body {",
+    "<pre>",
+    // "body {",
     " background-image: url(" + img + ");",
     " background-repeat: repeat;",
-    "}"
+    // "}",
+    "</pre>"
   ];
-  con.log(style.join("\n"))
+
+  preview.style.backgroundImage = "url(" + img + ")";
+  previewCSS.innerHTML = style.join("\n");
+
 });
 document.body.appendChild(buttonExport);
 document.body.appendChild(bmp.canvas);
 bmp.canvas.addEventListener("click", newPattern)
-// newPattern();
+newPattern();
