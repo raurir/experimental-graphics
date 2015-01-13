@@ -6,7 +6,13 @@ var dom = (function() {
 	function createElement(element, props) {
 		var el = document.createElement(element);
 		for (var p in props) {
-			el[p] = props[p];
+			if (p == "style") {
+				for (var s in props[p]) {
+					el[p][s] = props[p][s];
+				}
+			} else {
+				el[p] = props[p];
+			}
 		}
 		return el;
 	}

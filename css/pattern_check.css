@@ -1,3 +1,12 @@
+body {
+  overflow:hidden;
+  font-family: verdana;
+}
+
+.container {
+  position:relative;
+}
+
 .preview {
   position:absolute;
   top: 50%;
@@ -6,5 +15,27 @@
   height: 200px;
   margin-left: -100px;
   margin-top: -100px;
+  background: rgba(0,0,0,0.5);
   border: 10px solid black;
+  border-radius: 5px;
+  color: white;
+}
+
+.buttons {
+  position: absolute;
+  left:20px;
+}
+.buttons.top {
+  top: 20px;
+}
+.buttons.bottom {
+  bottom: 20px;
+}
+
+.button {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.7);
+  padding: 5px;
 }

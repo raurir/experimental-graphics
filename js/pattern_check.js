@@ -1,22 +1,24 @@
-var sw = window.innerWidth - 20, sh = window.innerHeight- 20;
+var sw = window.innerWidth, sh = window.innerHeight;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
 var pattern;
 var dot = 2;
+var widths;
+var pallete;
+var size;
 
-function newPattern() {
+var container = dom.element("div", {className:"container", style:{width:sw+"px",height:sh+"px"}});
+document.body.appendChild(container);
 
-  ctx.clearRect(0, 0, sw, sh);
+function newSize() {
+  size = Math.ceil(Math.random() * 10) * 10;
+}
 
-  var patternSize = Math.ceil(Math.random() * 10) * 10;
-  var cols = Math.ceil(sw / (patternSize * dot)), rows = Math.ceil(sh / (patternSize * dot));
-
-  pattern = dom.canvas(patternSize * dot, patternSize * dot);
-
+function newStripes() {
   var lines = 2 + ~~(Math.random() * 5);
-  var widths = [0];
-  while(widths.length < lines) widths.push(Math.ceil(1 + Math.random() * patternSize / 2) * 2); // all patterns should be multiples of 2
-  widths.push(patternSize);
+  widths = [0];
+  while(widths.length < lines) widths.push(Math.ceil(1 + Math.random() * size / 2) * 2); // all patterns should be multiples of 2
+  widths.push(size);
 
   var noDuplicates = [];
   widths.map(function(a,i) {
@@ -26,22 +28,34 @@ function newPattern() {
   });
 
   widths = noDuplicates.sort(function(a,b) { return a < b ? -1 : 1;});
+}
 
-  var col = [];
+function newColours() {
+  palette = [];
   widths.map(function(a,i) {
-    col.push(colours.getRandomColour());
+    palette.push(colours.getRandomColour());
   });
+}
 
-  // con.log(col, widths)
+function reset() {
+  newSize();
+  newStripes();
+  newColours();
+  render();
+}
+
+function render() {
+
+  pattern = dom.canvas(size * dot, size * dot);
 
   for (var i = 0; i < widths.length - 1; i++) {
     var x = widths[i];
     var w = widths[i + 1] - x;
-    var colourColumn = col[i];
+    var colourColumn = palette[i];
     for (var j = 0; j < widths.length - 1; j++) {
       var y = widths[j];
       var h = widths[j + 1] - y;
-      var colourRow = col[j];
+      var colourRow = palette[j];
       for (var px = 0; px < w; px++) {
         for (var py = 0; py < h; py++) {
           pattern.ctx.fillStyle = (px+py) % 2 == 0 ? colourColumn : colourRow;
@@ -52,58 +66,57 @@ function newPattern() {
     }
   }
 
-  // ctx.drawImage(pattern.canvas, 0,0);
-
-  for (var i = 0; i < cols; i++) {
-    var x = i * patternSize * dot;
-    for (var j = 0; j < rows; j++) {
-      var y = j * patternSize * dot;
-      ctx.drawImage(pattern.canvas, x, y);
-    }
-  }
+  ctx.save();
+  ctx.rect(0, 0, sw, sh);
+  // ctx.rotate(0.1);
+  ctx.fillStyle = ctx.createPattern(pattern.canvas,"repeat");
+  ctx.fill();
+  ctx.restore();
 
 }
 
 
+var buttonsTop = dom.element("div", {className:"buttons top"});
+container.appendChild(buttonsTop);
+var buttonsBottom = dom.element("div", {className:"buttons bottom"});
+container.appendChild(buttonsBottom);
+
 var preview;
-var buttonExport = dom.button("export", {className: "export"});
+var buttonExport = dom.button("export", {className:"button export"});
 buttonExport.addEventListener("click", function(e) {
 
   var img = pattern.canvas.toDataURL("image/jpeg");
   var style = [
     "<pre>",
-    // "body {",
     " background-image: url(" + img + ");",
     " background-repeat: repeat;",
-    // "}",
     "</pre>"
   ];
 
-  preview = dom.button("preview",{className:"preview", style:{backgroundImage: "url(" + img + ")"}});
-  document.body.appendChild(preview);
-
-  var previewCSS = dom.element("div", {className:"previewCSS", innerHTML:style.join("\n")});
-  preview.appendChild(previewCSS);
+  preview = dom.button("preview",{className:"preview"});
+  container.appendChild(preview);
+  var css = dom.element("div", {className:"previewCSS", innerHTML:style.join("\n")});
+  preview.appendChild(css);
 });
-document.body.appendChild(buttonExport);
-document.body.appendChild(bmp.canvas);
+buttonsTop.appendChild(buttonExport);
 
 function changeSize(size) {
   // alert(size);
   dot = size;
-  newPattern();
+  render();
 }
 
-var buttonSize1 = dom.button("1x", {className:"size"});
-buttonSize1.addEventListener("click", function() { changeSize(1)});
-var buttonSize2 = dom.button("2x", {className:"size"});
-buttonSize2.addEventListener("click", function() { changeSize(2)});
+var sizes = [1,2,3,4];
+// var sizeButtons
+for (var s in sizes) {
+  var size = sizes[s];
+  var buttonSize = dom.button(size + "x", {className:"button size", size: size});
+  buttonSize.addEventListener("click", function() { changeSize(this.size); });
+  buttonsBottom.appendChild(buttonSize);
+}
 
+bmp.canvas.addEventListener("click", reset);
 
+container.appendChild(bmp.canvas);
 
-document.body.appendChild(buttonSize1);
-document.body.appendChild(buttonSize2);
-
-
-bmp.canvas.addEventListener("click", newPattern)
-newPattern();
+reset();
