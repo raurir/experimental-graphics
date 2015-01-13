@@ -1,16 +1,17 @@
 var sw = window.innerWidth - 20, sh = window.innerHeight- 20;
-var bmp = dom.createCanvas(sw,sh);
+var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
-var pattern
+var pattern;
+var dot = 2;
 
 function newPattern() {
 
   ctx.clearRect(0, 0, sw, sh);
 
   var patternSize = Math.ceil(Math.random() * 10) * 10;
-  var dot = 2, cols = Math.ceil(sw / (patternSize * dot)), rows = Math.ceil(sh / (patternSize * dot));
+  var cols = Math.ceil(sw / (patternSize * dot)), rows = Math.ceil(sh / (patternSize * dot));
 
-  pattern = dom.createCanvas(patternSize * dot, patternSize * dot);
+  pattern = dom.canvas(patternSize * dot, patternSize * dot);
 
   var lines = 2 + ~~(Math.random() * 5);
   var widths = [0];
@@ -31,7 +32,7 @@ function newPattern() {
     col.push(colours.getRandomColour());
   });
 
-  con.log(col, widths)
+  // con.log(col, widths)
 
   for (var i = 0; i < widths.length - 1; i++) {
     var x = widths[i];
@@ -65,18 +66,8 @@ function newPattern() {
 
 
 var preview;
-var buttonExport = dom.createElement("button");
-buttonExport.className = "export";
-buttonExport.innerHTML = "Create CSS";
+var buttonExport = dom.button("export", {className: "export"});
 buttonExport.addEventListener("click", function(e) {
-
-  preview = dom.createElement("div");
-  preview.className = "preview";
-  document.body.appendChild(preview);
-
-  var previewCSS = dom.createElement("div");
-  previewCSS.className = "previewCSS";
-  preview.appendChild(previewCSS);
 
   var img = pattern.canvas.toDataURL("image/jpeg");
   var style = [
@@ -88,11 +79,31 @@ buttonExport.addEventListener("click", function(e) {
     "</pre>"
   ];
 
-  preview.style.backgroundImage = "url(" + img + ")";
-  previewCSS.innerHTML = style.join("\n");
+  preview = dom.button("preview",{className:"preview", style:{backgroundImage: "url(" + img + ")"}});
+  document.body.appendChild(preview);
 
+  var previewCSS = dom.element("div", {className:"previewCSS", innerHTML:style.join("\n")});
+  preview.appendChild(previewCSS);
 });
 document.body.appendChild(buttonExport);
 document.body.appendChild(bmp.canvas);
+
+function changeSize(size) {
+  // alert(size);
+  dot = size;
+  newPattern();
+}
+
+var buttonSize1 = dom.button("1x", {className:"size"});
+buttonSize1.addEventListener("click", function() { changeSize(1)});
+var buttonSize2 = dom.button("2x", {className:"size"});
+buttonSize2.addEventListener("click", function() { changeSize(2)});
+
+
+
+document.body.appendChild(buttonSize1);
+document.body.appendChild(buttonSize2);
+
+
 bmp.canvas.addEventListener("click", newPattern)
 newPattern();

@@ -25,13 +25,13 @@ canvas {/* border:1px solid #444;*/}
 	];
 
 	function createScript(s) {
-		var script = dom.createElement("script");
+		var script = dom.element("script");
 		script.src = s;
 		document.body.appendChild(script);
 	}
 
 	function creatStyleSheet(s) {
-    var link  = dom.createElement("link");
+    var link  = dom.element("link");
     // link.id = cssId;
     link.rel = "stylesheet";
     link.type = "text/css";
@@ -58,7 +58,7 @@ canvas {/* border:1px solid #444;*/}
 	}
 	function showButtons() {
 		for(var e in experiments) {
-			var button = dom.createElement("button");
+			var button = dom.element("button");
 			button.addEventListener("click", function(event){
 				var index = event.target.index;
 				window.location = "?" + index;

@@ -1,5 +1,5 @@
 var sw = 400, sh = 400;
-var bmp = dom.createCanvas(sw,sh);
+var bmp = dom.canvas(sw,sh);
 
 var ctx = bmp.ctx;
 var cx = sw / 2;

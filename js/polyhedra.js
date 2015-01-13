@@ -1,6 +1,6 @@
 var sw = 600, sh = 600;
 
-var bmp = dom.createCanvas(sw,sh);
+var bmp = dom.canvas(sw,sh);
 document.body.appendChild(bmp.canvas);
 
 var frame = 0;

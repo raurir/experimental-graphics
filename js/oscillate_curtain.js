@@ -24,7 +24,7 @@ function getOsc(i,a,range) {
 	return temp;
 }
 
-var bmp = dom.createCanvas(sw,sh);
+var bmp = dom.canvas(sw,sh);
 document.body.appendChild(bmp.canvas);
 
 var h = 0;

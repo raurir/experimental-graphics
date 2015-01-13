@@ -45,7 +45,7 @@ function createPattern(size) {
 
 	// con.log('createCanvas, size', size);
 	var half = size / 2;
-	var canvas = dom.createCanvas(size, size);
+	var canvas = dom.canvas(size, size);
 	// document.body.appendChild(canvas.canvas);
 	// canvas.canvas.style.border = '2px solid black'
 	var ctx = canvas.ctx;

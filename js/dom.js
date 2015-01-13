@@ -3,8 +3,12 @@ var con = console;
 var dom = (function() {
 	var isNode = false;
 
-	function createElement(element) {
-		return document.createElement(element);
+	function createElement(element, props) {
+		var el = document.createElement(element);
+		for (var p in props) {
+			el[p] = props[p];
+		}
+		return el;
 	}
 
 	function createCanvas(w, h) {
@@ -24,9 +28,17 @@ var dom = (function() {
 		}
 	}
 
+	function createButton(txt, props) {
+		props.innerHTML = txt;
+		var b = createElement("div", props);
+		return b;
+	}
+
 	return {
-		createElement:createElement,
-		createCanvas:createCanvas
+		element: createElement,
+		canvas: createCanvas,
+		button: createButton
+
 	}
 
 
