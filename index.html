@@ -12,15 +12,16 @@ canvas {/* border:1px solid #444;*/}
 	var experiments = [
 		["additive"],
 		["isometric_cubes"],
+		["fool", "css/pattern_check"],
 		["mining_branches"],
 		["oscillate_curtain"],
 		["pattern_check", "css/pattern_check"],
+		["polyhedra","3d"],
+		["polyhedra_three","THREE"],
 		["recursive"],
 		["spiral_even"],
 		["squaretracer"],
 		["tea"],
-		["polyhedra","3d"],
-		["polyhedra_three","THREE"],
 		["voronoi_stripes", "voronoi"],
 	];
 
@@ -60,17 +61,24 @@ canvas {/* border:1px solid #444;*/}
 		for(var e in experiments) {
 			var button = dom.element("button");
 			button.addEventListener("click", function(event){
-				var index = event.target.index;
-				window.location = "?" + index;
+				window.location = "?" + event.target.key;
 			});
-			button.index = e;
-			button.innerHTML = experiments[e][0];
+			var key = experiments[e][0];
+			button.key = key
+			button.innerHTML = key;
 			document.body.appendChild(button);
 		}
 	}
 
 	if (window.location.search) {
-		var index = window.location.search.split("?")[1];
+		var key = window.location.search.split("?")[1], index = 0, found = false;
+		while(index < experiments.length && found == false) {
+			if ( experiments[index][0] == key) {
+				found = true;
+			} else {
+				index++;
+			}
+		}
 		loadExperiment(index);
 	} else {
 		showButtons();
