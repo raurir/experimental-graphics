@@ -1,4 +1,3 @@
-var con = console;
 var sw = 1600;
 var sh = 1600;
 var bmp = dom.canvas(sw,sh);

@@ -9,6 +9,7 @@ rotMod = Math.PI / 4 # 0.2
 
 settings = {}
 
+
 createSlider = (prop, min, max, ini, granularity = 1) ->
   div = d.createElement("div")
 
@@ -94,7 +95,7 @@ draw = (x, y, branchAngle, level) ->
     ctx.translate(x, y)
     ctx.rotate(rotation) # Math.PI / 2)
 
-    rgb = 0    
+    rgb = 0
     ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},#{alpha})"
     ctx.fillRect( - w * 1 / 2, 0, w * 1, h * 1)
 
