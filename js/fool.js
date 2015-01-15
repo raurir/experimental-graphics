@@ -17,3 +17,6 @@ nav.addEventListener("click", function() {
   navOpen = !navOpen;
   nav.className = navOpen? "nav open" : "nav";
 })
+
+
+// hamburger: http://codepen.io/trvr/pen/wFzkv?editors=110

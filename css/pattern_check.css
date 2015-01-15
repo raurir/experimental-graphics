@@ -1,14 +1,12 @@
 body {
-  overflow:hidden;
+  overflow: hidden;
   font-family: verdana;
 }
-
 .container {
-  position:relative;
+  position: relative;
 }
-
 .preview {
-  position:absolute;
+  position: absolute;
   top: 50%;
   left: 50%;
   width: 200px;
@@ -16,14 +14,16 @@ body {
   margin-left: -100px;
   margin-top: -100px;
   background: rgba(0,0,0,0.5);
-  border: 10px solid black;
+  border: 10px solid #000;
   border-radius: 5px;
-  color: white;
+  color: #fff;
 }
-
+.preview .css {
+  font-family: monospace;
+}
 .buttons {
   position: absolute;
-  left:20px;
+  left: 20px;
 }
 .buttons.top {
   top: 20px;
@@ -31,11 +31,36 @@ body {
 .buttons.bottom {
   bottom: 20px;
 }
-
 .button {
   background: rgba(0,0,0,0.5);
-  color: white;
+  color: #fff;
   border-radius: 5px;
   border: 1px solid rgba(255,255,255,0.7);
   padding: 5px;
+  margin-right: 10px;
+  display: inline-block;
+  cursor: pointer;
+}
+.button:hover {
+  background: rgba(0,0,0,0.8);
+}
+.palette {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 10px;
+  display: inline-block;
+  cursor: pointer;
+}
+.palette .colour {
+  width: 100px;
+  height: 50px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 50px;
+  text-shadow: 1px 1px 4px #000;
 }

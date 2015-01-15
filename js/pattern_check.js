@@ -6,9 +6,12 @@ var dot = 2;
 var widths;
 var pallete;
 var size;
+var rotation = 0;
+var palettePreview;
 
 var container = dom.element("div", {className:"container", style:{width:sw+"px",height:sh+"px"}});
 document.body.appendChild(container);
+container.appendChild(bmp.canvas);
 
 function newSize() {
   size = Math.ceil(Math.random() * 10) * 10;
@@ -28,23 +31,55 @@ function newStripes() {
   });
 
   widths = noDuplicates.sort(function(a,b) { return a < b ? -1 : 1;});
+
 }
 
+function newPalette() {
+  colours.getRandomPalette();
+  if (palettePreview) {
+    container.removeChild(palettePreview);
+    palettePreview.removeEventListener("click", changePalette)
+  }
+  palettePreview = colours.showPalette();
+  palettePreview.addEventListener("click", changePalette);
+  container.appendChild(palettePreview);
+}
 function newColours() {
   palette = [];
-  widths.map(function(a,i) {
+  while(palette.length < widths.length - 1) {
     palette.push(colours.getRandomColour());
-  });
+  }
 }
 
 function reset() {
   newSize();
   newStripes();
+  newPalette()
   newColours();
   render();
 }
 
+function changeSize(size) {
+  dot = size;
+  render();
+}
+
+function changeRotation() {
+  rotation += Math.PI / 4;
+  render();
+}
+
+function changePalette() {
+  newPalette();
+  newColours();
+  render();
+}
+
+
+
 function render() {
+
+  con.log(palette, widths)
 
   pattern = dom.canvas(size * dot, size * dot);
 
@@ -68,7 +103,7 @@ function render() {
 
   ctx.save();
   ctx.rect(0, 0, sw, sh);
-  // ctx.rotate(0.1);
+  ctx.rotate(rotation);
   ctx.fillStyle = ctx.createPattern(pattern.canvas,"repeat");
   ctx.fill();
   ctx.restore();
@@ -84,30 +119,32 @@ container.appendChild(buttonsBottom);
 var preview;
 var buttonExport = dom.button("export", {className:"button export"});
 buttonExport.addEventListener("click", function(e) {
-
   var img = pattern.canvas.toDataURL("image/jpeg");
-  var style = [
-    "<pre>",
-    " background-image: url(" + img + ");",
-    " background-repeat: repeat;",
-    "</pre>"
-  ];
-
   preview = dom.button("preview",{className:"preview"});
   container.appendChild(preview);
-  var css = dom.element("div", {className:"previewCSS", innerHTML:style.join("\n")});
+
+  var r = "rotate(" + rotation + "rad)";
+  var cssArr = [
+    "background-image: url(" + img + ");",
+    "background-repeat: repeat;",
+    "-webkit-transform: " + r + ";",
+    "-moz-transform: " + r + ";",
+    "-ms-transform: " + r + ";",
+    "-o-transform: " + r + ";",
+    "transform: " + r + ";",
+  ];
+
+  var css = dom.element("div", {
+    className: "css",
+    innerHTML: cssArr.join("\n")//#.match(/.{1,20}/g).join("<br>")
+  });
+
   preview.appendChild(css);
 });
 buttonsTop.appendChild(buttonExport);
 
-function changeSize(size) {
-  // alert(size);
-  dot = size;
-  render();
-}
 
 var sizes = [1,2,3,4];
-// var sizeButtons
 for (var s in sizes) {
   var size = sizes[s];
   var buttonSize = dom.button(size + "x", {className:"button size", size: size});
@@ -115,8 +152,17 @@ for (var s in sizes) {
   buttonsBottom.appendChild(buttonSize);
 }
 
+var buttonRotation = dom.button("rotation", {className:"button rotation"});
+buttonRotation.addEventListener("click", function() { changeRotation(); });
+buttonsBottom.appendChild(buttonRotation);
+
 bmp.canvas.addEventListener("click", reset);
 
-container.appendChild(bmp.canvas);
+window.addEventListener("resize", function() {
+  bmp.canvas.width = sw = window.innerWidth;
+  bmp.canvas.height = sh = window.innerHeight;
+  container.setSize(sw,sh);
+  render();
+});
 
 reset();

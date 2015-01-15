@@ -1,79 +1,99 @@
 var colours = (function() {
 
-  var paletteIndex = -1, currentPalette = null;
-  var colourIndex = 0;
+	var paletteIndex = -1, currentPalette = null;
+	var colourIndex = 0;
+	var previewCSSAdded = false;
 
-  function getRandomPalette() {
-	paletteIndex = ~~(Math.random() * palettes.length);
-	currentPalette = palettes[paletteIndex];
-	return currentPalette;
-  }
-  function setRandomPalette(_paletteIndex) {
-	paletteIndex = _paletteIndex;
-	currentPalette = palettes[paletteIndex];
-  }
-  function getRandomColour() {
-	if (currentPalette == null ) getRandomPalette();
-	colourIndex = ~~(Math.random() * currentPalette.length);
-	return currentPalette[colourIndex];
-  }
-
-  function getCurrentColour() {
-	if (currentPalette == null ) getRandomPalette();
-	return currentPalette[colourIndex];
-  }
-
-  function getNextColour(offset) {
-	if (currentPalette == null ) getRandomPalette();
-	if (offset != undefined) {
-		colourIndex += offset;
-	} else {
-		colourIndex++;
+	function getRandomPalette() {
+		paletteIndex = ~~(Math.random() * palettes.length);
+		currentPalette = palettes[paletteIndex];
+		return currentPalette;
 	}
-	colourIndex += currentPalette.length
-	colourIndex %= currentPalette.length;
-	return currentPalette[colourIndex];
-  }
-  function setColourIndex(index) {
-	colourIndex = index;
-  }
+	function setRandomPalette(_paletteIndex) {
+		paletteIndex = _paletteIndex;
+		currentPalette = palettes[paletteIndex];
+	}
+	function getRandomColour() {
+		if (currentPalette == null ) getRandomPalette();
+		colourIndex = ~~(Math.random() * currentPalette.length);
+		return currentPalette[colourIndex];
+	}
 
-  function showColours() {
-	var h = document.createElement("div");
-	for (var i = 0; i < palettes.length; i++) {
-		var palette = palettes[i];
-		var p = document.createElement("div");
-		p.style.clear = "both";
-		p.style.height = "50px";
-		p.style.marginBottom = "20px";
-		h.appendChild(p)
-		for (var j = -1; j < palette.length; j++) {
-			var c = document.createElement("div");
-			p.appendChild(c);
-			var colour, innerHTML;
-			if ( j == -1 ) {
-				colour = "grey"
-				innerHTML = i;
-			} else {
-				innerHTML = colour = palette[j];
-			}
-			with (c.style) {
-				background = colour;
-				width = "100px";
-				height = "50px";
-				float = "left";
-				textAlign = "center"
-				fontSize = "10px";
-				lineHeight = "50px";
-			}
-			c.innerHTML = innerHTML;
+	function getCurrentColour() {
+		if (currentPalette == null ) getRandomPalette();
+		return currentPalette[colourIndex];
+	}
+
+	function getNextColour(offset) {
+		if (currentPalette == null ) getRandomPalette();
+		if (offset != undefined) {
+			colourIndex += offset;
+		} else {
+			colourIndex++;
 		}
+		colourIndex += currentPalette.length
+		colourIndex %= currentPalette.length;
+		return currentPalette[colourIndex];
 	}
-	document.body.appendChild(h);
-  }
-  
+	function setColourIndex(index) {
+		colourIndex = index;
+	}
 
-  var palettes = [
+	function showPalette() {
+		if (currentPalette == null) getRandomPalette();
+		var p = dom.element("div");
+		p.className = "palette";
+		p.id = "palette-" + paletteIndex;
+		for (var j = 0; j < currentPalette.length; j++) {
+			var colour = currentPalette[j];
+			var c = dom.element("div", {className:"colour", innerHTML:colour, style:{background:colour}});
+			p.appendChild(c);
+		}
+		return p;
+	}
+
+	function showColours() {
+		addPreviewCSS();
+		var h = document.createElement("div");
+		for (var i = 0; i < palettes.length; i++) {
+			paletteIndex = i;
+			currentPalette = palettes[i];
+			h.appendChild( showPalette() );
+		}
+		document.body.appendChild(h);
+		return h;
+	}
+
+
+	function addPreviewCSS() {
+		var css = [
+			".palette {",
+			"	clear: both;",
+			"	height: 50px;",
+			" margin-bottom: 20px",
+			"}",
+			".colour {",
+			"	width: 100px;",
+			"	height: 50px;",
+			"	float: left;",
+			"	text-align: center;",
+			"	font-size: 10px;",
+			"	line-height: 50px;",
+			"}"
+		].join("");
+
+		var style = dom.element('style');
+		style.type = 'text/css';
+		if (style.styleSheet){
+		  style.styleSheet.cssText = css;
+		} else {
+		  style.appendChild(document.createTextNode(css));
+		}
+		document.head.appendChild(style);
+		previewCSSAdded = true;
+	}
+
+	var palettes = [
 
 	['#333','#ccc'],
 
@@ -202,20 +222,21 @@ var colours = (function() {
 	[ '#F38A8A', '#55443D', '#A0CAB5', '#CDE9CA', '#F1EDD0' ], // id:234090
 	[ '#793A57', '#4D3339', '#8C873E', '#D1C5A5', '#A38A5F' ] // id:716114
 
-  ];
+	];
 
-  // showColours();
+	// showColours();
 
-  return {
-	getRandomPalette: getRandomPalette,
-	getRandomColour: getRandomColour,
-	getCurrentColour: getCurrentColour,
-	getNextColour: getNextColour, 
-	getPalleteIndex: function() { return paletteIndex;},
-	setRandomPalette: setRandomPalette,
-	setColourIndex: setColourIndex,
-	showColours: showColours
-  }
+	return {
+		getRandomPalette: getRandomPalette,
+		getRandomColour: getRandomColour,
+		getCurrentColour: getCurrentColour,
+		getNextColour: getNextColour,
+		getPalleteIndex: function() { return paletteIndex;},
+		setRandomPalette: setRandomPalette,
+		setColourIndex: setColourIndex,
+		showPalette: showPalette,
+		showColours: showColours,
+	}
 
 })();
 

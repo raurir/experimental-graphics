@@ -3,7 +3,7 @@ var con = console;
 var dom = (function() {
 	var isNode = false;
 
-	function createElement(element, props) {
+	function element(element, props) {
 		var el = document.createElement(element);
 		for (var p in props) {
 			if (p == "style") {
@@ -14,16 +14,20 @@ var dom = (function() {
 				el[p] = props[p];
 			}
 		}
+		el.setSize = function(w,h) {
+			el.style.width = w + "px"; // i always use pixels... oh, you don't? i don't give a fuck
+			el.style.height = h + "px";
+		};
 		return el;
 	}
 
-	function createCanvas(w, h) {
+	function canvas(w, h) {
 
 		var c;
 		if (isNode) {
 			c = new Canvas(w,h);
 		} else {
-			c = createElement("canvas");
+			c = element("canvas");
 			c.width = w;
 			c.height = h;
 		}
@@ -34,17 +38,16 @@ var dom = (function() {
 		}
 	}
 
-	function createButton(txt, props) {
+	function button(txt, props) {
 		props.innerHTML = txt;
-		var b = createElement("div", props);
+		var b = element("div", props);
 		return b;
 	}
 
 	return {
-		element: createElement,
-		canvas: createCanvas,
-		button: createButton
-
+		element: element,
+		canvas: canvas,
+		button: button
 	}
 
 
