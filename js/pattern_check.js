@@ -1,13 +1,15 @@
 var sw = window.innerWidth, sh = window.innerHeight;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
-var pattern;
+var patternMonochrome;
+var patternColoured;
 var dot = 2;
 var widths;
 var pallete;
 var size;
 var rotation = 0;
 var palettePreview;
+var preview;
 
 var container = dom.element("div", {className:"container", style:{width:sw+"px",height:sh+"px"}});
 document.body.appendChild(container);
@@ -20,7 +22,7 @@ function newSize() {
 function newStripes() {
   var lines = 2 + ~~(Math.random() * 5);
   widths = [0];
-  while(widths.length < lines) widths.push(Math.ceil(1 + Math.random() * size / 2) * 2); // all patterns should be multiples of 2
+  while(widths.length < lines) widths.push(Math.ceil(1 + Math.random() * size / 2) * 2); // all patternColoureds should be multiples of 2
   widths.push(size);
 
   var noDuplicates = [];
@@ -59,6 +61,13 @@ function reset() {
   render();
 }
 
+function changeStripes() {
+  // newSize();
+  newStripes();
+  newColours();
+  render();
+}
+
 function changeSize(size) {
   dot = size;
   render();
@@ -81,30 +90,43 @@ function render() {
 
   con.log(palette, widths)
 
-  pattern = dom.canvas(size * dot, size * dot);
+  patternColoured = dom.canvas(size * dot, size * dot);
+
+  if (patternMonochrome) patternDetails.removeChild(patternMonochrome.canvas);
+
+  patternMonochrome = dom.canvas(size * dot, size * dot);
+
+  var colourMonochrome = [["#666","#aaa"], ["#333","#888"]];
 
   for (var i = 0; i < widths.length - 1; i++) {
     var x = widths[i];
     var w = widths[i + 1] - x;
     var colourColumn = palette[i];
+    var monoColumn = colourMonochrome[0][i%2];
     for (var j = 0; j < widths.length - 1; j++) {
       var y = widths[j];
       var h = widths[j + 1] - y;
       var colourRow = palette[j];
+      var monoRow = colourMonochrome[1][j%2];
       for (var px = 0; px < w; px++) {
         for (var py = 0; py < h; py++) {
-          pattern.ctx.fillStyle = (px+py) % 2 == 0 ? colourColumn : colourRow;
-          pattern.ctx.fillRect((x + px) * dot, (y + py) * dot, dot, dot);
+          patternColoured.ctx.fillStyle = (px+py) % 2 == 0 ? colourColumn : colourRow;
+          patternColoured.ctx.fillRect((x + px) * dot, (y + py) * dot, dot, dot);
+          patternMonochrome.ctx.fillStyle = (px+py) % 2 == 0 ? monoColumn : monoRow;
+          patternMonochrome.ctx.fillRect((x + px) * dot, (y + py) * dot, dot, dot);
         }
       }
 
     }
   }
 
+
+  patternDetails.appendChild(patternMonochrome.canvas);
+
   ctx.save();
   ctx.rect(0, 0, sw, sh);
   ctx.rotate(rotation);
-  ctx.fillStyle = ctx.createPattern(pattern.canvas,"repeat");
+  ctx.fillStyle = ctx.createPattern(patternColoured.canvas,"repeat");
   ctx.fill();
   ctx.restore();
 
@@ -116,10 +138,14 @@ container.appendChild(buttonsTop);
 var buttonsBottom = dom.element("div", {className:"buttons bottom"});
 container.appendChild(buttonsBottom);
 
-var preview;
+var patternDetails = dom.element("div", {className:"pattern"});
+container.appendChild(patternDetails);
+patternDetails.addEventListener("click", changeStripes);
+
+
 var buttonExport = dom.button("export", {className:"button export"});
 buttonExport.addEventListener("click", function(e) {
-  var img = pattern.canvas.toDataURL("image/jpeg");
+  var img = patternColoured.canvas.toDataURL("image/jpeg");
   preview = dom.button("preview",{className:"preview"});
   container.appendChild(preview);
 
