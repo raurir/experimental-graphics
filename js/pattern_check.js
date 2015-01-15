@@ -11,6 +11,8 @@ var rotation = 0;
 var palettePreview;
 var preview;
 
+var title;
+
 var container = dom.element("div", {className:"container", style:{width:sw+"px",height:sh+"px"}});
 document.body.appendChild(container);
 container.appendChild(bmp.canvas);
