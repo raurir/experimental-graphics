@@ -21,11 +21,24 @@ body {
   -o-transition: margin-left 0.3s ease-in-out;
   transition: margin-left 0.3s ease-in-out;
 }
+.nav .menu {
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  width: 80%;
+}
+.nav .menu .option {
+  height: 20px;
+  line-height: 20px;
+  width: 80%;
+  background: #111;
+}
 .nav .tab {
   position: absolute;
   top: 50%;
   right: 0;
   margin-right: -50px;
+  margin-top: -50px;
   border-radius: 50%;
   width: 100px;
   height: 100px;

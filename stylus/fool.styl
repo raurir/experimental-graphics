@@ -43,11 +43,26 @@ body
   margin-left navWidth * -1
   makeTransition(margin-left 0.3s ease-in-out)
 
+  .menu
+    position absolute
+    left 10%
+    top 50%
+    width 80%
+    .option
+      height 20px
+      line-height 20px
+      // padding 0 10px
+      width 80%
+      background colourBlack
+
+
+
   .tab
     position absolute
     top 50%
     right 0
     margin-right tabSize * -0.5
+    margin-top tabSize * -0.5
     border-radius 50%
     width tabSize
     height tabSize
