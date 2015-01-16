@@ -31,7 +31,14 @@ var dom = (function() {
 			c.width = w;
 			c.height = h;
 		}
+
 		var ctx = c.getContext("2d");
+
+		var circleRads = Math.PI * 2;
+		ctx.drawCircle = function(x, y, r) {
+			ctx.arc(x, y, r, 0, circleRads, false);
+		}
+
 		return {
 			canvas: c,
 			ctx: ctx
