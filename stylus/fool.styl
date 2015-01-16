@@ -47,15 +47,24 @@ body
     position absolute
     left 10%
     top 50%
-    width 80%
-    .option
-      height 20px
-      line-height 20px
-      // padding 0 10px
-      width 80%
-      background colourBlack
+    width 60%
+    margin-top 0
+    makeTransition(margin-top 0.5s ease-in-out)
+    .main
+      .option, .sub-option
+        height 20px
+        line-height 20px
+        width 100%
+        background rgba(0,0,0,0.5)
+        cursor pointer
+        &:hover
+          background rgba(0,0,0,0.8)
 
-
+      .sub-options
+        background rgba(0,0,255,0.1)
+        height 0
+        overflow hidden
+        makeTransition(height 0.3s ease-in-out)
 
   .tab
     position absolute
@@ -75,12 +84,14 @@ body
     -moz-user-select none
     -ms-user-select none
     user-select none
-
     makeTransition(background 0.3s linear)
-
+    &:hover
+      .icon
+        li
+          background colourWhite
     .icon
       position relative
-      // background blue
+      cursor pointer
       list-style none
       margin 0
       padding 0

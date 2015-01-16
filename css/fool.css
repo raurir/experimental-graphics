@@ -25,13 +25,33 @@ body {
   position: absolute;
   left: 10%;
   top: 50%;
-  width: 80%;
+  width: 60%;
+  margin-top: 0;
+  -webkit-transition: margin-top 0.5s ease-in-out;
+  -moz-transition: margin-top 0.5s ease-in-out;
+  -o-transition: margin-top 0.5s ease-in-out;
+  transition: margin-top 0.5s ease-in-out;
 }
-.nav .menu .option {
+.nav .menu .main .option,
+.nav .menu .main .sub-option {
   height: 20px;
   line-height: 20px;
-  width: 80%;
-  background: #111;
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.nav .menu .main .option:hover,
+.nav .menu .main .sub-option:hover {
+  background: rgba(0,0,0,0.8);
+}
+.nav .menu .main .sub-options {
+  background: rgba(0,0,255,0.1);
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: height 0.3s ease-in-out;
+  -moz-transition: height 0.3s ease-in-out;
+  -o-transition: height 0.3s ease-in-out;
+  transition: height 0.3s ease-in-out;
 }
 .nav .tab {
   position: absolute;
@@ -56,8 +76,12 @@ body {
   -o-transition: background 0.3s linear;
   transition: background 0.3s linear;
 }
+.nav .tab:hover .icon li {
+  background: #c7cdef;
+}
 .nav .tab .icon {
   position: relative;
+  cursor: pointer;
   list-style: none;
   margin: 0;
   padding: 0;
