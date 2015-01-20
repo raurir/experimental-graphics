@@ -36,28 +36,26 @@ var colours = (function() {
 		return currentPalette[colourIndex];
 	}
 
-	function componentToHex(c) {
+	function channelToHex(c) {
 		var hex = c.toString(16);
 		return hex.length == 1 ? "0" + hex : hex;
 	}
 
 	function rgbToHex(r, g, b) {
-		return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+		return "#" + channelToHex(r) + channelToHex(g) + channelToHex(b);
 	}
 
 	function hexToRgb(hex) {
-		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-		return result ? {
-			r: parseInt(result[1], 16),
-			g: parseInt(result[2], 16),
-			b: parseInt(result[3], 16)
-		} : null;
+		var r = parseInt(hex.substr(1,2), 16), 
+			g = parseInt(hex.substr(3,2), 16), 
+			b = parseInt(hex.substr(5,2), 16);
+		return {r:r,g:g,b:b};
 	}
 
 	function mutateChannel(channel, amount, direction) {
-		var mutated = Math.round(channel * (Math.random() - 0.5) * amount);
-		mutated = mutated > 255 ? 255 : mutated < 0 ? 0 : mutated;
-		return mutated;
+		var mutation = Math.round(channel + (Math.random() - 0.5) * amount);
+		mutation = mutation > 255 ? 255 : mutation <= 0 ? 0 : mutation;
+		return mutation;
 	}
 
 	function mutateHex(hex, amount) {
@@ -65,19 +63,16 @@ var colours = (function() {
 		r = mutateChannel(r, amount);
 		g = mutateChannel(g, amount);
 		b = mutateChannel(b, amount);
-		con.log(rgbToHex(r,g,b));
 		return rgbToHex(r,g,b);
 	}
 
 	function mutateColour(colour, amount) {
+		var mutation = mutateHex(colour, amount);
 		return mutateHex(colour, amount);
 		// TODO mutateRGB...
 	}
 
 
-	function shiftHue() {
-
-	}
 
 
 	function setColourIndex(index) {

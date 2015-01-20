@@ -11,7 +11,7 @@ var cy = sh * 0.5;
 
 var i,j;
 
-var planets = 1800;
+var planets = 1000;
 var arrPlanets = [];
 var arrRings = [[]];
 var ringIndex = 0;
@@ -87,8 +87,13 @@ function newPlanet( index ) {
 	if ( ok ) {
 		attempts = 0;
 
-		// planet.hue = (planet.closest.hue + (Math.random() - 0.4) * 20);
-		planet.colour = colours.mutateColour(planet.closest.colour, 0.2);
+		
+		if (Math.random() > 1.9) {
+			planet.colour = colours.getRandomColour();
+		} else {
+			// planet.colour = planet.closest.colour;
+			planet.colour = colours.mutateColour(planet.closest.colour, 10);
+		}
 
 		createPlanet(index, planet)
 	} else {
