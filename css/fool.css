@@ -34,24 +34,27 @@ body {
 }
 .nav .menu .main .option,
 .nav .menu .main .sub-option {
+  box-sizing: border-box;
+  font-size: 10px;
   height: 20px;
   line-height: 20px;
   width: 100%;
-  background: rgba(0,0,0,0.5);
   cursor: pointer;
 }
 .nav .menu .main .option:hover,
 .nav .menu .main .sub-option:hover {
-  background: rgba(0,0,0,0.8);
+  background: rgba(255,255,255,0.2);
 }
 .nav .menu .main .sub-options {
-  background: rgba(0,0,255,0.1);
   height: 0;
   overflow: hidden;
   -webkit-transition: height 0.3s ease-in-out;
   -moz-transition: height 0.3s ease-in-out;
   -o-transition: height 0.3s ease-in-out;
   transition: height 0.3s ease-in-out;
+}
+.nav .menu .main .sub-options .sub-option {
+  padding-left: 10px;
 }
 .nav .tab {
   position: absolute;

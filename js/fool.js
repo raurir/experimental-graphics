@@ -1,7 +1,11 @@
 var sw = window.innerWidth, sh = window.innerHeight;
 
+var navOpen = true;
+function navClass() { return "nav" + (navOpen ? " open" : "");}
+
+
 var container = dom.element("div",{className:"container", style:{width:sw+"px",height:sh+"px"}});
-var nav = dom.element("div",{className:"nav"});
+var nav = dom.element("div",{className:navClass()});
 var navMenu = dom.element("div",{className:"menu"});
 var navTab = dom.element("div",{className:"tab"});
 var navIcon = dom.element("ul",{className:"icon", innerHTML:["first","second","third"].map(function(a,i) { return "<li class='" + a + "'></li>"; }).join("") });
@@ -14,10 +18,10 @@ navTab.appendChild(navIcon);
 container.appendChild(space);
 document.body.appendChild(container);
 
-var navOpen = false;
+
 navTab.addEventListener("click", function() {
   navOpen = !navOpen;
-  nav.className = "nav" + (navOpen ? " open" : "");
+  nav.className = navClass();
 });
 
 var options = [
@@ -60,6 +64,12 @@ var options = [
   },
 ];
 
+
+var itemHeight = 20;
+function navY(items) {
+  return (items + options.length) / 2 * -itemHeight + "px";
+}
+
 function createOption(option) {
   var main = dom.element("div", {className:"main"});
   var button = dom.element("div", {className:"option", innerHTML:option.label});
@@ -74,17 +84,18 @@ function createOption(option) {
       suboptions.appendChild(sub);
     }
     button.addEventListener("click", function(e) {
-      if (lastSub) lastSub.style.height = 0;
-      suboptions.style.height = option.items.length * 20 + "px";
+      if (lastSub) {
+        if (lastSub == suboptions) return; // double click.
+        lastSub.style.height = 0;
+      }
+      setTimeout(function() { suboptions.style.height = option.items.length * itemHeight + "px"; }, 400);
       lastSub = suboptions;
-
-      navMenu.style.marginTop = (option.items.length + options.length) / 2 * -20 + "px";
-
+      navMenu.style.marginTop = navY(option.items.length);
     });
   } else {
     button.addEventListener("click", function(e) {
 
-      navMenu.style.marginTop = (options.length) / 2 * -20 + "px";
+      navMenu.style.marginTop = navY(0);
 
       if (lastSub) {
         lastSub.style.height = 0;
@@ -99,6 +110,7 @@ var lastSub = null;
 for (var i = 0; i < options.length; i++) {
   createOption(options[i]);
 };
+navMenu.style.marginTop = navY(0);
 
 window.addEventListener("resize", function() {
   sw = window.innerWidth;

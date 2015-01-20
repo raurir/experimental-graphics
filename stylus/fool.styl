@@ -52,19 +52,20 @@ body
     makeTransition(margin-top 0.5s ease-in-out)
     .main
       .option, .sub-option
+        box-sizing border-box
+        font-size 10px
         height 20px
         line-height 20px
         width 100%
-        background rgba(0,0,0,0.5)
         cursor pointer
         &:hover
-          background rgba(0,0,0,0.8)
-
+          background rgba(255,255,255,0.2)
       .sub-options
-        background rgba(0,0,255,0.1)
         height 0
         overflow hidden
         makeTransition(height 0.3s ease-in-out)
+        .sub-option
+          padding-left 10px
 
   .tab
     position absolute
