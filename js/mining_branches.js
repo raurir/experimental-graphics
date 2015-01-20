@@ -1,22 +1,28 @@
-var sw = 1600;
-var sh = 1600;
+var sw = 600;
+var sh = sw;
 var bmp = dom.canvas(sw,sh);
-document.body.appendChild(bmp.canvas);
 var ctx = bmp.ctx;
+
+var straight = true;//false;
+
 var circleRads = Math.PI*2;
 var cx = sw * 0.5;
 var cy = sh * 0.5;
 
 var i,j;
 
-var planets = 2000;
+var planets = 1800;
 var arrPlanets = [];
 var arrRings = [[]];
 var ringIndex = 0;
 
 var diameter = 5;
+var ringSize = 5;
 var rotation = 0;
 var attempts = 0;
+
+document.body.appendChild(bmp.canvas);
+
 
 function createPlanet(index, planet) {
 	planet.index = index;
@@ -29,7 +35,8 @@ createPlanet(0, {
 	y:cy,
 	distance: 0,
 	rotation: 0,
-	hue: 0
+	// hue: ~~(Math.random() * 360),
+	colour: colours.getRandomColour()
 });
 
 
@@ -80,7 +87,8 @@ function newPlanet( index ) {
 	if ( ok ) {
 		attempts = 0;
 
-		planet.hue = planet.closest == undefined ? ~~(Math.random() * 360) : planet.closest.hue + (Math.random() - 0.4) * 10;
+		// planet.hue = (planet.closest.hue + (Math.random() - 0.4) * 20);
+		planet.colour = colours.mutateColour(planet.closest.colour, 0.2);
 
 		createPlanet(index, planet)
 	} else {
@@ -89,8 +97,8 @@ function newPlanet( index ) {
 		} else {
 			ringIndex++
 			arrRings[ringIndex] = [];
-			con.log('increasing diameter',ringIndex)
-			diameter += Math.random() * 5 + 1;
+			// con.log('increasing diameter',ringIndex);
+			diameter += Math.random() * ringSize + 1;
 		}
 		attempts++;
 		newPlanet( index );
@@ -98,44 +106,15 @@ function newPlanet( index ) {
 }
 
 function drawPlanets() {
-
 	ctx.clearRect(0, 0, sw, sh);
-
 	var j = arrPlanets.length - 1;
 	while(j > -1) {
-
 		var planet = arrPlanets[ j ];
-		var closest = planet.closest;
-
-		var hue = closest ? closest.hue : planet.hue;
-		var colour = 'hsl(' + hue + ', 50%, 50%)'
-
-		var size = (sw - planet.distance) / sw;
-		ctx.beginPath();
-		ctx.fillStyle = colour;
-		ctx.arc(planet.x, planet.y, size * 7, 0, circleRads, false);
-		ctx.fill();
-
-		if (closest) {
-
-			ctx.beginPath();
-			ctx.lineWidth = Math.pow((size + 0.6), 4);
-			ctx.strokeStyle = colour;
-			ctx.moveTo(planet.x, planet.y);
-			ctx.lineTo(closest.x, closest.y);
-			ctx.stroke();
-			ctx.closePath();
-
-			// var label = planet.index + ":" + planet.closest.index;
-			// ctx.fillStyle = "#000";
-			// ctx.fillText(label, planet.x, planet.y);
-
-		}
-
-		// j = 0; // loop killer
+		var xp = planet.x;
+		var yp = planet.y;		
+		drawPlanet(planet, xp, yp);
 		j--;
 	}
-
 }
 
 
@@ -153,10 +132,8 @@ function animPlanets() {
 		while(j > -1) {
 
 			var planet = arrPlanets[ j ];
-
 			var xp = planet.x;
 			var yp = planet.y;
-
 
 			var f = frame / 5;
 			var ringDelta = Math.abs(f - r);
@@ -168,28 +145,7 @@ function animPlanets() {
 				// con.log(xp)
 			}
 
-			var closest = planet.closest;
-
-			var hue = closest ? closest.hue : planet.hue;
-			var colour = 'hsl(' + hue + ', 50%, 50%)'
-
-			var size = (sw - planet.distance) / sw;
-			ctx.beginPath();
-			ctx.fillStyle = colour;
-			ctx.arc(xp, yp, size * 7, 0, circleRads, false);
-			ctx.fill();
-
-			if (closest) {
-
-				ctx.beginPath();
-				ctx.lineWidth = Math.pow((size + 0.6), 4);
-				ctx.strokeStyle = colour;
-				ctx.moveTo(xp, yp);
-				ctx.lineTo(closest.x, closest.y);
-				ctx.stroke();
-				ctx.closePath();
-
-			}
+			drawPlanet(planet, xp, yp);
 
 			j--;
 		}
@@ -200,6 +156,56 @@ function animPlanets() {
 
 
 
+function drawPlanet(planet, xp, yp) {
+	var closest = planet.closest;
+	// var hue = closest ? closest.hue : planet.hue;
+	// var colour = 'hsl(' + hue + ', 50%, 50%)';
+	var colour = closest ? closest.colour : planet.colour;
+	var size = (sw - planet.distance) / sw;
+	var radius = size * 10;
+	ctx.beginPath();
+	ctx.fillStyle = colour;
+	ctx.arc(planet.x, planet.y, radius, 0, circleRads, false);
+	ctx.fill();
+
+	if (closest) {
+		ctx.beginPath();
+		ctx.lineWidth = Math.pow(1.1, (size * 30));
+		ctx.strokeStyle = colour;
+      	ctx.lineCap = 'round';
+		ctx.moveTo(xp, yp);
+
+		if (straight) {
+			ctx.lineTo(closest.x, closest.y);
+		} else {
+			if (closest.closest) {
+
+				var phx = closest.x + (closest.closest.x - closest.x) / 2; 
+				var phy = closest.y + (closest.closest.y - closest.y) / 2; 
+
+				var nx = closest.x + (closest.x - phx); 
+				var ny = closest.y + (closest.y - phy); 
+
+				ctx.quadraticCurveTo(nx, ny, closest.x, closest.y);
+
+			} else {
+
+				var hx = closest.x + (xp - closest.x) / 2;
+				var hy = closest.y + (yp - closest.y) / 2;
+
+				ctx.quadraticCurveTo(hx, hy, closest.x, closest.y);
+			}
+		}
+		ctx.stroke();
+		// ctx.closePath();
+
+
+		// var label = planet.index + ":" + planet.closest.index;
+		// ctx.fillStyle = "#000";
+		// ctx.fillText(label, planet.x, planet.y);
+
+	}
+}
 
 
 
@@ -208,8 +214,7 @@ function animPlanets() {
 
 
 
-
-
+//*
 j = 1;
 while( j < planets ) {
 	newPlanet(j);
@@ -218,6 +223,7 @@ while( j < planets ) {
 drawPlanets();
 
 /*
+
 j = 1;
 function render() {
 	newPlanet(j);
@@ -229,12 +235,10 @@ function render() {
 	}
 }
 render();
-*/
 
 
 
 
-/*
 var frame = 0;
 function render() {
 	frame++;
@@ -242,4 +246,4 @@ function render() {
 	// requestAnimationFrame(render);
 }
 render();
-*/
+//*/

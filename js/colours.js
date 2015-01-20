@@ -35,6 +35,51 @@ var colours = (function() {
 		colourIndex %= currentPalette.length;
 		return currentPalette[colourIndex];
 	}
+
+	function componentToHex(c) {
+		var hex = c.toString(16);
+		return hex.length == 1 ? "0" + hex : hex;
+	}
+
+	function rgbToHex(r, g, b) {
+		return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	}
+
+	function hexToRgb(hex) {
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
+	}
+
+	function mutateChannel(channel, amount, direction) {
+		var mutated = Math.round(channel * (Math.random() - 0.5) * amount);
+		mutated = mutated > 255 ? 255 : mutated < 0 ? 0 : mutated;
+		return mutated;
+	}
+
+	function mutateHex(hex, amount) {
+		var rgb = hexToRgb(hex), r = rgb.r, g = rgb.g, b = rgb.b;
+		r = mutateChannel(r, amount);
+		g = mutateChannel(g, amount);
+		b = mutateChannel(b, amount);
+		con.log(rgbToHex(r,g,b));
+		return rgbToHex(r,g,b);
+	}
+
+	function mutateColour(colour, amount) {
+		return mutateHex(colour, amount);
+		// TODO mutateRGB...
+	}
+
+
+	function shiftHue() {
+
+	}
+
+
 	function setColourIndex(index) {
 		colourIndex = index;
 	}
@@ -236,6 +281,8 @@ var colours = (function() {
 		setColourIndex: setColourIndex,
 		showPalette: showPalette,
 		showColours: showColours,
+
+		mutateColour: mutateColour
 	}
 
 })();
