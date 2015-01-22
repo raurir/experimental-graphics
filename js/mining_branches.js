@@ -1,9 +1,13 @@
-var seed = 2383241;//~~(Math.random() * 1e10)
+// var seed = 411930879;
+var seed = ~~(Math.random() * 1e9)
+seed = 561552435;
+con.log(seed);
 var same = seed;
 
+// setTimeout(function() {
 Math.random = function() {
-   var x = (Math.sin(seed++) + 1) * 10000;
-   return x % 1;
+	var x = (Math.sin(seed++) + 1) * 10000;
+	return x % 1;
 }
 getRandom = Math.random;
 
@@ -11,12 +15,12 @@ var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
 
 
+var planets = 20;
 
 function doCan(scale) {
-
 var sw = 400 * scale;
 var sh = sw;
-var bmp = dom.canvas(sw,sh);
+var bmp = dom.canvas(sw, sh);
 bmp.canvas.setSize(sw/scale, sh/scale);
 var ctx = bmp.ctx;
 
@@ -28,7 +32,7 @@ var i,j;
 
 var lastPlanet;
 
-var planets = 400;
+
 var arrPlanets = [];
 var arrRings = [[]];
 var ringIndex = 0;
@@ -41,12 +45,14 @@ var attempts = 0;
 var settings = {
   increaseMutation: getRandom() > 0.5,
   drawNodes: getRandom() > 0.5,
-  straight: true //getRandom() > 0.5,
+  straight: getRandom() > 0.5,
+	megaNodes: getRandom() > 0.5,
+	megaSubNodes: getRandom() > 0.5,
+	constantMegaNodeSize: getRandom() > 0.5,
+	constantMegaSubNodeSize: getRandom() > 0.5,
 }
-if (settings.drawNodes) settings.megaNodes = getRandom() > 0.5;
-if (settings.megaNodes) settings.megaSubNodes = getRandom() > 0.5;
 
-con.log(settings);
+// con.log(settings);
 
 document.body.appendChild(bmp.canvas);
 
@@ -212,23 +218,23 @@ function drawNode(planet, xp, yp) {
   var size = 1 - planet.distance;
 
   if (settings.drawNodes) {
-    var radius = size * 10;
+    var radius = size * scale * 5;
     ctx.beginPath();
     ctx.fillStyle = colour;
-    ctx.drawCircle(planet.x*sw, planet.y*sh, radius);
+    ctx.drawCircle(planet.x * sw, planet.y * sh, radius);
     ctx.fill();
 
   }
 
   if (closest) {
     ctx.beginPath();
-    ctx.lineWidth = Math.pow(1.1, (size * 30 / 5)) * scale;
+    ctx.lineWidth = Math.pow(1.1, size * 6) * scale;
     ctx.strokeStyle = colour;
     ctx.lineCap = 'round';
     ctx.moveTo(xp * sw, yp * sh);
 
     if (settings.straight) {
-      ctx.lineTo(closest.x * sw, closest.y * sw);
+      ctx.lineTo(closest.x * sw, closest.y * sh);
     } else {
       if (closest.closest) {
 
@@ -238,14 +244,14 @@ function drawNode(planet, xp, yp) {
         var nx = closest.x + (closest.x - phx);
         var ny = closest.y + (closest.y - phy);
 
-        ctx.quadraticCurveTo(nx, ny, closest.x, closest.y);
+        ctx.quadraticCurveTo(nx * sw, ny * sh, closest.x * sw, closest.y * sh);
 
       } else {
 
         var hx = closest.x + (xp - closest.x) / 2;
         var hy = closest.y + (yp - closest.y) / 2;
 
-        ctx.quadraticCurveTo(hx, hy, closest.x, closest.y);
+        ctx.quadraticCurveTo(hx * sw, hy * sh, closest.x * sw, closest.y * sh);
       }
     }
     ctx.stroke();
@@ -259,20 +265,20 @@ function drawNode(planet, xp, yp) {
 }
 
 function drawInnerNode(planet, xp, yp) {
-	return;
-  var size = (sw - planet.distance) / sw;
-  var radius = size * 10;
+	// return;
+  var size = 1 - planet.distance;
+  var radius = size * scale * 5;
 
   if (settings.megaNodes) {
     ctx.beginPath();
     ctx.fillStyle = bgColour;
-    ctx.drawCircle(planet.x, planet.y, radius * 0.7 * getRandom());
+    ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.7 * (settings.constantMegaNodeSize ? 1 : getRandom()));
     ctx.fill();
 
     if (settings.megaSubNodes && getRandom() > 0.5) {
       ctx.beginPath();
       ctx.fillStyle = planet.colour;
-      ctx.drawCircle(planet.x, planet.y, radius * 0.5 * getRandom());
+      ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.9 * (settings.constantMegaSubNodeSize ? 1 : getRandom()));
       ctx.fill();
     }
   }
@@ -319,11 +325,26 @@ render();
 
 }
 
-seed = same;
-doCan(1);
-seed = same;
-doCan(2);
-seed = same;
-doCan(3);
-seed = same;
-doCan(7);
+window.addEventListener("mousemove", function(e) {
+	var x = e.x || e.clientX;
+	// con.log(document.body.children	);
+	// while(document.body.children)
+
+	var es = document.body.getElementsByTagName("canvas");
+	for (var i = 0; i < es.length; i++) {
+		document.body.removeChild(es[i]);
+	};
+
+	planets = x;
+	seed = same;
+	doCan(1);
+	// seed = same;
+	// doCan(2);
+	// seed = same;
+	// doCan(3);
+	seed = same;
+	doCan(7);
+
+
+})
+// },500);
