@@ -1,4 +1,5 @@
-var sw = 600;
+var scale = 1//~~(1 + Math.random() * 6)
+var sw = 600 * scale;
 var sh = sw;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
@@ -7,12 +8,12 @@ var circleRads = Math.PI*2;
 var cx = sw * 0.5;
 var cy = sh * 0.5;
 
-
-var seed = 1e3;//~~(Math.random() * 1e10)
-function getRandom() {
+var seed = ~~(Math.random() * 1e10)
+Math.random = function() {
    var x = Math.sin(seed++) * 10000;
    return x - Math.floor(x);
 }
+getRandom = Math.random;
 
 var i,j;
 
@@ -21,8 +22,8 @@ var arrPlanets = [];
 var arrRings = [[]];
 var ringIndex = 0;
 
-var diameter = 5;
-var ringSize = 5;
+var diameter = 5 * scale;
+var ringSize = 5 * scale;
 var rotation = 0;
 var attempts = 0;
 
@@ -64,8 +65,8 @@ var bgColour = colours.getNextColour();
 function newPlanet( index ) {
 
   var planet = {
-    x: cx + Math.sin(rotation) * diameter + (getRandom() - 0.5) * 20,
-    y: cy + Math.cos(rotation) * diameter + (getRandom() - 0.5) * 20,
+    x: cx + Math.sin(rotation) * diameter + (getRandom() - 0.5) * 20 * scale,
+    y: cy + Math.cos(rotation) * diameter + (getRandom() - 0.5) * 20 * scale,
     rotation: rotation,
     distance: diameter
   };
@@ -87,7 +88,7 @@ function newPlanet( index ) {
 
     // con.log("distance", distance)
 
-    if ( distance < 16 ) {
+    if ( distance < 16 * scale ) {
       ok = false
     } else {
       lastDistance = Math.min(distance,lastDistance);
@@ -105,19 +106,14 @@ function newPlanet( index ) {
   if ( ok ) {
     attempts = 0;
 
-
-    if (getRandom() > 1.9) {
-      planet.colour = colours.getRandomColour();
+    // planet.colour = planet.closest.colour;
+    if (settings.increaseMutation) {
+      planet.mutationRate = planet.closest.mutationRate * 1.04;
     } else {
-      // planet.colour = planet.closest.colour;
-      if (settings.increaseMutation) {
-        planet.mutationRate = planet.closest.mutationRate * 1.04;
-      } else {
-        planet.mutationRate = planet.closest.mutationRate * 0.9;
-      }
-
-      planet.colour = colours.mutateColour(planet.closest.colour, planet.mutationRate);
+      planet.mutationRate = planet.closest.mutationRate * 0.9;
     }
+
+    planet.colour = colours.mutateColour(planet.closest.colour, planet.mutationRate);
 
     createPlanet(index, planet)
   } else {
@@ -204,7 +200,7 @@ function drawNode(planet, xp, yp) {
 
   var closest = planet.closest;
   var colour = closest ? closest.colour : planet.colour;
-  var size = (sw - planet.distance) / sw;
+  var size = (sw - planet.distance) / sw * scale;
 
   if (settings.drawNodes) {
     var radius = size * 10;
@@ -217,7 +213,7 @@ function drawNode(planet, xp, yp) {
 
   if (closest) {
     ctx.beginPath();
-    ctx.lineWidth = Math.pow(1.1, (size * 30));
+    ctx.lineWidth = Math.pow(1.1, (size * 30 / 5));
     ctx.strokeStyle = colour;
     ctx.lineCap = 'round';
     ctx.moveTo(xp, yp);
@@ -254,7 +250,7 @@ function drawNode(planet, xp, yp) {
 }
 
 function drawInnerNode(planet, xp, yp) {
-  var size = (sw - planet.distance) / sw;
+  var size = (sw - planet.distance) / sw * scale;
   var radius = size * 10;
 
   if (settings.megaNodes) {
