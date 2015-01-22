@@ -1,36 +1,47 @@
-var scale = 1//~~(1 + Math.random() * 6)
-var sw = 600 * scale;
-var sh = sw;
-var bmp = dom.canvas(sw,sh);
-var ctx = bmp.ctx;
+var seed = 2383241;//~~(Math.random() * 1e10)
+var same = seed;
 
-var circleRads = Math.PI*2;
-var cx = sw * 0.5;
-var cy = sh * 0.5;
-
-var seed = ~~(Math.random() * 1e10)
 Math.random = function() {
-   var x = Math.sin(seed++) * 10000;
-   return x - Math.floor(x);
+   var x = (Math.sin(seed++) + 1) * 10000;
+   return x % 1;
 }
 getRandom = Math.random;
 
+var fgColour = colours.getRandomColour();
+var bgColour = colours.getNextColour();
+
+
+
+function doCan(scale) {
+
+var sw = 400 * scale;
+var sh = sw;
+var bmp = dom.canvas(sw,sh);
+bmp.canvas.setSize(sw/scale, sh/scale);
+var ctx = bmp.ctx;
+
+var circleRads = Math.PI*2;
+var cx = 0.5;
+var cy = 0.5;
+
 var i,j;
 
-var planets = 1000;
+var lastPlanet;
+
+var planets = 400;
 var arrPlanets = [];
 var arrRings = [[]];
 var ringIndex = 0;
 
-var diameter = 5 * scale;
-var ringSize = 5 * scale;
+var diameter = 0.01;
+var ringSize = 0.01;
 var rotation = 0;
 var attempts = 0;
 
 var settings = {
   increaseMutation: getRandom() > 0.5,
   drawNodes: getRandom() > 0.5,
-  straight: getRandom() > 0.5,
+  straight: true //getRandom() > 0.5,
 }
 if (settings.drawNodes) settings.megaNodes = getRandom() > 0.5;
 if (settings.megaNodes) settings.megaSubNodes = getRandom() > 0.5;
@@ -52,11 +63,10 @@ createPlanet(0, {
   distance: 0,
   rotation: 0,
   // hue: ~~(getRandom() * 360),
-  colour: colours.getRandomColour(),
+  colour: fgColour,
   mutationRate: 10 //getRandom()
 });
 
-var bgColour = colours.getNextColour();
 
 
 
@@ -65,8 +75,8 @@ var bgColour = colours.getNextColour();
 function newPlanet( index ) {
 
   var planet = {
-    x: cx + Math.sin(rotation) * diameter + (getRandom() - 0.5) * 20 * scale,
-    y: cy + Math.cos(rotation) * diameter + (getRandom() - 0.5) * 20 * scale,
+    x: cx + Math.sin(rotation) * diameter + (getRandom() - 0.5) * 0.05,
+    y: cy + Math.cos(rotation) * diameter + (getRandom() - 0.5) * 0.05,
     rotation: rotation,
     distance: diameter
   };
@@ -86,14 +96,13 @@ function newPlanet( index ) {
     var dy = planet.y - other.y;
     var distance = Math.sqrt(dx*dx+dy*dy);
 
-    // con.log("distance", distance)
-
-    if ( distance < 16 * scale ) {
+    if ( distance < 0.04 ) {
       ok = false
     } else {
       lastDistance = Math.min(distance,lastDistance);
       if ( lastDistance == distance) {
         planet.closest = arrPlanets[i];
+        // con.log("distance", scale, i, distance)
       }
     }
     i--
@@ -123,7 +132,7 @@ function newPlanet( index ) {
       ringIndex++
       arrRings[ringIndex] = [];
       // con.log('increasing diameter',ringIndex);
-      diameter += getRandom() * ringSize + 1;
+      diameter += getRandom() * ringSize + 1/400;
     }
     attempts++;
     newPlanet( index );
@@ -159,7 +168,7 @@ function drawNodes() {
 }
 
 
-
+/*
 function animPlanets() {
 
   ctx.fillStyle = bgColour;
@@ -193,33 +202,33 @@ function animPlanets() {
   }
 
 }
-
+*/
 
 
 function drawNode(planet, xp, yp) {
 
   var closest = planet.closest;
   var colour = closest ? closest.colour : planet.colour;
-  var size = (sw - planet.distance) / sw * scale;
+  var size = 1 - planet.distance;
 
   if (settings.drawNodes) {
     var radius = size * 10;
     ctx.beginPath();
     ctx.fillStyle = colour;
-    ctx.drawCircle(planet.x, planet.y, radius);
+    ctx.drawCircle(planet.x*sw, planet.y*sh, radius);
     ctx.fill();
 
   }
 
   if (closest) {
     ctx.beginPath();
-    ctx.lineWidth = Math.pow(1.1, (size * 30 / 5));
+    ctx.lineWidth = Math.pow(1.1, (size * 30 / 5)) * scale;
     ctx.strokeStyle = colour;
     ctx.lineCap = 'round';
-    ctx.moveTo(xp, yp);
+    ctx.moveTo(xp * sw, yp * sh);
 
     if (settings.straight) {
-      ctx.lineTo(closest.x, closest.y);
+      ctx.lineTo(closest.x * sw, closest.y * sw);
     } else {
       if (closest.closest) {
 
@@ -250,7 +259,8 @@ function drawNode(planet, xp, yp) {
 }
 
 function drawInnerNode(planet, xp, yp) {
-  var size = (sw - planet.distance) / sw * scale;
+	return;
+  var size = (sw - planet.distance) / sw;
   var radius = size * 10;
 
   if (settings.megaNodes) {
@@ -306,3 +316,14 @@ function render() {
 }
 render();
 //*/
+
+}
+
+seed = same;
+doCan(1);
+seed = same;
+doCan(2);
+seed = same;
+doCan(3);
+seed = same;
+doCan(7);
