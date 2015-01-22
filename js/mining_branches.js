@@ -1,4 +1,4 @@
-var sw = 2600;
+var sw = 600;
 var sh = sw;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
@@ -8,20 +8,11 @@ var cx = sw * 0.5;
 var cy = sh * 0.5;
 
 
-var randoms = [1,3,4,1,3,5,2,4];
-var ind  = 0
-
+var seed = 1e3;//~~(Math.random() * 1e10)
 function getRandom() {
-  return Math.random();
-  var rand = Math.PI;
-  return randoms[ind++];
+   var x = Math.sin(seed++) * 10000;
+   return x - Math.floor(x);
 }
-
-function seedRandom(i) {
-  ind = i;
-}
-
-seedRandom(52)
 
 var i,j;
 
@@ -37,11 +28,11 @@ var attempts = 0;
 
 var settings = {
   increaseMutation: getRandom() > 0.5,
-  drawNodes: true,//getRandom() > 0.5,
+  drawNodes: getRandom() > 0.5,
   straight: getRandom() > 0.5,
 }
-if (settings.drawNodes) settings.megaNodes = true;//getRandom() > 0.5;
-if (settings.megaNodes) settings.megaSubNodes = true;//getRandom() > 0.5;
+if (settings.drawNodes) settings.megaNodes = getRandom() > 0.5;
+if (settings.megaNodes) settings.megaSubNodes = getRandom() > 0.5;
 
 con.log(settings);
 
