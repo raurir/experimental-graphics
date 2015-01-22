@@ -8,9 +8,10 @@ var circleRads = Math.PI*2;
 var cx = sw * 0.5;
 var cy = sh * 0.5;
 
-var seed = ~~(Math.random() * 1e10)
+var seed = 23334;//~~(Math.random() * 1e10)
 Math.random = function() {
-   var x = Math.sin(seed++) * 10000;
+  seed+= 0.00000000001
+   var x = Math.sin(seed) * 1;
    return x - Math.floor(x);
 }
 getRandom = Math.random;
