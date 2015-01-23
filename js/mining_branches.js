@@ -1,25 +1,26 @@
 // var seed = 411930879;
 var seed = ~~(Math.random() * 1e9)
-// seed = 561552435;
-con.log(seed);
+seed = 178134816;
+// con.log(seed);
 var same = seed;
 
+var originalRand = Math.random
 
-// setTimeout(function() {
 Math.random = function() {
+  var x = (Math.sin(seed) + 1) * 10000;
   seed += 1;
-	var x = (Math.sin(seed) + 1) * 10000;
 	return x % 1;
 }
 getRandom = Math.random;
 
+
 var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
-
-
 var planets = 20;
 
-function doCan(scale) {
+
+function makeCanvas(scale) {
+
 var sw = 400 * scale;
 var sh = sw;
 var bmp = dom.canvas(sw, sh);
@@ -56,7 +57,8 @@ var settings = {
 
 // con.log(settings);
 
-document.body.appendChild(bmp.canvas);
+
+canvases.appendChild(bmp.canvas);
 
 
 function createPlanet(index, planet) {
@@ -327,26 +329,37 @@ render();
 
 }
 
-// window.addEventListener("mousemove", function(e) {
-	var x = 400;//e.x || e.clientX;
-	// con.log(document.body.children	);
-	// while(document.body.children)
+function generate() {
+  while(canvases.childNodes.length) canvases.removeChild(canvases.childNodes[0]);
 
-	var es = document.body.getElementsByTagName("canvas");
-	for (var i = 0; i < es.length; i++) {
-		document.body.removeChild(es[i]);
-	};
+  seed = ~~(originalRand() * 1e9)
 
-	planets = x;
-	seed = same;
-	doCan(1);
-	// seed = same;
-	// doCan(2);
-	// seed = same;
-	// doCan(3);
-	seed = same;
-	doCan(7);
+  colours.getRandomPalette();
+  fgColour = colours.getRandomColour();
+  bgColour = colours.getNextColour();
+
+  seed = same;
+  makeCanvas(1);
+  // seed = same;
+  // makeCanvas(2);
+  // seed = same;
+  // makeCanvas(3);
+  seed = same;
+  makeCanvas(7);
+}
+
+var canvases = dom.element("div");
+document.body.appendChild(canvases);
+
+var buttons = dom.element("div");
+document.body.appendChild(buttons);
+
+var buttonSize = dom.button("change", {className:"button size"});
+buttonSize.addEventListener("click", function() {
+  generate();
+});
+buttons.appendChild(buttonSize);
 
 
-// })
-// },500);
+
+generate();
