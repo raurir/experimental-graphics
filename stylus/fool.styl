@@ -22,11 +22,17 @@ colourBlack = #111
 colourWhite = #C7CDEF
 
 
+@font-face {
+  font-family: 'MyWebFont';
+  src: url('../font/BlockZone.ttf') format('truetype');
+}
 
 body
   background colourBlack
   overflow hidden
-  font-family verdana
+  // font-family verdana
+  font-family 'MyWebFont', Fallback, sans-serif;
+
 
 .container
   position relative
