@@ -10,7 +10,8 @@
     "stylus": "^0.49.3"
   },
   "devDependencies": {
-    "grunt-contrib-stylus": "^0.20.0"
+    "grunt-contrib-stylus": "^0.20.0",
+    "grunt-contrib-jade": "~0.14.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -6,6 +6,7 @@ grunt = require('grunt')
 grunt.loadNpmTasks('grunt-contrib-coffee')
 grunt.loadNpmTasks('grunt-contrib-watch')
 grunt.loadNpmTasks('grunt-contrib-stylus')
+grunt.loadNpmTasks('grunt-contrib-jade')
 grunt.initConfig(
   watch:
     coffee:
@@ -14,6 +15,10 @@ grunt.initConfig(
     stylus:
       files: ["#{__dirname}/stylus/*.styl"]
       tasks: ['stylus:compile']
+    jade:
+      files: ["#{__dirname}/jade/*.jade"]
+      tasks: ['jade:compile']
+
   coffee:
     compile:
       expand: true
@@ -22,12 +27,32 @@ grunt.initConfig(
       src: ['*.coffee']
       dest: 'js/'
       ext: '.js'
+
+  jade:
+    compile:
+      options: {
+        client: false,
+        pretty: true
+        # data: (dest, src) ->
+        #   console.log("log", dest,src)
+        #   return {data:"hello", path:dest}
+      }
+      files: [
+        {
+          expand: true
+          cwd: 'jade/'
+          src: ["**/*.jade"] # , "!**/_**" 
+          dest: 'html/'
+          ext: '.html'
+        }
+      ]
+
   stylus:
     compile:
       files: [
         {
           expand: true
-          cwd: "stylus/"
+          cwd: "#{__dirname}/stylus/"
           src: ["*.styl"]
           dest: "css"
           ext: ".css"

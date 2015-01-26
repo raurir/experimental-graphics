@@ -171,6 +171,25 @@ buttonExport.addEventListener("click", function(e) {
 });
 buttonsTop.appendChild(buttonExport);
 
+var buttonSave = dom.button("save", {className:"button save"});
+buttonSave.addEventListener("click", function(e) {
+
+  var dataURL = bmp.canvas.toDataURL("image/jpeg");
+  $.ajax({
+    type: "POST",
+    url: "/php/save.php",
+    data: { 
+       imgBase64: dataURL
+    }
+  }).done(function(o) {
+    con.log('saved', o); 
+
+  });
+
+  // preview.appendChild(css);
+});
+buttonsTop.appendChild(buttonSave);
+
 
 var sizes = [1,2,3,4];
 for (var s in sizes) {

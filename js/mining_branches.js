@@ -1,6 +1,6 @@
 // var seed = 411930879;
 var seed = ~~(Math.random() * 1e9)
-seed = 178134816;
+seed = 662718928;
 // con.log(seed);
 var same = seed;
 
@@ -16,7 +16,7 @@ getRandom = Math.random;
 
 var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
-var planets = 20;
+var planets = 200;
 
 
 function makeCanvas(scale) {
@@ -155,8 +155,8 @@ function newPlanet( index ) {
 
 
 function drawNodes() {
-  ctx.fillStyle = bgColour;
-  ctx.fillRect(0, 0, sw, sh);
+  // ctx.fillStyle = bgColour;
+  // ctx.fillRect(0, 0, sw, sh);
   var j = arrPlanets.length - 1;
   while(j > -1) {
     var planet = arrPlanets[ j ];
