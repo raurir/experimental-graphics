@@ -1,3 +1,5 @@
+// just a test comment.
+
 var sw = window.innerWidth, sh = window.innerHeight;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
