@@ -190,9 +190,12 @@ buttonExport.addEventListener("click", function(e) {
 buttonsTop.appendChild(buttonExport);
 
 
-function save(canvas) {
+function save(canvas, type) {
   var dataURL = canvas.toDataURL("image/jpeg");
-  window.open(dataURL);
+  var filename = "check_" + type + "_" + (Math.random() * 1e9 << 0).toString(16) + "-.jpg";
+  var link = dom.element("a", {"href": dataURL, "download": filename});
+  link.click();
+
   // not on my server you don't...
   // $.ajax({
   //   type: "POST",
@@ -205,26 +208,24 @@ function save(canvas) {
   // });
 }
 
-// window open is disabled. right.
-/*
-var buttonSaveOne = dom.button("pattern image", {className:"button save"});
-buttonSaveOne.addEventListener("click", function(e) { save(patternColoured.canvas);});
+var buttonSaveOne = dom.button("pattern image", {className:"button"});
+buttonSaveOne.addEventListener("click", function(e) { save(patternColoured.canvas, "pattern");});
 buttonsTop.appendChild(buttonSaveOne);
 
-var buttonSaveTiled = dom.button("tiled image", {className:"button save"});
-buttonSaveTiled.addEventListener("click", function(e) { save(bmp.canvas);});
+var buttonSaveTiled = dom.button("tiled image", {className:"button"});
+buttonSaveTiled.addEventListener("click", function(e) { save(bmp.canvas, "tiled");});
 buttonsTop.appendChild(buttonSaveTiled);
-*/
+
 
 var sizes = [1,2,3,4];
 for (var s in sizes) {
   var size = sizes[s];
-  var buttonSize = dom.button(size + "x", {className:"button size", size: size});
+  var buttonSize = dom.button(size + "x", {className:"button", size: size});
   buttonSize.addEventListener("click", function() { changeSize(this.size); });
   buttonsBottom.appendChild(buttonSize);
 }
 
-var buttonRotation = dom.button("rotation", {className:"button rotation"});
+var buttonRotation = dom.button("rotation", {className:"button"});
 buttonRotation.addEventListener("click", function() { changeRotation(); });
 buttonsBottom.appendChild(buttonRotation);
 
