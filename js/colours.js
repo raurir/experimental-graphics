@@ -46,8 +46,8 @@ var colours = (function() {
 	}
 
 	function hexToRgb(hex) {
-		var r = parseInt(hex.substr(1,2), 16), 
-			g = parseInt(hex.substr(3,2), 16), 
+		var r = parseInt(hex.substr(1,2), 16),
+			g = parseInt(hex.substr(3,2), 16),
 			b = parseInt(hex.substr(5,2), 16);
 		return {r:r,g:g,b:b};
 	}
@@ -72,8 +72,26 @@ var colours = (function() {
 		// TODO mutateRGB...
 	}
 
+	function mixColours(colours) {
+		var mixed = {r:0, g:0, b:0};
+		for (var c = 0, cl = colours.length; c < cl; c++) {
+			var hex = colours[c];
+			// con.log(rgb)
+			var rgb = hexToRgb(hex);
+			mixed.r += rgb.r;
+			mixed.g += rgb.g;
+			mixed.b += rgb.b;
+		}
+		mixed.r /= cl;
+		mixed.g /= cl;
+		mixed.b /= cl;
 
+		mixed.r = parseInt(mixed.r);
+		mixed.g = parseInt(mixed.g);
+		mixed.b = parseInt(mixed.b);
 
+		return rgbToHex(mixed.r,mixed.g,mixed.b);
+	}
 
 	function setColourIndex(index) {
 		colourIndex = index;
@@ -272,12 +290,14 @@ var colours = (function() {
 		getCurrentColour: getCurrentColour,
 		getNextColour: getNextColour,
 		getPalleteIndex: function() { return paletteIndex;},
+		setPalette: function(p) { currentPalette = p; },
 		setRandomPalette: setRandomPalette,
 		setColourIndex: setColourIndex,
 		showPalette: showPalette,
 		showColours: showColours,
 
-		mutateColour: mutateColour
+		mutateColour: mutateColour,
+		mixColours: mixColours
 	}
 
 })();

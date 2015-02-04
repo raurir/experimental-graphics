@@ -3,17 +3,23 @@ var con = console;
 var dom = (function() {
 	var isNode = false;
 
-	function element(element, props) {
-		var el = document.createElement(element);
+	function setProps(el,props) {
 		for (var p in props) {
 			if (p == "style") {
 				for (var s in props[p]) {
 					el[p][s] = props[p][s];
 				}
 			} else {
-				el[p] = props[p];
+				el.setAttribute(p,props[p]);
+				// el[p] = props[p];
 			}
 		}
+		return el;
+	}
+
+	function element(element, props) {
+		var el = document.createElement(element);
+		setProps(el, props);
 		el.setSize = function(w,h) {
 			el.style.width = w + "px"; // i always use pixels... oh, you don't? i don't give a fuck
 			el.style.height = h + "px";
@@ -51,10 +57,28 @@ var dom = (function() {
 		return b;
 	}
 
+
+	function svg(tag, props) {
+		var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+		setProps(el, props);
+
+
+
+
+		return el;
+
+
+	}
+
+
+
+
+
 	return {
 		element: element,
 		canvas: canvas,
-		button: button
+		button: button,
+		svg: svg
 	}
 
 

@@ -8,7 +8,7 @@ fi
 
 
 echo "Copying files... "
-for file in index.html js/* css/*
+for file in index.html lib/* js/* css/*
 do
   if [[ -f $file ]]; then
     cp "$file" "../raurir.github.io/$file"

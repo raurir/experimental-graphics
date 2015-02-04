@@ -1,6 +1,7 @@
 var gfx = (function() {
 	var experiments = [
 		["additive"],
+		["hexagon_tile"],
 		["isometric_cubes"],
 		["fool", "css/fool"],
 		["mining_branches"],
