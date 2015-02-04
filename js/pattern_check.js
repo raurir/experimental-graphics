@@ -1,4 +1,4 @@
-// just a test comment.
+// just a test comment number 2.
 
 var sw = window.innerWidth, sh = window.innerHeight;
 var bmp = dom.canvas(sw,sh);
