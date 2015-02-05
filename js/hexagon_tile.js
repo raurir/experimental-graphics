@@ -1,4 +1,4 @@
-var sw = 800, 
+var sw = 800,
 sh = 800,
 radiusOuter = 5 + Math.random() * 25,
 strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter,
@@ -6,211 +6,234 @@ radiusInner = radiusOuter - strokeSize + 0.3,
 smoothSize = 1 + Math.random() * 20,
 angle60 = 2 * Math.PI / 6;
 
-var graphics = dom.svg("svg", {width:sw, height:sh});
-document.body.appendChild(graphics);
-var scaler = dom.svg("g");
-graphics.appendChild(scaler);
+var randomHexes, graphics, hexagons, hexs;
 
-var neighbourGroups = dom.svg("g");
-graphics.appendChild(neighbourGroups);
+function reset() {
 
+  if (graphics) document.body.removeChild(graphics);
 
-// colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
-// colours.setPalette(["#ff2244", "#ff3322"]);
+  graphics = dom.svg("svg", {width:sw, height:sh});
+  document.body.appendChild(graphics);
+  var scaler = dom.svg("g");
+  graphics.appendChild(scaler);
 
-var points = [];
-for(var i = 0; i < 6; i++) {
-  var angle = i * angle60;
-  points[i] = (i === 0 ? "M" : "L") + (radiusInner * Math.cos(angle)) + "," + (radiusInner * Math.sin(angle));
-}
-points.push("Z");
+  var neighbourGroups = dom.svg("g");
+  graphics.appendChild(neighbourGroups);
 
-var minHeight = radiusOuter * Math.sin(angle60); // this is edge to edge, not corner to corner.
+  // colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
+  // colours.setPalette(["#ff2244", "#ff3322"]);
 
-var cols = Math.ceil(sw / radiusOuter / 3) + 1;
-var rows = Math.ceil(sh / minHeight) + 1;
-// cols -= 3;
-// rows -= 6;
-var hexagons = cols * rows;
-// con.log(rows,cols, hexagons);
-
-var hexs = [];
-
-for(var i = 0; i < hexagons; i++) {
-
-  var row = Math.floor(i / cols);
-  var second = (row % 2 == 0);
-  var col = (i % cols) + (second ? 0.5 : 0);
-  var x = col * radiusOuter * 3;
-  var y = row * minHeight;
-
-  // x += 100;
-  // y += 100;
-
-  var group = dom.svg("g");
-  group.setAttribute("transform", "translate(" + x + "," + y + ")")
-  scaler.appendChild(group);
-
-
-  var hex = dom.svg("path", {
-    "d": points.join(" ")
-    // "style": { "fill": colour }
-  });
-  group.appendChild(hex);
-
-
-  // var circle = dom.svg("circle", {
-  //   "r": radiusInner * 0.5,
-  //   "style": { "fill": colours.getNextColour() }
-  // });
-  // group.appendChild(circle);
-
-
-  // var text = dom.svg("text", {
-  //   "text-anchor": "middle",
-  //   y: 5
-  // });
-  // text.innerHTML = i + "(" + col + "," + row + ")";
-  // group.appendChild(text);
-
-
-  var neighbours = [];
-  if (row > 1) neighbours.push(i - 6); // T
-  if (second) {
-    if (col > 0) {
-      if (row > 1) neighbours.push(i - 3); // TL
-      if (row < rows - 1) neighbours.push(i + 3); // BL
-    }
-    if (col < cols - 1) {
-      if (row > 1) neighbours.push(i - 2); // TR
-      if (row < rows - 1) neighbours.push(i + 4); // BR
-    }
-  } else {
-    if (col > 0) {
-      if (row > 0.5) neighbours.push(i - 4); // TL
-      if (row < rows - 2) neighbours.push(i + 2); // BL
-    } 
-    if (col < cols) {
-      if (row > 0.5) neighbours.push(i - 3); // TR
-      if (row < rows - 2) neighbours.push(i + 3); // BR
-    }
+  var points = [];
+  for(var i = 0; i < 6; i++) {
+    var angle = i * angle60;
+    points[i] = (i === 0 ? "M" : "L") + (radiusInner * Math.cos(angle)) + "," + (radiusInner * Math.sin(angle));
   }
-  if (row < rows - 2) neighbours.push(i + 6); // B
+  points.push("Z");
 
-  /*
-  group.index = i;
-  group.addEventListener("mouseover", function() {
-    con.log(this.index, hexs[this.index].neighbours);
-    var neighbours = hexs[this.index].neighbours;
-    for (var j = 0; j < neighbours.length; j++) {
-      var neighbour = hexs[neighbours[j]];
-      var circle = dom.svg("circle", {
-        "transform": "translate(" + neighbour.x + "," + neighbour.y + ")",
-        // x: neighbour.x,
-        // y: neighbour.y,
-        "r": radiusInner * 1,
-        "style": { "fill": "black" }
-      });
-      neighbourGroups.appendChild(circle);
-    };
-  });
+  var minHeight = radiusOuter * Math.sin(angle60); // this is edge to edge, not corner to corner.
 
-  group.addEventListener("mouseout", function() {
-    var svg = neighbourGroups;
-    while (svg.lastChild) {
-      svg.removeChild(svg.lastChild);
+  var cols = Math.ceil(sw / radiusOuter / 3) + 1;
+  var rows = Math.ceil(sh / minHeight) + 1;
+  // cols -= 3;
+  // rows -= 6;
+  hexagons = cols * rows;
+  // con.log(rows,cols, hexagons);
+
+  hexs = [];
+
+  for(var i = 0; i < hexagons; i++) {
+
+    var row = Math.floor(i / cols);
+    var second = (row % 2 == 0);
+    var col = (i % cols) + (second ? 0.5 : 0);
+    var x = col * radiusOuter * 3;
+    var y = row * minHeight;
+
+    // x += 100;
+    // y += 100;
+
+    var group = dom.svg("g");
+    group.setAttribute("transform", "translate(" + x + "," + y + ")")
+    scaler.appendChild(group);
+
+
+    var hex = dom.svg("path", {
+      "d": points.join(" ")
+      // "style": { "fill": colour }
+    });
+    group.appendChild(hex);
+
+
+    // var circle = dom.svg("circle", {
+    //   "r": radiusInner * 0.5,
+    //   "style": { "fill": colours.getNextColour() }
+    // });
+    // group.appendChild(circle);
+
+
+    // var text = dom.svg("text", {
+    //   "text-anchor": "middle",
+    //   y: 5
+    // });
+    // text.innerHTML = i + "(" + col + "," + row + ")";
+    // group.appendChild(text);
+
+
+    var neighbours = [];
+    if (row > 1) neighbours.push(i - 6); // T
+    if (second) {
+      if (col > 0) {
+        if (row > 1) neighbours.push(i - 3); // TL
+        if (row < rows - 1) neighbours.push(i + 3); // BL
+      }
+      if (col < cols - 1) {
+        if (row > 1) neighbours.push(i - 2); // TR
+        if (row < rows - 1) neighbours.push(i + 4); // BR
+      }
+    } else {
+      if (col > 0) {
+        if (row > 0.5) neighbours.push(i - 4); // TL
+        if (row < rows - 2) neighbours.push(i + 2); // BL
+      }
+      if (col < cols) {
+        if (row > 0.5) neighbours.push(i - 3); // TR
+        if (row < rows - 2) neighbours.push(i + 3); // BR
+      }
     }
-  });
-  */
+    if (row < rows - 2) neighbours.push(i + 6); // B
 
-  hexs[i] = {
-    index: i,
-    path: hex,
-    x: x,
-    y: y,
-    colour: null,
-    rendered: false,
-    neighbours: neighbours
-  };
+    /*
+    group.index = i;
+    group.addEventListener("mouseover", function() {
+      con.log(this.index, hexs[this.index].neighbours);
+      var neighbours = hexs[this.index].neighbours;
+      for (var j = 0; j < neighbours.length; j++) {
+        var neighbour = hexs[neighbours[j]];
+        var circle = dom.svg("circle", {
+          "transform": "translate(" + neighbour.x + "," + neighbour.y + ")",
+          // x: neighbour.x,
+          // y: neighbour.y,
+          "r": radiusInner * 1,
+          "style": { "fill": "black" }
+        });
+        neighbourGroups.appendChild(circle);
+      };
+    });
 
+    group.addEventListener("mouseout", function() {
+      var svg = neighbourGroups;
+      while (svg.lastChild) {
+        svg.removeChild(svg.lastChild);
+      }
+    });
+    */
+
+    // var scale = 1;
+    // var rotate = 0;
+    // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
+    // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
+    //
+
+    // con.log(hexagons);
+
+
+
+
+    hexs[i] = {
+      index: i,
+      path: hex,
+      x: x,
+      y: y,
+      colour: null,
+      rendered: false,
+      neighbours: neighbours
+    };
+
+  }
+  randomHexes = shuffle(hexs.slice());
+
+  render();
 }
-
 
 function shuffle(o){
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
 
-var randomHexes = shuffle(hexs.slice());
+function render() {
+  for(var h = 0; h < hexagons; h++) {
 
-// var scale = 1;
-// var rotate = 0;
-// scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
-// scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
-//
-
-// con.log(hexagons);
-
-for(var h = 0; h < hexagons; h++) {
-
-  var index = randomHexes[h].index;
-  var item = hexs[index];
+    var index = randomHexes[h].index;
+    var item = hexs[index];
 
 
-  // var neighbours = [];
-  // for(var i = 0; i < item.neighbours.length; i++) {
-  //   var otherItemIndex = item.neighbours[i];
-  //   // con.log(otherItemIndex);
-  //   var otherItem = hexs[otherItemIndex];
-  //   if (otherItem.rendered) {
-  //     neighbours.push(otherItem.colour);
-  //   }
-  // }
+    // var neighbours = [];
+    // for(var i = 0; i < item.neighbours.length; i++) {
+    //   var otherItemIndex = item.neighbours[i];
+    //   // con.log(otherItemIndex);
+    //   var otherItem = hexs[otherItemIndex];
+    //   if (otherItem.rendered) {
+    //     neighbours.push(otherItem.colour);
+    //   }
+    // }
 
 
-  var close = [];
-  for(var i = 0; i < hexagons; i++) {
-    if (i != h) {
-      var otherItem = randomHexes[i];
-      // con.log(otherItem)
-      if (otherItem.rendered) {
+    var close = [];
+    for(var i = 0; i < hexagons; i++) {
+      if (i != h) {
+        var otherItem = randomHexes[i];
+        // con.log(otherItem)
+        if (otherItem.rendered) {
 
-        var dx = item.x - otherItem.x,
-          dy = item.y - otherItem.y,
-          d = Math.sqrt(dx * dx + dy * dy);
+          var dx = item.x - otherItem.x,
+            dy = item.y - otherItem.y,
+            d = Math.sqrt(dx * dx + dy * dy);
 
-          // con.log(item.x, otherItem.x)
+            // con.log(item.x, otherItem.x)
 
-          if (d < radiusOuter * smoothSize) {
-            close.push(otherItem.colour);
-          }
+            if (d < radiusOuter * smoothSize) {
+              close.push(otherItem.colour);
+            }
 
+        }
       }
     }
+
+    // con.log(neighbours.length,close.length);
+    var colour;
+    if (close.length > 0 ) {
+      colour = colours.mixColours(close);
+      // colour = colours.mutateColour(colour, 3);
+    } else {
+      colour = colours.getNextColour();
+    }
+
+
+    item.path.setAttribute("style", "fill:" + colour);
+
+    hexs[index].rendered = true;
+    hexs[index].colour = colour;
+
   }
 
-
-
-
-
-
-
-  // con.log(neighbours.length,close.length);
-  var colour;
-  if (close.length > 0 ) {
-    colour = colours.mixColours(close);
-    // colour = colours.mutateColour(colour, 3);
-  } else {
-    colour = colours.getNextColour();
-  }
-
-
-  item.path.setAttribute("style", "fill:" + colour);
-
-  hexs[index].rendered = true;
-  hexs[index].colour = colour;
 
 }
+
+
+document.body.addEventListener("click", reset);
+
+window.addEventListener("resize", function() {
+  sw = window.innerWidth;
+  sh = window.innerHeight;
+  // container.setSize(sw,sh);
+  reset();
+});
+
+
+
+reset();
+
+
 
 
 
@@ -247,5 +270,8 @@ for(var h = 0; h < hexagons; h++) {
 }
 
 */
+
+
+
 
 
