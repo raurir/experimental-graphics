@@ -1,4 +1,4 @@
-var size = 800,
+var size = 100,
 
   sw = size,
   sh = size,
@@ -15,6 +15,8 @@ var size = 800,
   hexs;
 
 function reset() {
+
+  size = 100 + Math.random() * 1000;
 
   radiusOuter = 5 + Math.random() * 25;
   strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter;
@@ -36,6 +38,8 @@ function reset() {
   // colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
   // colours.setPalette(["#ff2244", "#ff3322"]);
 
+  document.body.setAttribute("style", "background-color:" + colours.getNextColour());
+
   var points = [];
   for(var i = 0; i < 6; i++) {
     var angle = i * angle60;
@@ -45,8 +49,8 @@ function reset() {
 
   var minHeight = radiusOuter * Math.sin(angle60); // this is edge to edge, not corner to corner.
 
-  var cols = Math.ceil(sw / radiusOuter / 3) + 1;
-  var rows = Math.ceil(sh / minHeight) + 1;
+  var cols = Math.ceil(size / radiusOuter / 3) + 1;
+  var rows = Math.ceil(size / minHeight) + 1;
   // cols -= 3;
   // rows -= 6;
   hexagons = cols * rows;
@@ -66,7 +70,7 @@ function reset() {
     // y += 100;
 
     var group = dom.svg("g");
-    group.setAttribute("transform", "translate(" + x + "," + y + ")")
+    group.setAttribute("transform", "translate(" + x + "," + y + ")");
     scaler.appendChild(group);
 
 
@@ -219,36 +223,29 @@ function render() {
 
   }
 
-
+  resize();
 }
 
-
-document.body.addEventListener("click", reset);
-
-window.addEventListener("resize", function() {
+function resize() {
   sw = window.innerWidth;
   sh = window.innerHeight;
   graphics.setSize(sw,sh);
 
   var largestDimension = sw > sh ? sw : sh;
-
   var scale = largestDimension / size;
-  // var rotate = 0;
-  // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
-
   var x = 0, y = 0;
   if (sw < sh) {
-    x = -((scale * sw) - sw);
+    x = -((scale * size) - sw) / 2;
+  } else {
+    y = -((scale * size) - sh) / 2;
   }
 
   scaler.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
 
+}
 
-    // con.log(hexagons);
-
-
-});
-
+document.body.addEventListener("click", reset);
+window.addEventListener("resize", resize);
 reset();
 
 
