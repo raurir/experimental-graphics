@@ -1,20 +1,33 @@
-var sw = 800,
-sh = 800,
-radiusOuter = 5 + Math.random() * 25,
-strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter,
-radiusInner = radiusOuter - strokeSize + 0.3,
-smoothSize = 1 + Math.random() * 20,
-angle60 = 2 * Math.PI / 6;
+var size = 800,
 
-var randomHexes, graphics, hexagons, hexs;
+  sw = size,
+  sh = size,
+
+  angle60 = 2 * Math.PI / 6,
+  radiusOuter,
+  strokeSize,
+  radiusInner,
+  smoothSize,
+  randomHexes,
+  graphics,
+  scaler,
+  hexagons,
+  hexs;
 
 function reset() {
+
+  radiusOuter = 5 + Math.random() * 25;
+  strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter;
+  radiusInner = radiusOuter - strokeSize + 0.3;
+  smoothSize = 1 + Math.random() * 20;
+
+
 
   if (graphics) document.body.removeChild(graphics);
 
   graphics = dom.svg("svg", {width:sw, height:sh});
   document.body.appendChild(graphics);
-  var scaler = dom.svg("g");
+  scaler = dom.svg("g");
   graphics.appendChild(scaler);
 
   var neighbourGroups = dom.svg("g");
@@ -128,16 +141,6 @@ function reset() {
     });
     */
 
-    // var scale = 1;
-    // var rotate = 0;
-    // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
-    // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
-    //
-
-    // con.log(hexagons);
-
-
-
 
     hexs[i] = {
       index: i,
@@ -225,11 +228,26 @@ document.body.addEventListener("click", reset);
 window.addEventListener("resize", function() {
   sw = window.innerWidth;
   sh = window.innerHeight;
-  // container.setSize(sw,sh);
-  reset();
+  graphics.setSize(sw,sh);
+
+  var largestDimension = sw > sh ? sw : sh;
+
+  var scale = largestDimension / size;
+  // var rotate = 0;
+  // scaler.setAttribute("transform", "translate(400,400) rotate(" + rotate + ") scale(" + scale + ")");
+
+  var x = 0, y = 0;
+  if (sw < sh) {
+    x = -((scale * sw) - sw);
+  }
+
+  scaler.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
+
+
+    // con.log(hexagons);
+
+
 });
-
-
 
 reset();
 
