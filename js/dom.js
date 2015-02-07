@@ -27,6 +27,7 @@ var dom = (function() {
 		var el = document.createElement(element);
 		setProps(el, props);
 		el.setSize = function(w,h) {
+			con.log('ssretS',w,h);
 			el.style.width = w + "px"; // i always use pixels... oh, you don't? i don't give a fuck
 			el.style.height = h + "px";
 		};

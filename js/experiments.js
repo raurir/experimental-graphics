@@ -1,4 +1,27 @@
-var gfx = (function() {
+// var seed = 411930879;
+var seed = ~~(Math.random() * 1e9)
+// seed = 662718928;
+// con.log(seed);
+var same = seed;
+
+var originalRand = Math.random
+
+Math.random = function() {
+  var x = (Math.sin(seed) + 1) * 10000;
+  seed += 1;
+	return x % 1;
+}
+getRandom = Math.random;
+
+
+
+
+(function() {
+
+	var holder = dom.element("div");
+	document.body.appendChild(holder);
+
+
 	var experiments = [
 		["additive"],
 		["hexagon_tile"],
@@ -47,7 +70,7 @@ var gfx = (function() {
 				createScript(src);
 			}
 		}
-		initRenderProgress();
+		// con.log("experiment", experiment);
 	}
 	function showButtons() {
 		for(var e in experiments) {
@@ -77,7 +100,8 @@ var gfx = (function() {
 	}
 
 	function initRenderProgress() {
-		var loader, graph, bar ;
+		con.log('initRenderProgress');
+		var loader, graph, bar;
 		addEventListener('render:start', function (e) {
 		  if (loader) {
 		  	bar.style.width = "0%";
@@ -109,11 +133,47 @@ var gfx = (function() {
 		}, false);
 	}
 
+	var currentExperiment;
+
+	function resize() {
+	  // con.log("resize!");
+	  var sw = window.innerWidth, sh = window.innerHeight;
+	  
+  	currentExperiment.resize(sw,sh);
+
+	  // // graphics.setSize(sw,sh);
+
+	  // var largestDimension = sw > sh ? sw : sh;
+	  // var scale = largestDimension / size;
+	  // var x = 0, y = 0;
+	  // if (sw < sh) {
+	  //   x = -((scale * size) - sw) / 2;
+	  // } else {
+	  //   y = -((scale * size) - sh) / 2;
+	  // }
+
+	  // scaler.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
+
+	}
+
+	function initWindowListener() {
+		window.addEventListener("resize", resize);
+	}
+
+	addEventListener("load:complete", function(e) {
+		con.log("Loaded", e);
+		currentExperiment = e.detail;
+		holder.appendChild(currentExperiment.stage);
+		initRenderProgress();
+		initWindowListener();
+		currentExperiment.init();
+		resize();
+	});
 
 
 	// document.body.appendChild(colours.showPalette());
-	return {
-		load: loadExperiment,
-		experiments: experiments
-	};
+	// return {
+	// 	load: loadExperiment,
+	// 	experiments: experiments
+	// };
 })();

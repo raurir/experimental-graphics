@@ -1,3 +1,4 @@
+(function() {
 var size = 100,
 
   sw = size,
@@ -18,6 +19,8 @@ var size = 100,
   batches, 
   currentBatch = 0;
 
+var graphics = dom.svg("svg", {width:sw, height:sh});
+
 function reset() {
 
   dispatchEvent(new Event("render:start"));
@@ -30,11 +33,10 @@ function reset() {
   smoothSize = 1 + Math.random() * 20;
 
 
+  while (graphics.firstChild) graphics.removeChild(graphics.firstChild);
 
-  if (graphics) document.body.removeChild(graphics);
-
-  graphics = dom.svg("svg", {width:sw, height:sh});
-  document.body.appendChild(graphics);
+  
+  
   scaler = dom.svg("g");
   graphics.appendChild(scaler);
 
@@ -258,10 +260,9 @@ function render() {
   
 }
 
-function resize() {
+function resize(sw,sh) {
   con.log("resize!");
-  sw = window.innerWidth;
-  sh = window.innerHeight;
+  if (!sw || !sh) return;
   graphics.setSize(sw,sh);
 
   var largestDimension = sw > sh ? sw : sh;
@@ -276,12 +277,21 @@ function resize() {
   scaler.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
 
 }
+window.addEventListener("resize", resize);
 
 document.body.addEventListener("click", reset);
-window.addEventListener("resize", resize);
-reset();
+
+
+var hexagon_tile = {
+  stage: graphics,
+  resize: resize,
+  init: reset,
+  kill: function() {}
+}
+
 // dispatchEvent(new CustomEvent("render:progress", {"detail": 0.4}));
 
+dispatchEvent(new CustomEvent("load:complete", {detail:hexagon_tile}));
 
 
 
@@ -321,6 +331,6 @@ for(var h = 0; h < hexagons; h++) {
 */
 
 
-
+})();
 
 

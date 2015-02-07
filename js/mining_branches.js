@@ -1,29 +1,17 @@
-// var seed = 411930879;
-var seed = ~~(Math.random() * 1e9)
-seed = 662718928;
-// con.log(seed);
-var same = seed;
-
-var originalRand = Math.random
-
-Math.random = function() {
-  var x = (Math.sin(seed) + 1) * 10000;
-  seed += 1;
-	return x % 1;
-}
-getRandom = Math.random;
-
-
+(function() {
 var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
 var planets = 200;
 
+var size = 400;
+
+var bmp;
 
 function makeCanvas(scale) {
 
-var sw = 400 * scale;
+var sw = size * scale;
 var sh = sw;
-var bmp = dom.canvas(sw, sh);
+bmp = dom.canvas(sw, sh);
 bmp.canvas.setSize(sw/scale, sh/scale);
 var ctx = bmp.ctx;
 
@@ -58,7 +46,7 @@ var settings = {
 // con.log(settings);
 
 
-canvases.appendChild(bmp.canvas);
+
 
 
 function createPlanet(index, planet) {
@@ -155,8 +143,8 @@ function newPlanet( index ) {
 
 
 function drawNodes() {
-  // ctx.fillStyle = bgColour;
-  // ctx.fillRect(0, 0, sw, sh);
+  ctx.fillStyle = bgColour;
+  ctx.fillRect(0, 0, sw, sh);
   var j = arrPlanets.length - 1;
   while(j > -1) {
     var planet = arrPlanets[ j ];
@@ -327,6 +315,9 @@ function render() {
 render();
 //*/
 
+
+canvases.appendChild(bmp.canvas);
+
 }
 
 function generate() {
@@ -344,22 +335,46 @@ function generate() {
   // makeCanvas(2);
   // seed = same;
   // makeCanvas(3);
-  seed = same;
-  makeCanvas(7);
+  // seed = same;
+  // makeCanvas(7);
 }
 
 var canvases = dom.element("div");
-document.body.appendChild(canvases);
+// document.body.appendChild(canvases);
 
-var buttons = dom.element("div");
-document.body.appendChild(buttons);
+// var buttons = dom.element("div");
+// document.body.appendChild(buttons);
 
-var buttonSize = dom.button("change", {className:"button size"});
-buttonSize.addEventListener("click", function() {
-  generate();
-});
-buttons.appendChild(buttonSize);
+// var buttonSize = dom.button("change", {className:"button size"});
+// buttonSize.addEventListener("click", function() {
+//   generate();
+// });
+// buttons.appendChild(buttonSize);
+
+
+var experiment = {
+  stage: canvases,
+  resize: function(sw,sh) {
+
+    var smallestDimension = sw < sh ? sw : sh;
+    var scale = smallestDimension / size;
+    var x = 0, y = 0;
+    if (sw > sh) {
+      x = (sw - (scale * size)) / 2;
+    } else {
+      y = (sh - (scale * size)) / 2;
+    }
+    bmp.canvas.setSize(scale * size, scale * size);
+    bmp.canvas.style.position = "absolute";
+    bmp.canvas.style.left = x + "px";
+    bmp.canvas.style.top = y + "px";
+  },
+  init: generate,
+  kill: function() {}
+}
 
 
 
-generate();
+dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
+
+})();
