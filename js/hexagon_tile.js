@@ -280,6 +280,7 @@ function resize() {
 document.body.addEventListener("click", reset);
 window.addEventListener("resize", resize);
 reset();
+// dispatchEvent(new CustomEvent("render:progress", {"detail": 0.4}));
 
 
 

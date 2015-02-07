@@ -77,11 +77,10 @@ var gfx = (function() {
 	}
 
 	function initRenderProgress() {
-		var loader, graph;
+		var loader, graph, bar ;
 		addEventListener('render:start', function (e) {
 		  if (loader) {
-		  	graph.style.width = "0%";
-		  	loader.classList.remove("complete");
+		  	bar.style.width = "0%";
 		  }
 		}, false);
 		addEventListener('render:progress', function (e) {
@@ -89,16 +88,23 @@ var gfx = (function() {
 		  if (loader == undefined) {
 		  	loader = dom.element("div", {className:"experiments-loader"});
 		  	graph = dom.element("div", {className:"experiments-loader-graph"});
-		  	document.body.appendChild(loader);	
-		  	loader.appendChild(graph);	
+		  	bar = dom.element("div", {className:"experiments-loader-graph-bar"});
+		  	loader.appendChild(graph);
+		  	graph.appendChild(bar);
 		  }
+		  document.body.appendChild(loader);
 		  loader.classList.remove("complete");
-		  graph.style.width = Math.round(e.detail * 100) + "%";
+		  bar.style.width = Math.round(e.detail * 100) + "%";
 		}, false);
 		addEventListener('render:complete', function (e) {
 		  if (loader) {
-		  	graph.style.width = "100%";
+		  	bar.style.width = "100%";
 		  	loader.classList.add("complete");
+		  	setTimeout(function() {
+		  		loader.classList.remove("complete");
+		  		bar.style.width = "0%";
+		  		try { document.body.removeChild(loader); } catch(e) { /* already removed? */}
+		  	},200);
 		  }
 		}, false);
 	}

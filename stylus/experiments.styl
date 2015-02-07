@@ -4,7 +4,6 @@ makeTransition(transition)
   -o-transition transition
   transition transition
 
-
 body
   overflow hidden
   font-family verdana
@@ -12,22 +11,27 @@ body
   padding 0
 
 .experiments-loader
-  position absolute
-  top 50%
-  left 40%
-  width 20%
-  height 10px
-  margin-top -8px
-  background rgba(0,0,0,0.3)
-  border 2px solid transparent
-  border-radius 4px
+  position: absolute
+  background rgba(50,50,50,0.3)
+  top 0
+  left 0
+  width 100%
+  height 100%
   makeTransition(opacity 0.2s ease-in-out)
-  
   &.complete
-    opacity 0  
-    
+    opacity 0
   .experiments-loader-graph
-    background #eee
+    position absolute
+    top 50%
+    left 40%
+    width 20%
     height 10px
-    border-radius 2px
-    makeTransition(width 0.2s ease-in-out)
+    margin-top -8px
+    background rgba(0,0,0,0.3)
+    border 2px solid rgba(0,0,0,0.4)
+    border-radius 4px
+    .experiments-loader-graph-bar
+      background #eee
+      height 10px
+      border-radius 2px
+      makeTransition(width 0.2s ease-out)
