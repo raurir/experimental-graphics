@@ -1,0 +1,33 @@
+body {
+  overflow: hidden;
+  font-family: verdana;
+  margin: 0;
+  padding: 0;
+}
+.experiments-loader {
+  position: absolute;
+  top: 50%;
+  left: 40%;
+  width: 20%;
+  height: 10px;
+  margin-top: -8px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid transparent;
+  border-radius: 4px;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  -moz-transition: opacity 0.2s ease-in-out;
+  -o-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
+}
+.experiments-loader.complete {
+  opacity: 0;
+}
+.experiments-loader .experiments-loader-graph {
+  background: #eee;
+  height: 10px;
+  border-radius: 2px;
+  -webkit-transition: width 0.2s ease-in-out;
+  -moz-transition: width 0.2s ease-in-out;
+  -o-transition: width 0.2s ease-in-out;
+  transition: width 0.2s ease-in-out;
+}

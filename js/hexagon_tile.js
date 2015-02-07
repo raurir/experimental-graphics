@@ -12,11 +12,17 @@ var size = 100,
   graphics,
   scaler,
   hexagons,
-  hexs;
+  hexs,
+
+  batchSize = 1000, 
+  batches, 
+  currentBatch = 0;
 
 function reset() {
 
-  size = 100 + Math.random() * 1000;
+  dispatchEvent(new Event("render:start"));
+
+  size = 1000;//100 + Math.random() * 1000;
 
   radiusOuter = 5 + Math.random() * 25;
   strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter;
@@ -167,8 +173,17 @@ function shuffle(o){
     return o;
 };
 
-function render() {
-  for(var h = 0; h < hexagons; h++) {
+
+
+
+
+
+
+function batch() {
+  var loopStart = currentBatch * batchSize,
+    loopEnd = loopStart + batchSize;
+  if (loopEnd > hexagons) loopEnd = hexagons;
+  for(var h = loopStart; h < loopEnd; h++) {
 
     var index = randomHexes[h].index;
     var item = hexs[index];
@@ -183,7 +198,6 @@ function render() {
     //     neighbours.push(otherItem.colour);
     //   }
     // }
-
 
     var close = [];
     for(var i = 0; i < hexagons; i++) {
@@ -222,11 +236,30 @@ function render() {
     hexs[index].colour = colour;
 
   }
+  con.log("doing batch", currentBatch, batches);
 
-  resize();
+  currentBatch++;
+  if (currentBatch == batches) {
+    dispatchEvent(new Event("render:complete"));
+    resize();
+  } else {
+    dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
+    resize();
+    // requestAnimationFrame(batch);
+    setTimeout(batch,200);
+  }
+
+}
+
+function render() {
+  batches = Math.ceil(hexagons / batchSize);
+  currentBatch = 0;
+  batch();
+  
 }
 
 function resize() {
+  con.log("resize!");
   sw = window.innerWidth;
   sh = window.innerHeight;
   graphics.setSize(sw,sh);

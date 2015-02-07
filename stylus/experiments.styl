@@ -1,0 +1,33 @@
+makeTransition(transition)
+  -webkit-transition transition
+  -moz-transition transition
+  -o-transition transition
+  transition transition
+
+
+body
+  overflow hidden
+  font-family verdana
+  margin 0
+  padding 0
+
+.experiments-loader
+  position absolute
+  top 50%
+  left 40%
+  width 20%
+  height 10px
+  margin-top -8px
+  background rgba(0,0,0,0.3)
+  border 2px solid transparent
+  border-radius 4px
+  makeTransition(opacity 0.2s ease-in-out)
+  
+  &.complete
+    opacity 0  
+    
+  .experiments-loader-graph
+    background #eee
+    height 10px
+    border-radius 2px
+    makeTransition(width 0.2s ease-in-out)

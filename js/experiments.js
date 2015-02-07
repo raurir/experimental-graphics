@@ -47,7 +47,7 @@ var gfx = (function() {
 				createScript(src);
 			}
 		}
-
+		initRenderProgress();
 	}
 	function showButtons() {
 		for(var e in experiments) {
@@ -75,6 +75,35 @@ var gfx = (function() {
 	} else {
 		showButtons();
 	}
+
+	function initRenderProgress() {
+		var loader, graph;
+		addEventListener('render:start', function (e) {
+		  if (loader) {
+		  	graph.style.width = "0%";
+		  	loader.classList.remove("complete");
+		  }
+		}, false);
+		addEventListener('render:progress', function (e) {
+		  con.log("progress", e.detail);
+		  if (loader == undefined) {
+		  	loader = dom.element("div", {className:"experiments-loader"});
+		  	graph = dom.element("div", {className:"experiments-loader-graph"});
+		  	document.body.appendChild(loader);	
+		  	loader.appendChild(graph);	
+		  }
+		  loader.classList.remove("complete");
+		  graph.style.width = Math.round(e.detail * 100) + "%";
+		}, false);
+		addEventListener('render:complete', function (e) {
+		  if (loader) {
+		  	graph.style.width = "100%";
+		  	loader.classList.add("complete");
+		  }
+		}, false);
+	}
+
+
 
 	// document.body.appendChild(colours.showPalette());
 	return {
