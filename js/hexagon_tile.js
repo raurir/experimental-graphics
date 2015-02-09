@@ -1,5 +1,5 @@
 (function() {
-var size = 100,
+var size = 1,
 
   sw = size,
   sh = size,
@@ -10,8 +10,8 @@ var size = 100,
   radiusInner,
   smoothSize,
   randomHexes,
-  graphics,
-  scaler,
+  stage,
+  inner,
   hexagons,
   hexs,
 
@@ -19,29 +19,27 @@ var size = 100,
   batches, 
   currentBatch = 0;
 
-var graphics = dom.svg("svg", {width:sw, height:sh});
+var stage = dom.svg("svg", {width:sw, height:sh});
+var inner = dom.svg("g");
+stage.appendChild(inner);
 
 function reset() {
+  document.body.removeEventListener("click", reset);
+  con.log("click reset");
 
   dispatchEvent(new Event("render:start"));
 
-  size = 1000;//100 + Math.random() * 1000;
+  // size = 0.1 + Math.random();
 
-  radiusOuter = 5 + Math.random() * 25;
-  strokeSize = Math.random() * Math.random() * Math.random() * radiusOuter;
-  radiusInner = radiusOuter - strokeSize + 0.3;
-  smoothSize = 1 + Math.random() * 20;
+  radiusOuter = (5 + Math.random() * 25) / 1000;
+  strokeSize = (Math.random() * Math.random() * Math.random() * radiusOuter);
+  radiusInner = (radiusOuter - strokeSize + (strokeSize * 0.01));
+  smoothSize = (0.01 + Math.random() * 10);
 
+  while (inner.firstChild) inner.removeChild(inner.firstChild);
 
-  while (graphics.firstChild) graphics.removeChild(graphics.firstChild);
-
-  
-  
-  scaler = dom.svg("g");
-  graphics.appendChild(scaler);
-
-  var neighbourGroups = dom.svg("g");
-  graphics.appendChild(neighbourGroups);
+  // var neighbourGroups = dom.svg("g");
+  // stage.appendChild(neighbourGroups);
 
   // colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
   // colours.setPalette(["#ff2244", "#ff3322"]);
@@ -57,8 +55,8 @@ function reset() {
 
   var minHeight = radiusOuter * Math.sin(angle60); // this is edge to edge, not corner to corner.
 
-  var cols = Math.ceil(size / radiusOuter / 3) + 1;
-  var rows = Math.ceil(size / minHeight) + 1;
+  var cols = Math.ceil(1 / radiusOuter / 3) + 1;
+  var rows = Math.ceil(1 / minHeight) + 1;
   // cols -= 3;
   // rows -= 6;
   hexagons = cols * rows;
@@ -79,7 +77,7 @@ function reset() {
 
     var group = dom.svg("g");
     group.setAttribute("transform", "translate(" + x + "," + y + ")");
-    scaler.appendChild(group);
+    inner.appendChild(group);
 
 
     var hex = dom.svg("path", {
@@ -238,11 +236,12 @@ function batch() {
     hexs[index].colour = colour;
 
   }
-  con.log("doing batch", currentBatch, batches);
+  // con.log("doing batch", currentBatch, batches);
 
   currentBatch++;
   if (currentBatch == batches) {
     dispatchEvent(new Event("render:complete"));
+    document.body.addEventListener("click", reset);
     resize();
   } else {
     dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
@@ -261,9 +260,11 @@ function render() {
 }
 
 function resize(sw,sh) {
-  con.log("resize!");
-  if (!sw || !sh) return;
-  graphics.setSize(sw,sh);
+  con.log("resize! hex");
+  // if (!sw || !sh) return;
+  sw = window.innerWidth;
+  sh = window.innerHeight; 
+  stage.setSize(sw,sh);
 
   var largestDimension = sw > sh ? sw : sh;
   var scale = largestDimension / size;
@@ -274,16 +275,17 @@ function resize(sw,sh) {
     y = -((scale * size) - sh) / 2;
   }
 
-  scaler.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
+  inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
 
 }
 window.addEventListener("resize", resize);
 
-document.body.addEventListener("click", reset);
+
 
 
 var hexagon_tile = {
-  stage: graphics,
+  stage: stage,
+  inner: inner,
   resize: resize,
   init: reset,
   kill: function() {}
