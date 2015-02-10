@@ -28,7 +28,7 @@ function init() {
 
       type: ~~(Math.random() * 2),
       bmp: null,
-      size: 0, 
+      size: 0,
       generate: function() {
         this.size = 6 + ~~(Math.random() * 20);
         var bmp = dom.canvas(this.size, this.size);
@@ -64,7 +64,7 @@ function init() {
             ctx.drawCircle(this.size / 2, this.size / 2, radius - 1);
             for(var i = 0; i < sides; i++) {
               var angle = i / sides * Math.PI * 2 ;
-              var xp = this.size / 2 + this.size / 2 * 0.8 * Math.cos(angle), 
+              var xp = this.size / 2 + this.size / 2 * 0.8 * Math.cos(angle),
                 yp = this.size / 2 + this.size / 2 * 0.8 * Math.sin(angle);
               if (i == 0){
                 ctx.moveTo(xp, yp);
@@ -76,7 +76,7 @@ function init() {
             ctx.stroke();
 
             break;
-          case 2 : 
+          case 2 :
             break;
         }
         this.bmp = bmp.canvas;
@@ -162,10 +162,11 @@ function init() {
 }
 
 var groups = [];
-var lines = {};
+var lines = [];
 var t = 0;
 function uniqueId(j, k) {
-  return j + ":" + k;
+  // return j + ":" + k;
+  return ((j*(j-1))/2) + k;
 }
 
 for (var j = 0; j < dots; j++) {
@@ -184,13 +185,13 @@ for (var j = 0; j < dots; j++) {
   }
   // con.log("=============");
 }
-con.log(lines);
+// con.log(lines);
 
 function render() {
   ctx.fillStyle = "rgba(200,200,180,0.9)"; //bgColour;
   ctx.fillRect(0, 0, sw, sh);
 
-  
+
 
   for (var j = 0; j < dots; j++) {
 
@@ -328,9 +329,9 @@ function render() {
     // drawLine(lineM[0], lineM[1]);
 
   for (var m in lines) {
-    var line = lines[m], 
+    var line = lines[m],
       points = line.points,
-      a = arrDots[ points[0] ], 
+      a = arrDots[ points[0] ],
       b = arrDots[ points[1] ];
     // if (line.val) {
     drawLine(a, b, line.val);
@@ -382,13 +383,13 @@ function debugCircle(dot) {
 
 function intersection(p0, p1, p2, p3) {
 
-    var p0_x = p0.x, 
-    p0_y = p0.y, 
-    p1_x = p1.x, 
-    p1_y = p1.y, 
-    p2_x = p2.x, 
-    p2_y = p2.y, 
-    p3_x = p3.x, 
+    var p0_x = p0.x,
+    p0_y = p0.y,
+    p1_x = p1.x,
+    p1_y = p1.y,
+    p2_x = p2.x,
+    p2_y = p2.y,
+    p3_x = p3.x,
     p3_y = p3.y;
 
     if (p0_x == p2_x && p0_y == p2_y) return null; // if first point is same as third point
