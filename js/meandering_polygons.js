@@ -1,13 +1,15 @@
-// (function() {
+(function() {
 var sw = 1000, sh = 1000;
 var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
-var dots = 5;
+var dots = 14;
 var arrDots = [];
 
 var bmp = dom.canvas(sw, sh);
 // bmp.canvas.setSize(sw, sh);
 var ctx = bmp.ctx;
+
+var range = 0.2;
 
 function init() {
   var j = 0
@@ -15,6 +17,8 @@ function init() {
     arrDots[j] = {
       x: Math.random(),
       y: Math.random(),
+      fx: 0,
+      fy: 0,
       vx: Math.random(),
       vy: Math.random(),
       dir: Math.random() * Math.PI * 2,
@@ -23,11 +27,11 @@ function init() {
       connected: [],
       move: function() {
 
-        return;
+        // return;
         this.dirFloat += (Math.random() > 0.5 ? -1 : 1) * 0.1;
         this.dir -= (this.dir - this.dirFloat) * 0.01;
-        this.vx = Math.sin(this.dir) * 0.001;
-        this.vy = Math.cos(this.dir) * 0.001;
+        this.vx = Math.sin(this.dir) * 0.001 + this.fx;
+        this.vy = Math.cos(this.dir) * 0.001 + this.fy;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -35,7 +39,14 @@ function init() {
         if (this.x > 1) this.x = 0;
         if (this.y < 0) this.y = 1;
         if (this.y > 1) this.y = 0;
+      },
+      force: function(opposite, distance) {
+
+        return;
+        this.fx = (this.x - opposite.x) / distance * 0.1 * (range - distance);
+        this.fy = (this.y - opposite.y) / distance * 0.1 * (range - distance);
       }
+
     }
     j++;
   }
@@ -89,8 +100,11 @@ function init() {
 var groups = [];
 
 function render() {
-  ctx.fillStyle = "rgba(0,0,0,0.04)"; bgColour;
+  ctx.fillStyle = "rgba(0,0,0,1.04)"; //bgColour;
   ctx.fillRect(0, 0, sw, sh);
+
+  var lines = [];
+
   for (var j = 0; j < dots; j++) {
 
     var dot = arrDots[ j ];
@@ -105,8 +119,12 @@ function render() {
         dy = dot.y - other.y,
         d = Math.sqrt(dx * dx + dy * dy);
 
-      if (d < 0.2) {
+      if (d < range) {
 
+        dot.force(other, d);
+        other.force(dot, d);
+
+        /*
         var groupIndex = -1, jFound = false, kFound = false;
 
         var bothFound = false;
@@ -162,22 +180,23 @@ function render() {
         //   other.connected.push(j);
         //   dot.connected.push(k);
         // }
+        */
 
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "#555";// dot.colour;
-        ctx.lineCap = 'round';
-        ctx.moveTo(dot.x * sw, dot.y * sh);
-        ctx.lineTo(other.x * sw, other.y * sh);
-        ctx.stroke();
+        // drawLine(dot, other);
+        lines.push([dot,other])
       }
 
     }
   }
 
+/*
   for (var g = 0; g < groups.length; g++) {
     // con.log(g, groups[g].length)
     ctx.beginPath();
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#f0f";// dot.colour;
+    ctx.lineCap = 'round';
     ctx.fillStyle = "rgba(255,0,0,0.6)";
     for (var c = 0; c < groups[g].length; c++) {
       var dot = arrDots[ groups[g][c] ];
@@ -188,23 +207,110 @@ function render() {
         ctx.lineTo(xp, yp);
       }
     }
+    ctx.closePath();
     ctx.fill();
-
+    ctx.stroke();
   }
+*/
 
-
-
+  for (var m = 0, ml = lines.length; m < ml; m++) {
+    var lineM = lines[m];
+    for (var k = 0; k < m; k++) {
+      var lineK = lines[k];
+      var intersects = intersection(lineM[0], lineM[1], lineK[0], lineK[1]);
+      if (intersects) {
+        drawNode(intersects);
+      }
+    }
+    drawLine(lineM[0], lineM[1]);
+  }
 
   requestAnimationFrame(render);
 }
 
+
+
+function drawLine(a, b) {
+  ctx.beginPath();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#f00";//dot.colour;
+  ctx.lineCap = 'round';
+  ctx.moveTo(a.x * sw, a.y * sh);
+  ctx.lineTo(b.x * sw, b.y * sh);
+  ctx.stroke();
+}
+
+
+
+
+
+
 function drawNode(dot) {
+  var radius = sw * range / 2;
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(255,0,0,0.3)"; // dot.colour;
+  ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
+  ctx.fill();
   var radius = 5;
   ctx.beginPath();
-  ctx.fillStyle = dot.colour;
+  ctx.fillStyle = "#f00" // dot.colour;
   ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
   ctx.fill();
 }
+
+
+
+
+
+
+
+function intersection(p0, p1, p2, p3) {
+
+    var p0_x = p0.x, 
+    p0_y = p0.y, 
+    p1_x = p1.x, 
+    p1_y = p1.y, 
+    p2_x = p2.x, 
+    p2_y = p2.y, 
+    p3_x = p3.x, 
+    p3_y = p3.y;
+
+    if (p0_x == p2_x && p0_y == p2_y) return null; // if first point is same as third point
+    if (p0_x == p3_x && p0_y == p3_y) return null; // if first point is same as fourth point
+    if (p1_x == p2_x && p1_y == p2_y) return null; // if second point is same as third point
+    if (p1_x == p3_x && p1_y == p3_y) return null; // if second point is same as fourth point
+
+
+    var s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+    var s, t;
+    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+        // Collision detected
+        return {
+          x: p0_x + (t * s1_x),
+          y: p0_y + (t * s1_y)
+        }
+    }
+
+    return null; // No collision
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 var resizeMode = "contain";
 
@@ -222,4 +328,4 @@ var meandering = {
 
 dispatchEvent(new CustomEvent("load:complete", {detail:meandering}));
 
-// })();
+})();
