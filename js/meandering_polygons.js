@@ -2,7 +2,7 @@
 var sw = 1000, sh = 1000;
 var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
-var dots = 14;
+var dots = 24;
 var arrDots = [];
 
 var bmp = dom.canvas(sw, sh);
@@ -25,6 +25,70 @@ function init() {
       dirFloat: 0,
       colour: colours.getRandomColour(),
       connected: [],
+
+      type: ~~(Math.random() * 2),
+      bmp: null,
+      size: 0, 
+      generate: function() {
+        this.size = 6 + ~~(Math.random() * 20);
+        var bmp = dom.canvas(this.size, this.size);
+        document.body.appendChild(bmp.canvas);
+        var ctx = bmp.ctx;
+        switch(this.type) {
+          case 0 : // double circle
+            // ctx.fillStyle = "#f00";
+            // ctx.fillRect(0, 0, this.size, this.size);
+
+            var lineWidth = Math.random() * 3;
+            var radius = this.size / 2 - lineWidth;
+
+            ctx.beginPath();
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = "#fff";
+            ctx.drawCircle(this.size / 2, this.size / 2, radius);
+            ctx.stroke();
+
+            radius *= Math.random();
+
+            ctx.beginPath();
+            ctx.fillStyle = "#fff";
+            ctx.drawCircle(this.size / 2, this.size / 2, radius);
+            ctx.fill();
+
+            break;
+          case 1 : // ngon
+            var sides = 3 + ~~(Math.random() * 7);
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#fff";
+            ctx.drawCircle(this.size / 2, this.size / 2, radius - 1);
+            for(var i = 0; i < sides; i++) {
+              var angle = i / sides * Math.PI * 2 ;
+              var xp = this.size / 2 + this.size / 2 * 0.8 * Math.cos(angle), 
+                yp = this.size / 2 + this.size / 2 * 0.8 * Math.sin(angle);
+              if (i == 0){
+                ctx.moveTo(xp, yp);
+              } else {
+                ctx.lineTo(xp, yp);
+              }
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            break;
+          case 2 : 
+            break;
+        }
+        this.bmp = bmp.canvas;
+      },
+      draw: function() {
+        if (this.bmp == null) {
+          this.generate();
+        }
+        // con.log('draw', this.bmp);
+        ctx.drawImage(this.bmp, this.x * sw - this.size / 2, this.y * sh - this.size / 2);
+      },
+
       move: function() {
 
         // return;
@@ -35,10 +99,10 @@ function init() {
         this.x += this.vx;
         this.y += this.vy;
 
-        if (this.x < 0) this.x = 1;
-        if (this.x > 1) this.x = 0;
-        if (this.y < 0) this.y = 1;
-        if (this.y > 1) this.y = 0;
+        if (this.x < -0.1) this.x = 1.1;
+        if (this.x > 1.1) this.x = -0.1;
+        if (this.y < -0.1) this.y = 1.1;
+        if (this.y > 1.1) this.y = -0.1;
       },
       force: function(opposite, distance) {
 
@@ -98,28 +162,61 @@ function init() {
 }
 
 var groups = [];
+var lines = {};
+var t = 0;
+function uniqueId(j, k) {
+  return j + ":" + k;
+}
+
+for (var j = 0; j < dots; j++) {
+  // lines[j] = [];
+  for (var k = 0;k < j; k++) {
+    // lines[j][k] = {};
+    // var uniqueId = j + k ;
+
+    lines[uniqueId(j,k)] = {
+      points: [j,k],
+      val:0
+    };
+
+    // con.log(k, j, t);
+    t++
+  }
+  // con.log("=============");
+}
+con.log(lines);
 
 function render() {
-  ctx.fillStyle = "rgba(0,0,0,1.04)"; //bgColour;
+  ctx.fillStyle = "rgba(200,200,180,0.9)"; //bgColour;
   ctx.fillRect(0, 0, sw, sh);
 
-  var lines = [];
+  
 
   for (var j = 0; j < dots; j++) {
 
     var dot = arrDots[ j ];
     dot.move();
-    drawNode(dot);
+    dot.draw();
 
     for (var k = 0;k < j; k++) {
       // con.log(j,k)
+
+      var lineId = uniqueId(j,k);
+
       var other = arrDots[ k ];
 
       var dx = dot.x - other.x,
         dy = dot.y - other.y,
         d = Math.sqrt(dx * dx + dy * dy);
 
-      if (d < range) {
+      var inRange = d < range;
+
+      // ignore off screen
+      if (other.x < 0 || other.x > 1 || other.y < 0 || other.y > 1) inRange = false;
+
+
+
+      if (inRange) {
 
         dot.force(other, d);
         other.force(dot, d);
@@ -183,8 +280,13 @@ function render() {
         */
 
         // drawLine(dot, other);
-        lines.push([dot,other])
+        // lines.push([dot,other])
+        lines[ lineId ].val -= (lines[ lineId ].val - 3) * 0.01;
+      } else {
+        // con.log("not in range");
+        lines[ lineId ].val *= 0.99;
       }
+
 
     }
   }
@@ -213,16 +315,26 @@ function render() {
   }
 */
 
-  for (var m = 0, ml = lines.length; m < ml; m++) {
-    var lineM = lines[m];
-    for (var k = 0; k < m; k++) {
-      var lineK = lines[k];
-      var intersects = intersection(lineM[0], lineM[1], lineK[0], lineK[1]);
-      if (intersects) {
-        drawNode(intersects);
-      }
-    }
-    drawLine(lineM[0], lineM[1]);
+  // for (var m = 0, ml = lines.length; m < ml; m++) {
+    // var lineM = lines[m];
+    // con.log(lines,m, lineM);
+    // for (var k = 0; k < m; k++) {
+    //   var lineK = lines[k];
+    //   var intersects = intersection(lineM[0], lineM[1], lineK[0], lineK[1]);
+    //   if (intersects) {
+    //     debugCircle(intersects);
+    //   }
+    // }
+    // drawLine(lineM[0], lineM[1]);
+
+  for (var m in lines) {
+    var line = lines[m], 
+      points = line.points,
+      a = arrDots[ points[0] ], 
+      b = arrDots[ points[1] ];
+    // if (line.val) {
+    drawLine(a, b, line.val);
+    // }
   }
 
   requestAnimationFrame(render);
@@ -230,14 +342,17 @@ function render() {
 
 
 
-function drawLine(a, b) {
-  ctx.beginPath();
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "#f00";//dot.colour;
-  ctx.lineCap = 'round';
-  ctx.moveTo(a.x * sw, a.y * sh);
-  ctx.lineTo(b.x * sw, b.y * sh);
-  ctx.stroke();
+function drawLine(a, b, lineWidth) {
+  if (lineWidth > 0) {
+  // con.log(lineWidth);
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = "#fff";//dot.colour;
+    ctx.lineCap = 'round';
+    ctx.moveTo(a.x * sw, a.y * sh);
+    ctx.lineTo(b.x * sw, b.y * sh);
+    ctx.stroke();
+  }
 }
 
 
@@ -245,12 +360,13 @@ function drawLine(a, b) {
 
 
 
-function drawNode(dot) {
+function debugCircle(dot) {
+  return;
   var radius = sw * range / 2;
-  ctx.beginPath();
-  ctx.fillStyle = "rgba(255,0,0,0.3)"; // dot.colour;
-  ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
-  ctx.fill();
+  // ctx.beginPath();
+  // ctx.fillStyle = "rgba(255,0,0,0.3)"; // dot.colour;
+  // ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
+  // ctx.fill();
   var radius = 5;
   ctx.beginPath();
   ctx.fillStyle = "#f00" // dot.colour;
