@@ -28,6 +28,7 @@ getRandom = Math.random;
     ["isometric_cubes"],
     ["fool", "css/fool"],
     ["mining_branches"],
+    ["meandering_polygons"],
     ["oscillate_curtain"],
     ["pattern_check", "css/pattern_check"],
     ["pattern_circles"],
@@ -150,11 +151,11 @@ getRandom = Math.random;
   function resize() {
     // con.log("resize!");
     var sw = window.innerWidth, sh = window.innerHeight;
-    
-    // currentExperiment.resize(sw,sh);
+
+    currentExperiment.resize(sw,sh);
 
 
-    currentExperiment.stage.setSize(sw,sh);
+    // currentExperiment.stage.setSize(sw,sh);
 
     // var largestDimension = sw > sh ? sw : sh;
     // var scale = largestDimension / size;
