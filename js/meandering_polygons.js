@@ -109,13 +109,17 @@ function render() {
 
         var groupIndex = -1, jFound = false, kFound = false;
 
-        for (var g = 0; g < groups.length && jFound == false && kFound == false; g++) {
+        var bothFound = false;
+
+        for (var g = 0; g < groups.length; g++) {
 
           jFound = groups[g].indexOf(j) > -1,
           kFound = groups[g].indexOf(k) > -1;
 
           if (jFound && kFound) {
             groupIndex = g;
+            bothFound = true
+            bothIndex = g;
           } else if (jFound) {
             groupIndex = g;
           } else if (kFound) {
@@ -129,10 +133,25 @@ function render() {
 
         } else if (jFound) {
           con.log("groupIndex jFound", groups[groupIndex])
-          groups[groupIndex].push(k);
+          if (groups[groupIndex].length >= 3) {
+            con.log("creating new group!", groupIndex)
+            groupIndex++;
+            groups[groupIndex] = [j,k];
+          } else {
+            groups[groupIndex].push(k);
+          }
+
         } else if (kFound) {
           con.log("groupIndex kFound", groups[groupIndex])
-          groups[groupIndex].push(j);
+
+          if (groups[groupIndex].length >= 3) {
+            con.log("creating new group!")
+            groupIndex++;
+            groups[groupIndex] = [j,k];
+          } else {
+            groups[groupIndex].push(j);
+          }
+
         } else {
           groups[groups.length] = [j,k];
         }
