@@ -40,10 +40,11 @@ function init() {
         var bmp = dom.canvas(this.size, this.size);
         // document.body.appendChild(bmp.canvas);
         var ctx = bmp.ctx;
+        // ctx.fillStyle = "#f00";
+        // ctx.fillRect(0, 0, this.size, this.size);
+
         switch(this.type) {
           case 0 : // double circle
-            // ctx.fillStyle = "#f00";
-            // ctx.fillRect(0, 0, this.size, this.size);
 
             var lineWidth = Math.random() * 2;
             var radius = this.size / 2 - lineWidth;
@@ -91,9 +92,11 @@ function init() {
         if (this.bmp == null) {
           this.generate();
         }
-        // con.log('draw', this.bmp);
-        this.bmp.ctx.rotate(this.rotation);
-        ctx.drawImage(this.bmp.canvas, this.x * sw - this.size / 2, this.y * sh - this.size / 2);
+        ctx.save();
+        ctx.translate(this.x * sw, this.y * sh);
+        ctx.rotate(this.rotation);
+        ctx.drawImage(this.bmp.canvas, -this.size / 2, - this.size / 2);
+        ctx.restore();
       },
 
       attraction: -0.00001,
@@ -103,7 +106,7 @@ function init() {
 
       move: function() {
 
-        this.rotationFloat += (Math.random() > 0.5 ? -1 : 1) * 0.1;
+        this.rotationFloat += (Math.random() > 0.5 ? -1 : 1) * 0.5;
         this.rotation -= (this.rotation - this.rotationFloat) * 0.01;
 
         this.dirFloat += (Math.random() > 0.5 ? -1 : 1) * 0.1;
@@ -189,7 +192,8 @@ for (var j = 0; j < dots; j++) {
     lines[uniqueId(j,k)] = {
       points: [j,k],
       lineWidth: 0,
-      colour: white()
+      colour: white(),
+      dashes: ~~(Math.random() * 5)
     };
   }
 }
@@ -275,14 +279,16 @@ function render() {
 function drawLine(a, b, line) {
   if (line.lineWidth > 0) {
   // con.log(lineWidth);
+    ctx.save();
     ctx.beginPath();
     ctx.lineWidth = line.lineWidth;
     ctx.strokeStyle = line.colour;
-    ctx.setLineDash([5]);
+    if (line.dashes > 2) ctx.setLineDash([line.dashes]);
     ctx.lineCap = 'round';
     ctx.moveTo(a.x * sw, a.y * sh);
     ctx.lineTo(b.x * sw, b.y * sh);
     ctx.stroke();
+    ctx.restore();
   }
 }
 
