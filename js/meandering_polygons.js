@@ -1,6 +1,5 @@
 (function() {
 var sw = 1000, sh = 1000;
-var fgColour = colours.getRandomColour();
 var bgColour = colours.getNextColour();
 var dots = 24;
 var arrDots = [];
@@ -11,6 +10,14 @@ var ctx = bmp.ctx;
 
 var range = 0.2;
 
+function white() {
+  var b = ~~(230 + Math.random() * 25),
+    a = Math.round((0.7 + Math.random() * 0.3) * 100) / 100,
+    w = "rgba("+b+","+b+","+b+","+a+")";
+    // con.log(w);
+  return w;
+}
+
 function init() {
   var j = 0
   while(j < dots) {
@@ -19,40 +26,38 @@ function init() {
       y: Math.random(),
       fx: 0,
       fy: 0,
-      vx: Math.random(),
-      vy: Math.random(),
+      vx: Math.random() * 0.001,
+      vy: Math.random() * 0.001,
       dir: Math.random() * Math.PI * 2,
       dirFloat: 0,
-      colour: colours.getRandomColour(),
-      connected: [],
-
+      rotation: 0,
+      rotationFloat: 0,
       type: ~~(Math.random() * 2),
       bmp: null,
       size: 0,
       generate: function() {
-
         this.size = 6 + ~~(Math.random() * 20);
         var bmp = dom.canvas(this.size, this.size);
-        document.body.appendChild(bmp.canvas);
+        // document.body.appendChild(bmp.canvas);
         var ctx = bmp.ctx;
         switch(this.type) {
           case 0 : // double circle
             // ctx.fillStyle = "#f00";
             // ctx.fillRect(0, 0, this.size, this.size);
 
-            var lineWidth = Math.random() * 3;
+            var lineWidth = Math.random() * 2;
             var radius = this.size / 2 - lineWidth;
 
             ctx.beginPath();
             ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = this.colour;
+            ctx.strokeStyle = white()
             ctx.drawCircle(this.size / 2, this.size / 2, radius);
             ctx.stroke();
 
             radius *= Math.random();
 
             ctx.beginPath();
-            ctx.fillStyle = this.colour;//"#fff";
+            ctx.fillStyle =  white();
             ctx.drawCircle(this.size / 2, this.size / 2, radius);
             ctx.fill();
 
@@ -61,7 +66,7 @@ function init() {
             var sides = 3 + ~~(Math.random() * 7);
             ctx.beginPath();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = this.colour;//"#fff";
+            ctx.strokeStyle = white();
             ctx.drawCircle(this.size / 2, this.size / 2, radius - 1);
             for(var i = 0; i < sides; i++) {
               var angle = i / sides * Math.PI * 2 ;
@@ -80,23 +85,35 @@ function init() {
           case 2 :
             break;
         }
-        this.bmp = bmp.canvas;
+        this.bmp = bmp;
       },
       draw: function() {
         if (this.bmp == null) {
           this.generate();
         }
         // con.log('draw', this.bmp);
-        ctx.drawImage(this.bmp, this.x * sw - this.size / 2, this.y * sh - this.size / 2);
+        this.bmp.ctx.rotate(this.rotation);
+        ctx.drawImage(this.bmp.canvas, this.x * sw - this.size / 2, this.y * sh - this.size / 2);
       },
+
+      attraction: -0.00001,
+      speed: 0.0001,
+      friction: 0.9,
+
 
       move: function() {
 
-        // return;
+        this.rotationFloat += (Math.random() > 0.5 ? -1 : 1) * 0.1;
+        this.rotation -= (this.rotation - this.rotationFloat) * 0.01;
+
         this.dirFloat += (Math.random() > 0.5 ? -1 : 1) * 0.1;
         this.dir -= (this.dir - this.dirFloat) * 0.01;
-        this.vx = Math.sin(this.dir) * 0.001 + this.fx;
-        this.vy = Math.cos(this.dir) * 0.001 + this.fy;
+
+        this.vx += Math.sin(this.dir) * this.speed + this.fx;
+        this.vy += Math.cos(this.dir) * this.speed + this.fy;
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+
         this.x += this.vx;
         this.y += this.vy;
 
@@ -105,11 +122,10 @@ function init() {
         if (this.y < -0.2) this.y = 1.2;
         if (this.y > 1.2) this.y = -0.2;
       },
-      force: function(opposite, distance) {
-
-        return;
-        this.fx = (this.x - opposite.x) / distance * 0.1 * (range - distance);
-        this.fy = (this.y - opposite.y) / distance * 0.1 * (range - distance);
+      force: function(opposite, distance, deltaX, deltaY) {
+        // return;
+        this.fx = deltaX / distance * this.attraction; // * (range - distance);
+        this.fy = deltaY / distance * this.attraction; // * (range - distance);
       }
 
     }
@@ -135,6 +151,7 @@ function init() {
           // ctx.strokeStyle = "#f0f";// dot.colour;
           // ctx.lineCap = 'round';
           // ctx.moveTo(mx * sw, my * sh);
+
           // ctx.lineTo(dot.x * sw, dot.y * sh);
           // ctx.stroke();
           ctx.beginPath();
@@ -162,7 +179,6 @@ function init() {
 
 }
 
-var groups = [];
 var lines = [];
 function uniqueId(j, k) {
   return ((j*(j-1))/2) + k;
@@ -172,16 +188,15 @@ for (var j = 0; j < dots; j++) {
   for (var k = 0;k < j; k++) {
     lines[uniqueId(j,k)] = {
       points: [j,k],
-      lineWidth:0,
-      colour: colours.getRandomColour()
+      lineWidth: 0,
+      colour: white()
     };
   }
 }
 
 
 function render() {
-  // ctx.fillStyle = "rgba(200,200,180,0.2)";
-  ctx.fillStyle = bgColour;
+  ctx.fillStyle = "rgba(180,180,200,1)";
   ctx.fillRect(0, 0, sw, sh);
 
   for (var j = 0; j < dots; j++) {
@@ -207,8 +222,8 @@ function render() {
 
       if (inRange) {
 
-        dot.force(other, d);
-        other.force(dot, d);
+        dot.force(other, d, dx, dy);
+        other.force(dot, d, dx, dy);
 
         lines[ lineId ].lineWidth -= (lines[ lineId ].lineWidth - 3) * 0.01;
 
@@ -263,6 +278,7 @@ function drawLine(a, b, line) {
     ctx.beginPath();
     ctx.lineWidth = line.lineWidth;
     ctx.strokeStyle = line.colour;
+    ctx.setLineDash([5]);
     ctx.lineCap = 'round';
     ctx.moveTo(a.x * sw, a.y * sh);
     ctx.lineTo(b.x * sw, b.y * sh);
@@ -277,9 +293,9 @@ function debugCircle(dot, colour) {
   // ctx.fillStyle = "rgba(255,0,0,0.3)"; // dot.colour;
   // ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
   // ctx.fill();
-  var radius = 5;
+  var radius = 3;
   ctx.beginPath();
-  ctx.fillStyle = colour ? colour : "#f0f";
+  ctx.fillStyle = colour;
   ctx.drawCircle(dot.x * sw, dot.y * sh, radius);
   ctx.fill();
 }
