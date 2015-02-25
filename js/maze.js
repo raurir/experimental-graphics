@@ -1,5 +1,5 @@
 (function() {
-  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, maze, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
+  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
 
   con = console;
 
@@ -10,6 +10,12 @@
   can = null;
 
   time = 0;
+
+  ran = Math.random();
+
+  Math.random = function() {
+    return ran;
+  };
 
   random = {
     randint: function(min, max) {
@@ -231,7 +237,7 @@
   draw = function() {
     var rgb, _k, _l, _m, _n, _results;
     time += 0.5;
-    for (d = _k = 0; _k < 100; d = ++_k) {
+    for (d = _k = 0; _k < 1000; d = ++_k) {
       maze();
     }
     for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {

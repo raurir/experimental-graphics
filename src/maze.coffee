@@ -7,6 +7,10 @@ ctx = null
 can = null
 time = 0 # Math.random() * 1e10
 
+ran = Math.random()
+
+Math.random = () -> return ran # Math.E / Math.PI
+
 random = {
   randint: (min,max) -> return parseInt(min + Math.random() * (max - min))
   shuffle: (array) -> 
@@ -218,7 +222,7 @@ draw = () ->
   # can.width = can.width
   time += 0.5
 
-  for d in [0...100]
+  for d in [0...1000]
     maze()
 
   #print the maze
