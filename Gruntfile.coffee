@@ -41,7 +41,7 @@ grunt.initConfig(
         {
           expand: true
           cwd: 'jade/'
-          src: ["**/*.jade"] # , "!**/_**" 
+          src: ["**/*.jade"] # , "!**/_**"
           dest: 'html/'
           ext: '.html'
         }
@@ -63,14 +63,4 @@ grunt.initConfig(
         expand: true
 )
 
-
-
-# grunt.registerTask("compile", "", () ->
-#   # (true)
-#   con.log('compile ok')
-# )
-
-# grunt.registerTask("default", "", () ->
-#   # (true)
-#   con.log('ok')
-# )
+grunt.registerTask('default', ['watch']);
