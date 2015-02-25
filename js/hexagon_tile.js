@@ -43,8 +43,10 @@ function reset() {
 
   // colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
   // colours.setPalette(["#ff2244", "#ff3322"]);
+  // colours.setPalette(["#f3512f", "#faa584", "#575757", "#ffffff"]);
 
   document.body.setAttribute("style", "background-color:" + colours.getNextColour());
+  // document.body.setAttribute("style", "background-color:#ffffff;");
 
   var points = [];
   for(var i = 0; i < 6; i++) {

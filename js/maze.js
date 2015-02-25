@@ -1,17 +1,9 @@
 (function() {
-  var bits, branchrate, can, carve, centre, check, choice, con, ctx, d, draw, e, field, frontier, gap, harden, init, oscs, pos, random, row, s, seeds, size, time, x, xchoice, xwide, y, ychoice, yhigh, _i, _j, _k, _l, _m, _n;
+  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, maze, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
 
   con = console;
 
   d = document;
-
-  bits = 200;
-
-  gap = 2;
-
-  size = bits * gap;
-
-  centre = size / 2;
 
   ctx = null;
 
@@ -19,23 +11,26 @@
 
   time = 0;
 
-  oscs = 4;
-
-  seeds = [];
-
   random = {
     randint: function(min, max) {
-      return ~~(min + (max - min));
+      return parseInt(min + Math.random() * (max - min));
     },
-    shuffle: function(arr) {
-      return arr;
-    },
-    random: Math.random
+    shuffle: function(array) {
+      var i, m, t;
+      m = array.length;
+      while (m) {
+        i = Math.floor(Math.random() * m--);
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+      }
+      return array;
+    }
   };
 
-  xwide = 10;
+  xwide = 140;
 
-  yhigh = 10;
+  yhigh = 140;
 
   field = [];
 
@@ -47,12 +42,10 @@
     field.push(row);
   }
 
-  con.log(field);
-
   frontier = [];
 
   carve = function(y, x) {
-    var extra;
+    var extra, i, _k, _len, _results;
     extra = [];
     field[y][x] = '.';
     if (x > 0) {
@@ -80,7 +73,12 @@
       }
     }
     extra = random.shuffle(extra);
-    return frontier.push(extra);
+    _results = [];
+    for (_k = 0, _len = extra.length; _k < _len; _k++) {
+      i = extra[_k];
+      _results.push(frontier.push(i));
+    }
+    return _results;
   };
 
   harden = function(y, x) {
@@ -92,7 +90,6 @@
     if (nodiagonals == null) {
       nodiagonals = true;
     }
-    con.log("check", y, x);
 
     /*
     Test the cell at y,x: can this cell become a space?
@@ -180,7 +177,7 @@
       }
       return false;
     } else {
-      if (edgestate.indexOf(1) || edgestate.indexOf(2) || edgestate.indexOf(4) || edgestate.indexOf(5)) {
+      if ([1, 2, 4, 8].indexOf(edgestate) !== -1) {
         return true;
       }
       return false;
@@ -191,46 +188,88 @@
 
   ychoice = random.randint(0, yhigh - 1);
 
-  carve(ychoice, xchoice);
+  console.log(xchoice, ychoice);
 
-  branchrate = 0;
+  carve(ychoice, xchoice);
 
   e = Math.E;
 
-  while (frontier.length) {
-    con.log(frontier);
-    pos = random.random();
-    pos = pos * (e - branchrate);
-    choice = frontier[parseInt(pos * frontier.length)];
-    con.log("choice ...", choice);
-    if (check(choice)) {
-      carve(choice);
-    } else {
-      harden(choice);
-    }
-    frontier.remove(choice);
-  }
+  branchrate = 3;
 
-  for (y = _k = 0; 0 <= yhigh ? _k < yhigh : _k > yhigh; y = 0 <= yhigh ? ++_k : --_k) {
-    for (x = _l = 0; 0 <= xwide ? _l < xwide : _l > xwide; x = 0 <= xwide ? ++_l : --_l) {
-      if (field[y][x] === '?') {
-        field[y][x] = '#';
+  iterations = 0;
+
+  unit = 4;
+
+  init = function() {
+    can = d.createElement("canvas");
+    can.width = xwide * 10;
+    can.height = yhigh * 10;
+    d.body.appendChild(can);
+    return ctx = can.getContext("2d");
+  };
+
+  maze = function() {
+    var choice, index, pos;
+    if (frontier.length && iterations < 1e10) {
+      pos = Math.random();
+      pos = Math.pow(pos, Math.pow(e, -branchrate));
+      if (pos >= 1 || pos < 0) {
+        console.log(pos);
+      }
+      index = Math.floor(pos * frontier.length);
+      choice = frontier[index];
+      if (check(choice[0], choice[1])) {
+        carve(choice[0], choice[1]);
+      } else {
+        harden(choice[0], choice[1]);
+      }
+      frontier.splice(index, 1);
+    }
+    return iterations++;
+  };
+
+  draw = function() {
+    var rgb, _k, _l, _m, _n, _results;
+    time += 0.5;
+    for (d = _k = 0; _k < 100; d = ++_k) {
+      maze();
+    }
+    for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {
+      for (x = _m = 0; 0 <= xwide ? _m < xwide : _m > xwide; x = 0 <= xwide ? ++_m : --_m) {
+        if (field[y][x] === "#") {
+          rgb = 200;
+          ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
+          ctx.fillRect(x * unit, y * unit, unit, unit);
+        }
       }
     }
-  }
-
-  for (y = _m = 0; 0 <= yhigh ? _m < yhigh : _m > yhigh; y = 0 <= yhigh ? ++_m : --_m) {
-    s = '';
-    for (x = _n = 0; 0 <= xwide ? _n < xwide : _n > xwide; x = 0 <= xwide ? ++_n : --_n) {
-      s += field[y][x];
+    if (frontier.length) {
+      return requestAnimationFrame(draw);
+    } else {
+      console.log("done");
+      _results = [];
+      for (y = _n = 0; 0 <= yhigh ? _n < yhigh : _n > yhigh; y = 0 <= yhigh ? ++_n : --_n) {
+        _results.push((function() {
+          var _o, _results1;
+          _results1 = [];
+          for (x = _o = 0; 0 <= xwide ? _o < xwide : _o > xwide; x = 0 <= xwide ? ++_o : --_o) {
+            if (field[y][x] === '?') {
+              rgb = 255;
+              ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
+              _results1.push(ctx.fillRect(x * unit, y * unit, unit, unit));
+            } else {
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        })());
+      }
+      return _results;
     }
-    con.log(s);
-  }
-
-  init = function() {};
-
-  draw = function() {};
+  };
 
   init();
+
+  draw();
 
 }).call(this);
