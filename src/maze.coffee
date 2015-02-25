@@ -1,3 +1,5 @@
+# http://pcg.wikidot.com/pcg-algorithm:maze
+
 con = console
 d = document
 
