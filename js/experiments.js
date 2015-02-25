@@ -27,6 +27,7 @@ getRandom = Math.random;
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["fool", "css/fool"],
+    ["maze"],
     ["mining_branches"],
     ["meandering_polygons"],
     ["oscillate_curtain"],
