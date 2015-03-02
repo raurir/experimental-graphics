@@ -9,7 +9,7 @@ time = 0 # Math.random() * 1e10
 
 ran = Math.random()
 
-Math.random = () -> return ran # Math.E / Math.PI
+# Math.random = () -> return ran # Math.E / Math.PI
 
 random = {
   randint: (min,max) -> return parseInt(min + Math.random() * (max - min))
@@ -158,9 +158,16 @@ check = (y, x, nodiagonals = true) ->
 xchoice = random.randint(0, xwide-1)
 ychoice = random.randint(0, yhigh-1)
 
-console.log xchoice, ychoice
-
 carve(ychoice,xchoice)
+# for j in [0..20]
+#   for i in [0..400]
+#     r = 30 + i * 1 + (Math.random() - 0.5) * 2
+#     a = i / 7 + (Math.random() - 0.5) * 0.2
+#     x = Math.round(Math.sin(a) * r + xwide / 2)
+#     y = Math.round(Math.cos(a) * r + yhigh / 2)
+#     if y < yhigh and x < xwide and y >= 0 and x >= 0
+#       # carve(y,x)
+#       field[y][x] = "."
 
 #parameter branchrate:
 #zero is unbiased, positive will make branches more frequent, negative will cause long passages
@@ -173,7 +180,7 @@ carve(ychoice,xchoice)
 
 e = Math.E
 
-branchrate = 3
+branchrate = 0
 
 iterations = 0
 
@@ -191,8 +198,8 @@ iterations = 0
 unit = 4
 init = () ->
   can = d.createElement("canvas")
-  can.width = xwide * 10
-  can.height = yhigh * 10
+  can.width = xwide * unit
+  can.height = yhigh * unit
   d.body.appendChild(can)
 
   ctx = can.getContext("2d")
@@ -245,13 +252,13 @@ draw = () ->
   else
     console.log "done"
 
-    for y in [0...yhigh]
-      for x in [0...xwide]
-        if field[y][x] == '?'
-          # field[y][x] = '#'
-          rgb = 255 # i * 10
-          ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
-          ctx.fillRect(x * unit, y * unit, unit, unit)
+    # for y in [0...yhigh]
+    #   for x in [0...xwide]
+    #     if field[y][x] == '?'
+    #       # field[y][x] = '#'
+    #       rgb = 255 # i * 10
+    #       ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
+    #       ctx.fillRect(x * unit, y * unit, unit, unit)
 
 
 
