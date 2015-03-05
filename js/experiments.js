@@ -24,6 +24,7 @@ getRandom = Math.random;
 
   var experiments = [
     ["additive"],
+    ["bezier_flow"],
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["fool", "css/fool"],
