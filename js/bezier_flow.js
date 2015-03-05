@@ -1,196 +1,213 @@
 (function() {
-var sw = sh = size = 600;
+var sw = sh = size = 800;
 
 var bmp = dom.canvas(size,size);
 var ctx = bmp.ctx;
 
-var lines = 13, sections = 2, points = [];
+var lines = Math.round(10 + Math.random() * 50), 
+  sections = Math.round(2 + Math.random() * 3), 
+  radius = 0.2 + Math.random() * 0.2;
+  points = [], 
+  fuckers = [];
 
+function getPoint(d) {
+  return points[(sections + d) % sections];
+}
 
-function createPoint() {
+function createPoint(init) {
 
-  var cx = Math.random(),
-      cy = Math.random(),
-      a = Math.random() * Math.PI * 2;
+  var cx = init.cx || Math.random(),
+      cy = init.cy || Math.random(),
+      a = Math.random() * Math.PI * 2
+      gapScale = Math.random() / 3 * 5;
+
   var gaps = [];
   var total = 0;
   for (var i = 0; i < lines; i++) {
-    var gap = Math.random() * 0.05;
+    var gap = (0.1 + Math.random()) * gapScale / lines;
     gaps[i] = total;
     total += gap;
   }
 
-
-  var point = {
+  points.push({
+    index: init.index,
     cx: cx,
     cy: cy,
     a: a,
     total: total,
     gaps: gaps,
-    lines: []
-  };
+    angle: function() {
+      var prev = getPoint(this.index - 1);
+      var next = getPoint(this.index + 1);
+      var dx = next.cx - prev.cx;
+      var dy = next.cy - prev.cy;
+      this.a = -Math.atan(dy/dx) - (dx > 0 ? Math.PI : 0); 
 
-  for (var i = 0; i < lines; i++) {
-    var x = cx - Math.sin(a) * (total / 2 + gaps[i]),
-      y = cy - Math.cos(a) * (total / 2 + gaps[i]);
-    point.lines[i] = [x,y];
+      // var x = cx * size, y = cy * size;
+      // ctx.fillStyle = "red";
+      // ctx.fillRect(x - 2, y - 2, 4, 4);
+      // ctx.strokeStyle = "red";
+      // ctx.beginPath();
+      // ctx.moveTo(x,y);
+      // ctx.lineTo(x + 20 * Math.sin(this.a), y + 20 * Math.cos(this.a));
+      // ctx.stroke();
+
+      // ctx.strokeStyle = "yellow";
+      // ctx.beginPath();
+      // ctx.moveTo(this.cx * size, this.cy * size);
+      // ctx.lineTo(prev.cx * size, prev.cy * size);
+      // ctx.stroke();
+
+    },
+    move: function() {
+      // this.a += 0.01;
+      this.angle();
+    },
+    lines: function(i) {
+      return [
+        cx - Math.sin(this.a) * (-total / 2 + gaps[i]),
+        cy - Math.cos(this.a) * (-total / 2 + gaps[i])
+      ];
+    }
+  });
+
+}
+
+for (var l = 0; l < lines; l++) {
+  fuckers[l] = {
+    strokeStyle: colours.getRandomColour(),
+    lineWidth: 1 + Math.random() * 13,
   }
-
-  points.push(point);
-
 }
 
 for (var p = 0; p < sections; p++) {
-  createPoint();
+  var a = p / sections * Math.PI * 2, 
+    cx = 0.5 + Math.sin(a) * radius + (Math.random() - 0.5) * 0.1, 
+    cy = 0.5 + Math.cos(a) * radius + (Math.random() - 0.5) * 0.1;
+  createPoint({index: p, cx: cx, cy: cy});
+}
+for (var p = 0; p < sections; p++) {
+ points[p].angle();
 }
 
 
 
-ctx.lineWidth = 1;
+function render() {
+  
+  ctx.clearRect(0, 0, size, size);
 
-for (var i = 1; i < points.length; i++) {
-
-  var p1 = points[i-1];
-  var p2 = points[i];
-
-  var m1 = -Math.tan(p1.a);
-  var m2 = -Math.tan(p2.a);
-
-  con.log("m1", m1, p1.a)
-
-  for (var j = 0;j < lines;j++) {
-
-    var x1 = p1.lines[j][0], y1 = p1.lines[j][1],
-      x2 = p2.lines[j][0], y2 = p2.lines[j][1];
-
-    var c1 = y1 - m1 * x1;
-    var c2 = y2 - m2 * x2;
-
-    // var mx = x1 + (x2 - x1) / 2,
-    //    my = y1 + (y2 - y1) / 2;
+  for (var i = 0; i < points.length; i++) {
 
 
-    // point of screen left
-    var x1a = -0.1 * 1e6;
-    var y1a = m1 * x1a + c1;
-    // point of screen right
-    var x1b = 1.1 * 1e6;
-    var y1b = m1 * x1b + c1;
+    var p1 = getPoint(i - 1);
+    var p2 = getPoint(i);
 
-    // the other lines point of screen left
-    var x2a = -0.1 * 1e6;
-    var y2a = m2 * x2a + c2;
-    // the other lines point of screen left
-    var x2b = 1.1 * 1e6;
-    var y2b = m2 * x2b + c2;
+    p2.move();
 
+    var m1 = -Math.tan(p1.a);
+    var m2 = -Math.tan(p2.a);
 
-    ctx.strokeStyle = "green";
-    ctx.beginPath();
-    ctx.moveTo(x1a * size, y1a * size);
-    ctx.lineTo(x1b * size, y1b * size);
-    ctx.stroke();
+    for (var j = 0;j < lines;j++) {
 
-    ctx.beginPath();
-    ctx.moveTo(x2a * size, y2a * size);
-    ctx.lineTo(x2b * size, y2b * size);
-    ctx.stroke();
+      var p1l = p1.lines(j);
+      var p2l = p2.lines(j);
 
 
+      var x1 = p1l[0], y1 = p1l[1], x2 = p2l[0], y2 = p2l[1];
+
+      var c1 = y1 - m1 * x1;
+      var c2 = y2 - m2 * x2;
+
+      // var mx = x1 + (x2 - x1) / 2,
+      //    my = y1 + (y2 - y1) / 2;
 
 
-    var inter = intersection(
-     {x: x1a, y: y1a},
-     {x: x1b, y: y1b},
-     {x: x2a, y: y2a},
-     {x: x2b, y: y2b}
-    );
+      // point of screen left
+      var x1a = -0.1 * 1e2;
+      var y1a = m1 * x1a + c1;
+      // point of screen right
+      var x1b = 1.1 * 1e2;
+      var y1b = m1 * x1b + c1;
 
-    // console.log(inter);
+      // the other lines point of screen left
+      var x2a = -0.1 * 1e2;
+      var y2a = m2 * x2a + c2;
+      // the other lines point of screen left
+      var x2b = 1.1 * 1e2;
+      var y2b = m2 * x2b + c2;
 
-    var dot = 4;
-    ctx.fillStyle = "blue";
-    ctx.fillRect(x1 * size - dot, y1 * size - dot, dot * 2, dot * 2);
-    ctx.fillRect(x2 * size - dot, y2 * size - dot, dot * 2, dot * 2);
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(inter.x * size - dot, inter.y * size - dot, dot * 2, dot * 2);
 
-    ctx.strokeStyle = "red";
-    ctx.beginPath();
+      // ctx.strokeStyle = "green";
+      // ctx.beginPath();
+      // ctx.moveTo(x1a * size, y1a * size);
+      // ctx.lineTo(x1b * size, y1b * size);
+      // ctx.stroke();
 
-    // ctx.moveTo(x1 * size, y1 * size);
-    // ctx.lineTo(inter.x * size, inter.y * size);
-    // ctx.lineTo(x2 * size, y2 * size);
 
-    ctx.moveTo(x1 * size, y1 * size);
-    ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);
-
-    ctx.stroke();
-
-  }
-}
+      // ctx.strokeStyle = "cyan";
+      // ctx.beginPath();
+      // ctx.moveTo(x2a * size, y2a * size);
+      // ctx.lineTo(x2b * size, y2b * size);
+      // ctx.stroke();
 
 
 
 
+      var inter = geom.intersection(
+       {x: x1a, y: y1a},
+       {x: x1b, y: y1b},
+       {x: x2a, y: y2a},
+       {x: x2b, y: y2b}
+      );
 
+      // console.log(inter);
 
+      // var dot = 4;
+      // ctx.fillStyle = "blue";
+      // ctx.fillRect(x1 * size - dot, y1 * size - dot, dot * 2, dot * 2);
+      // ctx.fillRect(x2 * size - dot, y2 * size - dot, dot * 2, dot * 2);
+      // ctx.fillStyle = "yellow";
+      // ctx.fillRect(inter.x * size - dot, inter.y * size - dot, dot * 2, dot * 2);
 
+      // ctx.strokeStyle = "brown";
+      // ctx.beginPath();
+      // ctx.moveTo(x1 * size, y1 * size);
+      // ctx.lineTo(inter.x * size, inter.y * size);
+      // ctx.lineTo(x2 * size, y2 * size);
+      // ctx.stroke();
 
+      ctx.strokeStyle = fuckers[j].strokeStyle;
+      ctx.lineWidth = fuckers[j].lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(x1 * size, y1 * size);
+      ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);
+      ctx.stroke();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// http://www.softwareandfinance.com/Turbo_C/Intersection_Two_lines_EndPoints.html might be more suitable.
-
-function intersection(p0, p1, p2, p3) {
-
-    var p0_x = p0.x,
-    p0_y = p0.y,
-    p1_x = p1.x,
-    p1_y = p1.y,
-    p2_x = p2.x,
-    p2_y = p2.y,
-    p3_x = p3.x,
-    p3_y = p3.y;
-
-    if (p0_x == p2_x && p0_y == p2_y) return null; // if first point is same as third point
-    if (p0_x == p3_x && p0_y == p3_y) return null; // if first point is same as fourth point
-    if (p1_x == p2_x && p1_y == p2_y) return null; // if second point is same as third point
-    if (p1_x == p3_x && p1_y == p3_y) return null; // if second point is same as fourth point
-
-
-    var s1_x, s1_y, s2_x, s2_y;
-    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
-    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
-
-    var s, t;
-    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
-    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-        // Collision detected
-        return {
-          x: p0_x + (t * s1_x),
-          y: p0_y + (t * s1_y)
-        }
     }
+  }
 
-    return null; // No collision
+
+
+  // requestAnimationFrame(render);
 }
+
+render();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
