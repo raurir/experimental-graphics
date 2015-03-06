@@ -1,12 +1,12 @@
 (function() {
-var sw = sh = size = 1000;
+var sw = sh = size = 800;
 
 // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
 
 var bmp = dom.canvas(size,size);
 var ctx = bmp.ctx;
 
-var lines = 100,//Math.round(10 + Math.random() * 50),
+var lines = 40,//Math.round(10 + Math.random() * 50),
   sections = Math.round(2 + Math.random() * 3),
   radius = 0.4,// + Math.random() * 0.2;
   points = [],
@@ -84,8 +84,8 @@ for (var l = 0; l < lines; l++) {
 
 for (var p = 0; p < sections; p++) {
   var a = p / sections * Math.PI * 2,
-    cx = 0.5 + Math.sin(a) * radius + (Math.random() - 0.5) * 0.1,
-    cy = 0.5 + Math.cos(a) * radius + (Math.random() - 0.5) * 0.1;
+    cx = 0.5 + Math.sin(a) * radius,// + (Math.random() - 0.5) * 0.1,
+    cy = 0.5 + Math.cos(a) * radius// + (Math.random() - 0.5) * 0.1;
   createPoint({index: p, cx: cx, cy: cy});
 }
 for (var p = 0; p < sections; p++) {
@@ -96,9 +96,6 @@ ctx.clearRect(0, 0, size, size);
 ctx.lineCap = 'round';
 
 function render(j) {
-
-  // con.log("render", j)
-
 
   for (var j = 0;j < lines;j++) {
   // if (true) {
@@ -201,28 +198,6 @@ function render(j) {
 
 }
 
-render(0);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 var resizeMode = "contain";
@@ -235,7 +210,9 @@ var meandering = {
     bmp.canvas.width = sw;
     bmp.canvas.height = sh;
   },
-  init: function() {},
+  init: function() {
+    setTimeout(function() { render()}, 100);
+  },
   kill: function() {}
 }
 
