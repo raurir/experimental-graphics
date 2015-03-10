@@ -1,13 +1,15 @@
 (function() {
 var sw = sh = size = 800;
 
+// http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
+
 var bmp = dom.canvas(size,size);
 var ctx = bmp.ctx;
 
-var lines = Math.round(10 + Math.random() * 50), 
-  sections = Math.round(2 + Math.random() * 3), 
-  radius = 0.2 + Math.random() * 0.2;
-  points = [], 
+var lines = 40,//Math.round(10 + Math.random() * 50),
+  sections = Math.round(2 + Math.random() * 3),
+  radius = 0.4,// + Math.random() * 0.2;
+  points = [],
   fuckers = [];
 
 function getPoint(d) {
@@ -41,7 +43,7 @@ function createPoint(init) {
       var next = getPoint(this.index + 1);
       var dx = next.cx - prev.cx;
       var dy = next.cy - prev.cy;
-      this.a = -Math.atan(dy/dx) - (dx > 0 ? Math.PI : 0); 
+      this.a = -Math.atan(dy/dx) - (dx > 0 ? Math.PI : 0);
 
       // var x = cx * size, y = cy * size;
       // ctx.fillStyle = "red";
@@ -76,38 +78,38 @@ function createPoint(init) {
 for (var l = 0; l < lines; l++) {
   fuckers[l] = {
     strokeStyle: colours.getRandomColour(),
-    lineWidth: 1 + Math.random() * 13,
+    lineWidth: 1 // + Math.random() * 13
   }
 }
 
 for (var p = 0; p < sections; p++) {
-  var a = p / sections * Math.PI * 2, 
-    cx = 0.5 + Math.sin(a) * radius + (Math.random() - 0.5) * 0.1, 
-    cy = 0.5 + Math.cos(a) * radius + (Math.random() - 0.5) * 0.1;
+  var a = p / sections * Math.PI * 2,
+    cx = 0.5 + Math.sin(a) * radius,// + (Math.random() - 0.5) * 0.1,
+    cy = 0.5 + Math.cos(a) * radius// + (Math.random() - 0.5) * 0.1;
   createPoint({index: p, cx: cx, cy: cy});
 }
 for (var p = 0; p < sections; p++) {
  points[p].angle();
 }
 
+ctx.clearRect(0, 0, size, size);
+ctx.lineCap = 'round';
+
+function render(j) {
+
+  for (var j = 0;j < lines;j++) {
+  // if (true) {
+
+    for (var i = 0; i < points.length; i++) {
 
 
-function render() {
-  
-  ctx.clearRect(0, 0, size, size);
+      var p1 = getPoint(i - 1);
+      var p2 = getPoint(i);
 
-  for (var i = 0; i < points.length; i++) {
+      p2.move();
 
-
-    var p1 = getPoint(i - 1);
-    var p2 = getPoint(i);
-
-    p2.move();
-
-    var m1 = -Math.tan(p1.a);
-    var m2 = -Math.tan(p2.a);
-
-    for (var j = 0;j < lines;j++) {
+      var m1 = -Math.tan(p1.a);
+      var m2 = -Math.tan(p2.a);
 
       var p1l = p1.lines(j);
       var p2l = p2.lines(j);
@@ -153,7 +155,7 @@ function render() {
 
 
 
-      var inter = geom.intersection(
+      var inter = geom.intersectionAnywhere(
        {x: x1a, y: y1a},
        {x: x1b, y: y1b},
        {x: x2a, y: y2a},
@@ -177,7 +179,7 @@ function render() {
       // ctx.stroke();
 
       ctx.strokeStyle = fuckers[j].strokeStyle;
-      ctx.lineWidth = fuckers[j].lineWidth;
+      ctx.lineWidth = fuckers[j].lineWidth * j * 0.1;
       ctx.beginPath();
       ctx.moveTo(x1 * size, y1 * size);
       ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);
@@ -189,29 +191,12 @@ function render() {
 
 
   // requestAnimationFrame(render);
+  // j++;
+  // if ( j < lines) {
+  //   setTimeout(function() { render(j)}, 100);
+  // }
+
 }
-
-render();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -220,12 +205,14 @@ var resizeMode = "contain";
 var meandering = {
   stage: bmp.canvas,
   resize: function(w,h) {
-    // sw = w;
-    // sh = h;
-    // bmp.canvas.width = sw;
-    // bmp.canvas.height = sh;
+    sw = w;
+    sh = h;
+    bmp.canvas.width = sw;
+    bmp.canvas.height = sh;
   },
-  init: function() {},
+  init: function() {
+    setTimeout(function() { render()}, 100);
+  },
   kill: function() {}
 }
 

@@ -257,7 +257,7 @@ function render() {
           var pointsK = lineK.points,
             c = arrDots[ pointsK[0] ],
             d = arrDots[ pointsK[1] ];
-          var intersects = geom.intersection(a, b, c, d);
+          var intersects = geom.intersectionBetweenPoints(a, b, c, d);
           if (intersects) {
             debugCircle(intersects, lineM.colour);
           }
