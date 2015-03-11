@@ -4,7 +4,7 @@ con = console
 d = document
 
 ctx = null
-can = null
+can = d.createElement("canvas")
 time = 0 # Math.random() * 1e10
 
 ran = Math.random()
@@ -197,15 +197,14 @@ iterations = 0
 
 unit = 4
 init = () ->
-  can = d.createElement("canvas")
   can.width = xwide * unit
   can.height = yhigh * unit
-  d.body.appendChild(can)
+  # d.body.appendChild(can)
 
   ctx = can.getContext("2d")
+  draw()
 
-
-maze = () ->
+iterativeDraw = () ->
   if frontier.length and iterations < 1e10
     #select a random edge
     pos = Math.random()
@@ -230,7 +229,7 @@ draw = () ->
   time += 0.5
 
   for d in [0...1000]
-    maze()
+    iterativeDraw()
 
   #print the maze
   # for y in [0...yhigh]
@@ -262,6 +261,14 @@ draw = () ->
 
 
 
+# init()
+# draw()
 
-init()
-draw()
+maze = {
+  init: init
+  stage: () -> can
+  resize: () -> console.log "resize maze not implemented!" 
+  kill: () -> console.log "kill maze not implemented!"
+}
+
+dispatchEvent(new CustomEvent("load:complete", {detail: maze}));

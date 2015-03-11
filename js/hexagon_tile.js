@@ -24,8 +24,10 @@ var inner = dom.svg("g");
 stage.appendChild(inner);
 
 function reset() {
-  document.body.removeEventListener("click", reset);
-  con.log("click reset");
+  con.log("reset");
+
+  window.removeEventListener("resize", resize);
+  // document.body.removeEventListener("click", reset);
 
   dispatchEvent(new Event("render:start"));
 
@@ -243,7 +245,10 @@ function batch() {
   currentBatch++;
   if (currentBatch == batches) {
     dispatchEvent(new Event("render:complete"));
-    document.body.addEventListener("click", reset);
+    // document.body.addEventListener("click", reset);
+
+    window.addEventListener("resize", resize);
+
     resize();
   } else {
     dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
@@ -280,7 +285,7 @@ function resize(sw,sh) {
   inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
 
 }
-window.addEventListener("resize", resize);
+
 
 
 
@@ -301,40 +306,6 @@ dispatchEvent(new CustomEvent("load:complete", {detail:hexagon_tile}));
 
 
 
-/*
-
-for(var h = 0; h < hexagons; h++) {
-  var item = randomHexes[h];
-
-  var close = [];
-  // con.log(item.neighbours);
-  for(var i = 0; i < item.neighbours.length; i++) {
-    var otherItem = hexs[item.neighbours[i]];
-    // con.log(otherItem);
-    if (otherItem.rendered) {
-      close.push(otherItem.colour);
-    }
-  }
-
-  con.log(close);
-
-  var colour;
-  if (close.length > 0 ) {
-    colour = colours.mixColours(close);
-    colour = colours.mutateColour(colour, 10);
-  } else {
-    colour = colours.getNextColour();
-  }
-
-  item.path.setAttribute("style", "fill:" + colour);
-
-  randomHexes[h].rendered = true;
-  randomHexes[h].colour = colour;
-}
-
-*/
 
 
 })();
-
-

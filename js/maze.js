@@ -1,5 +1,5 @@
 (function() {
-  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
+  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, iterativeDraw, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
 
   con = console;
 
@@ -7,7 +7,7 @@
 
   ctx = null;
 
-  can = null;
+  can = d.createElement("canvas");
 
   time = 0;
 
@@ -201,14 +201,13 @@
   unit = 4;
 
   init = function() {
-    can = d.createElement("canvas");
     can.width = xwide * unit;
     can.height = yhigh * unit;
-    d.body.appendChild(can);
-    return ctx = can.getContext("2d");
+    ctx = can.getContext("2d");
+    return draw();
   };
 
-  maze = function() {
+  iterativeDraw = function() {
     var choice, index, pos;
     if (frontier.length && iterations < 1e10) {
       pos = Math.random();
@@ -232,7 +231,7 @@
     var rgb, _k, _l, _m;
     time += 0.5;
     for (d = _k = 0; _k < 1000; d = ++_k) {
-      maze();
+      iterativeDraw();
     }
     for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {
       for (x = _m = 0; 0 <= xwide ? _m < xwide : _m > xwide; x = 0 <= xwide ? ++_m : --_m) {
@@ -250,8 +249,21 @@
     }
   };
 
-  init();
+  maze = {
+    init: init,
+    stage: function() {
+      return can;
+    },
+    resize: function() {
+      return console.log("resize maze not implemented!");
+    },
+    kill: function() {
+      return console.log("kill maze not implemented!");
+    }
+  };
 
-  draw();
+  dispatchEvent(new CustomEvent("load:complete", {
+    detail: maze
+  }));
 
 }).call(this);

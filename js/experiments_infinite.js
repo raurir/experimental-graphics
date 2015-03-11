@@ -1,40 +1,43 @@
-// // var seed = 411930879;
-// var seed = ~~(Math.random() * 1e9)
-// // seed = 662718928;
-// // con.log(seed);
-// var same = seed;
+// var seed = 411930879;
+var seed = ~~(Math.random() * 1e9)
+// seed = 662718928;
+// con.log(seed);
+var same = seed;
 
-// var originalRand = Math.random
+var originalRand = Math.random
 
-// Math.random = function() {
-//   var x = (Math.sin(seed) + 1) * 10000;
-//   seed += 1;
-//   return x % 1;
-// }
-// getRandom = Math.random;
-
-
+Math.random = function() {
+  var x = (Math.sin(seed) + 1) * 10000;
+  seed += 1;
+  return x % 1;
+}
+getRandom = Math.random;
 
 
-var experiments = (function() {
+function initExperiments() {
 
-  var holder = dom.element("div");
+  var currentExperiment;
+
+  var buttons = dom.element("div", {className:"buttons"});
+  var holder = dom.element("div", {className:"experiment-holder"});
+
+  document.body.appendChild(buttons);
   document.body.appendChild(holder);
 
 
-  var experiments = [
-    ["bezier_flow"],
-    ["hexagon_tile"],
-    ["maze"],
-    ["mining_branches"],
-    ["oscillate_curtain"],
-    ["pattern_check"],
-    ["pattern_circles"],
-    ["polyhedra","3d"],
-    ["spiral_even"],
-    ["squaretracer"],
-    ["voronoi_stripes", "voronoi"],
-  ];
+  var experiments = {
+    "Bezier_Flow": ["bezier_flow"],
+    "Hexagon_Tile": ["hexagon_tile"],
+    "Maze": ["maze"],
+    "Mining_Branches": ["mining_branches"],
+    "Oscillate_Curtain": ["oscillate_curtain"],
+    "pattern_check": ["pattern_check"],
+    "pattern_circles": ["pattern_circles"],
+    "polyhedra": ["polyhedra","3d"],
+    "spiral_even": ["spiral_even"],
+    "squaretracer": ["squaretracer"],
+    "voronoi_stripes": ["voronoi_stripes", "voronoi"],
+  };
 
   function createScript(s) {
     var script = dom.element("script");
@@ -42,56 +45,77 @@ var experiments = (function() {
     document.body.appendChild(script);
   }
 
-  function loadExperiment(index) {
-    var exp = experiments[index];
-    for (var i = exp.length - 1; i > -1;i--) {
-      var file = exp[i]
-      var src = "experiments/" + file +  ".js";
-      createScript(src);
-    }
-    // con.log("experiment", experiment);
-  }
-  function showButtons() {
-    for(var e in experiments) {
-      var button = dom.element("button");
-      button.addEventListener("click", function(event){
-        window.location = "?" + event.target.key;
-      });
-      var key = experiments[e][0];
-      button.key = key
-      button.innerHTML = key;
-      document.body.appendChild(button);
-    }
-  }
 
-  var currentExperiment;
 
   function resize() {
     con.log("implement experiment resize!");
     // var sw = window.innerWidth, sh = window.innerHeight;
     // currentExperiment.resize(sw,sh);
   }
-
+  var bitch = false;
   function initWindowListener() {
+    if (bitch) return;
     window.addEventListener("resize", resize);
+    bitch = true;
   }
+
+
+  function loadExperiment(key) {
+
+    if (currentExperiment) {
+      currentExperiment.kill();
+      currentExperiment = null;
+      while (holder.childNodes.length) holder.removeChild(holder.firstChild);
+    }
+
+    var exp = experiments[key];
+    // con.log("loadExperiment", exp);
+    for (var i = exp.length - 1; i > -1;i--) {
+      var file = exp[i];
+      var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
+      createScript(src);
+    }
+  }
+
+
 
   addEventListener("load:complete", function(e) {
     con.log("Loaded", e);
     currentExperiment = e.detail;
+    if (currentExperiment.stage) {
+      var stage;
+      if (typeof currentExperiment.stage === "function") {
+        stage = currentExperiment.stage();
+      } else {
+        stage = currentExperiment.stage;
+      }
+      con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
 
-    holder.appendChild(currentExperiment.stage);
+      holder.appendChild(stage);
+    } else {
+      return con.warn("no stage set in current experiment:", currentExperiment)
+    }
     initRenderProgress();
     initWindowListener();
     currentExperiment.init();
     resize();
   });
 
-  console.log("init");
-  return {
-   load: loadExperiment,
-   experiments: experiments
-  };
-})();
+  for(var e in experiments) {
+    var button = dom.element("button");
+    button.addEventListener("click", function(event){
+      clickHandler("design:" + event.target.key);
+    });
+    var key = e;
+    button.key = key
+    button.innerHTML = key;
+    buttons.appendChild(button);
+  }
 
-console.log("dfd", experiments);
+  return {
+    buttons: buttons,
+    loadExperiment: loadExperiment,
+    experiments: experiments
+  };
+
+};

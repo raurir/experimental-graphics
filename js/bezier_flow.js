@@ -1,4 +1,7 @@
 (function() {
+
+
+
 var sw = sh = size = 800;
 
 // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
@@ -10,11 +13,38 @@ var lines = 40,//Math.round(10 + Math.random() * 50),
   sections = Math.round(2 + Math.random() * 3),
   radius = 0.4,// + Math.random() * 0.2;
   points = [],
-  fuckers = [];
+  lineStyles = [];
 
 function getPoint(d) {
   return points[(sections + d) % sections];
 }
+
+function init() {
+  for (var l = 0; l < lines; l++) {
+    lineStyles[l] = {
+      strokeStyle: colours.getRandomColour(),
+      lineWidth: 1 // + Math.random() * 13
+    }
+  }
+
+  for (var p = 0; p < sections; p++) {
+    var a = p / sections * Math.PI * 2,
+      cx = 0.5 + Math.sin(a) * radius,// + (Math.random() - 0.5) * 0.1,
+      cy = 0.5 + Math.cos(a) * radius// + (Math.random() - 0.5) * 0.1;
+    createPoint({index: p, cx: cx, cy: cy});
+  }
+  for (var p = 0; p < sections; p++) {
+   points[p].angle();
+  }
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.lineCap = 'round';
+  render();
+
+}
+
+
+
 
 function createPoint(init) {
 
@@ -74,26 +104,6 @@ function createPoint(init) {
   });
 
 }
-
-for (var l = 0; l < lines; l++) {
-  fuckers[l] = {
-    strokeStyle: colours.getRandomColour(),
-    lineWidth: 1 // + Math.random() * 13
-  }
-}
-
-for (var p = 0; p < sections; p++) {
-  var a = p / sections * Math.PI * 2,
-    cx = 0.5 + Math.sin(a) * radius,// + (Math.random() - 0.5) * 0.1,
-    cy = 0.5 + Math.cos(a) * radius// + (Math.random() - 0.5) * 0.1;
-  createPoint({index: p, cx: cx, cy: cy});
-}
-for (var p = 0; p < sections; p++) {
- points[p].angle();
-}
-
-ctx.clearRect(0, 0, size, size);
-ctx.lineCap = 'round';
 
 function render(j) {
 
@@ -178,8 +188,8 @@ function render(j) {
       // ctx.lineTo(x2 * size, y2 * size);
       // ctx.stroke();
 
-      ctx.strokeStyle = fuckers[j].strokeStyle;
-      ctx.lineWidth = fuckers[j].lineWidth * j * 0.1;
+      ctx.strokeStyle = lineStyles[j].strokeStyle;
+      ctx.lineWidth = lineStyles[j].lineWidth * j * 0.1;
       ctx.beginPath();
       ctx.moveTo(x1 * size, y1 * size);
       ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);
@@ -202,7 +212,7 @@ function render(j) {
 
 var resizeMode = "contain";
 
-var meandering = {
+var bezier = {
   stage: bmp.canvas,
   resize: function(w,h) {
     sw = w;
@@ -210,12 +220,12 @@ var meandering = {
     bmp.canvas.width = sw;
     bmp.canvas.height = sh;
   },
-  init: function() {
-    setTimeout(function() { render()}, 100);
-  },
+  init: init,
   kill: function() {}
 }
+dispatchEvent(new CustomEvent("load:complete", {detail: bezier}));
 
-dispatchEvent(new CustomEvent("load:complete", {detail:meandering}));
+
+
 
 })();
