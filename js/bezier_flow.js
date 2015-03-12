@@ -226,6 +226,4 @@ var bezier = {
 dispatchEvent(new CustomEvent("load:complete", {detail: bezier}));
 
 
-
-
 })();

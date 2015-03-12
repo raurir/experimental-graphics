@@ -15,8 +15,8 @@ var size = 1,
   hexagons,
   hexs,
 
-  batchSize = 1000, 
-  batches, 
+  batchSize = 1000,
+  batches,
   currentBatch = 0;
 
 var stage = dom.svg("svg", {width:sw, height:sh});
@@ -47,8 +47,7 @@ function reset() {
   // colours.setPalette(["#ff2244", "#ff3322"]);
   // colours.setPalette(["#f3512f", "#faa584", "#575757", "#ffffff"]);
 
-  document.body.setAttribute("style", "background-color:" + colours.getNextColour());
-  // document.body.setAttribute("style", "background-color:#ffffff;");
+  stage.setAttribute("style", "background-color:" + colours.getNextColour());
 
   var points = [];
   for(var i = 0; i < 6; i++) {
@@ -263,14 +262,14 @@ function render() {
   batches = Math.ceil(hexagons / batchSize);
   currentBatch = 0;
   batch();
-  
+
 }
 
 function resize(sw,sh) {
   con.log("resize! hex");
   // if (!sw || !sh) return;
   sw = window.innerWidth;
-  sh = window.innerHeight; 
+  sh = window.innerHeight;
   stage.setSize(sw,sh);
 
   var largestDimension = sw > sh ? sw : sh;

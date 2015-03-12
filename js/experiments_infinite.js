@@ -16,7 +16,7 @@ getRandom = Math.random;
 
 function initExperiments() {
 
-  var currentExperiment;
+  var currentExperiment, experimentsLoaded = {}, currentLoading = null;
 
   var buttons = dom.element("div", {className:"buttons"});
   var holder = dom.element("div", {className:"experiment-holder"});
@@ -26,17 +26,18 @@ function initExperiments() {
 
 
   var experiments = {
-    "Bezier_Flow": ["bezier_flow"],
-    "Hexagon_Tile": ["hexagon_tile"],
-    "Maze": ["maze"],
-    "Mining_Branches": ["mining_branches"],
-    "Oscillate_Curtain": ["oscillate_curtain"],
-    "pattern_check": ["pattern_check"],
-    "pattern_circles": ["pattern_circles"],
-    "polyhedra": ["polyhedra","3d"],
-    "spiral_even": ["spiral_even"],
-    "squaretracer": ["squaretracer"],
-    "voronoi_stripes": ["voronoi_stripes", "voronoi"],
+    "bezier_flow": ["bezier_flow"],
+    "hexagon_tile": ["hexagon_tile"],
+    "maze": ["maze"],
+
+    // "Mining_Branches": ["mining_branches"],
+    // "Oscillate_Curtain": ["oscillate_curtain"],
+    // "pattern_check": ["pattern_check"],
+    // "pattern_circles": ["pattern_circles"],
+    // "polyhedra": ["polyhedra","3d"],
+    // "spiral_even": ["spiral_even"],
+    // "squaretracer": ["squaretracer"],
+    // "voronoi_stripes": ["voronoi_stripes", "voronoi"],
   };
 
   function createScript(s) {
@@ -62,18 +63,26 @@ function initExperiments() {
 
   function loadExperiment(key) {
 
+    currentLoading = key;
+
     if (currentExperiment) {
       currentExperiment.kill();
       currentExperiment = null;
       while (holder.childNodes.length) holder.removeChild(holder.firstChild);
     }
 
-    var exp = experiments[key];
-    // con.log("loadExperiment", exp);
-    for (var i = exp.length - 1; i > -1;i--) {
-      var file = exp[i];
-      var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
-      createScript(src);
+    if (experimentsLoaded[currentLoading]) {
+      con.log("script already loaded...", currentLoading);
+      currentExperiment = experimentsLoaded[currentLoading];
+      initExperiment();
+    } else {
+      var exp = experiments[currentLoading];
+      con.log("loadExperiment", exp );
+      for (var i = exp.length - 1; i > -1;i--) {
+        var file = exp[i];
+        var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
+        createScript(src);
+      }
     }
   }
 
@@ -82,24 +91,29 @@ function initExperiments() {
   addEventListener("load:complete", function(e) {
     con.log("Loaded", e);
     currentExperiment = e.detail;
-    if (currentExperiment.stage) {
-      var stage;
-      if (typeof currentExperiment.stage === "function") {
-        stage = currentExperiment.stage();
-      } else {
-        stage = currentExperiment.stage;
-      }
-      con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
+    if (currentExperiment.init == undefined) return con.warn("Missing property init on currentExperiment");
+    if (currentExperiment.kill == undefined) return con.warn("Missing property kill on currentExperiment");
+    if (currentExperiment.resize == undefined) return con.warn("Missing property resize on currentExperiment");
+    if (currentExperiment.stage == undefined) return con.warn("Missing property stage on currentExperiment");
+    experimentsLoaded[currentLoading] = currentExperiment;
+    initExperiment();
+  });
 
-      holder.appendChild(stage);
+  function initExperiment() {
+    var stage;
+    if (typeof currentExperiment.stage === "function") {
+      stage = currentExperiment.stage();
     } else {
-      return con.warn("no stage set in current experiment:", currentExperiment)
+      stage = currentExperiment.stage;
     }
+    // con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
+    holder.appendChild(stage);
+
     initRenderProgress();
     initWindowListener();
     currentExperiment.init();
     resize();
-  });
+  }
 
   for(var e in experiments) {
     var button = dom.element("button");
