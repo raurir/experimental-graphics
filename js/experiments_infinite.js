@@ -109,6 +109,9 @@ function initExperiments() {
     // con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
     holder.appendChild(stage);
 
+
+    
+
     initRenderProgress();
     initWindowListener();
     currentExperiment.init();
