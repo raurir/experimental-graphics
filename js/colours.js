@@ -1,11 +1,13 @@
 var colours = (function() {
 
+	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("colours is using native random"); }
+
 	var paletteIndex = -1, currentPalette = null;
 	var colourIndex = 0;
 	var previewCSSAdded = false;
 
 	function getRandomPalette() {
-		paletteIndex = ~~(Math.random() * palettes.length);
+		paletteIndex = ~~(random() * palettes.length);
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
 	}
@@ -15,7 +17,7 @@ var colours = (function() {
 	}
 	function getRandomColour() {
 		if (currentPalette == null ) getRandomPalette();
-		colourIndex = ~~(Math.random() * currentPalette.length);
+		colourIndex = ~~(random() * currentPalette.length);
 		return currentPalette[colourIndex];
 	}
 
@@ -53,7 +55,7 @@ var colours = (function() {
 	}
 
 	function mutateChannel(channel, amount, direction) {
-		var mutation = Math.round(channel + (Math.random() - 0.5) * amount);
+		var mutation = Math.round(channel + (random() - 0.5) * amount);
 		mutation = mutation > 255 ? 255 : mutation <= 0 ? 0 : mutation;
 		return mutation;
 	}

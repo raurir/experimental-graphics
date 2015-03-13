@@ -1,7 +1,5 @@
 (function() {
 
-
-
 var sw = sh = size = 800;
 
 // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
@@ -9,32 +7,35 @@ var sw = sh = size = 800;
 var bmp = dom.canvas(size,size);
 var ctx = bmp.ctx;
 
-var lines = 40,//Math.round(10 + Math.random() * 50),
-  sections = Math.round(2 + Math.random() * 3),
-  radius = 0.4,// + Math.random() * 0.2;
-  points = [],
-  lineStyles = [];
+var lines, sections, radius, points, lineStyles;
 
 function getPoint(d) {
   return points[(sections + d) % sections];
 }
 
 function init() {
+
+  lines = Math.round(10 + rand.random() * 50);
+  sections = Math.round(2 + rand.random() * 3);
+  radius = 0.4 + rand.random() * 0.2;
+  points = [];
+  lineStyles = [];
+
   for (var l = 0; l < lines; l++) {
     lineStyles[l] = {
       strokeStyle: colours.getRandomColour(),
-      lineWidth: 1 // + Math.random() * 13
+      lineWidth: 1 // + rand.random() * 13
     }
   }
 
   for (var p = 0; p < sections; p++) {
     var a = p / sections * Math.PI * 2,
-      cx = 0.5 + Math.sin(a) * radius,// + (Math.random() - 0.5) * 0.1,
-      cy = 0.5 + Math.cos(a) * radius// + (Math.random() - 0.5) * 0.1;
+      cx = 0.5 + Math.sin(a) * radius,// + (rand.random() - 0.5) * 0.1,
+      cy = 0.5 + Math.cos(a) * radius// + (rand.random() - 0.5) * 0.1;
     createPoint({index: p, cx: cx, cy: cy});
   }
   for (var p = 0; p < sections; p++) {
-   points[p].angle();
+    points[p].angle();
   }
 
   ctx.clearRect(0, 0, size, size);
@@ -43,20 +44,17 @@ function init() {
 
 }
 
-
-
-
 function createPoint(init) {
 
-  var cx = init.cx || Math.random(),
-      cy = init.cy || Math.random(),
-      a = Math.random() * Math.PI * 2
-      gapScale = Math.random() / 3 * 5;
+  var cx = init.cx || rand.random(),
+    cy = init.cy || rand.random(),
+    a = rand.random() * Math.PI * 2
+    gapScale = rand.random() / 3 * 5;
 
   var gaps = [];
   var total = 0;
   for (var i = 0; i < lines; i++) {
-    var gap = (0.1 + Math.random()) * gapScale / lines;
+    var gap = (0.1 + rand.random()) * gapScale / lines;
     gaps[i] = total;
     total += gap;
   }
@@ -107,6 +105,8 @@ function createPoint(init) {
 
 function render(j) {
 
+  con.log("render", lineStyles)
+
   for (var j = 0;j < lines;j++) {
   // if (true) {
 
@@ -135,17 +135,17 @@ function render(j) {
 
 
       // point of screen left
-      var x1a = -0.1 * 1e2;
+      var x1a = -0.1;
       var y1a = m1 * x1a + c1;
       // point of screen right
-      var x1b = 1.1 * 1e2;
+      var x1b = 1.1;
       var y1b = m1 * x1b + c1;
 
       // the other lines point of screen left
-      var x2a = -0.1 * 1e2;
+      var x2a = -0.1;
       var y2a = m2 * x2a + c2;
       // the other lines point of screen left
-      var x2b = 1.1 * 1e2;
+      var x2b = 1.1;
       var y2b = m2 * x2b + c2;
 
 
@@ -161,9 +161,6 @@ function render(j) {
       // ctx.moveTo(x2a * size, y2a * size);
       // ctx.lineTo(x2b * size, y2b * size);
       // ctx.stroke();
-
-
-
 
       var inter = geom.intersectionAnywhere(
        {x: x1a, y: y1a},
@@ -189,7 +186,7 @@ function render(j) {
       // ctx.stroke();
 
       ctx.strokeStyle = lineStyles[j].strokeStyle;
-      ctx.lineWidth = lineStyles[j].lineWidth * j * 0.1;
+      ctx.lineWidth = lineStyles[j].lineWidth * j * 0.4;
       ctx.beginPath();
       ctx.moveTo(x1 * size, y1 * size);
       ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);

@@ -60,10 +60,12 @@ function initExperiments() {
     bitch = true;
   }
 
+  var currentRandom;
 
-  function loadExperiment(key) {
-
-    currentLoading = key;
+  function loadExperiment(params) {
+    params = params.split(",");
+    currentLoading = params[0];
+    currentRandom = params[1];
 
     if (currentExperiment) {
       currentExperiment.kill();
@@ -109,11 +111,13 @@ function initExperiments() {
     // con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
     holder.appendChild(stage);
 
-
-    
-
     initRenderProgress();
     initWindowListener();
+
+    rand.setSeed(currentRandom);
+
+    // con.log("currentRandom", currentRandom)
+
     currentExperiment.init();
     resize();
   }
@@ -121,7 +125,7 @@ function initExperiments() {
   for(var e in experiments) {
     var button = dom.element("button");
     button.addEventListener("click", function(event){
-      clickHandler("design:" + event.target.key);
+      clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * Math.pow(2,10)));
     });
     var key = e;
     button.key = key
