@@ -105,7 +105,7 @@ function createPoint(init) {
 
 function render(j) {
 
-  con.log("render", lineStyles)
+  // con.log("render", lineStyles)
 
   for (var j = 0;j < lines;j++) {
   // if (true) {
