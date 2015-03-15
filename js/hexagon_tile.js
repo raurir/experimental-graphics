@@ -31,12 +31,12 @@ function reset() {
 
   dispatchEvent(new Event("render:start"));
 
-  // size = 0.1 + Math.random();
+  // size = 0.1 + rand.random();
 
-  radiusOuter = (5 + Math.random() * 25) / 1000;
-  strokeSize = (Math.random() * Math.random() * Math.random() * radiusOuter);
+  radiusOuter = (5 + rand.random() * 25) / 1000;
+  strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
   radiusInner = (radiusOuter - strokeSize + (strokeSize * 0.01));
-  smoothSize = (0.01 + Math.random() * 10);
+  smoothSize = (0.01 + rand.random() * 10);
 
   while (inner.firstChild) inner.removeChild(inner.firstChild);
 
@@ -172,7 +172,7 @@ function reset() {
 }
 
 function shuffle(o){
-    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
 

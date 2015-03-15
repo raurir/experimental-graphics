@@ -64,8 +64,13 @@ function initExperiments() {
 
   function loadExperiment(params) {
     params = params.split(",");
-    currentLoading = params[0];
-    currentRandom = params[1];
+    var newLoading = params[0];
+    var newRandom = params[1];
+
+    if (newLoading === currentLoading && newRandom === currentRandom) return con.warn("Already loaded experiment...");
+
+    currentLoading = newLoading;
+    currentRandom = newRandom;
 
     if (currentExperiment) {
       currentExperiment.kill();
@@ -116,7 +121,7 @@ function initExperiments() {
 
     rand.setSeed(currentRandom);
 
-    // con.log("currentRandom", currentRandom)
+    con.log("currentRandom", currentRandom)
 
     currentExperiment.init();
     resize();
