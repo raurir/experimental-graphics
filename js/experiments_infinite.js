@@ -1,24 +1,8 @@
-// var seed = 411930879;
-var seed = ~~(Math.random() * 1e9)
-// seed = 662718928;
-// con.log(seed);
-var same = seed;
-
-var originalRand = Math.random
-
-Math.random = function() {
-  var x = (Math.sin(seed) + 1) * 10000;
-  seed += 1;
-  return x % 1;
-}
-getRandom = Math.random;
-
-
 function initExperiments() {
 
   var currentExperiment, experimentsLoaded = {}, currentLoading = null;
 
-  var buttons = dom.element("div", {className:"buttons"});
+  var buttons = dom.element("div", {className:"experiment-buttons"});
   var holder = dom.element("div", {className:"experiment-holder"});
 
   document.body.appendChild(buttons);
@@ -65,23 +49,19 @@ function initExperiments() {
   function loadExperiment(params) {
     if (params) {
       params = params.split(",");
-      currentLoading = params[0];
+      var newLoading = params[0];
       var newRandom = params[1];
 
+      if (newLoading === currentLoading && newRandom === currentRandom) return con.warn("Already loaded experiment...");
+
+      currentLoading = newLoading;
+      currentRandom = newRandom;
+
       if (currentExperiment) {
-
-        if(currentExperiment === experimentsLoaded[currentLoading] && currentRandom === newRandom) {
-          return con.log("already loaded and initialised...", currentLoading, currentRandom)
-        }
-
         currentExperiment.kill();
         currentExperiment = null;
         while (holder.childNodes.length) holder.removeChild(holder.firstChild);
       }
-
-      // con.log("newRandom", newRandom);
-
-      currentRandom = newRandom;
 
       if (experimentsLoaded[currentLoading]) {
         // con.log("script already loaded...", currentLoading);
@@ -96,8 +76,10 @@ function initExperiments() {
           createScript(src);
         }
       }
+      $(buttons).slide(false);
     } else {
-      // no experiment to load...
+      $(buttons).slide(true);
+
     }
 
   }
