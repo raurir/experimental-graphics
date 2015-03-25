@@ -24,30 +24,30 @@ var inner = dom.svg("g");
 stage.appendChild(inner);
 
 function reset() {
-  con.log("reset");
+  // con.log("reset");
+
+  var palette = colours.getRandomPalette();
+  var backgroundColor = colours.getRandomColour();
 
   window.removeEventListener("resize", resize);
   // document.body.removeEventListener("click", reset);
 
   dispatchEvent(new Event("render:start"));
 
-  // size = 0.1 + Math.random();
-
-  radiusOuter = (5 + Math.random() * 25) / 1000;
-  strokeSize = (Math.random() * Math.random() * Math.random() * radiusOuter);
+  radiusOuter = (5 + rand.random() * 25) / 1000;
+  strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
   radiusInner = (radiusOuter - strokeSize + (strokeSize * 0.01));
-  smoothSize = (0.01 + Math.random() * 10);
+  smoothSize = (0.01 + rand.random() * 10);
 
   while (inner.firstChild) inner.removeChild(inner.firstChild);
 
   // var neighbourGroups = dom.svg("g");
   // stage.appendChild(neighbourGroups);
-
   // colours.setPalette(["#000044", "#000088", "#000033", "#000011", "#5CB9FC", "#ffffff"]);
   // colours.setPalette(["#ff2244", "#ff3322"]);
   // colours.setPalette(["#f3512f", "#faa584", "#575757", "#ffffff"]);
 
-  stage.setAttribute("style", "background-color:" + colours.getNextColour());
+  stage.setAttribute("style", "background-color:" + backgroundColor);
 
   var points = [];
   for(var i = 0; i < 6; i++) {
@@ -104,7 +104,7 @@ function reset() {
     // text.innerHTML = i + "(" + col + "," + row + ")";
     // group.appendChild(text);
 
-
+    /*
     var neighbours = [];
     if (row > 1) neighbours.push(i - 6); // T
     if (second) {
@@ -128,7 +128,7 @@ function reset() {
     }
     if (row < rows - 2) neighbours.push(i + 6); // B
 
-    /*
+
     group.index = i;
     group.addEventListener("mouseover", function() {
       con.log(this.index, hexs[this.index].neighbours);
@@ -162,7 +162,7 @@ function reset() {
       y: y,
       colour: null,
       rendered: false,
-      neighbours: neighbours
+      // neighbours: neighbours
     };
 
   }
@@ -172,7 +172,7 @@ function reset() {
 }
 
 function shuffle(o){
-    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
 
@@ -266,7 +266,7 @@ function render() {
 }
 
 function resize(sw,sh) {
-  con.log("resize! hex");
+  // con.log("resize! hex");
   // if (!sw || !sh) return;
   sw = window.innerWidth;
   sh = window.innerHeight;

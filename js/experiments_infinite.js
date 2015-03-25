@@ -49,7 +49,7 @@ function initExperiments() {
 
 
   function resize() {
-    con.log("implement experiment resize!");
+    // con.log("implement experiment resize!");
     // var sw = window.innerWidth, sh = window.innerHeight;
     // currentExperiment.resize(sw,sh);
   }
@@ -63,35 +63,49 @@ function initExperiments() {
   var currentRandom;
 
   function loadExperiment(params) {
-    params = params.split(",");
-    currentLoading = params[0];
-    currentRandom = params[1];
+    if (params) {
+      params = params.split(",");
+      currentLoading = params[0];
+      var newRandom = params[1];
 
-    if (currentExperiment) {
-      currentExperiment.kill();
-      currentExperiment = null;
-      while (holder.childNodes.length) holder.removeChild(holder.firstChild);
-    }
+      if (currentExperiment) {
 
-    if (experimentsLoaded[currentLoading]) {
-      con.log("script already loaded...", currentLoading);
-      currentExperiment = experimentsLoaded[currentLoading];
-      initExperiment();
-    } else {
-      var exp = experiments[currentLoading];
-      con.log("loadExperiment", exp );
-      for (var i = exp.length - 1; i > -1;i--) {
-        var file = exp[i];
-        var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
-        createScript(src);
+        if(currentExperiment === experimentsLoaded[currentLoading] && currentRandom === newRandom) {
+          return con.log("already loaded and initialised...", currentLoading, currentRandom)
+        }
+
+        currentExperiment.kill();
+        currentExperiment = null;
+        while (holder.childNodes.length) holder.removeChild(holder.firstChild);
       }
+
+      // con.log("newRandom", newRandom);
+
+      currentRandom = newRandom;
+
+      if (experimentsLoaded[currentLoading]) {
+        // con.log("script already loaded...", currentLoading);
+        currentExperiment = experimentsLoaded[currentLoading];
+        initExperiment();
+      } else {
+        var exp = experiments[currentLoading];
+        // con.log("loadExperiment", exp );
+        for (var i = exp.length - 1; i > -1;i--) {
+          var file = exp[i];
+          var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
+          createScript(src);
+        }
+      }
+    } else {
+      // no experiment to load...
     }
+
   }
 
 
 
   addEventListener("load:complete", function(e) {
-    con.log("Loaded", e);
+    // con.log("Loaded", e);
     currentExperiment = e.detail;
     if (currentExperiment.init == undefined) return con.warn("Missing property init on currentExperiment");
     if (currentExperiment.kill == undefined) return con.warn("Missing property kill on currentExperiment");
@@ -111,12 +125,11 @@ function initExperiments() {
     // con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
     holder.appendChild(stage);
 
+    rand.setSeed(currentRandom);
+    con.log("rand", currentRandom, rand.random());
+
     initRenderProgress();
     initWindowListener();
-
-    rand.setSeed(currentRandom);
-
-    // con.log("currentRandom", currentRandom)
 
     currentExperiment.init();
     resize();

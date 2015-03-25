@@ -17,9 +17,13 @@ function init() {
 
   lines = Math.round(10 + rand.random() * 50);
   sections = Math.round(2 + rand.random() * 3);
+  // lines = Math.round(3 + rand.random() * 3);
+  // sections = 3;
   radius = 0.4 + rand.random() * 0.2;
   points = [];
   lineStyles = [];
+
+  colours.getRandomPalette();
 
   for (var l = 0; l < lines; l++) {
     lineStyles[l] = {
@@ -105,7 +109,7 @@ function createPoint(init) {
 
 function render(j) {
 
-  con.log("render", lineStyles)
+  // con.log("render", lineStyles)
 
   for (var j = 0;j < lines;j++) {
   // if (true) {

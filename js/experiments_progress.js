@@ -1,5 +1,5 @@
 function initRenderProgress() {
-  con.log('initRenderProgress');
+  // con.log('initRenderProgress');
   var loader, graph, bar;
 
   function createLoader() {

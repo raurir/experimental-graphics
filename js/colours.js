@@ -6,7 +6,9 @@ var colours = (function() {
 	var colourIndex = 0;
 	var previewCSSAdded = false;
 
-	function getRandomPalette() {
+	function getRandomPalette(warning) {
+		// con.log("getRandomPalette");
+		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
@@ -16,24 +18,24 @@ var colours = (function() {
 		currentPalette = palettes[paletteIndex];
 	}
 	function getRandomColour() {
-		if (currentPalette == null ) getRandomPalette();
+		if (currentPalette == null) getRandomPalette(true);
 		colourIndex = ~~(random() * currentPalette.length);
 		return currentPalette[colourIndex];
 	}
 
 	function getCurrentColour() {
-		if (currentPalette == null ) getRandomPalette();
+		if (currentPalette == null ) getRandomPalette(true);
 		return currentPalette[colourIndex];
 	}
 
 	function getNextColour(offset) {
-		if (currentPalette == null ) getRandomPalette();
+		if (currentPalette == null ) getRandomPalette(true);
 		if (offset != undefined) {
 			colourIndex += offset;
 		} else {
 			colourIndex++;
 		}
-		colourIndex += currentPalette.length
+		colourIndex += currentPalette.length;
 		colourIndex %= currentPalette.length;
 		return currentPalette[colourIndex];
 	}
@@ -100,7 +102,7 @@ var colours = (function() {
 	}
 
 	function showPalette() {
-		if (currentPalette == null) getRandomPalette();
+		if (currentPalette == null) getRandomPalette(true);
 		var p = dom.element("div");
 		p.className = "palette";
 		p.id = "palette-" + paletteIndex;
