@@ -76,9 +76,9 @@ function initExperiments() {
           createScript(src);
         }
       }
-      $(buttons).slide(false);
+      // $(buttons).slide(false);
     } else {
-      $(buttons).slide(true);
+      // $(buttons).slide(true);
 
     }
 
@@ -108,7 +108,7 @@ function initExperiments() {
     holder.appendChild(stage);
 
     rand.setSeed(currentRandom);
-    con.log("rand", currentRandom, rand.random());
+    // con.log("rand", currentRandom, rand.random());
 
     initRenderProgress();
     initWindowListener();
@@ -118,13 +118,10 @@ function initExperiments() {
   }
 
   for(var e in experiments) {
-    var button = dom.element("button");
+    var button = dom.element("div", {className: "button", key: e, innerHTML: e});
     button.addEventListener("click", function(event){
-      clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * Math.pow(2,10)));
+      clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * 1e10));
     });
-    var key = e;
-    button.key = key
-    button.innerHTML = key;
     buttons.appendChild(button);
   }
 

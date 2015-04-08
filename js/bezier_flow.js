@@ -15,7 +15,7 @@ function getPoint(d) {
 
 function init() {
 
-  lines = Math.round(10 + rand.random() * 50);
+  lines = 5;//Math.round(10 + rand.random() * 50);
   sections = Math.round(2 + rand.random() * 3);
   // lines = Math.round(3 + rand.random() * 3);
   // sections = 3;
@@ -109,10 +109,12 @@ function createPoint(init) {
 
 function render(j) {
 
-  // con.log("render", lineStyles)
+  con.log("render ========================");
 
   for (var j = 0;j < lines;j++) {
+
   // if (true) {
+
 
     for (var i = 0; i < points.length; i++) {
 
@@ -190,7 +192,8 @@ function render(j) {
       // ctx.stroke();
 
       ctx.strokeStyle = lineStyles[j].strokeStyle;
-      ctx.lineWidth = lineStyles[j].lineWidth * j * 0.4;
+      ctx.lineWidth = lineStyles[j].lineWidth * (j + 1) * 0.4;
+
       ctx.beginPath();
       ctx.moveTo(x1 * size, y1 * size);
       ctx.quadraticCurveTo(inter.x * size, inter.y * size, x2 * size, y2 * size);
