@@ -1,13 +1,14 @@
 function initExperiments() {
 
   var currentExperiment, experimentsLoaded = {}, currentLoading = null;
+  var initialised = false;
+  var currentRandom;
 
   var buttons = dom.element("div", {className:"experiment-buttons"});
   var holder = dom.element("div", {className:"experiment-holder"});
 
   document.body.appendChild(buttons);
   document.body.appendChild(holder);
-
 
   var experiments = {
     "bezier_flow": ["bezier_flow"],
@@ -30,24 +31,22 @@ function initExperiments() {
     document.body.appendChild(script);
   }
 
-
-
   function resize() {
     // con.log("implement experiment resize!");
     // var sw = window.innerWidth, sh = window.innerHeight;
     // currentExperiment.resize(sw,sh);
   }
-  var bitch = false;
-  function initWindowListener() {
-    if (bitch) return;
-    window.addEventListener("resize", resize);
-    bitch = true;
-  }
 
-  var currentRandom;
+  function initWindowListener() {
+    window.addEventListener("resize", resize);
+  }
 
   function loadExperiment(params) {
     if (params) {
+
+      $(buttons).slide(false);
+      $('#buy').show();
+
       params = params.split(",");
       var newLoading = params[0];
       var newRandom = params[1];
@@ -76,10 +75,9 @@ function initExperiments() {
           createScript(src);
         }
       }
-      // $(buttons).slide(false);
     } else {
-      // $(buttons).slide(true);
-
+      $(buttons).slide(true);
+      $('#buy').hide();
     }
 
   }
@@ -97,6 +95,8 @@ function initExperiments() {
     initExperiment();
   });
 
+
+
   function initExperiment() {
     var stage;
     if (typeof currentExperiment.stage === "function") {
@@ -104,14 +104,15 @@ function initExperiments() {
     } else {
       stage = currentExperiment.stage;
     }
-    // con.log(typeof currentExperiment.stage === "function", currentExperiment.stage, stage);
     holder.appendChild(stage);
 
     rand.setSeed(currentRandom);
-    // con.log("rand", currentRandom, rand.random());
 
-    initRenderProgress();
-    initWindowListener();
+    if (initialised === false) {
+      initRenderProgress();
+      initWindowListener();
+      initialised = true;
+    };
 
     currentExperiment.init();
     resize();
