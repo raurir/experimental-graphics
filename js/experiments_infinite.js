@@ -96,9 +96,9 @@ function initExperiments() {
   });
 
 
-
+  var stage;
   function initExperiment() {
-    var stage;
+    
     if (typeof currentExperiment.stage === "function") {
       stage = currentExperiment.stage();
     } else {
@@ -126,10 +126,18 @@ function initExperiments() {
     buttons.appendChild(button);
   }
 
+  function getArt(w, h) {
+
+    // currentExperiment.getPrint(w, h);
+
+    return stage.toDataURL("image/png"); // "image/jpeg"
+  }
+
   return {
     buttons: buttons,
     loadExperiment: loadExperiment,
-    experiments: experiments
+    experiments: experiments,
+    getArt: getArt
   };
 
 };
