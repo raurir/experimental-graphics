@@ -96,9 +96,8 @@ function initExperiments() {
   });
 
 
-
+  var stage;
   function initExperiment() {
-    var stage;
     if (typeof currentExperiment.stage === "function") {
       stage = currentExperiment.stage();
     } else {
@@ -126,10 +125,17 @@ function initExperiments() {
     buttons.appendChild(button);
   }
 
+  function getArt() {
+    con.log(stage);
+    return stage.toDataURL("image/jpeg");
+  }
+
+
   return {
     buttons: buttons,
     loadExperiment: loadExperiment,
-    experiments: experiments
+    experiments: experiments,
+    getArt: getArt
   };
 
 };
