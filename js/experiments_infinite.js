@@ -125,11 +125,12 @@ function initExperiments() {
     buttons.appendChild(button);
   }
 
-  function getArt() {
-    con.log(stage);
-    return stage.toDataURL("image/jpeg");
-  }
+  function getArt(w, h) {
 
+    // currentExperiment.getPrint(w, h);
+
+    return stage.toDataURL("image/png"); // "image/jpeg"
+  }
 
   return {
     buttons: buttons,

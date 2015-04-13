@@ -1,6 +1,6 @@
 (function() {
-var size = 1,
-
+var size = 1000,
+  vector = false,
   sw = size,
   sh = size,
 
@@ -19,9 +19,15 @@ var size = 1,
   batches,
   currentBatch = 0;
 
-var stage = dom.svg("svg", {width:sw, height:sh});
-var inner = dom.svg("g");
-stage.appendChild(inner);
+var stage, inner;
+
+if (vector) {
+  stage = dom.svg("svg", {width:sw, height:sh});
+  inner = dom.svg("g");
+  stage.appendChild(inner);
+} else {
+  stage = dom.canvas(sw, sh);
+}
 
 function reset() {
   // con.log("reset");
@@ -39,7 +45,13 @@ function reset() {
   radiusInner = (radiusOuter - strokeSize + (strokeSize * 0.01));
   smoothSize = (0.01 + rand.random() * 10);
 
-  while (inner.firstChild) inner.removeChild(inner.firstChild);
+  if (vector) {
+    while (inner.firstChild) inner.removeChild(inner.firstChild);
+    stage.setAttribute("style", "background-color:" + backgroundColor);
+  } else {
+    stage.ctx.fillStyle = backgroundColor;
+    stage.ctx.fillRect(0, 0, size, size);
+  }
 
   // var neighbourGroups = dom.svg("g");
   // stage.appendChild(neighbourGroups);
@@ -47,14 +59,16 @@ function reset() {
   // colours.setPalette(["#ff2244", "#ff3322"]);
   // colours.setPalette(["#f3512f", "#faa584", "#575757", "#ffffff"]);
 
-  stage.setAttribute("style", "background-color:" + backgroundColor);
 
-  var points = [];
+  var path = [], points = [];
   for(var i = 0; i < 6; i++) {
-    var angle = i * angle60;
-    points[i] = (i === 0 ? "M" : "L") + (radiusInner * Math.cos(angle)) + "," + (radiusInner * Math.sin(angle));
+    var angle = i * angle60, 
+      x = (radiusInner * Math.cos(angle)),
+      y = (radiusInner * Math.sin(angle));
+    path[i] = (i === 0 ? "M" : "L") + x + "," + y;
+    points[i] = {x: x, y: y};
   }
-  points.push("Z");
+  path.push("Z");
 
   var minHeight = radiusOuter * Math.sin(angle60); // this is edge to edge, not corner to corner.
 
@@ -78,17 +92,18 @@ function reset() {
     // x += 100;
     // y += 100;
 
-    var group = dom.svg("g");
-    group.setAttribute("transform", "translate(" + x + "," + y + ")");
-    inner.appendChild(group);
-
-
-    var hex = dom.svg("path", {
-      "d": points.join(" ")
-      // "style": { "fill": colour }
-    });
-    group.appendChild(hex);
-
+    var hex;
+    if (vector) {
+      var group = dom.svg("g");
+      group.setAttribute("transform", "translate(" + x + "," + y + ")");
+      inner.appendChild(group);
+      hex = dom.svg("path", {
+        "d": path.join(" ")
+      });
+      group.appendChild(hex);
+    } else {
+      hex = points;
+    }
 
     // var circle = dom.svg("circle", {
     //   "r": radiusInner * 0.5,
@@ -157,7 +172,7 @@ function reset() {
 
     hexs[i] = {
       index: i,
-      path: hex,
+      hex: hex,
       x: x,
       y: y,
       colour: null,
@@ -232,8 +247,23 @@ function batch() {
       colour = colours.getNextColour();
     }
 
-
-    item.path.setAttribute("style", "fill:" + colour);
+    if (vector) {
+      item.hex.setAttribute("style", "fill:" + colour);
+    } else {
+      stage.ctx.fillStyle = colour;
+      stage.ctx.beginPath();
+      for (var i = 0; i < 6; i++) {
+        var x = (item.x + item.hex[i].x) * size, 
+          y = (item.y + item.hex[i].y) * size;
+        if (i === 0) {
+          stage.ctx.moveTo(x, y);
+        } else {
+          stage.ctx.lineTo(x, y);
+        }
+      };
+      stage.ctx.closePath();
+      stage.ctx.fill();
+    }
 
     hexs[index].rendered = true;
     hexs[index].colour = colour;
@@ -270,27 +300,30 @@ function resize(sw,sh) {
   // if (!sw || !sh) return;
   sw = window.innerWidth;
   sh = window.innerHeight;
-  stage.setSize(sw,sh);
+  if (vector) {
+    stage.setSize(sw,sh);
 
-  var largestDimension = sw > sh ? sw : sh;
-  var scale = largestDimension / size;
-  var x = 0, y = 0;
-  if (sw < sh) {
-    x = -((scale * size) - sw) / 2;
+    var largestDimension = sw > sh ? sw : sh;
+    var scale = largestDimension / size;
+    var x = 0, y = 0;
+    if (sw < sh) {
+      x = -((scale * size) - sw) / 2;
+    } else {
+      y = -((scale * size) - sh) / 2;
+    }
+
+    inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
   } else {
-    y = -((scale * size) - sh) / 2;
+    con.log("no canvas resize...");
   }
-
-  inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
-
 }
 
 
 
-
+con.log("stage", stage);
 
 var hexagon_tile = {
-  stage: stage,
+  stage: vector ? stage : stage.canvas,
   inner: inner,
   resize: resize,
   init: reset,
