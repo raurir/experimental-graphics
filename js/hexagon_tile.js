@@ -1,5 +1,5 @@
 (function() {
-var size = 1000,
+var size = 600 * 10, // 600 dpi * 10 inches.
   vector = false,
   sw = size,
   sh = size,
@@ -62,7 +62,7 @@ function reset() {
 
   var path = [], points = [];
   for(var i = 0; i < 6; i++) {
-    var angle = i * angle60, 
+    var angle = i * angle60,
       x = (radiusInner * Math.cos(angle)),
       y = (radiusInner * Math.sin(angle));
     path[i] = (i === 0 ? "M" : "L") + x + "," + y;
@@ -253,7 +253,7 @@ function batch() {
       stage.ctx.fillStyle = colour;
       stage.ctx.beginPath();
       for (var i = 0; i < 6; i++) {
-        var x = (item.x + item.hex[i].x) * size, 
+        var x = (item.x + item.hex[i].x) * size,
           y = (item.y + item.hex[i].y) * size;
         if (i === 0) {
           stage.ctx.moveTo(x, y);
@@ -319,8 +319,6 @@ function resize(sw,sh) {
 }
 
 
-
-con.log("stage", stage);
 
 var hexagon_tile = {
   stage: vector ? stage : stage.canvas,
