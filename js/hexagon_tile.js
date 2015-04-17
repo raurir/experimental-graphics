@@ -1,4 +1,14 @@
-(function() {
+var isNode = (typeof module !== 'undefined');
+
+if (isNode) {
+  // Canvas = require('canvas');
+  var dom = require('./dom.js');
+}
+
+
+var hexagon_tile = (function() {
+
+
 var size = 600 * 10, // 600 dpi * 10 inches.
   vector = false,
   sw = size,
@@ -332,10 +342,8 @@ var hexagon_tile = {
 
 dispatchEvent(new CustomEvent("load:complete", {detail:hexagon_tile}));
 
-
-
-
-
-
+return hexagon_tile;
 
 })();
+
+if(isNode) module.exports = hexagon_tile;
