@@ -5,8 +5,9 @@ var isNode = (typeof module !== 'undefined');
 //   var Canvas = require('canvas');
 // }
 
-// var Canvas =
-require('canvas');
+var Canvas = require('canvas');
+
+con.log(Canvas);
 
 var dom = (function() {
 

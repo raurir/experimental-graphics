@@ -1,8 +1,11 @@
+var con = console;
 var isNode = (typeof module !== 'undefined');
 
 if (isNode) {
   // Canvas = require('canvas');
+  var rand = require('./rand.js');
   var dom = require('./dom.js');
+  var colours = require('./colours.js');
 }
 
 
@@ -40,15 +43,14 @@ if (vector) {
 }
 
 function reset() {
-  // con.log("reset");
+  con.log("hex reset", rand);
+  con.log("rand", rand.random(), rand.getSeed());
 
   var palette = colours.getRandomPalette();
   var backgroundColor = colours.getRandomColour();
 
-  window.removeEventListener("resize", resize);
-  // document.body.removeEventListener("click", reset);
-
-  dispatchEvent(new Event("render:start"));
+  // window.removeEventListener("resize", resize);
+  // dispatchEvent(new Event("render:start"));
 
   radiusOuter = (5 + rand.random() * 25) / 1000;
   strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
@@ -193,6 +195,11 @@ function reset() {
   }
   randomHexes = shuffle(hexs.slice());
 
+  con.log('cols', cols);
+  con.log('rows', rows);
+  con.log('hexagons', hexagons);
+  con.log('randomHexes', randomHexes.length, hexs.length);
+
   render();
 }
 
@@ -283,14 +290,14 @@ function batch() {
 
   currentBatch++;
   if (currentBatch == batches) {
-    dispatchEvent(new Event("render:complete"));
+    // dispatchEvent(new Event("render:complete"));
     // document.body.addEventListener("click", reset);
 
-    window.addEventListener("resize", resize);
+    // window.addEventListener("resize", resize);
 
     resize();
   } else {
-    dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
+    // dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
     resize();
     // requestAnimationFrame(batch);
     setTimeout(batch,200);
@@ -306,7 +313,8 @@ function render() {
 }
 
 function resize(sw,sh) {
-  // con.log("resize! hex");
+  con.log("resize! hex");
+  return;
   // if (!sw || !sh) return;
   sw = window.innerWidth;
   sh = window.innerHeight;
@@ -330,7 +338,7 @@ function resize(sw,sh) {
 
 
 
-var hexagon_tile = {
+var experiment = {
   stage: vector ? stage : stage.canvas,
   inner: inner,
   resize: resize,
@@ -338,12 +346,11 @@ var hexagon_tile = {
   kill: function() {}
 }
 
-// dispatchEvent(new CustomEvent("render:progress", {"detail": 0.4}));
+// dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
 
-dispatchEvent(new CustomEvent("load:complete", {detail:hexagon_tile}));
 
-return hexagon_tile;
+return experiment;
 
 })();
 
-if(isNode) module.exports = hexagon_tile;
+if (isNode) module.exports = hexagon_tile;

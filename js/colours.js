@@ -1,3 +1,5 @@
+var rand = require('./rand.js');
+
 var colours = (function() {
 
 	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("colours is using native random"); }

@@ -24,3 +24,5 @@ var rand = (function() {
     }
   };
 }());
+
+if (typeof module !== 'undefined') module.exports = rand;
