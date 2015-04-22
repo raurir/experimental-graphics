@@ -1,4 +1,17 @@
-(function() {
+var con = console;
+var isNode = (typeof module !== 'undefined');
+
+if (isNode) {
+  // Canvas = require('canvas');
+  var rand = require('./rand.js');
+  var geom = require('./geom.js');
+  var dom = require('./dom.js');
+  var colours = require('./colours.js');
+}
+
+
+
+var bezier_flow = (function() {
 
 var sw = sh = size = 800;
 
@@ -13,7 +26,9 @@ function getPoint(d) {
   return points[(sections + d) % sections];
 }
 
-function init() {
+var callback;
+function init(_callback) {
+  callback = _callback;
 
   lines = 5;//Math.round(10 + rand.random() * 50);
   sections = Math.round(2 + rand.random() * 3);
@@ -48,10 +63,10 @@ function init() {
 
 }
 
-function createPoint(init) {
+function createPoint(origin) {
 
-  var cx = init.cx || rand.random(),
-    cy = init.cy || rand.random(),
+  var cx = origin.cx || rand.random(),
+    cy = origin.cy || rand.random(),
     a = rand.random() * Math.PI * 2
     gapScale = rand.random() / 3 * 5;
 
@@ -64,7 +79,7 @@ function createPoint(init) {
   }
 
   points.push({
-    index: init.index,
+    index: origin.index,
     cx: cx,
     cy: cy,
     a: a,
@@ -210,13 +225,15 @@ function render(j) {
   //   setTimeout(function() { render(j)}, 100);
   // }
 
+  callback("render:complete");
+
 }
 
 
 
 var resizeMode = "contain";
 
-var bezier = {
+var experiment = {
   stage: bmp.canvas,
   resize: function(w,h) {
     sw = w;
@@ -227,7 +244,10 @@ var bezier = {
   init: init,
   kill: function() {}
 }
-dispatchEvent(new CustomEvent("load:complete", {detail: bezier}));
+// dispatchEvent(new CustomEvent("load:complete", {detail: experiment}));
 
+return experiment;
 
 })();
+
+if (isNode) module.exports = bezier_flow;

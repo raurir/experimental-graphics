@@ -8,6 +8,7 @@ if (isNode) {
   var colours = require('./colours.js');
 }
 
+// seed 3 is awesome.
 
 var hexagon_tile = (function() {
 
@@ -41,16 +42,17 @@ if (vector) {
 } else {
   stage = dom.canvas(sw, sh);
 }
-
-function reset() {
-  con.log("hex reset", rand);
-  con.log("rand", rand.random(), rand.getSeed());
+var callback;
+function init(_callback) {
+  callback = _callback;
+  con.log("hex init rand", rand.random(), rand.getSeed());
 
   var palette = colours.getRandomPalette();
   var backgroundColor = colours.getRandomColour();
 
   // window.removeEventListener("resize", resize);
   // dispatchEvent(new Event("render:start"));
+  callback("render:start");
 
   radiusOuter = (5 + rand.random() * 25) / 1000;
   strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
@@ -195,10 +197,8 @@ function reset() {
   }
   randomHexes = shuffle(hexs.slice());
 
-  con.log('cols', cols);
-  con.log('rows', rows);
-  con.log('hexagons', hexagons);
-  con.log('randomHexes', randomHexes.length, hexs.length);
+  con.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
+  // con.log('randomHexes', randomHexes.length, hexs.length);
 
   render();
 }
@@ -291,13 +291,15 @@ function batch() {
   currentBatch++;
   if (currentBatch == batches) {
     // dispatchEvent(new Event("render:complete"));
-    // document.body.addEventListener("click", reset);
+    callback("render:complete");
+    // document.body.addEventListener("click", init);
 
     // window.addEventListener("resize", resize);
 
     resize();
   } else {
     // dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
+    callback("render:progress", currentBatch / batches);
     resize();
     // requestAnimationFrame(batch);
     setTimeout(batch,200);
@@ -313,7 +315,7 @@ function render() {
 }
 
 function resize(sw,sh) {
-  con.log("resize! hex");
+  // con.log("resize! hex");
   return;
   // if (!sw || !sh) return;
   sw = window.innerWidth;
@@ -342,7 +344,7 @@ var experiment = {
   stage: vector ? stage : stage.canvas,
   inner: inner,
   resize: resize,
-  init: reset,
+  init: init,
   kill: function() {}
 }
 
