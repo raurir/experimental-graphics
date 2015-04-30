@@ -1,12 +1,13 @@
 con = console
 
 grunt = require('grunt')
-# stylus = require('stylus')
+require('load-grunt-tasks')(grunt);
 
 grunt.loadNpmTasks('grunt-contrib-coffee')
 grunt.loadNpmTasks('grunt-contrib-watch')
 grunt.loadNpmTasks('grunt-contrib-stylus')
 grunt.loadNpmTasks('grunt-contrib-jade')
+
 grunt.initConfig(
   watch:
     coffee:
@@ -18,6 +19,18 @@ grunt.initConfig(
     jade:
       files: ["#{__dirname}/jade/*.jade"]
       tasks: ['jade:compile']
+    babel:
+      files: ["#{__dirname}/es6/*.js"]
+      tasks: ['babel']
+
+
+  babel:
+    options:
+      sourceMap: true
+    dist:
+      files:
+        'es5/test.js': 'es6/test.js'
+        # 'es5/anotherfile.js': 'es6/anotherfile.js'
 
   coffee:
     compile:

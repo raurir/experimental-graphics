@@ -13,7 +13,7 @@ if (isNode) {
 var hexagon_tile = (function() {
 
 
-var size = 600 * 10, // 600 dpi * 10 inches.
+var size = 600 * 1, // 600 dpi * 10 inches.
   vector = false,
   sw = size,
   sh = size,
@@ -51,8 +51,12 @@ function init(_callback) {
   var backgroundColor = colours.getRandomColour();
 
   // window.removeEventListener("resize", resize);
-  // dispatchEvent(new Event("render:start"));
-  callback("render:start");
+  if (isNode) {
+    callback("render:start");
+  } else {
+    dispatchEvent(new Event("render:start"));
+  }
+
 
   radiusOuter = (5 + rand.random() * 25) / 1000;
   strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
@@ -290,16 +294,31 @@ function batch() {
 
   currentBatch++;
   if (currentBatch == batches) {
-    // dispatchEvent(new Event("render:complete"));
-    callback("render:complete");
+    //
+    if (isNode) {
+      callback("render:complete");
+    } else {
+      dispatchEvent(new Event("render:complete"));
+    }
+
     // document.body.addEventListener("click", init);
 
     // window.addEventListener("resize", resize);
 
     resize();
   } else {
-    // dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
-    callback("render:progress", currentBatch / batches);
+
+    if (isNode) {
+      callback("render:progress", currentBatch / batches);
+    } else {
+      dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
+    }
+
+
+
+
+
+
     resize();
     // requestAnimationFrame(batch);
     setTimeout(batch,200);
@@ -316,7 +335,7 @@ function render() {
 
 function resize(sw,sh) {
   // con.log("resize! hex");
-  return;
+  if (isNode) return;
   // if (!sw || !sh) return;
   sw = window.innerWidth;
   sh = window.innerHeight;
@@ -348,7 +367,7 @@ var experiment = {
   kill: function() {}
 }
 
-// dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
+if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
 
 
 return experiment;

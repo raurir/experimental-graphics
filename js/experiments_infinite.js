@@ -42,6 +42,7 @@ function initExperiments() {
   }
 
   function loadExperiment(params) {
+    con.log("loadExperiment", params);
     if (params) {
 
       $(buttons).slide(false);
@@ -55,6 +56,8 @@ function initExperiments() {
 
       currentLoading = newLoading;
       currentRandom = newRandom;
+
+      con.log("currentExperiment", params);
 
       if (currentExperiment) {
         currentExperiment.kill();

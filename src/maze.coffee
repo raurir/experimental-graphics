@@ -13,7 +13,7 @@ ran = Math.random()
 
 random = {
   randint: (min,max) -> return parseInt(min + Math.random() * (max - min))
-  shuffle: (array) -> 
+  shuffle: (array) ->
     m = array.length
     while (m)
       i = Math.floor(Math.random() * m--)
@@ -267,7 +267,7 @@ draw = () ->
 maze = {
   init: init
   stage: () -> can
-  resize: () -> console.log "resize maze not implemented!" 
+  resize: () -> console.log "resize maze not implemented!"
   kill: () -> console.log "kill maze not implemented!"
 }
 

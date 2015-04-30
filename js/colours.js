@@ -1,4 +1,8 @@
-var rand = require('./rand.js');
+var isNode = (typeof module !== 'undefined');
+if (isNode) {
+	var rand = require('./rand.js');
+}
+
 
 var colours = (function() {
 
