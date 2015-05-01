@@ -37,6 +37,7 @@ var experiments = (function() {
     ["polyhedra","3d"],
     ["polyhedra_three","THREE"],
     ["recursive"],
+    ["rectangular_fill"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
@@ -152,4 +153,3 @@ var experiments = (function() {
   };
 })();
 
-console.log("dfd", experiments);
