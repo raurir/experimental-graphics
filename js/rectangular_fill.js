@@ -27,32 +27,43 @@ var rect = function(progress) {
 
   var sw = sh = size = 800;
 
-  var bmp = dom.canvas(size,size);
+  var block = 20;
+  var stroke = block * 0.3;//Math.random() * 0.4;
 
-  var block = 10;
-  var stroke = block * 0.2;
-
-  var rows = 50;
-  var cols = 50;
+  var rows = 40;
+  var cols = 80;
   var populated = [];
   var available = [];
   var squares = [];
 
 
+  var bmp = dom.canvas(block * cols, block * rows);
 
-  function setBlock(size, colour) {
+  function setBlock(size) {
+
+    var width = Math.ceil(Math.random() * size);
+    var height = Math.ceil(Math.random() * size);
+    var colour = colours.getRandomColour();
+
     var startIndex = Math.floor(available.length * Math.random());
-    var start = available[startIndex].split(":");
-    var x = parseInt(start[0]), y = parseInt(start[1]);
+    var start = available[startIndex];
+    var y = start % rows;
+    var x = Math.floor(start/rows);
 
-    // con.log("setBlock", x, y)
+    // con.log("setBlock", x, y, width, height)
 
     var ok = true;
 
-    var xxe = x + size;
-    if (xxe > cols) xxe = cols;
-    var yye = y + size;
-    if (yye > rows) yye = rows;
+    var xxe = x + width;
+    if (xxe > cols) {
+      xxe = cols;
+      width = cols - x;
+    }
+    var yye = y + height;
+    if (yye > rows) {
+      yye = rows;
+      height = rows - y;
+    }
 
     for (var xx = x; xx < xxe && ok; xx++) {
       for (var yy = y; yy < yye && ok; yy++) {
@@ -64,14 +75,11 @@ var rect = function(progress) {
         for (var yy = y; yy < yye && ok; yy++) {
           populated[xx][yy] = colour;
 
-          var id = [xx,yy].join(":");
-
-          try {
-            var availIndex = available.indexOf(id);
-            available.splice(availIndex, 1);
-          } catch(e) {
-            con.log("error", e);
-          }
+          // var id = [xx,yy].join(":");
+          // var id = xx+":"+yy;
+          var id = xx * rows + yy;
+          var availIndex = available.indexOf(id);
+          available.splice(availIndex, 1);
 
         }
       }
@@ -80,8 +88,8 @@ var rect = function(progress) {
         colour: colour,
         x: x * block + stroke,
         y: y * block + stroke,
-        w: size * block - 2 * stroke,
-        h: size * block - 2 * stroke
+        w: width * block - 2 * stroke,
+        h: height * block - 2 * stroke
       });
 
     }
@@ -96,17 +104,26 @@ var rect = function(progress) {
 
     attempts++;
 
-    if (attempts > 1e5) {
+    var size = 17;
+
+    if (attempts > 1e4 / 2) {
+      size = 1;
+    } else if (attempts > 1e4) {
+      render();
       return con.warn("bailing!", attempts);
     }
 
-    var size = Math.ceil(Math.random() * 4);
-    var colour = colours.getRandomColour();
-    setBlock(size, colour) ;
+
+
+    setBlock(size) ;
 
     if (available.length) {
-      tryPosition();
-      // setTimeout(tryPosition, 1);
+      if ((attempts + 1) % 1e3 == 0) {
+        con.log("delaying call");
+        setTimeout(tryPosition, 100);
+      } else {
+        tryPosition();
+      }
     } else {
       render();
     }
@@ -120,7 +137,8 @@ var rect = function(progress) {
       populated[x] = [];
       for (var y = 0; y < rows; y++) {
         populated[x][y] = 0;
-        available.push([x,y].join(":"));
+        // available.push([x,y].join(":"));
+        available.push(x * rows + y);
       }
     }
 
@@ -140,10 +158,25 @@ var rect = function(progress) {
     //   }
     // }
 
-    bmp.ctx.setTransform(1,Math.random() * 0.2 - 0.1,Math.random() * 0.2 - 0.1,1,0,0);
+    bmp.ctx.setTransform(1, Math.random() * 0.2 - 0.1, Math.random() * 0.2 - 0.1, 1, 0, 0);
 
     for (var s = 0, sl = squares.length; s < sl; s++) {
       var rect = squares[s];
+
+      // var colourStart = colours.mutateColour(rect.colour, 40);// "red";//
+      // var colourEnd = colours.mutateColour(rect.colour, 40);// "blue";//
+      // var gradient;
+      // if (rect.w === rect.h) {
+      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+      // } else if (rect.w > rect.h) {
+      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y );
+      // } else {
+      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x, rect.y + rect.h);
+      // }
+      // gradient.addColorStop(0.0, colourStart);
+      // gradient.addColorStop(1.0, colourEnd);
+      // bmp.ctx.fillStyle = gradient;
+
       bmp.ctx.fillStyle = rect.colour;
       bmp.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
     }
