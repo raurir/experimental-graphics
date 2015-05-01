@@ -30,25 +30,79 @@ var rect = function(progress) {
   var bmp = dom.canvas(size,size);
 
   var block = 10;
-  var rows = 25;
-  var cols = 25;
+  var stroke = block * 0.2;
+
+  var rows = 50;
+  var cols = 50;
   var populated = [];
   var available = [];
+  var squares = [];
 
 
-  function tryPosition() {
 
+  function setBlock(size, colour) {
     var startIndex = Math.floor(available.length * Math.random());
-    var start = available[startIndex];
-    var x = start[0], y = start[1];
-    var size = Math.ceil(Math.random() * 4);
-    var colour = colours.getRandomColour();
+    var start = available[startIndex].split(":");
+    var x = parseInt(start[0]), y = parseInt(start[1]);
 
-    populated[x][y] = colour;
+    // con.log("setBlock", x, y)
+
+    var ok = true;
+
+    var xxe = x + size;
+    if (xxe > cols) xxe = cols;
+    var yye = y + size;
+    if (yye > rows) yye = rows;
+
+    for (var xx = x; xx < xxe && ok; xx++) {
+      for (var yy = y; yy < yye && ok; yy++) {
+        if (populated[xx][yy]) ok = false;
+      }
+    }
+    if (ok) {
+      for (var xx = x; xx < xxe && ok; xx++) {
+        for (var yy = y; yy < yye && ok; yy++) {
+          populated[xx][yy] = colour;
+
+          var id = [xx,yy].join(":");
+
+          try {
+            var availIndex = available.indexOf(id);
+            available.splice(availIndex, 1);
+          } catch(e) {
+            con.log("error", e);
+          }
+
+        }
+      }
+
+      squares.push({
+        colour: colour,
+        x: x * block + stroke,
+        y: y * block + stroke,
+        w: size * block - 2 * stroke,
+        h: size * block - 2 * stroke
+      });
+
+    }
 
     // con.log("tryPosition", available.length, x, y);
 
-    available.splice(startIndex, 1);
+
+  }
+
+  var attempts = 0;
+  function tryPosition() {
+
+    attempts++;
+
+    if (attempts > 1e5) {
+      return con.warn("bailing!", attempts);
+    }
+
+    var size = Math.ceil(Math.random() * 4);
+    var colour = colours.getRandomColour();
+    setBlock(size, colour) ;
 
     if (available.length) {
       tryPosition();
@@ -66,24 +120,34 @@ var rect = function(progress) {
       populated[x] = [];
       for (var y = 0; y < rows; y++) {
         populated[x][y] = 0;
-        available.push([x,y]);
+        available.push([x,y].join(":"));
       }
     }
+
+    // con.log("available", available)
 
     tryPosition();
   }
 
   function render(j) {
 
+    // con.log(populated, available)
 
-    con.log(populated, available)
+    // for (var x = 0; x < cols; x++) {
+    //   for (var y = 0; y < rows; y++) {
+    //     bmp.ctx.fillStyle = populated[x][y];
+    //     bmp.ctx.fillRect(x * block, y * block, block, block);
+    //   }
+    // }
 
-    for (var x = 0; x < cols; x++) {
-      for (var y = 0; y < rows; y++) {
-        bmp.ctx.fillStyle = populated[x][y];
-        bmp.ctx.fillRect(x * block, y * block, block, block);
-      }
+    bmp.ctx.setTransform(1,Math.random() * 0.2 - 0.1,Math.random() * 0.2 - 0.1,1,0,0);
+
+    for (var s = 0, sl = squares.length; s < sl; s++) {
+      var rect = squares[s];
+      bmp.ctx.fillStyle = rect.colour;
+      bmp.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
     }
+
 
     progress("render:complete");
 
