@@ -1,19 +1,19 @@
-// var seed = 411930879;
-var seed = ~~(Math.random() * 1e9)
-// seed = 662718928;
-// con.log(seed);
-var same = seed;
+// // var seed = 411930879;
+// var seed = ~~(Math.random() * 1e9)
+// // seed = 662718928;
+// // con.log(seed);
+// var same = seed;
 
-var originalRand = Math.random
+// var originalRand = Math.random
 
-Math.random = function() {
-  var x = (Math.sin(seed) + 1) * 10000;
-  seed += 1;
-  return x % 1;
-}
-getRandom = Math.random;
+// Math.random = function() {
+//   var x = (Math.sin(seed) + 1) * 10000;
+//   seed += 1;
+//   return x % 1;
+// }
+// getRandom = Math.random;
 
-
+rand.setSeed(411930879);
 
 
 var experiments = (function() {
@@ -23,6 +23,7 @@ var experiments = (function() {
 
 
   var experiments = [
+    ["_test"],
     ["additive"],
     ["bezier_flow"],
     ["hexagon_tile"],
@@ -67,14 +68,17 @@ var experiments = (function() {
       if (/css/.test(file)) {
         creatStyleSheet(file);
       } else {
-        var src = "js/" + file +  ".js";
+        var src = "js/" + file;// +  ".js";
         if (file == "THREE") {
           src = "lib/three/three.min.js";
         }
-        createScript(src);
+        // createScript(src);
+        require([src], function(experiment) {
+          ExperimentFactory(experiment);
+        })
       }
     }
-    // con.log("experiment", experiment);
+
   }
   function showButtons() {
     for(var e in experiments) {
@@ -145,7 +149,7 @@ var experiments = (function() {
     resize();
   });
 
-  console.log("init");
+  console.log("Experiments init");
   // document.body.appendChild(colours.showPalette());
   return {
    load: loadExperiment,

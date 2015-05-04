@@ -8,7 +8,8 @@
     "grunt": "^0.4.5",
     "grunt-contrib-coffee": "^0.12.0",
     "grunt-contrib-watch": "^0.6.1",
-    "stylus": "^0.49.3"
+    "stylus": "^0.49.3",
+    "amdefine": "~0.1.0"
   },
   "devDependencies": {
     "grunt-babel": "^5.0.0",

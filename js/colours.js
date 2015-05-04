@@ -6,7 +6,7 @@ if (isNode) {
 
 var colours = (function() {
 
-	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("colours is using native random"); }
+	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
 
 	var paletteIndex = -1, currentPalette = null;
 	var colourIndex = 0;
