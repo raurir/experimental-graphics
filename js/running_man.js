@@ -85,7 +85,7 @@ var limbs = {
 		edit.appendChild(input);
 		input.addEventListener("change", function(e) {
 			limbs[l][k] = parseFloat(e.target.value);
-			output.innerHTML = ("var limbs = " + JSON.stringify(limbs, null, "\t") + ";");
+			settings();
 		})
 	}
 
@@ -96,7 +96,9 @@ var limbs = {
 	}
 	document.body.appendChild(editor);
 	editor.appendChild(output);
-
+	(function settings() {
+		output.innerHTML = ("var limbs = " + JSON.stringify(limbs, null, "\t") + ";");
+	})();
 
 
 
