@@ -32,7 +32,7 @@ var dom = (function() {
 		setProps(el, props);
 		el.setSize = function(w,h) {
 			con.log('ssretS',w,h);
-			el.style.width = w + "px"; // i always use pixels... oh, you don't? i don't give a fuck
+			el.style.width = w + "px"; // i always use pixels... don't you?
 			el.style.height = h + "px";
 		};
 		// el.addClass = function(className) {

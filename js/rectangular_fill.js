@@ -1,6 +1,20 @@
 var con = console;
-if (typeof define !== 'function') { var define = require('amdefine')(module) }
-var isNode = (typeof module !== 'undefined');
+
+var amdefine;
+try {
+  amdefine = require( 'amdefine' );
+}
+catch( e ) {
+  con.log(e)
+  if ( e.code === 'MODULE_NOT_FOUND' ) {
+
+  }
+}
+
+
+// if (typeof define !== 'function') { var define = require('amdefine')(module) }
+
+/*var isNode = (typeof module !== 'undefined');
 
 if (isNode) {
   var rand = require('./rand.js');
@@ -19,7 +33,7 @@ define(function (require) {
 
     var sw = sh = size = 800;
 
-    var block = 20;
+    var block = Math.round(20 * (0.2 + rand.random() * 0.8));
     var stroke = block * (0.1 + rand.random()) * 0.4;
 
     var rows = 30;
@@ -207,3 +221,4 @@ define(function (require) {
 });
 
 // if (isNode) module.exports = bezier_flow;
+*/

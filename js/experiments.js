@@ -39,6 +39,7 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["recursive"],
     ["rectangular_fill"],
+    ["running_man"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
@@ -73,8 +74,16 @@ var experiments = (function() {
           src = "lib/three/three.min.js";
         }
         // createScript(src);
+
+        con.log("loadExperiment", exp, src)
+
         require([src], function(experiment) {
-          ExperimentFactory(experiment);
+          if (experiment) {
+            con.log("require loaded...", experiment)
+            ExperimentFactory(experiment);
+          } else {
+            con.log("require loaded... but experiment is null", experiment)
+          }
         })
       }
     }

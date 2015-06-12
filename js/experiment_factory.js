@@ -3,7 +3,7 @@ var con = console;
 
 function ExperimentFactory(experiment, callback) {
 
-  con.log("ExperimentFactory");
+  con.log("ExperimentFactory", experiment, callback);
 
   function progress() {
     if (isNode) {
