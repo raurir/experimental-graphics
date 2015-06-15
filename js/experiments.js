@@ -39,7 +39,7 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["recursive"],
     ["rectangular_fill"],
-    ["running_man"],
+    ["running_man", "running_man_physics", "Matter"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
@@ -64,29 +64,39 @@ var experiments = (function() {
 
   function loadExperiment(index) {
     var exp = experiments[index];
+
+    var src = [];
+
     for (var i = exp.length - 1; i > -1;i--) {
       var file = exp[i]
       if (/css/.test(file)) {
         creatStyleSheet(file);
       } else {
-        var src = "js/" + file;// +  ".js";
-        if (file == "THREE") {
-          src = "lib/three/three.min.js";
+        switch(file) {
+          case "THREE" :
+            src.push("lib/three/three.min");
+            break;
+          case "Matter" :
+            src.push("lib/matter/matter-0.8.0");
+            break;
+          default:
+            src.push("js/" + file);
         }
         // createScript(src);
-
-        con.log("loadExperiment", exp, src)
-
-        require([src], function(experiment) {
-          if (experiment) {
-            con.log("require loaded...", experiment)
-            ExperimentFactory(experiment);
-          } else {
-            con.log("require loaded... but experiment is null", experiment)
-          }
-        })
       }
     }
+
+    con.log("loadExperiment", exp, src)
+
+    require(src, function(experiment) {
+      if (experiment) {
+        con.log("require loaded...", experiment)
+        ExperimentFactory(experiment);
+      } else {
+        con.log("require loaded... but experiment is null", experiment)
+      }
+    })
+
 
   }
   function showButtons() {

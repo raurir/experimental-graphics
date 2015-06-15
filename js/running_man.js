@@ -86,8 +86,8 @@ var running_man = (function() {
 			},
 			render: function(x, y) {
 				ctx.beginPath();
-				ctx.strokeStyle = "#0f0";
-				ctx.fillStyle = "#0f0";
+				ctx.strokeStyle = "#010";
+				ctx.fillStyle = "#010";
 				ctx.moveTo(x + this.pos.sx, y + this.pos.sy);
 				ctx.lineTo(x + this.pos.ex, y + this.pos.ey);
 				ctx.stroke();
@@ -155,7 +155,7 @@ var running_man = (function() {
 
 		// cy = 200 - Math.abs(Math.sin(time) * 50);
 
-		var max = 0; // calculate impact with ground, ie maximum y position. 
+		var max = 0; // calculate impact with ground, ie maximum y position.
 		// we can hope it's either the end of the calf or the end of the foot. walking on knees is not currently accepted.
 		hips.calc(time);
 		t1.calc(time);
@@ -192,11 +192,22 @@ var running_man = (function() {
 	}
 	render(0);
 
+
+
 	var experiment = {
 		stage: bmp.canvas,
 		inner: null,
 		resize: function() {},
-		init: function() {},
+		init: function() {
+
+
+			con.log("calling init")
+			setTimeout(function() {
+				con.log("Matter", Matter);
+				var physics = running_man_physics();
+				physics.init();
+			},100);
+		},
 		kill: function() {}
 	}
 
