@@ -42,13 +42,13 @@ var limbs = {
 
 var running_man = (function() {
 
-	var sw = 600, sh = 600;
+	var sw = 500, sh = 600;
 
 	var bmp = dom.canvas(sw,sh);
 	var ctx = bmp.ctx;
 
-	var cx = sw * 3 /4
-	var cy = sh * 1/ 4;
+	var cx = sw * 4 / 5
+	var cy = sh * 1 / 4;
 
 	var editor = dom.element("div", {style: {position: "absolute", top: 10, left: 10}});
 	var output = dom.element("pre", {style: {color: "white","font-size":"10px", }});
