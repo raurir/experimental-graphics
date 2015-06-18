@@ -5,6 +5,6 @@ require([
 	"js/colours.js",
 	"js/experiment_factory.js",
 	"js/experiments.js",
-	"js/experiments_progress.js"], function(dom, rand, geom, colours, experiment_factory, experiments, experiments_progress) {
-		console.log("experiments main ready");
+	"js/experiments_progress.js"], function() {
+		console.log("experiments main ready dom", dom);
 });

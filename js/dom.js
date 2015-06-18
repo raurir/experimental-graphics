@@ -1,9 +1,24 @@
+
+
 var con = console;
 
 var isNode = (typeof module !== 'undefined');
 if (isNode) {
   var Canvas = require('canvas');
 }
+
+// (function (module) {
+//     if (typeof define === "function" && define.amd) {
+//         define(function () { return module; });
+//     } else {
+//         window.myfunction = module.myfunction;
+//     }
+// }({
+//     myfunction: function () {
+//         /* ... */
+//     }
+// }));
+
 
 var dom = (function() {
 
@@ -31,7 +46,6 @@ var dom = (function() {
 		var el = document.createElement(element);
 		setProps(el, props);
 		el.setSize = function(w,h) {
-			con.log('ssretS',w,h);
 			el.style.width = w + "px"; // i always use pixels... don't you?
 			el.style.height = h + "px";
 		};
@@ -80,9 +94,6 @@ var dom = (function() {
 		var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
 		setAttributes(el, props);
 		el.setSize = function(w,h) {
-
-			// el.style.width = w + "px"; // i always use pixels... oh, you don't? i don't give a fuck
-			// el.style.height = h + "px";
 			el.setAttribute("width", w);
 			el.setAttribute("height", h);
 		};
@@ -103,4 +114,5 @@ var dom = (function() {
 
 })();
 
-if(isNode) module.exports = dom;
+// if(isNode) 
+// module.exports = dom;

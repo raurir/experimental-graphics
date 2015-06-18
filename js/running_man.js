@@ -58,7 +58,14 @@ var running_man = (function() {
 
 		var parent = options.parent;
 
+		var div = dom.element("div", {style: {
+			width: options.movement.length, height: 5, background:"rgba(255,0,0,0.5)",
+			transform: "translate(" + options.movement.length + "px,0px)rotate(20deg)"
+		}});
+		if (parent && parent.div) parent.div.appendChild(div);
+
 		return {
+			div: div,
 			pos: {},
 			calc: function(time) {
 				var osc = options.movement.baserot + Math.sin(time + options.movement.offset + options.phase) * options.movement.range;
@@ -73,6 +80,10 @@ var running_man = (function() {
 						ex: 0 + Math.sin(osc) * options.movement.length,
 						ey: 0 + Math.cos(osc) * options.movement.length
 					}
+
+					div.style.transform = "translate(" + options.movement.length + "px,0px)rotate(" + osc + "rad)";
+					div.style.transform = "rotate(" + osc + "rad)";
+
 					if (parent) {
 						var parentPos = parent.position();
 						pos.sx += parentPos.ex;
@@ -144,6 +155,8 @@ var running_man = (function() {
 	var forearm1 = createLimb({parent: bicep1, movement: limbs.forearm, phase: 0});
 	var bicep2 = createLimb({parent: null, movement: limbs.bicep, phase: Math.PI});
 	var forearm2 = createLimb({parent: bicep2, movement: limbs.forearm, phase: Math.PI});
+
+	document.body.appendChild(t1.div);
 
 	function render(t) {
 		// var time = 50;

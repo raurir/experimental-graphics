@@ -81,7 +81,7 @@ var experiments = (function() {
             src.push("lib/matter/matter-0.8.0");
             break;
            case "P2" :
-            src.push("lib/p2/p2", "lib/p2/p2.renderer");
+            src.push("lib/p2/p2");//, "lib/p2/p2.renderer");
             break;
           default:
             src.push("js/" + file);
@@ -90,14 +90,16 @@ var experiments = (function() {
       }
     }
 
-    con.log("loadExperiment", exp, src)
+    con.log("loadExperiment", exp);
+    con.log("loadExperiment src to load:",  src.length);
 
-    require(src, function(experiment) {
+    require(src, function(experiment,b,c,d,e) {
+      con.log("require loaded");
       if (experiment) {
         con.log("require loaded...", experiment)
         ExperimentFactory(experiment);
       } else {
-        con.log("require loaded... but experiment is null", experiment)
+        con.log("require loaded... but experiment is null", experiment, arguments)
       }
     })
 
