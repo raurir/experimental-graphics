@@ -40,7 +40,7 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["recursive"],
     ["rectangular_fill"],
-    ["running_man", "running_man_physics", "Matter"],
+    ["running_man", "P2", "running_man_physics_p2"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
@@ -79,6 +79,9 @@ var experiments = (function() {
             break;
           case "Matter" :
             src.push("lib/matter/matter-0.8.0");
+            break;
+           case "P2" :
+            src.push("lib/p2/p2", "lib/p2/p2.renderer");
             break;
           default:
             src.push("js/" + file);

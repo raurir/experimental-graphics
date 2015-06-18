@@ -201,12 +201,22 @@ var running_man = (function() {
 		init: function() {
 
 
+			// con.log("calling init")
+			// setTimeout(function() {
+			// 	con.log("Matter", Matter);
+			// 	var physics = running_man_physics();
+			// 	physics.init();
+			// },100);
+
 			con.log("calling init")
 			setTimeout(function() {
-				con.log("Matter", Matter);
-				var physics = running_man_physics();
-				physics.init();
-			},100);
+				// var physics = running_man_physics();
+				// physics.init();
+			},1100);
+
+
+
+
 		},
 		kill: function() {}
 	}
