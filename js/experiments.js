@@ -25,6 +25,7 @@ var experiments = (function() {
   var experiments = [
     ["_test"],
     ["additive"],
+    ["anemone_three", "THREE"],
     ["bezier_flow"],
     ["hexagon_tile"],
     ["isometric_cubes"],

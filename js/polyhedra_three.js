@@ -1,9 +1,9 @@
 var camera, scene, projector, renderer;
 var mouse = { x: 0, y: 0 };
 var sw = window.innerWidth, sh = window.innerHeight;
-sw = sh = 4000;
+sw = sh = 400;
 var theta = 0;
-var h = []; 
+var h = [];
 var i = 0;
 var radius = 20;
 var n;
@@ -74,7 +74,7 @@ function createPattern(size) {
 	// }
 	var y = -padding;
 	while(y < size + padding) {
-		// if (settings.varyPerLine) {		
+		// if (settings.varyPerLine) {
 		// 	settings.lineSize = 1 + frand(10) * settings.lineScale;
 		// 	settings.lineGap = 2 + frand(3) * settings.lineScale;
 		// }
@@ -98,7 +98,7 @@ function createPattern(size) {
 
 
 function draw(props) {
-	
+
 	var materials = [];
 	for (var i=0; i < props.faces.length / 3; i++) {
 		// var img = new Image();

@@ -129,7 +129,12 @@ var running_man_physics = function() {
 
 
         var hips = Matter.Composite.create();
-        var torso =  Bodies.rectangle(sw / 2, 100, 20, 20, {inertia: Infinity});
+
+        Matter.Body.translate(hips, {x:20,y:10});
+
+
+        var torso = Bodies.rectangle(sw / 2, 50, 20, 20, {inertia: 0});
+
 
         var legleft = Matter.Composite.create();
         var thighleft = Bodies.rectangle(sw / 2, 100, 50, 5, {inertia: Infinity});
@@ -161,7 +166,15 @@ var running_man_physics = function() {
         // }));
 
         Matter.Composite.add(hips, Matter.Constraint.create({
-            bodyA: thighleft,
+            bodyA: torso,
+            bodyB: thighleft,
+            // pointB: { x: -25, y: 0 },
+            // pointA: { x: sw / 2, y: 100 },
+            stiffness: 1
+        }));
+
+        Matter.Composite.add(hips, Matter.Constraint.create({
+            bodyA: torso,
             bodyB: thighright,
             // pointB: { x: -25, y: 0 },
             // pointA: { x: sw / 2, y: 100 },
@@ -188,6 +201,7 @@ var running_man_physics = function() {
         //     Matter.Body.applyForce(leg, {x: sw / 2, y: sh}, {x: 0, y: -0.01})
         // }, 1000);
 
+        /*
         var t = 0;
         setInterval(function() {
             t++;
@@ -199,6 +213,7 @@ var running_man_physics = function() {
 
             output.innerHTML = Math.sin(t / 10) * 0.05
         }, 40);
+        */
 
 
         var renderOptions = _engine.render.options;
@@ -224,7 +239,7 @@ var running_man_physics = function() {
         Mouse.setOffset(_engine.input.mouse, { x: 0, y: 0 });
 
         _engine.enableSleeping = false;
-        _engine.world.gravity.y = 1;//1;
+        _engine.world.gravity.y = 0;//1;
         _engine.world.gravity.x = 0;
         _engine.timing.timeScale = 1;
 
