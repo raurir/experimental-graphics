@@ -51,7 +51,13 @@ var running_man = (function() {
 	var cy = sh * 1 / 4;
 
 	var editor = dom.element("div", {style: {position: "absolute", top: 10, left: 10}});
-	var output = dom.element("pre", {style: {color: "white","font-size":"10px", }});
+	var output = dom.element("pre", {style: {color: "white","font-size":"10px"}});
+
+	var divnested = dom.element("div", {style: {position: "absolute",
+		top: 190,
+		left: 355,
+		transform: "rotate(-90deg)scale(-1,1)"
+	}});
 
 
 	function createLimb(options) {
@@ -59,12 +65,17 @@ var running_man = (function() {
 		var parent = options.parent;
 
 		var div = dom.element("div", {style: {
-			width: options.movement.length, height: 5, background:"rgba(255,0,0,0.5)",
-			transform: "translate(" + options.movement.length + "px,0px)rotate(20deg)"
+			width: options.movement.length,
+			height: 5,
+			background: "rgba(255,0,0,0.5)",
+			"transformOrigin": "0% 50% ",
+			transform: "translate(" + options.movement.length + "px,0px)rotate(20deg)",
+			// "transformStyle": "preserve-3d"
 		}});
 		if (parent && parent.div) parent.div.appendChild(div);
 
 		return {
+			options: options,
 			div: div,
 			pos: {},
 			calc: function(time) {
@@ -74,6 +85,9 @@ var running_man = (function() {
 			},
 			position: function(osc) {
 				if (osc) {
+
+					this.osc = osc;
+
 					var pos = {
 						sx: 0,
 						sy: 0,
@@ -81,8 +95,7 @@ var running_man = (function() {
 						ey: 0 + Math.cos(osc) * options.movement.length
 					}
 
-					div.style.transform = "translate(" + options.movement.length + "px,0px)rotate(" + osc + "rad)";
-					div.style.transform = "rotate(" + osc + "rad)";
+					var translation = "", rotation = "rotate(" + (osc) + "rad)";
 
 					if (parent) {
 						var parentPos = parent.position();
@@ -90,14 +103,22 @@ var running_man = (function() {
 						pos.sy += parentPos.ey;
 						pos.ex += parentPos.ex;
 						pos.ey += parentPos.ey;
+
+						translation = "translate(" + parent.options.movement.length + "px,0px)";
+
+						rotation = "rotate(" + (-parent.osc + osc) + "rad)";
+
 					}
+
+					div.style.transform = translation + rotation ;
+
 					this.pos = pos;
 				}
 				return this.pos;
 			},
 			render: function(x, y) {
 				ctx.beginPath();
-				ctx.strokeStyle = "#010";
+				ctx.strokeStyle = "#040";
 				ctx.fillStyle = "#010";
 				ctx.moveTo(x + this.pos.sx, y + this.pos.sy);
 				ctx.lineTo(x + this.pos.ex, y + this.pos.ey);
@@ -156,7 +177,8 @@ var running_man = (function() {
 	var bicep2 = createLimb({parent: null, movement: limbs.bicep, phase: Math.PI});
 	var forearm2 = createLimb({parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
-	document.body.appendChild(t1.div);
+	document.body.appendChild(divnested);
+	divnested.appendChild(t1.div);
 
 	function render(t) {
 		// var time = 50;
@@ -188,7 +210,7 @@ var running_man = (function() {
 		ctx.fillStyle = "#040";
 		ctx.fillRect(cx - 100, horizon, 200, 10);
 
-		var x = cx, y = horizon - max;
+		var x = cx, y = cy;//horizon - max;
 		t1.render(x, y);
 		c1.render(x, y);
 		f1.render(x, y);
@@ -221,11 +243,11 @@ var running_man = (function() {
 			// 	physics.init();
 			// },100);
 
-			con.log("calling init")
-			setTimeout(function() {
-				// var physics = running_man_physics();
-				// physics.init();
-			},1100);
+			// con.log("calling init")
+			// setTimeout(function() {
+			// 	var physics = running_man_physics();
+			// 	physics.init();
+			// },1100);
 
 
 
