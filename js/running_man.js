@@ -1,6 +1,13 @@
 var con = console;
 var isNode = (typeof module !== 'undefined');
 
+if (isNode) {
+	var dom = require('./dom.js');
+	var fs = require('fs');
+}
+
+// con.log(dom);
+
 var limbs = {
 	"body": {
 		"range": 0,
@@ -48,38 +55,45 @@ var limbs = {
 
 var running_man = (function() {
 
-	var sw = 500, sh = 600;
+	var sw = 300, sh = 400;
 
 	var bmp = dom.canvas(sw,sh);
 	var ctx = bmp.ctx;
 
 	var cx = 150;
-	var cy = sh * 1 / 4;
+	var cy = 0;
+
+	var horizon = sh - 50;
 
 	var blockSize = 10;
 
-	var editor = dom.element("div", {style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
-	var output = dom.element("pre", {style: {position: "absolute", top: 0, left: 220}});
+	if (!isNode) {
+		var editor = dom.element("div", {style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
+		var output = dom.element("pre", {style: {position: "absolute", top: 0, left: 220}});
 
-	var divnested = dom.element("div", {style: {position: "absolute",
-		top: 0,
-		left: cx - blockSize / 2,
-		transform: "rotate(-90deg)scale(-1,1)"
-	}});
+		var divnested = dom.element("div", {style: {position: "absolute",
+			top: 0,
+			left: cx - blockSize / 2,
+			transform: "rotate(-90deg)scale(-1,1)"
+		}});
+	}
 
 
 	function createLimb(options) {
 
 		var parent = options.parent;
 
-		var div = dom.element("div", {style: {
-			width: options.movement.length,
-			height: blockSize,
-			background: "rgba(255,0,0,0.5)",
-			"transformOrigin": "0 " + (blockSize / 2) + "px",
-			position: "absolute"
-		}});
-		if (parent && parent.div) parent.div.appendChild(div);
+		var div = {};
+		if (!isNode) {
+			div = dom.element("div", {style: {
+				width: options.movement.length,
+				height: blockSize,
+				background: "rgba(255,0,0,0.5)",
+				"transformOrigin": "0 " + (blockSize / 2) + "px",
+				position: "absolute"
+			}});
+			if (parent && parent.div) parent.div.appendChild(div);
+		}
 
 		return {
 			name: options.name,
@@ -149,76 +163,12 @@ var running_man = (function() {
 				var tx = this.translationX, ty = 0;
 				if (!parent) tx = y;
 
-				div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
+				if (!isNode) div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
 				// con.log(this.div.style.transform);
 			}
 		}
 	}
 
-	function settings() {
-		output.innerHTML = ("var limbs = " + JSON.stringify(limbs, null, "\t") + ";");
-	};
-	settings();
-
-
-	function createEditor(l,k) {
-		var edit = dom.element("div");
-		var label = dom.element("span", {innerHTML: l + ":" + k + ":"});
-		var input = dom.element("input", {value: limbs[l][k], type: "number"});
-		editor.appendChild(edit);
-		edit.appendChild(label);
-		edit.appendChild(input);
-		input.addEventListener("change", function(e) {
-			limbs[l][k] = parseFloat(e.target.value);
-			settings();
-		})
-		return input;
-	}
-
-	var inputs = [];
-	for (var l in limbs) {
-		for (var k in limbs[l]) {
-			inputs.push(createEditor(l,k));
-		}
-	}
-	document.body.appendChild(editor);
-
-
-	function createButton(label, callback) {
-		var button = dom.element("button", {innerHTML: label});
-		editor.appendChild(button);
-		button.addEventListener("click", callback);
-	}
-
-	var randomise = createButton("Random", function(e) {
-		// for (var l in limbs) {
-		// 	for (var k in limbs[l]) {
-		// 		limbs[l][k] = limbs[l][k] * (0.8 + Math.random() * 0.2);
-		// 	}
-		// }
-		for (var i in inputs) {
-			inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
-			inputs[i].dispatchEvent(new Event('change'));
-		}
-
-	});
-
-	editor.appendChild(output);
-
-
-	/* body structure
-
-	body
-		torso
-			bicep1
-				forearm1
-			bicep2
-				forearm2
-		thigh1
-			calf1
-		thigh2
-			calf2
-	*/
 
 
 	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
@@ -237,16 +187,88 @@ var running_man = (function() {
 	var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
 	var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
-	document.body.appendChild(divnested);
-	divnested.appendChild(body.div);
+
+
+	if (!isNode) {
+		function settings() {
+			output.innerHTML = ("var limbs = " + JSON.stringify(limbs, null, "\t") + ";");
+		};
+		settings();
+
+
+		function createEditor(l,k) {
+			var edit = dom.element("div");
+			var label = dom.element("span", {innerHTML: l + ":" + k + ":"});
+			var input = dom.element("input", {value: limbs[l][k], type: "number"});
+			editor.appendChild(edit);
+			edit.appendChild(label);
+			edit.appendChild(input);
+			input.addEventListener("change", function(e) {
+				limbs[l][k] = parseFloat(e.target.value);
+				settings();
+			})
+			return input;
+		}
+
+		var inputs = [];
+		for (var l in limbs) {
+			for (var k in limbs[l]) {
+				inputs.push(createEditor(l,k));
+			}
+		}
+		document.body.appendChild(editor);
+
+
+		function createButton(label, callback) {
+			var button = dom.element("button", {innerHTML: label});
+			editor.appendChild(button);
+			button.addEventListener("click", callback);
+		}
+
+		var randomise = createButton("Random", function(e) {
+			// for (var l in limbs) {
+			// 	for (var k in limbs[l]) {
+			// 		limbs[l][k] = limbs[l][k] * (0.8 + Math.random() * 0.2);
+			// 	}
+			// }
+			for (var i in inputs) {
+				inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
+				inputs[i].dispatchEvent(new Event('change'));
+			}
+
+		});
+
+		editor.appendChild(output);
+		document.body.appendChild(divnested);
+		divnested.appendChild(body.div);
+	}
+
+	/* body structure
+
+	body
+		torso
+			bicep1
+				forearm1
+			bicep2
+				forearm2
+		thigh1
+			calf1
+		thigh2
+			calf2
+	*/
+
+
+	var frames = 10;
 
 	function render(t) {
 		// var time = 50;
-		var time = t / 2500;
+		var time = t / frames * Math.PI
 
-		ctx.clearRect(0, 0, sw, sh);
-		// ctx.fillStyle = "#0f0";
-		// ctx.fillRect(cx - 2, cy - 2, 4, 4);
+		con.log(t, time)
+
+		// ctx.clearRect(0, 0, sw, sh);
+		ctx.fillStyle = "#000";
+		ctx.fillRect(0, 0, sw, sh);
 
 		// cy = 200 - Math.abs(Math.sin(time) * 50);
 
@@ -268,10 +290,9 @@ var running_man = (function() {
 		bicep2.calc(time);
 		forearm2.calc(time);
 
-		var horizon = 400;
 		// cy = max;
 		ctx.fillStyle = "#040";
-		ctx.fillRect(cx - 100, horizon, 200, 10);
+		ctx.fillRect(cx - sw / 2, horizon, sw, 10);
 
 		var x = cx, y = horizon - max;
 
@@ -291,9 +312,47 @@ var running_man = (function() {
 		forearm2.render(x, y);
 
 		// if (t<100)requestAnimationFrame(render);
-		requestAnimationFrame(render);
+		// requestAnimationFrame(render);
+
+		saveFile(bmp.canvas, t);
+
+		if (t < frames) {
+			setTimeout(function() {
+				render(t + 1);
+			}, 50);
+		}
+
 	}
 	render(0);
+
+
+
+
+
+
+
+
+
+
+	function saveFile(canvas, frame) {
+		if (isNode) {
+			canvas.toBuffer(function(err, buf){
+				if (err) {
+					con.log(err);
+				} else {
+					var filename = __dirname + '/../export/runningman' + frame + '.png';
+					fs.writeFile(filename, buf, function(){
+						con.log("writeFile", filename);
+					});
+				}
+			});
+		} else {
+			con.warn("browser export not written");
+		}
+	}
+
+
+
 
 
 

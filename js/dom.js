@@ -114,5 +114,4 @@ var dom = (function() {
 
 })();
 
-// if(isNode) 
-// module.exports = dom;
+if(isNode) module.exports = dom;
