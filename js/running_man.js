@@ -7,7 +7,6 @@ if (isNode) {
 }
 
 // con.log(dom);
-
 var limbs = {
 	"body": {
 		"range": 0,
@@ -17,7 +16,7 @@ var limbs = {
 	},
 	"torso": {
 		"range": 0,
-		"baserot": Math.PI,
+		"baserot": 3.141592653589793,
 		"length": 100,
 		"offset": 0
 	},
@@ -40,14 +39,14 @@ var limbs = {
 		"offset": 0
 	},
 	"bicep": {
-		"range": 1.5,
-		"baserot": 0,
+		"range": 0.9,
+		"baserot": -0.5,
 		"length": 70,
 		"offset": 0
 	},
 	"forearm": {
-		"range": 1,
-		"baserot": 2,
+		"range": 1.5,
+		"baserot": 1.5,
 		"length": 60,
 		"offset": 0
 	}
@@ -147,6 +146,7 @@ var running_man = (function() {
 			},
 			render: function(x, y) {
 				ctx.beginPath();
+				ctx.lineWidth = 3;
 				ctx.strokeStyle = "#090";
 				ctx.fillStyle = "#0a0";
 				ctx.moveTo(x + this.pos.sx, y + this.pos.sy);
@@ -257,14 +257,13 @@ var running_man = (function() {
 			calf2
 	*/
 
-
-	var frames = 10;
-
 	function render(t) {
-		// var time = 50;
-		var time = t / frames * Math.PI
 
-		con.log(t, time)
+		var frames = 50;
+
+		var time = isNode ? t / frames * Math.PI : t / 500;
+
+		// con.log("render", t, time)
 
 		// ctx.clearRect(0, 0, sw, sh);
 		ctx.fillStyle = "#000";
@@ -311,15 +310,17 @@ var running_man = (function() {
 		bicep2.render(x, y);
 		forearm2.render(x, y);
 
-		// if (t<100)requestAnimationFrame(render);
-		// requestAnimationFrame(render);
-
-		saveFile(bmp.canvas, t);
-
-		if (t < frames) {
-			setTimeout(function() {
-				render(t + 1);
-			}, 50);
+		if (isNode) {
+			saveFile(bmp.canvas, t);
+			if (t < frames - 1) {
+				setTimeout(function() {
+					render(t + 1);
+				}, 50);
+				// and then:  convert -delay 3 -loop 0 *.png animation.gif
+			}
+		} else {
+			// if (t<100)requestAnimationFrame(render);
+			requestAnimationFrame(render);			
 		}
 
 	}
@@ -340,10 +341,8 @@ var running_man = (function() {
 				if (err) {
 					con.log(err);
 				} else {
-					var filename = __dirname + '/../export/runningman' + frame + '.png';
-					fs.writeFile(filename, buf, function(){
-						con.log("writeFile", filename);
-					});
+					var filename = __dirname + '/../export/running_man/runningman' + (10 + frame) + '.png';
+					fs.writeFile(filename, buf, function(){ con.log("writeFile", filename); });
 				}
 			});
 		} else {
