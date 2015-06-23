@@ -2,10 +2,16 @@ var con = console;
 var isNode = (typeof module !== 'undefined');
 
 var limbs = {
-	"hips": {
+	"body": {
 		"range": 0,
 		"baserot": 0,
 		"length": 0,
+		"offset": 0
+	},
+	"torso": {
+		"range": 0,
+		"baserot": Math.PI,
+		"length": 100,
 		"offset": 0
 	},
 	"thigh": {
@@ -29,13 +35,13 @@ var limbs = {
 	"bicep": {
 		"range": 1.5,
 		"baserot": 0,
-		"length": 50,
+		"length": 70,
 		"offset": 0
 	},
 	"forearm": {
 		"range": 1,
 		"baserot": 2,
-		"length": 40,
+		"length": 60,
 		"offset": 0
 	}
 };
@@ -50,12 +56,14 @@ var running_man = (function() {
 	var cx = 150;
 	var cy = sh * 1 / 4;
 
-	var editor = dom.element("div", {style: {position: "absolute", top: 10, left: 300}});
-	var output = dom.element("pre", {style: {color: "white","font-size":"10px"}});
+	var blockSize = 10;
+
+	var editor = dom.element("div", {style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
+	var output = dom.element("pre", {style: {position: "absolute", top: 0, left: 220}});
 
 	var divnested = dom.element("div", {style: {position: "absolute",
 		top: 0,
-		left: cx,
+		left: cx - blockSize / 2,
 		transform: "rotate(-90deg)scale(-1,1)"
 	}});
 
@@ -66,9 +74,9 @@ var running_man = (function() {
 
 		var div = dom.element("div", {style: {
 			width: options.movement.length,
-			height: 10,
+			height: blockSize,
 			background: "rgba(255,0,0,0.5)",
-			"transformOrigin": "0 5px",
+			"transformOrigin": "0 " + (blockSize / 2) + "px",
 			position: "absolute"
 		}});
 		if (parent && parent.div) parent.div.appendChild(div);
@@ -78,9 +86,9 @@ var running_man = (function() {
 			options: options,
 			div: div,
 			pos: {
-				sx: 0, 
-				sy: 0, 
-				ex: 0, 
+				sx: 0,
+				sy: 0,
+				ex: 0,
 				ey: 0
 			},
 			calc: function(time) {
@@ -123,7 +131,7 @@ var running_man = (function() {
 				this.pos = pos;
 				// con.log(this, this.pos);
 			},
-			render: function(x, y, offsetNested) {
+			render: function(x, y) {
 				ctx.beginPath();
 				ctx.strokeStyle = "#090";
 				ctx.fillStyle = "#0a0";
@@ -139,6 +147,7 @@ var running_man = (function() {
 				ctx.fill();
 
 				var tx = this.translationX, ty = 0;
+				if (!parent) tx = y;
 
 				div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
 				// con.log(this.div.style.transform);
@@ -154,7 +163,7 @@ var running_man = (function() {
 
 	function createEditor(l,k) {
 		var edit = dom.element("div");
-		var label = dom.element("span", {innerHTML: l + ":" + k + ":", style:{color: "white"}});
+		var label = dom.element("span", {innerHTML: l + ":" + k + ":"});
 		var input = dom.element("input", {value: limbs[l][k], type: "number"});
 		editor.appendChild(edit);
 		edit.appendChild(label);
@@ -163,34 +172,77 @@ var running_man = (function() {
 			limbs[l][k] = parseFloat(e.target.value);
 			settings();
 		})
+		return input;
 	}
 
+	var inputs = [];
 	for (var l in limbs) {
 		for (var k in limbs[l]) {
-			createEditor(l,k);
+			inputs.push(createEditor(l,k));
 		}
 	}
 	document.body.appendChild(editor);
+
+
+	function createButton(label, callback) {
+		var button = dom.element("button", {innerHTML: label});
+		editor.appendChild(button);
+		button.addEventListener("click", callback);
+	}
+
+	var randomise = createButton("Random", function(e) {
+		// for (var l in limbs) {
+		// 	for (var k in limbs[l]) {
+		// 		limbs[l][k] = limbs[l][k] * (0.8 + Math.random() * 0.2);
+		// 	}
+		// }
+		for (var i in inputs) {
+			inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
+			inputs[i].dispatchEvent(new Event('change'));
+		}
+
+	});
+
 	editor.appendChild(output);
 
-	var hips = createLimb({name: "hips", parent: null, movement: limbs.hips, phase: 0});
-	var thigh1 = createLimb({name: "thigh1", parent: hips, movement: limbs.thigh, phase: 0});
-	var calfoot1 = createLimb({name: "calfoot1", parent: thigh1, movement: limbs.calf, phase: 0});
-	var foot1 = createLimb({name: "foot1", parent: calfoot1, movement: limbs.foot, phase: 0});
-	var thigh2 = createLimb({name: "thigh2", parent: hips, movement: limbs.thigh, phase: Math.PI});
+
+	/* body structure
+
+	body
+		torso
+			bicep1
+				forearm1
+			bicep2
+				forearm2
+		thigh1
+			calf1
+		thigh2
+			calf2
+	*/
+
+
+	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
+
+	var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
+
+	var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
+	var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
+	var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
+	var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
 	var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
 	var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
-	var bicep1 = createLimb({name: "bicep1", parent: hips, movement: limbs.bicep, phase: 0});
+
+	var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
 	var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
-	var bicep2 = createLimb({name: "bicep2", parent: hips, movement: limbs.bicep, phase: Math.PI});
+	var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
 	var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
 	document.body.appendChild(divnested);
-	divnested.appendChild(hips.div);
+	divnested.appendChild(body.div);
 
 	function render(t) {
 		// var time = 50;
-		var time = t / 250;
+		var time = t / 2500;
 
 		ctx.clearRect(0, 0, sw, sh);
 		// ctx.fillStyle = "#0f0";
@@ -200,10 +252,12 @@ var running_man = (function() {
 
 		var max = 0; // calculate impact with ground, ie maximum y position.
 		// we can hope it's either the end of the calf or the end of the foot. walking on knees is not currently accepted.
-		
-		hips.calc(time);
+
+		body.calc(time);
+		torso.calc(time);
+
 		thigh1.calc(time);
-		max = Math.max(max, calfoot1.calc(time));
+		max = Math.max(max, calf1.calc(time));
 		max = Math.max(max, foot1.calc(time));
 		thigh2.calc(time);
 		max = Math.max(max, calf2.calc(time));
@@ -221,15 +275,16 @@ var running_man = (function() {
 
 		var x = cx, y = horizon - max;
 
-		hips.render(x, y, true);
+		body.render(x, y);
+		torso.render(x, y);
 
 		thigh1.render(x, y);
-		calfoot1.render(x, y);
+		calf1.render(x, y);
 		foot1.render(x, y);
 		thigh2.render(x, y);
 		calf2.render(x, y);
 		foothigh2.render(x, y);
-		y -= 90;
+		// y -= 90;
 		bicep1.render(x, y);
 		forearm1.render(x, y);
 		bicep2.render(x, y);
