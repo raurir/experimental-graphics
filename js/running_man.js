@@ -52,30 +52,74 @@ var limbs = {
 	}
 };
 
+function createEditor() {
+
+	var editor = dom.element("div", {style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
+	var output = dom.element("pre", {style: {position: "absolute", top: 0, left: 220}});
+
+	function settings() {
+		output.innerHTML = "var limbs = " + JSON.stringify(limbs, null, "\t") + ";";
+	};
+	settings();
+
+
+	function createEditor(l,k) {
+		var edit = dom.element("div", {style: {margin: 2}});
+		var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
+		var input = dom.element("input", {value: limbs[l][k], type: "number", style:{width: 100}});
+		editor.appendChild(edit);
+		edit.appendChild(label);
+		edit.appendChild(input);
+		input.addEventListener("change", function(e) {
+			limbs[l][k] = parseFloat(e.target.value);
+			settings();
+		})
+		return input;
+	}
+
+	var inputs = [];
+	for (var l in limbs) {
+		for (var k in limbs[l]) {
+			inputs.push(createEditor(l,k));
+		}
+	}
+
+	function createButton(label, callback) {
+		var button = dom.element("button", {innerHTML: label});
+		editor.appendChild(button);
+		button.addEventListener("click", callback);
+	}
+
+	var randomise = createButton("Random", function(e) {
+		for (var i in inputs) {
+			inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
+			inputs[i].dispatchEvent(new Event('change'));
+		}
+	});
+
+	var morph = createButton("Morph", function(e) {
+		// for (var i in inputs) {
+		// 	inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
+		// 	inputs[i].dispatchEvent(new Event('change'));
+		// }
+	});
+
+	document.body.appendChild(editor);
+	editor.appendChild(output);
+}
+
+
 var running_man = (function() {
 
-	var sw = 300, sh = 400;
+	var sw = 300;
+	var sh = 400;
+	var cx = 150;
+	var cy = 0;
+	var horizon = sh - 50;
+	var blockSize = 40;
 
 	var bmp = dom.canvas(sw,sh);
 	var ctx = bmp.ctx;
-
-	var cx = 150;
-	var cy = 0;
-
-	var horizon = sh - 50;
-
-	var blockSize = 10;
-
-	if (!isNode) {
-		var editor = dom.element("div", {style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
-		var output = dom.element("pre", {style: {position: "absolute", top: 0, left: 220}});
-
-		var divnested = dom.element("div", {style: {position: "absolute",
-			top: 0,
-			left: cx - blockSize / 2,
-			transform: "rotate(-90deg)scale(-1,1)"
-		}});
-	}
 
 
 	function createLimb(options) {
@@ -87,7 +131,7 @@ var running_man = (function() {
 			div = dom.element("div", {style: {
 				width: options.movement.length,
 				height: blockSize,
-				background: "rgba(255,0,0,0.5)",
+				background: "rgba(0,100,0,0.5)",
 				"transformOrigin": "0 " + (blockSize / 2) + "px",
 				position: "absolute"
 			}});
@@ -120,7 +164,7 @@ var running_man = (function() {
 					ey: 0 + Math.cos(osc) * options.movement.length
 				}
 
-				var translationX = 0, rotation = osc;//"rotate(" + (osc) + "rad)";
+				var translationX = 0, rotation = osc;
 
 				if (parent) {
 					pos.sx += parent.pos.ex;
@@ -128,21 +172,13 @@ var running_man = (function() {
 					pos.ex += parent.pos.ex;
 					pos.ey += parent.pos.ey;
 
-					// translation = "translate(" + parent.options.movement.length + "px,0px)";
-					translationX = parent.options.movement.length;// + "px,0px)";
-
-					// rotation = "rotate(" + (-parent.osc + osc) + "rad)";
+					translationX = parent.options.movement.length;
 					rotation = -parent.osc + osc;
-
 				}
-
-				// div.style.transform = translation + rotation ;
 
 				this.translationX = translationX;
 				this.rotationRad = rotation;
-
 				this.pos = pos;
-				// con.log(this, this.pos);
 			},
 			render: function(x, y) {
 				ctx.beginPath();
@@ -155,21 +191,33 @@ var running_man = (function() {
 				ctx.closePath();
 
 				ctx.beginPath();
-				ctx.drawCircle(x + this.pos.sx, y + this.pos.sy, 5);
-				ctx.drawCircle(x + this.pos.ex, y + this.pos.ey, 5);
+				ctx.drawCircle(x + this.pos.sx, y + this.pos.sy, blockSize / 2);
+				ctx.drawCircle(x + this.pos.ex, y + this.pos.ey, blockSize / 2);
 				ctx.closePath();
 				ctx.fill();
 
-				var tx = this.translationX, ty = 0;
-				if (!parent) tx = y;
-
-				if (!isNode) div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
-				// con.log(this.div.style.transform);
+				if (!isNode) {
+					var tx = parent ? this.translationX : y, ty = 0;
+					div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
+				}
 			}
 		}
 	}
 
 
+	/* body structure
+
+	body
+		torso
+			bicep1
+				forearm1
+			bicep2
+				forearm2
+		thigh1
+			calf1
+		thigh2
+			calf2
+	*/
 
 	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
 
@@ -190,72 +238,17 @@ var running_man = (function() {
 
 
 	if (!isNode) {
-		function settings() {
-			output.innerHTML = ("var limbs = " + JSON.stringify(limbs, null, "\t") + ";");
-		};
-		settings();
+		createEditor();
 
-
-		function createEditor(l,k) {
-			var edit = dom.element("div");
-			var label = dom.element("span", {innerHTML: l + ":" + k + ":"});
-			var input = dom.element("input", {value: limbs[l][k], type: "number"});
-			editor.appendChild(edit);
-			edit.appendChild(label);
-			edit.appendChild(input);
-			input.addEventListener("change", function(e) {
-				limbs[l][k] = parseFloat(e.target.value);
-				settings();
-			})
-			return input;
-		}
-
-		var inputs = [];
-		for (var l in limbs) {
-			for (var k in limbs[l]) {
-				inputs.push(createEditor(l,k));
-			}
-		}
-		document.body.appendChild(editor);
-
-
-		function createButton(label, callback) {
-			var button = dom.element("button", {innerHTML: label});
-			editor.appendChild(button);
-			button.addEventListener("click", callback);
-		}
-
-		var randomise = createButton("Random", function(e) {
-			// for (var l in limbs) {
-			// 	for (var k in limbs[l]) {
-			// 		limbs[l][k] = limbs[l][k] * (0.8 + Math.random() * 0.2);
-			// 	}
-			// }
-			for (var i in inputs) {
-				inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
-				inputs[i].dispatchEvent(new Event('change'));
-			}
-
-		});
-
-		editor.appendChild(output);
+		var divnested = dom.element("div", {style: {position: "absolute",
+			top: 0,
+			left: cx - blockSize / 2,
+			transform: "rotate(-90deg)scale(-1,1)"
+		}});
 		document.body.appendChild(divnested);
 		divnested.appendChild(body.div);
 	}
 
-	/* body structure
-
-	body
-		torso
-			bicep1
-				forearm1
-			bicep2
-				forearm2
-		thigh1
-			calf1
-		thigh2
-			calf2
-	*/
 
 	function render(t) {
 
@@ -263,16 +256,13 @@ var running_man = (function() {
 
 		var time = isNode ? t / frames * Math.PI : t / 500;
 
-		// con.log("render", t, time)
-
-		// ctx.clearRect(0, 0, sw, sh);
 		ctx.fillStyle = "#000";
 		ctx.fillRect(0, 0, sw, sh);
 
-		// cy = 200 - Math.abs(Math.sin(time) * 50);
-
-		var max = 0; // calculate impact with ground, ie maximum y position.
-		// we can hope it's either the end of the calf or the end of the foot. walking on knees is not currently accepted.
+		// calculate impact with ground, ie maximum y position.
+		// we can hope it's either the end of the calf or the end of the foot.
+		// walking on knees is not currently accepted.
+		var max = 0;
 
 		body.calc(time);
 		torso.calc(time);
@@ -289,11 +279,10 @@ var running_man = (function() {
 		bicep2.calc(time);
 		forearm2.calc(time);
 
-		// cy = max;
 		ctx.fillStyle = "#040";
 		ctx.fillRect(cx - sw / 2, horizon, sw, 10);
 
-		var x = cx, y = horizon - max;
+		var x = cx, y = horizon - max - blockSize / 2;
 
 		body.render(x, y);
 		torso.render(x, y);
@@ -304,13 +293,13 @@ var running_man = (function() {
 		thigh2.render(x, y);
 		calf2.render(x, y);
 		foothigh2.render(x, y);
-		// y -= 90;
 		bicep1.render(x, y);
 		forearm1.render(x, y);
 		bicep2.render(x, y);
 		forearm2.render(x, y);
 
 		if (isNode) {
+		// in node mode output frame to a png.
 			saveFile(bmp.canvas, t);
 			if (t < frames - 1) {
 				setTimeout(function() {
@@ -319,8 +308,9 @@ var running_man = (function() {
 				// and then:  convert -delay 3 -loop 0 *.png animation.gif
 			}
 		} else {
+			// in browser
 			// if (t<100)requestAnimationFrame(render);
-			requestAnimationFrame(render);			
+			requestAnimationFrame(render);
 		}
 
 	}
@@ -336,18 +326,14 @@ var running_man = (function() {
 
 
 	function saveFile(canvas, frame) {
-		if (isNode) {
-			canvas.toBuffer(function(err, buf){
-				if (err) {
-					con.log(err);
-				} else {
-					var filename = __dirname + '/../export/running_man/runningman' + (10 + frame) + '.png';
-					fs.writeFile(filename, buf, function(){ con.log("writeFile", filename); });
-				}
-			});
-		} else {
-			con.warn("browser export not written");
-		}
+		canvas.toBuffer(function(err, buf){
+			if (err) {
+				con.log(err);
+			} else {
+				var filename = __dirname + '/../export/running_man/runningman' + (10 + frame) + '.png';
+				fs.writeFile(filename, buf, function(){ con.log("writeFile", filename); });
+			}
+		});
 	}
 
 
@@ -359,26 +345,7 @@ var running_man = (function() {
 		stage: bmp.canvas,
 		inner: null,
 		resize: function() {},
-		init: function() {
-
-
-			// con.log("calling init")
-			// setTimeout(function() {
-			// 	con.log("Matter", Matter);
-			// 	var physics = running_man_physics();
-			// 	physics.init();
-			// },100);
-
-			// con.log("calling init")
-			// setTimeout(function() {
-			// 	var physics = running_man_physics();
-			// 	physics.init();
-			// },1100);
-
-
-
-
-		},
+		init: function() {},
 		kill: function() {}
 	}
 

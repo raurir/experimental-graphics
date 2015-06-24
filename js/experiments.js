@@ -40,7 +40,7 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["recursive"],
     ["rectangular_fill"],
-    ["running_man", "P2", "running_man_physics_p2"],
+    ["running_man"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
