@@ -53,7 +53,7 @@ var experiments = (function() {
     document.body.appendChild(script);
   }
 
-  function creatStyleSheet(s) {
+  function createStyleSheet(s) {
     var link  = dom.element("link");
     // link.id = cssId;
     link.rel = "stylesheet";
@@ -71,7 +71,7 @@ var experiments = (function() {
     for (var i = exp.length - 1; i > -1;i--) {
       var file = exp[i]
       if (/css/.test(file)) {
-        creatStyleSheet(file);
+        createStyleSheet(file);
       } else {
         switch(file) {
           case "THREE" :
