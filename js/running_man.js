@@ -21,7 +21,7 @@ var limbs = {
 		"offset": 0
 	},
 	"thigh": {
-		"range": 0,//1,
+		"range": 1,
 		"baserot": 0.3,
 		"length": 90,
 		"offset": 0
@@ -48,7 +48,7 @@ var limbs = {
 		"range": 1.5,
 		"baserot": 1.5,
 		"length": 60,
-		"offset": 0
+		"offset": -0.3
 	}
 };
 
@@ -129,7 +129,7 @@ var running_man = (function() {
 		// options.movement.offset = 0;
 		con.log(options.movement.offset);
 
-		var div = {}, divKeyframe = {}, css = [];
+		var div = {}, divKeyframe = {}, divJoint = {}, css = [];
 		if (!isNode) {
 			div = dom.element("div", {style: {
 				width: options.movement.length,
@@ -140,10 +140,8 @@ var running_man = (function() {
 			}});
 			if (parent && parent.div) parent.div.appendChild(div);
 
-			divKeyframe = dom.element("div", {id: options.name, style:{}});
-			if (parent && parent.divKeyframe) parent.divKeyframe.appendChild(divKeyframe);
 
-			 // options.movement.baserot + Math.sin(time + options.movement.offset + options.phase) * options.movement.range;
+			// options.movement.baserot + Math.sin(time + options.movement.offset + options.phase) * options.movement.range;
 
 			var translationX = parent ? parent.options.movement.length : 0;
 			var rotationStart = (parent ? parent.cssRotationStart : 0) + options.movement.baserot - options.movement.range;
@@ -151,29 +149,42 @@ var running_man = (function() {
 			// var rotationStart = options.movement.baserot - options.movement.range;
 			// var rotationEnd = options.movement.baserot + options.movement.range;
 
+
+
+
+			divKeyframe = dom.element("div", {id: options.name});
+			divJoint = dom.element("div", {id: options.name + "-opposite", style: {
+				position: "absolute", width: 20, height: 20, transformOrigin: "center center", background: "rgba(255,0,0,0.5)",
+				// margin: "-10px -10px"
+				transform: "translateX(" + translationX + "px)",
+			}});
+			if (parent) {
+				if (parent.divJoint) console.log(parent.divJoint);
+				parent.divKeyframe.appendChild(divKeyframe);
+				divKeyframe.appendChild(divJoint);
+			}
+
 			if (options.name == "forearm1") {// options.movement.baserot > Math.PI / 2
 				rotationStart += Math.PI;
 				rotationEnd += Math.PI;
 			}
 
-			con.log("rotationStart", rotationStart, rotationEnd);
-
-			// options.movement.offset
-
 			var transform = [
-				"0% {",
-			    "transform: translateX(" + translationX + "px)rotate(" + rotationStart + "rad);",
-			  "}",
-			  "50% {",
-			    "transform: translateX(" + translationX + "px)rotate(" + rotationEnd + "rad);",
-			  "}",
-			  "100% {",
-			    "transform: translateX(" + translationX + "px)rotate(" + rotationStart + "rad);",
-			  "}"
+				"0% {transform: translateX(" + translationX + "px)rotate(" + rotationStart + "rad);}",
+				"50% {transform: translateX(" + translationX + "px)rotate(" + rotationEnd + "rad);}",
+				"100% {transform: translateX(" + translationX + "px)rotate(" + rotationStart + "rad);}"
 			];
+			var transformOpposite = [
+				"0% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationStart + "rad);}",
+			  "50% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationEnd + "rad);}",
+			  "100% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationStart + "rad);}"
+			];
+
+
 			var time = 2;
 			var delay = (-0.63 + -time * (options.movement.offset + options.phase) / (Math.PI * 2));
-		 	var animation = options.name + "-animation " + time + "s " + delay + "s ease-in-out infinite;"
+			var animation = options.name + "-animation " + time + "s " + delay + "s ease-in-out infinite;"
+			var animationOpposite = options.name + "-opposite-animation " + time + "s " + delay + "s ease-in-out infinite;"
 
 			css = [
 			"#" + options.name + " {",
@@ -188,10 +199,21 @@ var running_man = (function() {
 				"-webkit-animation: " + animation,
 			"};",
 			"@keyframes " + options.name + "-animation {",
-			  transform.join(""),
+				transform.join(""),
 			"}",
 			"@-webkit-keyframes " + options.name + "-animation {",
-			  transform.join(""),
+				transform.join(""),
+			"}",
+
+			"#" + options.name + "-opposite {",
+				"animation: " + animationOpposite,
+				"-webkit-animation: " + animationOpposite,
+			"};",
+			"@keyframes " + options.name + "-opposite-animation {",
+				transformOpposite.join(""),
+			"}",
+			"@-webkit-keyframes " + options.name + "-opposite-animation {",
+				transformOpposite.join(""),
 			"}"
 
 			]
@@ -208,6 +230,7 @@ var running_man = (function() {
 			cssRotationEnd: -rotationEnd,
 
 			divKeyframe: divKeyframe,
+			divJoint: divJoint,
 			pos: {
 				sx: 0,
 				sy: 0,
@@ -287,29 +310,29 @@ var running_man = (function() {
 
 
 	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
-	var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
+	// var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
 	var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
-	var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
+	// var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
 	// var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
 	// var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
 	// var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
 	// var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
-	var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
-	var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
+	// var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
+	// var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
 	// var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
 	// var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
 	var human = [
 		body,
-		torso,
+		// torso,
 		thigh1,
-		calf1,
+		// calf1,
 		// foot1,
 		// thigh2,
 		// calf2,
 		// foothigh2,
-		bicep1,
-		forearm1,
+		// bicep1,
+		// forearm1,
 		// bicep2,
 		// forearm2
 	];
