@@ -21,7 +21,7 @@ var limbs = {
 		"offset": 0
 	},
 	"thigh": {
-		"range": 1,
+		"range": 0,//1,
 		"baserot": 0.3,
 		"length": 90,
 		"offset": 0
@@ -126,6 +126,9 @@ var running_man = (function() {
 
 		var parent = options.parent;
 
+		// options.movement.offset = 0;
+		con.log(options.movement.offset);
+
 		var div = {}, divKeyframe = {}, css = [];
 		if (!isNode) {
 			div = dom.element("div", {style: {
@@ -143,10 +146,17 @@ var running_man = (function() {
 			 // options.movement.baserot + Math.sin(time + options.movement.offset + options.phase) * options.movement.range;
 
 			var translationX = parent ? parent.options.movement.length : 0;
-			// var rotationStart = (parent ? parent.cssRotationStart : 0) + options.movement.baserot - options.movement.range;
-			// var rotationEnd = (parent ? parent.cssRotationEnd : 0) + options.movement.baserot + options.movement.range;
-			var rotationStart = options.movement.baserot - options.movement.range;
-			var rotationEnd = options.movement.baserot + options.movement.range;
+			var rotationStart = (parent ? parent.cssRotationStart : 0) + options.movement.baserot - options.movement.range;
+			var rotationEnd = (parent ? parent.cssRotationEnd : 0) + options.movement.baserot + options.movement.range;
+			// var rotationStart = options.movement.baserot - options.movement.range;
+			// var rotationEnd = options.movement.baserot + options.movement.range;
+
+			if (options.name == "forearm1") {// options.movement.baserot > Math.PI / 2
+				rotationStart += Math.PI;
+				rotationEnd += Math.PI;
+			}
+
+			con.log("rotationStart", rotationStart, rotationEnd);
 
 			// options.movement.offset
 
@@ -161,15 +171,18 @@ var running_man = (function() {
 			    "transform: translateX(" + translationX + "px)rotate(" + rotationStart + "rad);",
 			  "}"
 			];
-			var time = 3;
-		 	var animation = options.name + "-animation " + time + "s " + (-time * (options.movement.offset + options.phase) / (Math.PI * 2)) + "s ease-in-out infinite;"
+			var time = 2;
+			var delay = (-0.63 + -time * (options.movement.offset + options.phase) / (Math.PI * 2));
+		 	var animation = options.name + "-animation " + time + "s " + delay + "s ease-in-out infinite;"
 
 			css = [
 			"#" + options.name + " {",
 				"width: " + options.movement.length + "px;", 
 				"height: " + blockSize + "px;",
 				"background: rgba(0,0,200,0.8);",
-				"transform-origin: 0 " + (blockSize / 2) + "px;",
+				// "transform-origin: 0 " + (blockSize / 2) + "px;",
+				"transform-origin: center left;",
+				"transform-style: preserve-3d;",
 				"position: absolute;",
 				"animation: " + animation,
 				"-webkit-animation: " + animation,
@@ -191,8 +204,8 @@ var running_man = (function() {
 			div: div,
 			css: css,
 
-			cssRotationStart: rotationStart,
-			cssRotationEnd: rotationEnd,
+			cssRotationStart: -rotationStart,
+			cssRotationEnd: -rotationEnd,
 
 			divKeyframe: divKeyframe,
 			pos: {
@@ -272,20 +285,37 @@ var running_man = (function() {
 			calf2
 	*/
 
+
 	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
 	var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
 	var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
 	var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
-	var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
-	var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
-	var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
-	var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
+	// var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
+	// var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
+	// var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
+	// var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
 	var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
 	var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
-	var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
-	var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
+	// var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
+	// var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
-	var human = [body, torso, thigh1, calf1, foot1, thigh2, calf2, foothigh2, bicep1, forearm1, bicep2, forearm2];
+	var human = [
+		body,
+		torso,
+		thigh1,
+		calf1,
+		// foot1,
+		// thigh2,
+		// calf2,
+		// foothigh2,
+		bicep1,
+		forearm1,
+		// bicep2,
+		// forearm2
+	];
+
+
+
 
 	if (!isNode) {
 		createEditor();
@@ -320,58 +350,35 @@ var running_man = (function() {
 
 	function render(t) {
 
+		output.innerHTML = Math.round(t/100)/10;
+
 		var frames = 50;
 
-		var time = isNode ? t / frames * Math.PI : t / 500;
+		var time = isNode ? t / frames * Math.PI : t * Math.PI / 1000;
 
 		ctx.fillStyle = "#000";
 		ctx.fillRect(0, 0, sw, sh);
-
-		// calculate impact with ground, ie maximum y position.
-		// we can hope it's either the end of the calf or the end of the foot.
-		// walking on knees is not currently accepted.
-		var max = 0;
-
-		body.calc(time);
-		torso.calc(time);
-
-		thigh1.calc(time);
-		max = Math.max(max, calf1.calc(time));
-		max = Math.max(max, foot1.calc(time));
-		thigh2.calc(time);
-		max = Math.max(max, calf2.calc(time));
-		max = Math.max(max, foothigh2.calc(time));
-
-		bicep1.calc(time);
-		forearm1.calc(time);
-		bicep2.calc(time);
-		forearm2.calc(time);
-
 		ctx.fillStyle = "#040";
 		ctx.fillRect(cx - sw / 2, horizon, sw, 10);
 
+		// calculate impact with ground, ie maximum y position.
+		// we can hope it's either the end of the calf or the end of the foot.
+		// walking on knees or head IS accepted.
+		var max = 0;
+		for (var l in human) {
+			max = Math.max(max, human[l].calc(time)); // calculate each limb position
+		}
 		var x = cx, y = horizon;// - max - blockSize / 2;
-
-		body.render(x, y);
-		torso.render(x, y);
-
-		thigh1.render(x, y);
-		calf1.render(x, y);
-		foot1.render(x, y);
-		thigh2.render(x, y);
-		calf2.render(x, y);
-		foothigh2.render(x, y);
-		bicep1.render(x, y);
-		forearm1.render(x, y);
-		bicep2.render(x, y);
-		forearm2.render(x, y);
+		for (l in human) {
+			human[l].render(x, y); // render each limb
+		}
 
 		if (isNode) {
-		// in node mode output frame to a png.
+		// in node - output frame to a png.
 			saveFile(bmp.canvas, t);
 			if (t < frames - 1) {
 				setTimeout(function() {
-					render(t + 1);
+					render(++t);
 				}, 50);
 				// and then:  convert -delay 3 -loop 0 *.png animation.gif
 			}

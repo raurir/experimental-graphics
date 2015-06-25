@@ -14,8 +14,8 @@ function newLine() {
 
 	bmp.ctx.clearRect(0, 0, sw, sh); 
 
-	bmp.ctx.fillStyle = "#000";
-	bmp.ctx.fillRect(cx - 2, cy - 2, 4, 4);
+	// bmp.ctx.fillStyle = "#000";
+	// bmp.ctx.fillRect(cx - 2, cy - 2, 4, 4);
 
 	var rings = 25;
 	var dotsPerRing = 10 + Math.sin(frame * 0.0004) * 4;
@@ -32,6 +32,7 @@ function newLine() {
 	}
 
 	bmp.ctx.beginPath();
+	bmp.ctx.strokeStyle = "red";
 	bmp.ctx.lineWidth = ring * 0.7;
 	for (var h = 0; h < dotsPerRing * rings; h++) {
 		var point = getArc(h - 1);
@@ -44,7 +45,7 @@ function newLine() {
 	bmp.ctx.stroke();
 
 	frame += 1;
-	// requestAnimationFrame(newLine)
+	if (frame < 50) requestAnimationFrame(newLine)
 }
 
 newLine();
