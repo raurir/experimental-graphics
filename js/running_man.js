@@ -52,9 +52,18 @@ var limbs = {
 	}
 };
 
+
+var sw = 300;
+var sh = 400;
+var cx = 150;
+var cy = 0;
+var horizon = sh - 50;
+var blockSize = 10;
+
+
 function createEditor() {
 
-	var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: 300}});
+	var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
 	var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 220}});
 
 	function settings() {
@@ -111,13 +120,6 @@ function createEditor() {
 
 var running_man = (function() {
 
-	var sw = 300;
-	var sh = 400;
-	var cx = 150;
-	var cy = 0;
-	var horizon = sh - 50;
-	var blockSize = 10;
-
 	var bmp = dom.canvas(sw,sh);
 	var ctx = bmp.ctx;
 
@@ -128,25 +130,12 @@ var running_man = (function() {
 	function createLimbKeyframe(options) {
 		var parent = options.parent;
 
-		// options.movement.offset = 0;
-		// con.log(options.movement.offset);
-
-		// con.log("createLimbKeyframe", options);
-		// options.movement.baserot + Math.sin(time + options.movement.offset + options.phase) * options.movement.range;
-
-		var translationX = parent ? parent.options.movement.length : 0;
+		var translationX = options.movement.length;
 		var rotationStart = options.movement.baserot - options.movement.range;
 		var rotationEnd = options.movement.baserot + options.movement.range;
-		// var rotationStart = options.movement.baserot - options.movement.range;
-		// var rotationEnd = options.movement.baserot + options.movement.range;
 
-
-		var divKeyframe = dom.element("div", {id: options.name});
-		var divJoint = dom.element("div", {id: options.name + "-joint", style: {
-			position: "absolute", width: 10, height: 10, transformOrigin: "center center", background: "rgba(255,0,0,0.5)",
-			// margin: "-10px -10px"
-			transform: "translateX(" + translationX + "px)",
-		}});
+		var divKeyframe = dom.element("div", {id: options.name, className: "limb"});
+		var divJoint = dom.element("div", {id: options.name + "-joint", className: "joint"});
 
 		if (parent) {
 			parent.divJoint.appendChild(divKeyframe);
@@ -155,20 +144,15 @@ var running_man = (function() {
 		}
 		divKeyframe.appendChild(divJoint);
 
-		if (options.name == "forearm1") {// options.movement.baserot > Math.PI / 2
-			rotationStart += Math.PI;
-			rotationEnd += Math.PI;
-		}
-
 		var transform = [
-			"0% {transform: translateX(" + 0 + "px)rotate(" + rotationStart + "rad);}",
-			"50% {transform: translateX(" + 0 + "px)rotate(" + rotationEnd + "rad);}",
-			"100% {transform: translateX(" + 0 + "px)rotate(" + rotationStart + "rad);}"
+			"0% {transform: rotate(" + rotationStart + "rad);}",
+			"50% {transform: rotate(" + rotationEnd + "rad);}",
+			"100% {transform: rotate(" + rotationStart + "rad);}"
 		];
 		var transformJoint = [
-			"0% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationStart + "rad);}",
-		  "50% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationEnd + "rad);}",
-		  "100% {transform: translateX(" + options.movement.length + "px) rotate(" + -rotationStart + "rad);}"
+			"0% {transform: translateX(" + translationX + "px) rotate(" + -rotationStart + "rad);}",
+		  "50% {transform: translateX(" + translationX + "px) rotate(" + -rotationEnd + "rad);}",
+		  "100% {transform: translateX(" + translationX + "px) rotate(" + -rotationStart + "rad);}"
 		];
 
 
@@ -181,11 +165,6 @@ var running_man = (function() {
 		"#" + options.name + " {",
 			"width: " + options.movement.length + "px;", 
 			"height: " + blockSize + "px;",
-			"background: rgba(0,0,200,0.8);",
-			// "transform-origin: 0 " + (blockSize / 2) + "px;",
-			"transform-origin: center left;",
-			"transform-style: preserve-3d;",
-			"position: absolute;",
 			"animation: " + animation,
 			"-webkit-animation: " + animation,
 		"};",
@@ -231,8 +210,8 @@ var running_man = (function() {
 			div = dom.element("div", {style: {
 				width: options.movement.length,
 				height: blockSize,
-				background: "rgba(0,100,0,0.5)",
-				"transformOrigin": "0 " + (blockSize / 2) + "px",
+				background: "rgba(255,0,0,0.5)",
+				transformOrigin: "0 " + (blockSize / 2) + "px",
 				position: "absolute"
 			}});
 			if (parent && parent.div) parent.div.appendChild(div);
@@ -308,7 +287,7 @@ var running_man = (function() {
 				ctx.fill();
 
 				if (!isNode) {
-					var tx = parent ? this.translationX : y, ty = 0;
+					var tx = parent ? this.translationX : y, ty = parent ? 0 : sw / 2;
 					div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
 				}
 			}
@@ -366,23 +345,51 @@ var running_man = (function() {
 		createEditor();
 
 		var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
-			top: 0,
-			left: cx - blockSize / 2,
-			transform: "rotate(-90deg)scale(-1,1)"
+  		left: -50,
+			top: sh + 50, //0, ???
+			width: sh, 
+			height: sw, 
+			transform: "rotate(-90deg)scale(-1,1)",
+			background: "rgba(255,0,0,0.2)"
 		}});
 		document.body.appendChild(divnested);
 		divnested.appendChild(body.div);
 		
 		var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
-			top: 150,
-			left: cx - blockSize / 2,
-			transform: "rotate(-90deg)scale(-1,1)"
+			top: sh * 2 + 50,// 150,
+			left: -50, //cx - blockSize / 2, 
+			width: sh, 
+			height: sw, 
+			transform: "rotate(-90deg)scale(-1,1)",
+			background: "rgba(0,0,255,0.2)"
 		}});
 		document.body.appendChild(divKeyframes);
 		divKeyframes.appendChild(body.divKeyframe);
 
 		var styleSheet = document.createElement("style");
-		var css = ["#body {left: 200px;}", ];
+		var css = [
+			"body {",
+				"overflow: auto;",
+			"}", 			
+			"#body {",
+				"left: " + sh / 2 + "px;",
+				"top: " + sw / 2 + "px;",
+			"}", 			
+			".limb {",
+				"background: rgba(0,0,200,0.8);",
+				"position: absolute;",
+				"transform-origin: center left;",
+				"transform-style: preserve-3d;",
+			"}",
+			".joint {",
+				"background: rgba(0,0,255,0.9);",
+				"height: 10px;",
+				"position: absolute;",
+				"transform-origin: center center;",
+				"width: 10px;",
+				// "transform: translateX(0px)",
+			"}"
+		];
 		for (var l in human) {
 			css = css.concat(human[l].css);
 		}
@@ -401,9 +408,9 @@ var running_man = (function() {
 
 		var time = isNode ? t / frames * Math.PI : t * Math.PI / 1000;
 
-		ctx.fillStyle = "#000";
+		ctx.fillStyle = "#030";
 		ctx.fillRect(0, 0, sw, sh);
-		ctx.fillStyle = "#040";
+		ctx.fillStyle = "#432";
 		ctx.fillRect(cx - sw / 2, horizon, sw, 10);
 
 		// calculate impact with ground, ie maximum y position.
@@ -413,7 +420,7 @@ var running_man = (function() {
 		for (var l in human) {
 			max = Math.max(max, human[l].calc(time)); // calculate each limb position
 		}
-		var x = cx, y = horizon;// - max - blockSize / 2;
+		var x = cx, y = horizon - max - blockSize / 2;
 		for (l in human) {
 			human[l].render(x, y); // render each limb
 		}
