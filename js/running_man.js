@@ -6,6 +6,8 @@ if (isNode) {
 	var fs = require('fs');
 }
 
+var human = [];
+
 // con.log(dom);
 var limbs = {
 	"body": {
@@ -52,6 +54,20 @@ var limbs = {
 	}
 };
 
+var creature = [
+	{name: "body", parent: null, movement: limbs.body, phase: 0},
+	{name: "torso", parent: "body", movement: limbs.torso, phase: 0},
+	{name: "thigh1", parent: "body", movement: limbs.thigh, phase: 0},
+	{name: "calf1", parent: "thigh1", movement: limbs.calf, phase: 0},
+	{name: "foot1", parent: "calf1", movement: limbs.foot, phase: 0},
+	{name: "thigh2", parent: "body", movement: limbs.thigh, phase: Math.PI},
+	{name: "calf2", parent: "thigh2", movement: limbs.calf, phase: Math.PI},
+	{name: "foothigh2", parent: "calf2", movement: limbs.foot, phase: Math.PI},
+	{name: "bicep1", parent: "torso", movement: limbs.bicep, phase: 0},
+	{name: "forearm1", parent: "bicep1", movement: limbs.forearm, phase: 0},
+	{name: "bicep2", parent: "torso", movement: limbs.bicep, phase: Math.PI},
+	{name: "forearm2", parent: "bicep2", movement: limbs.forearm, phase: Math.PI},
+];
 
 var sw = 300;
 var sh = 400;
@@ -130,6 +146,8 @@ var running_man = (function() {
 	function createLimbKeyframe(options) {
 		var parent = options.parent;
 
+		con.log("createLimbKeyframe", options)
+
 		var translationX = options.movement.length;
 		var rotationStart = options.movement.baserot - options.movement.range;
 		var rotationEnd = options.movement.baserot + options.movement.range;
@@ -163,7 +181,7 @@ var running_man = (function() {
 
 		var css = [
 		"#" + options.name + " {",
-			"width: " + options.movement.length + "px;", 
+			"width: " + options.movement.length + "px;",
 			"height: " + blockSize + "px;",
 			"animation: " + animation,
 			"-webkit-animation: " + animation,
@@ -204,6 +222,9 @@ var running_man = (function() {
 	function createLimb(options) {
 
 		var parent = options.parent;
+		if (parent) options.parent = human[parent];
+
+		con.log("parent", human, parent, parent && parent.div)
 
 		var div = {};
 		if (!isNode) {
@@ -222,7 +243,7 @@ var running_man = (function() {
 			css = keyframe.css,
 			divKeyframe = keyframe.divKeyframe,
 			divJoint = keyframe.divJoint;
-		
+
 		return {
 			name: options.name,
 			options: options,
@@ -256,7 +277,8 @@ var running_man = (function() {
 
 				var translationX = 0, rotation = osc;
 
-				if (parent) {
+				if (options.parent) {
+					var parent = options.parent;
 					pos.sx += parent.pos.ex;
 					pos.sy += parent.pos.ey;
 					pos.ex += parent.pos.ex;
@@ -287,6 +309,7 @@ var running_man = (function() {
 				ctx.fill();
 
 				if (!isNode) {
+					var parent = options.parent;
 					var tx = parent ? this.translationX : y, ty = parent ? 0 : sw / 2;
 					div.style.transform = "translate(" + tx + "px," + ty + "px)rotate(" + this.rotationRad + "rad)" ;
 				}
@@ -310,34 +333,42 @@ var running_man = (function() {
 	*/
 
 
-	var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
-	var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
-	var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
-	var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
-	var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
-	var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
-	var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
-	var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
-	var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
-	var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
-	var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
-	var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
+	// var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
+	// var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
+	// var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
+	// var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
+	// var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
+	// var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
+	// var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
+	// var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
+	// var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
+	// var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
+	// var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
+	// var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
 
-	var human = [
-		body,
-		torso,
-		thigh1,
-		calf1,
-		foot1,
-		thigh2,
-		calf2,
-		foothigh2,
-		bicep1,
-		forearm1,
-		bicep2,
-		forearm2
-	];
+	// var human = [
+	// 	body,
+	// 	torso,
+	// 	thigh1,
+	// 	calf1,
+	// 	foot1,
+	// 	thigh2,
+	// 	calf2,
+	// 	foothigh2,
+	// 	bicep1,
+	// 	forearm1,
+	// 	bicep2,
+	// 	forearm2
+	// ];
 
+	human = {};
+	for (var c in creature) {
+		var bit = creature[c];
+		// var l =
+		// con.log(c, bit.name, l);
+		human[bit.name] = createLimb(bit);
+	}
+	con.log(human);
 
 
 
@@ -347,34 +378,34 @@ var running_man = (function() {
 		var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
   		left: -50,
 			top: sh + 50, //0, ???
-			width: sh, 
-			height: sw, 
+			width: sh,
+			height: sw,
 			transform: "rotate(-90deg)scale(-1,1)",
 			background: "rgba(255,0,0,0.2)"
 		}});
 		document.body.appendChild(divnested);
-		divnested.appendChild(body.div);
-		
+		divnested.appendChild(human.body.div);
+
 		var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
 			top: sh * 2 + 50,// 150,
-			left: -50, //cx - blockSize / 2, 
-			width: sh, 
-			height: sw, 
+			left: -50, //cx - blockSize / 2,
+			width: sh,
+			height: sw,
 			transform: "rotate(-90deg)scale(-1,1)",
 			background: "rgba(0,0,255,0.2)"
 		}});
 		document.body.appendChild(divKeyframes);
-		divKeyframes.appendChild(body.divKeyframe);
+		divKeyframes.appendChild(human.body.divKeyframe);
 
 		var styleSheet = document.createElement("style");
 		var css = [
 			"body {",
 				"overflow: auto;",
-			"}", 			
+			"}",
 			"#body {",
 				"left: " + sh / 2 + "px;",
 				"top: " + sw / 2 + "px;",
-			"}", 			
+			"}",
 			".limb {",
 				"background: rgba(0,0,200,0.8);",
 				"position: absolute;",
