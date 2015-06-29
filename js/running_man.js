@@ -6,9 +6,22 @@ if (isNode) {
 	var fs = require('fs');
 }
 
-var human = [];
+var human = {};
+/* human structure
 
-// con.log(dom);
+body
+	torso
+		bicep1
+			forearm1
+		bicep2
+			forearm2
+	thigh1
+		calf1
+	thigh2
+		calf2
+*/
+
+
 var limbs = {
 	"body": {
 		"range": 0,
@@ -68,6 +81,8 @@ var creature = [
 	{name: "bicep2", parent: "torso", movement: limbs.bicep, phase: Math.PI},
 	{name: "forearm2", parent: "bicep2", movement: limbs.forearm, phase: Math.PI},
 ];
+
+
 
 var sw = 300;
 var sh = 400;
@@ -222,9 +237,10 @@ var running_man = (function() {
 	function createLimb(options) {
 
 		var parent = options.parent;
-		if (parent) options.parent = human[parent];
-
-		con.log("parent", human, parent, parent && parent.div)
+		if (parent) {
+			options.parent = human[parent];
+			parent = options.parent;
+		}
 
 		var div = {};
 		if (!isNode) {
@@ -317,58 +333,12 @@ var running_man = (function() {
 		}
 	}
 
-
-	/* body structure
-
-	body
-		torso
-			bicep1
-				forearm1
-			bicep2
-				forearm2
-		thigh1
-			calf1
-		thigh2
-			calf2
-	*/
-
-
-	// var body = createLimb({name: "body", parent: null, movement: limbs.body, phase: 0});
-	// var torso = createLimb({name: "torso", parent: body, movement: limbs.torso, phase: 0});
-	// var thigh1 = createLimb({name: "thigh1", parent: body, movement: limbs.thigh, phase: 0});
-	// var calf1 = createLimb({name: "calf1", parent: thigh1, movement: limbs.calf, phase: 0});
-	// var foot1 = createLimb({name: "foot1", parent: calf1, movement: limbs.foot, phase: 0});
-	// var thigh2 = createLimb({name: "thigh2", parent: body, movement: limbs.thigh, phase: Math.PI});
-	// var calf2 = createLimb({name: "calf2", parent: thigh2, movement: limbs.calf, phase: Math.PI});
-	// var foothigh2 = createLimb({name: "foothigh2", parent: calf2, movement: limbs.foot, phase: Math.PI});
-	// var bicep1 = createLimb({name: "bicep1", parent: torso, movement: limbs.bicep, phase: 0});
-	// var forearm1 = createLimb({name: "forearm1", parent: bicep1, movement: limbs.forearm, phase: 0});
-	// var bicep2 = createLimb({name: "bicep2", parent: torso, movement: limbs.bicep, phase: Math.PI});
-	// var forearm2 = createLimb({name: "forearm2", parent: bicep2, movement: limbs.forearm, phase: Math.PI});
-
-	// var human = [
-	// 	body,
-	// 	torso,
-	// 	thigh1,
-	// 	calf1,
-	// 	foot1,
-	// 	thigh2,
-	// 	calf2,
-	// 	foothigh2,
-	// 	bicep1,
-	// 	forearm1,
-	// 	bicep2,
-	// 	forearm2
-	// ];
-
 	human = {};
 	for (var c in creature) {
 		var bit = creature[c];
-		// var l =
-		// con.log(c, bit.name, l);
 		human[bit.name] = createLimb(bit);
 	}
-	con.log(human);
+	// con.log(human);
 
 
 
