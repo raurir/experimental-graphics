@@ -6,7 +6,7 @@ if (isNode) {
 	var fs = require('fs');
 }
 
-var human = {};
+// var human = {};
 /* human structure
 
 body
@@ -84,7 +84,7 @@ var human = [
 	{name: "bicep2", parent: "torso", movement: limbs.bicep, phase: Math.PI},
 	{name: "forearm2", parent: "bicep2", movement: limbs.forearm, phase: Math.PI},
 ];
-var limbs = {
+var spiderlimbs = {
 	"body": {
 		"range": 0,
 		"baserot": 0,
@@ -130,18 +130,18 @@ var limbs = {
 };
 
 var spider = [
-	{name: "body", parent: null, movement: limbs.body, phase: 0},
-	{name: "thigh1", parent: "body", movement: limbs.thigh, phase: 0},
-	{name: "calf1", parent: "thigh1", movement: limbs.calf, phase: 0},
-	{name: "thigh2", parent: "body", movement: limbs.thigh, phase: Math.PI},
-	{name: "calf2", parent: "thigh2", movement: limbs.calf, phase: Math.PI},
-	{name: "thigh3", parent: "body", movement: limbs.thigh2, phase: 0},
-	{name: "calf3", parent: "thigh3", movement: limbs.calf2, phase: 0},
-	{name: "thigh4", parent: "body", movement: limbs.thigh2, phase: Math.PI},
-	{name: "calf4", parent: "thigh4", movement: limbs.calf2, phase: Math.PI},
+	{name: "body", parent: null, movement: spiderlimbs.body, phase: 0},
+	{name: "thigh1", parent: "body", movement: spiderlimbs.thigh, phase: 0},
+	{name: "calf1", parent: "thigh1", movement: spiderlimbs.calf, phase: 0},
+	{name: "thigh2", parent: "body", movement: spiderlimbs.thigh, phase: Math.PI},
+	{name: "calf2", parent: "thigh2", movement: spiderlimbs.calf, phase: Math.PI},
+	{name: "thigh3", parent: "body", movement: spiderlimbs.thigh2, phase: 0},
+	{name: "calf3", parent: "thigh3", movement: spiderlimbs.calf2, phase: 0},
+	{name: "thigh4", parent: "body", movement: spiderlimbs.thigh2, phase: Math.PI},
+	{name: "calf4", parent: "thigh4", movement: spiderlimbs.calf2, phase: Math.PI},
 
-	{name: "thigh5", parent: "body", movement: limbs.thigh3, phase: Math.PI},
-	{name: "calf5", parent: "thigh5", movement: limbs.calf3, phase: Math.PI},
+	{name: "thigh5", parent: "body", movement: spiderlimbs.thigh3, phase: Math.PI},
+	{name: "calf5", parent: "thigh5", movement: spiderlimbs.calf3, phase: Math.PI},
 
 
 ]
@@ -155,19 +155,20 @@ var cy = 0;
 var horizon = sh - 50;
 var blockSize = 10;
 
+var inputs = [];
 
-function createEditor() {
+function createEditor(limbs) {
 
 	var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
 	var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 220}});
 
-	function settings() {
+	function outputSettings() {
 		output.innerHTML = "var limbs = " + JSON.stringify(limbs, null, "\t") + ";";
 	};
-	settings();
+	outputSettings();
 
 
-	function createEditor(l,k) {
+	function createEdit(l,k) {
 		var edit = dom.element("div", {style: {margin: 2}});
 		var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
 		var input = dom.element("input", {value: limbs[l][k], type: "number", style:{width: 100}});
@@ -176,15 +177,15 @@ function createEditor() {
 		edit.appendChild(input);
 		input.addEventListener("change", function(e) {
 			limbs[l][k] = parseFloat(e.target.value);
-			settings();
+			outputSettings();
 		})
 		return input;
 	}
 
-	var inputs = [];
+	
 	for (var l in limbs) {
 		for (var k in limbs[l]) {
-			inputs.push(createEditor(l,k));
+			inputs.push(createEdit(l,k));
 		}
 	}
 
@@ -202,10 +203,9 @@ function createEditor() {
 	});
 
 	var morph = createButton("Morph", function(e) {
-		// for (var i in inputs) {
-		// 	inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
-		// 	inputs[i].dispatchEvent(new Event('change'));
-		// }
+		for (var i in inputs) {
+			inputs[i].newValue = inputs[i].value * (0.8 + Math.random() * 0.4);
+		}
 	});
 
 	document.body.appendChild(editor);
@@ -213,7 +213,7 @@ function createEditor() {
 }
 
 
-var running_man = (function(settings) {
+var running_man = (function(settings, limbs) {
 
 	var creature = {};
 
@@ -406,7 +406,7 @@ var running_man = (function(settings) {
 
 
 	if (!isNode) {
-		createEditor();
+		createEditor(limbs);
 
 		var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
   		left: -50,
@@ -467,6 +467,15 @@ var running_man = (function(settings) {
 	function render(t) {
 
 		// output.innerHTML = Math.round(t / 100)/ 10;
+
+
+		for (var i in inputs) {
+			if (inputs[i].newValue && inputs[i].newValue != inputs[i].value) {
+				inputs[i].value -= (inputs[i].value - inputs[i].newValue) * 0.1;
+				inputs[i].dispatchEvent(new Event('change'));
+			}
+		}
+
 
 		var frames = 50;
 
@@ -544,6 +553,6 @@ var running_man = (function(settings) {
 
 	return experiment;
 
-})(spider);
+})(human, limbs);
 
 if (isNode) module.exports = running_man;
