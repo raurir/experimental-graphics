@@ -67,7 +67,10 @@ var limbs = {
 	}
 };
 
-var creature = [
+var iceskating = {"body":{"range":0,"baserot":0,"length":0,"offset":0},"torso":{"range":0,"baserot":2.5,"length":100,"offset":0},"thigh":{"range":0.5,"baserot":0.3,"length":100,"offset":0},"calf":{"range":-0.8,"baserot":-0.7,"length":110,"offset":2.9},"foot":{"range":0,"baserot":1.6,"length":40,"offset":0},"bicep":{"range":1.6,"baserot":-0.3,"length":85,"offset":0},"forearm":{"range":1.5,"baserot":1,"length":70,"offset":-0.3}};
+// limbs = iceskating;
+
+var human = [
 	{name: "body", parent: null, movement: limbs.body, phase: 0},
 	{name: "torso", parent: "body", movement: limbs.torso, phase: 0},
 	{name: "thigh1", parent: "body", movement: limbs.thigh, phase: 0},
@@ -81,10 +84,71 @@ var creature = [
 	{name: "bicep2", parent: "torso", movement: limbs.bicep, phase: Math.PI},
 	{name: "forearm2", parent: "bicep2", movement: limbs.forearm, phase: Math.PI},
 ];
+var limbs = {
+	"body": {
+		"range": 0,
+		"baserot": 0,
+		"length": 0,
+		"offset": 0
+	},
+	"thigh": {
+		"range": 0.2,
+		"baserot": -2,
+		"length": 90,
+		"offset": 0
+	},
+	"calf": {
+		"range": 0.2,
+		"baserot": -0.2,
+		"length": 90,
+		"offset": 1.6
+	},
+	"thigh2": {
+		"range": 0.2,
+		"baserot": 2,
+		"length": 90,
+		"offset": 0
+	},
+	"calf2": {
+		"range": -0.2,
+		"baserot": -0.2,
+		"length": 90,
+		"offset": 1.6
+	},
+	"thigh3": {
+		"range": 0.2,
+		"baserot": 1.5,
+		"length": 130,
+		"offset": 0.5
+	},
+	"calf3": {
+		"range": -0.3,
+		"baserot": 1,
+		"length": 100,
+		"offset": 1.8
+	}
+};
+
+var spider = [
+	{name: "body", parent: null, movement: limbs.body, phase: 0},
+	{name: "thigh1", parent: "body", movement: limbs.thigh, phase: 0},
+	{name: "calf1", parent: "thigh1", movement: limbs.calf, phase: 0},
+	{name: "thigh2", parent: "body", movement: limbs.thigh, phase: Math.PI},
+	{name: "calf2", parent: "thigh2", movement: limbs.calf, phase: Math.PI},
+	{name: "thigh3", parent: "body", movement: limbs.thigh2, phase: 0},
+	{name: "calf3", parent: "thigh3", movement: limbs.calf2, phase: 0},
+	{name: "thigh4", parent: "body", movement: limbs.thigh2, phase: Math.PI},
+	{name: "calf4", parent: "thigh4", movement: limbs.calf2, phase: Math.PI},
+
+	{name: "thigh5", parent: "body", movement: limbs.thigh3, phase: Math.PI},
+	{name: "calf5", parent: "thigh5", movement: limbs.calf3, phase: Math.PI},
+
+
+]
 
 
 
-var sw = 300;
+var sw = 600;
 var sh = 400;
 var cx = 150;
 var cy = 0;
@@ -149,19 +213,18 @@ function createEditor() {
 }
 
 
-var running_man = (function() {
+var running_man = (function(settings) {
+
+	var creature = {};
 
 	var bmp = dom.canvas(sw,sh);
 	var ctx = bmp.ctx;
 
 
-
-
-
 	function createLimbKeyframe(options) {
 		var parent = options.parent;
 
-		con.log("createLimbKeyframe", options)
+		// con.log("createLimbKeyframe", options)
 
 		var translationX = options.movement.length;
 		var rotationStart = options.movement.baserot - options.movement.range;
@@ -238,7 +301,7 @@ var running_man = (function() {
 
 		var parent = options.parent;
 		if (parent) {
-			options.parent = human[parent];
+			options.parent = creature[parent];
 			parent = options.parent;
 		}
 
@@ -333,12 +396,12 @@ var running_man = (function() {
 		}
 	}
 
-	human = {};
-	for (var c in creature) {
-		var bit = creature[c];
-		human[bit.name] = createLimb(bit);
+	var creature = {};
+	for (var c in settings) {
+		var bit = settings[c];
+		creature[bit.name] = createLimb(bit);
 	}
-	// con.log(human);
+	// con.log(creature);
 
 
 
@@ -354,7 +417,7 @@ var running_man = (function() {
 			background: "rgba(255,0,0,0.2)"
 		}});
 		document.body.appendChild(divnested);
-		divnested.appendChild(human.body.div);
+		divnested.appendChild(creature.body.div);
 
 		var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
 			top: sh * 2 + 50,// 150,
@@ -365,7 +428,7 @@ var running_man = (function() {
 			background: "rgba(0,0,255,0.2)"
 		}});
 		document.body.appendChild(divKeyframes);
-		divKeyframes.appendChild(human.body.divKeyframe);
+		divKeyframes.appendChild(creature.body.divKeyframe);
 
 		var styleSheet = document.createElement("style");
 		var css = [
@@ -391,8 +454,8 @@ var running_man = (function() {
 				// "transform: translateX(0px)",
 			"}"
 		];
-		for (var l in human) {
-			css = css.concat(human[l].css);
+		for (var l in creature) {
+			css = css.concat(creature[l].css);
 		}
 		styleSheet.innerText = css.join(' ');
 		// con.log(css);
@@ -403,7 +466,7 @@ var running_man = (function() {
 
 	function render(t) {
 
-		output.innerHTML = Math.round(t/100)/10;
+		// output.innerHTML = Math.round(t / 100)/ 10;
 
 		var frames = 50;
 
@@ -416,14 +479,14 @@ var running_man = (function() {
 
 		// calculate impact with ground, ie maximum y position.
 		// we can hope it's either the end of the calf or the end of the foot.
-		// walking on knees or head IS accepted.
+		// but walking on knees or head IS accepted.
 		var max = 0;
-		for (var l in human) {
-			max = Math.max(max, human[l].calc(time)); // calculate each limb position
+		for (var l in creature) {
+			max = Math.max(max, creature[l].calc(time)); // calculate each limb position
 		}
 		var x = cx, y = horizon - max - blockSize / 2;
-		for (l in human) {
-			human[l].render(x, y); // render each limb
+		for (l in creature) {
+			creature[l].render(x, y); // render each limb
 		}
 
 		if (isNode) {
@@ -481,6 +544,6 @@ var running_man = (function() {
 
 	return experiment;
 
-})();
+})(spider);
 
 if (isNode) module.exports = running_man;
