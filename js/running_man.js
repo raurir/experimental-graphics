@@ -84,7 +84,7 @@ var human = [
 	{name: "bicep2", parent: "torso", movement: limbs.bicep, phase: Math.PI},
 	{name: "forearm2", parent: "bicep2", movement: limbs.forearm, phase: Math.PI},
 ];
-var spiderlimbs = {
+var spiderlimbs ={
 	"body": {
 		"range": 0,
 		"baserot": 0,
@@ -117,15 +117,27 @@ var spiderlimbs = {
 	},
 	"thigh3": {
 		"range": 0.2,
-		"baserot": 1.5,
+		"baserot": 1.65,
 		"length": 130,
 		"offset": 0.5
 	},
 	"calf3": {
-		"range": -0.3,
+		"range": -0.5,
 		"baserot": 1,
 		"length": 100,
 		"offset": 1.8
+	},
+	"thigh6": {
+		"range": -1,
+		"baserot": 3,
+		"length": 40,
+		"offset": 0
+	},
+	"calf6": {
+		"range": -0.2,
+		"baserot": 1,
+		"length": 60,
+		"offset": -1.5
 	}
 };
 
@@ -142,6 +154,11 @@ var spider = [
 
 	{name: "thigh5", parent: "body", movement: spiderlimbs.thigh3, phase: Math.PI},
 	{name: "calf5", parent: "thigh5", movement: spiderlimbs.calf3, phase: Math.PI},
+
+
+	{name: "thigh6", parent: "body", movement: spiderlimbs.thigh6, phase: Math.PI},
+	{name: "calf6", parent: "thigh6", movement: spiderlimbs.calf6, phase: Math.PI},
+
 
 
 ]
@@ -171,7 +188,8 @@ function createEditor(limbs) {
 	function createEdit(l,k) {
 		var edit = dom.element("div", {style: {margin: 2}});
 		var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
-		var input = dom.element("input", {value: limbs[l][k], type: "number", style:{width: 100}});
+		var input = dom.element("input", {value: limbs[l][k], type: "range", style:{width: 100}});
+		// var input = dom.element("input", {value: limbs[l][k], type: "number", style:{width: 100}});
 		editor.appendChild(edit);
 		edit.appendChild(label);
 		edit.appendChild(input);
@@ -182,7 +200,7 @@ function createEditor(limbs) {
 		return input;
 	}
 
-	
+
 	for (var l in limbs) {
 		for (var k in limbs[l]) {
 			inputs.push(createEdit(l,k));
@@ -553,6 +571,6 @@ var running_man = (function(settings, limbs) {
 
 	return experiment;
 
-})(human, limbs);
+})(spider, spiderlimbs);
 
 if (isNode) module.exports = running_man;
