@@ -185,16 +185,28 @@ function createEditor(limbs) {
 	outputSettings();
 
 
-	function createEdit(l,k) {
+	function edit(l,k) {
+		var min = 0,  multiplier =  0.001, max = Math.PI * 2 / multiplier;
+		if (k === "length") {
+			max = 200;
+			multiplier = 1;
+		}
+
+		var value = limbs[l][k];
+
 		var edit = dom.element("div", {style: {margin: 2}});
 		var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
-		var input = dom.element("input", {value: limbs[l][k], type: "range", style:{width: 100}});
-		// var input = dom.element("input", {value: limbs[l][k], type: "number", style:{width: 100}});
+		var input = dom.element("input", {value: value, min: min, max: max, type: "range", style: {width: 100}});
+		var display = dom.element("input", {value: value, type: "number", style: {width: 50}});
+
 		editor.appendChild(edit);
 		edit.appendChild(label);
 		edit.appendChild(input);
+		edit.appendChild(display);
 		input.addEventListener("change", function(e) {
-			limbs[l][k] = parseFloat(e.target.value);
+			var newValue = parseFloat(e.target.value) * multiplier
+			limbs[l][k] = newValue;
+			display.value = newValue;
 			outputSettings();
 		})
 		return input;
@@ -203,7 +215,7 @@ function createEditor(limbs) {
 
 	for (var l in limbs) {
 		for (var k in limbs[l]) {
-			inputs.push(createEdit(l,k));
+			inputs.push(edit(l,k));
 		}
 	}
 
