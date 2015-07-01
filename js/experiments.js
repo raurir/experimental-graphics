@@ -27,6 +27,7 @@ var experiments = (function() {
     ["additive"],
     ["anemone_three", "THREE"],
     ["bezier_flow"],
+    ["creature_creator/creature", "creature_creator/creature_creator", "creature_creator/human"],
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["fool", "css/fool"],
@@ -40,7 +41,6 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["recursive"],
     ["rectangular_fill"],
-    ["running_man"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
@@ -93,7 +93,7 @@ var experiments = (function() {
     con.log("loadExperiment", exp);
     con.log("loadExperiment src to load:",  src.length);
 
-    require(src, function(experiment,b,c,d,e) {
+    require(src, function(experiment) {
       con.log("require loaded");
       if (experiment) {
         con.log("require loaded...", experiment)
