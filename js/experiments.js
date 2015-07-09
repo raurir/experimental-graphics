@@ -13,6 +13,16 @@
 // }
 // getRandom = Math.random;
 
+
+
+
+
+
+
+
+
+
+
 rand.setSeed(411930879);
 
 
@@ -27,7 +37,7 @@ var experiments = (function() {
     ["additive"],
     ["anemone_three", "THREE"],
     ["bezier_flow"],
-    ["creature_creator/creature", "creature_creator/creature_creator", "creature_creator/human"],
+    ["creature_creator/creature"], //, "creature_creator/creature_creator", "creature_creator/human"],
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["fool", "css/fool"],
@@ -93,13 +103,47 @@ var experiments = (function() {
     con.log("loadExperiment", exp);
     con.log("loadExperiment src to load:",  src.length);
 
-    require(src, function(experiment) {
+    // require(["js/creature_creator/creature"], function(creature) {
+    //   con.log("creature!!!!!!!!", creature);
+    // })
+
+
+
+
+    // require.config({
+    //   // baseUrl: '../lib',
+    //   paths: {
+    //     'zetestmod': 'js/zetestmod',
+    //     'creature': 'js/creature_creator/creature',
+    //   },
+    // });
+
+
+
+    // require([
+    //   "testmod",
+    //   "zetestmod",
+    //   "creature"
+    // ], function(testmod, zetestmod, creature) {
+    //     console.log("experiments:", testmod, zetestmod, creature);
+    // });
+
+
+
+
+
+
+
+
+
+
+    require(src, function(experiment,a,b,c) {
       con.log("require loaded");
       if (experiment) {
         con.log("require loaded...", experiment)
         ExperimentFactory(experiment);
       } else {
-        con.log("require loaded... but experiment is null", experiment, arguments)
+        con.log("require loaded... but experiment is null", experiment, arguments, a,b,c)
       }
     })
 

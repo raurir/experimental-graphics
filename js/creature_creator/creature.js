@@ -1,17 +1,17 @@
 var con = console;
 var isNode = (typeof module !== 'undefined');
 
-if (isNode) {
-	var dom = require('./dom.js');
-	var fs = require('fs');
-	var creature_creator = require('./creature_creator/creature_creator.js');
-}
+// if (isNode) {
+// 	var dom = require('./dom.js');
+// 	var fs = require('fs');
+// 	var creature_creator = require('./creature_creator/creature_creator.js');
+// }
 
-define(function (require) {
+var creature = function() {
+
+	con.log("creature constructor");
 
 	// var bmp = require('./messages');
-
-// function creature() {
 
 	var experiment = {
 		stage: null,
@@ -30,6 +30,12 @@ define(function (require) {
 
 	return experiment;
 
-});
+};
 
-// if (isNode) module.exports = creature;
+// con.log(creature());
+
+if (isNode) {
+  module.exports = creature();
+} else {
+  define("creature", creature);
+}
