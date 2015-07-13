@@ -32,12 +32,24 @@ var experiments = (function() {
   document.body.appendChild(holder);
 
 
+  require.config({
+    // baseUrl: '../lib',
+    paths: {
+      // 'zetestmod': 'js/zetestmod',
+      'creature': 'js/creature_creator/creature',
+      'creature_creator': 'js/creature_creator/creature_creator',
+      'human': 'js/creature_creator/human',
+    },
+  });
+
+
+
   var experiments = [
     ["_test"],
     ["additive"],
     ["anemone_three", "THREE"],
     ["bezier_flow"],
-    ["creature_creator/creature"], //, "creature_creator/creature_creator", "creature_creator/human"],
+    ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["fool", "css/fool"],
@@ -78,6 +90,7 @@ var experiments = (function() {
 
     var src = [];
 
+    /*
     for (var i = exp.length - 1; i > -1;i--) {
       var file = exp[i]
       if (/css/.test(file)) {
@@ -94,14 +107,18 @@ var experiments = (function() {
             src.push("lib/p2/p2");//, "lib/p2/p2.renderer");
             break;
           default:
+
             src.push("js/" + file);
         }
         // createScript(src);
       }
     }
+    */
 
-    con.log("loadExperiment", exp);
-    con.log("loadExperiment src to load:",  src.length);
+    src = exp;
+
+    // con.log("loadExperiment", exp);
+    // con.log("loadExperiment src to load:",  src.length);
 
     // require(["js/creature_creator/creature"], function(creature) {
     //   con.log("creature!!!!!!!!", creature);
@@ -110,13 +127,7 @@ var experiments = (function() {
 
 
 
-    // require.config({
-    //   // baseUrl: '../lib',
-    //   paths: {
-    //     'zetestmod': 'js/zetestmod',
-    //     'creature': 'js/creature_creator/creature',
-    //   },
-    // });
+
 
 
 
@@ -137,15 +148,16 @@ var experiments = (function() {
 
 
 
-    require(src, function(experiment,a,b,c) {
-      con.log("require loaded");
+    require(src, function(experiment) {
+      // con.log("require loaded");
       if (experiment) {
-        con.log("require loaded...", experiment)
-        ExperimentFactory(experiment);
+        con.log("require loaded...", experiment);
+        // ExperimentFactory(experiment);
+        experimentLoaded(experiment);
       } else {
-        con.log("require loaded... but experiment is null", experiment, arguments, a,b,c)
+        con.log("require loaded... but experiment is null", experiment, arguments);
       }
-    })
+    });
 
 
   }
@@ -205,18 +217,25 @@ var experiments = (function() {
     window.addEventListener("resize", resize);
   }
 
-  addEventListener("load:complete", function(e) {
-    con.log("Loaded", e);
-    currentExperiment = e.detail;
-
-
-
-    holder.appendChild(currentExperiment.stage);
+  function experimentLoaded(exp) {
+    currentExperiment = exp;
+    if (currentExperiment.stage) {
+      holder.appendChild(currentExperiment.stage);
+    } else {
+      con.log("experimentLoaded, but no stage:", currentExperiment.stage);
+    }
     initRenderProgress(); // experiments_progress
     initWindowListener();
     currentExperiment.init();
     resize();
+  }
+
+  addEventListener("load:complete", function(e) {
+    con.log("Loaded", e);
+    experimentLoaded(e.detail);
   });
+
+
 
   console.log("Experiments init");
   // document.body.appendChild(colours.showPalette());

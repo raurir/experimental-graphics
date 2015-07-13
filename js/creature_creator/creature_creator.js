@@ -7,91 +7,133 @@ if (isNode) {
 }
 
 
-
-var sw = 600;
-var sh = 400;
-var cx = 150;
-var cy = 0;
-var horizon = sh - 50;
-var blockSize = 10;
-
-var inputs = [];
-
-function createEditor(limbs) {
-
-	var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
-	var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 220}});
-
-	function outputSettings() {
-		output.innerHTML = "var limbs = " + JSON.stringify(limbs, null, "\t") + ";";
-	};
-	outputSettings();
-
-
-	function edit(l,k) {
-		var min = 0,  multiplier =  0.001, max = Math.PI * 2 / multiplier;
-		if (k === "length") {
-			max = 200;
-			multiplier = 1;
-		}
-
-		var value = limbs[l][k];
-
-		var edit = dom.element("div", {style: {margin: 2}});
-		var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
-		var input = dom.element("input", {value: value, min: min, max: max, type: "range", style: {width: 100}});
-		var display = dom.element("input", {value: value, type: "number", style: {width: 50}});
-
-		editor.appendChild(edit);
-		edit.appendChild(label);
-		edit.appendChild(input);
-		edit.appendChild(display);
-		input.addEventListener("change", function(e) {
-			var newValue = parseFloat(e.target.value) * multiplier
-			limbs[l][k] = newValue;
-			display.value = newValue;
-			outputSettings();
-		})
-		return input;
-	}
-
-
-	for (var l in limbs) {
-		for (var k in limbs[l]) {
-			inputs.push(edit(l,k));
-		}
-	}
-
-	function createButton(label, callback) {
-		var button = dom.element("button", {innerHTML: label});
-		editor.appendChild(button);
-		button.addEventListener("click", callback);
-	}
-
-	var randomise = createButton("Random", function(e) {
-		for (var i in inputs) {
-			inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
-			inputs[i].dispatchEvent(new Event('change'));
-		}
-	});
-
-	var morph = createButton("Morph", function(e) {
-		for (var i in inputs) {
-			inputs[i].newValue = inputs[i].value * (0.8 + Math.random() * 0.4);
-		}
-	});
-
-	document.body.appendChild(editor);
-	editor.appendChild(output);
-}
-
-
-var running_man = function(settings, limbs) {
+var creature_creator = function() {
 
 	var creature = {};
 
-	var bmp = dom.canvas(sw,sh);
-	var ctx = bmp.ctx;
+	con.log("creature creator");
+
+	var sw = 600;
+	var sh = 400;
+	var cx = 150;
+	var cy = 0;
+	var horizon = sh - 50;
+	var blockSize = 10;
+
+	var inputs = [];
+	
+	function createEditor(limbs) {
+
+		var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
+		var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 220}});
+
+		function outputSettings() {
+			output.innerHTML = "var limbs = " + JSON.stringify(limbs, null, "\t") + ";";
+		};
+		outputSettings();
+
+
+		function edit(l,k) {
+			var min = 0,  multiplier =  0.001, max = Math.PI * 2 / multiplier;
+			if (k === "length") {
+				max = 200;
+				multiplier = 1;
+			}
+
+			var value = limbs[l][k];
+
+			var edit = dom.element("div", {style: {margin: 2}});
+			var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
+			var input = dom.element("input", {value: value, min: min, max: max, type: "range", style: {width: 100}});
+			var display = dom.element("input", {value: value, type: "number", style: {width: 50}});
+
+			editor.appendChild(edit);
+			edit.appendChild(label);
+			edit.appendChild(input);
+			edit.appendChild(display);
+			input.addEventListener("change", function(e) {
+				var newValue = parseFloat(e.target.value) * multiplier
+				limbs[l][k] = newValue;
+				display.value = newValue;
+				outputSettings();
+			})
+			return input;
+		}
+
+
+		for (var l in limbs) {
+			for (var k in limbs[l]) {
+				inputs.push(edit(l,k));
+			}
+		}
+
+		function createButton(label, callback) {
+			var button = dom.element("button", {innerHTML: label});
+			editor.appendChild(button);
+			button.addEventListener("click", callback);
+		}
+
+		var randomise = createButton("Random", function(e) {
+			for (var i in inputs) {
+				inputs[i].value = inputs[i].value * (0.8 + Math.random() * 0.4);
+				inputs[i].dispatchEvent(new Event('change'));
+			}
+		});
+
+		var morph = createButton("Morph", function(e) {
+			for (var i in inputs) {
+				inputs[i].newValue = inputs[i].value * (0.8 + Math.random() * 0.4);
+			}
+		});
+
+		document.body.appendChild(editor);
+		editor.appendChild(output);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	function createLimbKeyframe(options) {
@@ -269,77 +311,12 @@ var running_man = function(settings, limbs) {
 		}
 	}
 
-	var creature = {};
-	for (var c in settings) {
-		var bit = settings[c];
-		creature[bit.name] = createLimb(bit);
-	}
-	// con.log(creature);
-
-
-
-	if (!isNode) {
-		createEditor(limbs);
-
-		var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
-  		left: -50,
-			top: sh + 50, //0, ???
-			width: sh,
-			height: sw,
-			transform: "rotate(-90deg)scale(-1,1)",
-			background: "rgba(255,0,0,0.2)"
-		}});
-		document.body.appendChild(divnested);
-		divnested.appendChild(creature.body.div);
-
-		var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
-			top: sh * 2 + 50,// 150,
-			left: -50, //cx - blockSize / 2,
-			width: sh,
-			height: sw,
-			transform: "rotate(-90deg)scale(-1,1)",
-			background: "rgba(0,0,255,0.2)"
-		}});
-		document.body.appendChild(divKeyframes);
-		divKeyframes.appendChild(creature.body.divKeyframe);
-
-		var styleSheet = document.createElement("style");
-		var css = [
-			"body {",
-				"overflow: auto;",
-			"}",
-			"#body {",
-				"left: " + sh / 2 + "px;",
-				"top: " + sw / 2 + "px;",
-			"}",
-			".limb {",
-				"background: rgba(0,0,200,0.8);",
-				"position: absolute;",
-				"transform-origin: center left;",
-				"transform-style: preserve-3d;",
-			"}",
-			".joint {",
-				"background: rgba(0,0,255,0.9);",
-				"height: 10px;",
-				"position: absolute;",
-				"transform-origin: center center;",
-				"width: 10px;",
-				// "transform: translateX(0px)",
-			"}"
-		];
-		for (var l in creature) {
-			css = css.concat(creature[l].css);
-		}
-		styleSheet.innerText = css.join(' ');
-		// con.log(css);
-		document.head.appendChild(styleSheet);
-
-	}
 
 
 	function render(t) {
 
 		// output.innerHTML = Math.round(t / 100)/ 10;
+		// con.log("t", t);
 
 
 		for (var i in inputs) {
@@ -387,7 +364,7 @@ var running_man = function(settings, limbs) {
 		}
 
 	}
-	render(0);
+	
 
 
 
@@ -395,6 +372,92 @@ var running_man = function(settings, limbs) {
 
 
 
+
+
+
+	function init(bitmap, context, settings, limbs) {
+		bmp = bitmap;
+		ctx = context;
+		creature = {};
+		for (var c in settings) {
+			var bit = settings[c];
+			creature[bit.name] = createLimb(bit);
+		}
+		con.log(creature);
+
+
+
+
+		if (!isNode) {
+			createEditor(limbs);
+
+			var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
+	  		left: -50,
+				top: sh + 50, //0, ???
+				width: sh,
+				height: sw,
+				transform: "rotate(-90deg)scale(-1,1)",
+				background: "rgba(255,0,0,0.2)"
+			}});
+			document.body.appendChild(divnested);
+			divnested.appendChild(creature.body.div);
+
+			var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
+				top: sh * 2 + 50,// 150,
+				left: -50, //cx - blockSize / 2,
+				width: sh,
+				height: sw,
+				transform: "rotate(-90deg)scale(-1,1)",
+				background: "rgba(0,0,255,0.2)"
+			}});
+			document.body.appendChild(divKeyframes);
+			divKeyframes.appendChild(creature.body.divKeyframe);
+
+			var styleSheet = document.createElement("style");
+			var css = [
+				"body {",
+					"overflow: auto;",
+				"}",
+				"#body {",
+					"left: " + sh / 2 + "px;",
+					"top: " + sw / 2 + "px;",
+				"}",
+				".limb {",
+					"background: rgba(0,0,200,0.8);",
+					"position: absolute;",
+					"transform-origin: center left;",
+					"transform-style: preserve-3d;",
+				"}",
+				".joint {",
+					"background: rgba(0,0,255,0.9);",
+					"height: 10px;",
+					"position: absolute;",
+					"transform-origin: center center;",
+					"width: 10px;",
+					// "transform: translateX(0px)",
+				"}"
+			];
+			for (var l in creature) {
+				css = css.concat(creature[l].css);
+			}
+			styleSheet.innerText = css.join(' ');
+			// con.log(css);
+			document.head.appendChild(styleSheet);
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+		render(0);
+	}
 
 
 
@@ -415,17 +478,22 @@ var running_man = function(settings, limbs) {
 
 
 	var experiment = {
-		stage: bmp.canvas,
+		stage: null, // bmp.canvas,
 		inner: null,
 		resize: function() {},
-		init: function() {},
+		init: init,
 		kill: function() {}
 	}
 
-	if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
+	// if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
 
 	return experiment;
 
 }
 
-if (isNode) module.exports = running_man;
+
+if (isNode) {
+  module.exports = creature_creator();
+} else {
+  define("creature_creator", creature_creator);
+}
