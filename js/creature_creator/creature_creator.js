@@ -9,23 +9,19 @@ if (isNode) {
 
 var creature_creator = function() {
 
-	var creature = {};
-
-	con.log("creature creator");
-
 	var sw = 600;
 	var sh = 400;
 	var cx = 150;
 	var cy = 0;
 	var horizon = sh - 50;
 	var blockSize = 10;
-
+	var creature = {};
 	var inputs = [];
 	
 	function createEditor(limbs) {
 
 		var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
-		var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 220}});
+		var output = dom.element("pre", {id: "output", style: {position: "absolute", top: 0, left: 270}});
 
 		function outputSettings() {
 			output.innerHTML = "var limbs = " + JSON.stringify(limbs, null, "\t") + ";";
@@ -34,7 +30,7 @@ var creature_creator = function() {
 
 
 		function edit(l,k) {
-			var min = 0,  multiplier =  0.001, max = Math.PI * 2 / multiplier;
+			var min = 0,  multiplier = 0.001, max = Math.PI * 2 / multiplier;
 			if (k === "length") {
 				max = 200;
 				multiplier = 1;
@@ -52,7 +48,7 @@ var creature_creator = function() {
 			edit.appendChild(input);
 			edit.appendChild(display);
 			input.addEventListener("change", function(e) {
-				var newValue = parseFloat(e.target.value) * multiplier
+				var newValue = parseFloat(e.target.value) * multiplier;
 				limbs[l][k] = newValue;
 				display.value = newValue;
 				outputSettings();

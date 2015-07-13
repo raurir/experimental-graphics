@@ -21,11 +21,11 @@ var creature = function() {
 	// 	creature_creator.init(bmp, ctx, human.body, human.limbs);
 	// });
 
-  require.config({
-    paths: {
-      'arachnid': 'js/creature_creator/arachnid',
-    },
-  });
+	require.config({
+		paths: {
+			'arachnid': 'js/creature_creator/arachnid',
+		},
+	});
 	require(["creature_creator", "arachnid"], function(creature_creator, arachnid) {
 		creature_creator.init(bmp, ctx, arachnid.body, arachnid.limbs);
 	});
@@ -45,7 +45,7 @@ var creature = function() {
 };
 
 if (isNode) {
-  module.exports = creature();
+	module.exports = creature();
 } else {
-  define("creature", creature);
+	define("creature", creature);
 }
