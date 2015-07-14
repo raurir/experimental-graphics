@@ -34,8 +34,10 @@ var experiments = (function() {
 
   require.config({
     // baseUrl: '../lib',
+    baseUrl: "js",
     paths: {
       // 'zetestmod': 'js/zetestmod',
+      // 'bezier_flow': 'js/bezier_flow',
       'creature': 'js/creature_creator/creature',
       'creature_creator': 'js/creature_creator/creature_creator',
       'human': 'js/creature_creator/human',
