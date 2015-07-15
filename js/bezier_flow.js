@@ -18,7 +18,16 @@ var bezier_flow = function() {
   // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
 
   var bmp = dom.canvas(size,size);
+
+  con.log("bezier_flow bmp", bmp.setSize);
+
   var ctx = bmp.ctx;
+
+
+  bmp.canvas.id = "what";
+  ctx.fillStyle = "red";
+  ctx.fillRect(0,0,100,100);
+
 
   var lines, sections, radius, points, lineStyles;
 
@@ -27,6 +36,7 @@ var bezier_flow = function() {
   }
 
   function init() {
+    
 
     lines = 5;//Math.round(10 + rand.random() * 50);
     sections = Math.round(2 + rand.random() * 3);
@@ -35,6 +45,8 @@ var bezier_flow = function() {
     radius = 0.4 + rand.random() * 0.2;
     points = [];
     lineStyles = [];
+
+    con.log("init", lines, radius);
 
     colours.getRandomPalette();
 
@@ -88,8 +100,12 @@ var bezier_flow = function() {
         var next = getPoint(this.index + 1);
         var dx = next.cx - prev.cx;
         var dy = next.cy - prev.cy;
+
+
         this.a = -Math.atan(dy/dx) - (dx > 0 ? Math.PI : 0);
 
+        // con.log("angle", dy, dx, this.a, -Math.atan(dy/dx));
+        // con.log("angle", next.cx, prev.cx);
         // var x = cx * size, y = cy * size;
         // ctx.fillStyle = "red";
         // ctx.fillRect(x - 2, y - 2, 4, 4);
@@ -136,6 +152,8 @@ var bezier_flow = function() {
         var p2 = getPoint(i);
 
         p2.move();
+
+        // con.log("p1", p1, p2.move);
 
         var m1 = -Math.tan(p1.a);
         var m2 = -Math.tan(p2.a);
@@ -188,7 +206,7 @@ var bezier_flow = function() {
          {x: x2b, y: y2b}
         );
 
-        // console.log(inter);
+        console.log(inter);
 
         // var dot = 4;
         // ctx.fillStyle = "blue";
@@ -236,8 +254,7 @@ var bezier_flow = function() {
     resize: function(w,h) {
       sw = w;
       sh = h;
-      bmp.canvas.width = sw;
-      bmp.canvas.height = sh;
+      bmp.canvas.setSize(sw, sh);
     },
     init: init,
     kill: function() {}

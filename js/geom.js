@@ -45,6 +45,8 @@ var geom = (function() {
 
   function intersectionAnywhere(p0, p1, p2, p3) {
 
+    // con.log("intersectionAnywhere", p0, p1, p2, p3);
+
     var m1, c1, m2, c2, x1, y1, x2, y2, dx, dy;
 
     x1 = p0.x;
@@ -77,11 +79,12 @@ var geom = (function() {
     // con.log("Equation of line2: Y = %.2fX %c %.2f\n", m2, (c2 < 0) ? ' ' : '+',  c2);
 
     if(m1 - m2 == 0) {
-       return null
+      // con.log("intersectionAnywhere: no intercept");
+      return null
     } else {
-      intersection_X = (c2 - c1) / (m1 - m2);
-      intersection_Y = m1 * intersection_X + c1;
-      // printf("Intersecting Point: = %.2f, %.2f\n", intersection_X, intersection_Y);
+      var intersection_X = (c2 - c1) / (m1 - m2);
+      var intersection_Y = m1 * intersection_X + c1;
+      // con.log("intersectionAnywhere:", intersection_X, intersection_Y);
       return {x: intersection_X, y: intersection_Y};
     }
 }

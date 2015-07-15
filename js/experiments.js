@@ -23,7 +23,8 @@
 
 
 
-rand.setSeed(411930879);
+// rand.setSeed(411930879); // this doesn't work for bezier flow
+rand.setSeed(411979);
 
 
 var experiments = (function() {
@@ -193,7 +194,7 @@ var experiments = (function() {
   var currentExperiment;
 
   function resize() {
-    // con.log("resize!");
+    con.log("resize!");
     var sw = window.innerWidth, sh = window.innerHeight;
 
     currentExperiment.resize(sw,sh);
