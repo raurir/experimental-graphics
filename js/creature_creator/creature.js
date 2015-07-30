@@ -11,7 +11,7 @@ var creature = function() {
 
 	// con.log("creature constructor");
 
-	var sw = 600;
+	var sw = 400;
 	var sh = 400;
 
 	var bmp = dom.canvas(sw, sh);
@@ -23,11 +23,14 @@ var creature = function() {
 
 	require.config({
 		paths: {
-			'arachnid': 'js/creature_creator/arachnid',
+			'arachnid': 'creature_creator/arachnid',
+			'human': 'creature_creator/human',
 		},
 	});
-	require(["creature_creator", "arachnid"], function(creature_creator, arachnid) {
-		creature_creator.init(bmp, ctx, arachnid.body, arachnid.limbs);
+	// require(["creature_creator", "arachnid"], function(creature_creator, arachnid) {
+		// creature_creator.init(bmp, ctx, arachnid.body, arachnid.limbs);
+	require(["creature_creator", "human"], function(creature_creator, human) {
+		creature_creator.init(bmp, ctx, human.body, human.limbs);
 	});
 
 	var experiment = {
