@@ -42,7 +42,7 @@ function initExperiments() {
   }
 
   function loadExperiment(params) {
-    con.log("loadExperiment", params);
+    con.log("! loadExperiment params:", params);
     if (params) {
 
       $(buttons).slide(false);
@@ -57,7 +57,7 @@ function initExperiments() {
       currentLoading = newLoading;
       currentRandom = newRandom;
 
-      con.log("currentExperiment", params);
+      con.log("currentExperiment set:", currentExperiment);
 
       if (currentExperiment) {
         currentExperiment.kill();
@@ -66,17 +66,34 @@ function initExperiments() {
       }
 
       if (experimentsLoaded[currentLoading]) {
-        // con.log("script already loaded...", currentLoading);
+        con.log("script already loaded...", currentLoading);
         currentExperiment = experimentsLoaded[currentLoading];
         initExperiment();
       } else {
         var exp = experiments[currentLoading];
-        // con.log("loadExperiment", exp );
-        for (var i = exp.length - 1; i > -1;i--) {
-          var file = exp[i];
-          var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
-          createScript(src);
-        }
+        con.log("do loadExperiment", currentLoading );
+        // for (var i = exp.length - 1; i > -1;i--) {
+        //   var file = exp[i];
+        //   var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
+        //   createScript(src);
+        // }
+
+        var src = "experiments/" + exp;
+
+        require(src, function(experiment) {
+          // con.log("require loaded");
+          if (experiment) {
+            con.log("require loaded...", experiment);
+            // ExperimentFactory(experiment);
+            experimentLoaded(experiment);
+          } else {
+            con.log("require loaded... but experiment is null", experiment, arguments);
+          }
+        });
+
+
+
+
       }
     } else {
       $(buttons).slide(true);
