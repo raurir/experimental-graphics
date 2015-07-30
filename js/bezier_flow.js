@@ -36,7 +36,7 @@ var bezier_flow = function() {
   }
 
   function init() {
-    
+
 
     lines = 5;//Math.round(10 + rand.random() * 50);
     sections = Math.round(2 + rand.random() * 3);
