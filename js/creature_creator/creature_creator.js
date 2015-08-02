@@ -29,7 +29,7 @@ var creature_creator = function() {
 		outputSettings();
 
 
-		function edit(l,k) {
+		function edit(parent, l,k) {
 			var min = 0,  multiplier = 0.001, max = Math.PI * 2 / multiplier;
 			if (k === "length") {
 				max = 200;
@@ -40,10 +40,10 @@ var creature_creator = function() {
 
 			var edit = dom.element("div", {style: {margin: 2}});
 			var label = dom.element("div", {innerHTML: l + " " + k + ":", style: {display: "inline-block", textAlign: "right", width: 100} });
-			var input = dom.element("input", {value: value, min: min, max: max, type: "range", style: {width: 100}});
+			var input = dom.element("input", {value: value / multiplier, min: min, max: max, type: "range", style: {width: 100}});
 			var display = dom.element("input", {value: value, type: "number", style: {width: 50}});
 
-			editor.appendChild(edit);
+			parent.appendChild(edit);
 			edit.appendChild(label);
 			edit.appendChild(input);
 			edit.appendChild(display);
@@ -58,8 +58,10 @@ var creature_creator = function() {
 
 
 		for (var l in limbs) {
+			var editLimb = dom.element("div", {style: {background: "#333", "margin-bottom": 5}});
+			editor.appendChild(editLimb);
 			for (var k in limbs[l]) {
-				inputs.push(edit(l,k));
+				inputs.push(edit(editLimb, l,k));
 			}
 		}
 

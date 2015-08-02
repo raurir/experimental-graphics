@@ -13,22 +13,12 @@ if (isNode) {
 
 var bezier_flow = function() {
 
-  var sw = sh = size = 800;
+  var sw = sh = size = 400;
 
   // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
 
   var bmp = dom.canvas(size,size);
-
-  con.log("bezier_flow bmp", bmp.setSize);
-
   var ctx = bmp.ctx;
-
-
-  bmp.canvas.id = "what";
-  ctx.fillStyle = "red";
-  ctx.fillRect(0,0,100,100);
-
-
   var lines, sections, radius, points, lineStyles;
 
   function getPoint(d) {
@@ -37,23 +27,18 @@ var bezier_flow = function() {
 
   function init() {
     
-
-    lines = 5;//Math.round(10 + rand.random() * 50);
+    lines = Math.round(10 + rand.random() * 50);
     sections = Math.round(2 + rand.random() * 3);
-    // lines = Math.round(3 + rand.random() * 3);
-    // sections = 3;
     radius = 0.4 + rand.random() * 0.2;
     points = [];
     lineStyles = [];
-
-    con.log("init", lines, radius);
 
     colours.getRandomPalette();
 
     for (var l = 0; l < lines; l++) {
       lineStyles[l] = {
         strokeStyle: colours.getRandomColour(),
-        lineWidth: 1 // + rand.random() * 13
+        lineWidth: 1 + rand.random() * 3
       }
     }
 
@@ -205,8 +190,6 @@ var bezier_flow = function() {
          {x: x2a, y: y2a},
          {x: x2b, y: y2b}
         );
-
-        console.log(inter);
 
         // var dot = 4;
         // ctx.fillStyle = "blue";

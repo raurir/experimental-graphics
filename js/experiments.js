@@ -23,8 +23,8 @@
 
 
 
-// rand.setSeed(411930879); // this doesn't work for bezier flow
-rand.setSeed(411979);
+// rand.setSeed(411930879); // this doesn"t work for bezier flow
+rand.setSeed();
 
 
 var experiments = (function() {
@@ -32,22 +32,22 @@ var experiments = (function() {
   var holder = dom.element("div");
   document.body.appendChild(holder);
 
-
   require.config({
-    // baseUrl: '../lib',
     baseUrl: "js",
     paths: {
-      // 'zetestmod': 'js/zetestmod',
-      // 'bezier_flow': 'js/bezier_flow',
-      'creature': 'js/creature_creator/creature',
-      'creature_creator': 'js/creature_creator/creature_creator',
-      'human': 'js/creature_creator/human',
+      "THREE": "../lib/three/three.min",
+      "TweenMax": "../lib/greensock/TweenMax.min",
+      "creature": "creature_creator/creature",
     },
   });
 
 
 
   var experiments = [
+    ["unknown"],
+
+    ["race_lines_three","THREE", "TweenMax"],
+
     ["_test"],
     ["additive"],
     ["anemone_three", "THREE"],

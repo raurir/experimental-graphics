@@ -34,13 +34,13 @@ var rotation = 0;
 var attempts = 0;
 
 var settings = {
-  increaseMutation: getRandom() > 0.5,
-  drawNodes: getRandom() > 0.5,
-  straight: getRandom() > 0.5,
-	megaNodes: getRandom() > 0.5,
-	megaSubNodes: getRandom() > 0.5,
-	constantMegaNodeSize: getRandom() > 0.5,
-	constantMegaSubNodeSize: getRandom() > 0.5,
+  increaseMutation: rand.random() > 0.5,
+  drawNodes: rand.random() > 0.5,
+  straight: rand.random() > 0.5,
+	megaNodes: rand.random() > 0.5,
+	megaSubNodes: rand.random() > 0.5,
+	constantMegaNodeSize: rand.random() > 0.5,
+	constantMegaSubNodeSize: rand.random() > 0.5,
 }
 
 // con.log(settings);
@@ -60,9 +60,9 @@ createPlanet(0, {
   y:cy,
   distance: 0,
   rotation: 0,
-  // hue: ~~(getRandom() * 360),
+  // hue: ~~(rand.random() * 360),
   colour: fgColour,
-  mutationRate: 10 //getRandom()
+  mutationRate: 10 //rand.random()
 });
 
 
@@ -73,8 +73,8 @@ createPlanet(0, {
 function newPlanet( index ) {
 
   var planet = {
-    x: cx + Math.sin(rotation) * diameter + (getRandom() - 0.5) * 0.05,
-    y: cy + Math.cos(rotation) * diameter + (getRandom() - 0.5) * 0.05,
+    x: cx + Math.sin(rotation) * diameter + (rand.random() - 0.5) * 0.05,
+    y: cy + Math.cos(rotation) * diameter + (rand.random() - 0.5) * 0.05,
     rotation: rotation,
     distance: diameter
   };
@@ -125,12 +125,12 @@ function newPlanet( index ) {
     createPlanet(index, planet)
   } else {
     if ( attempts < 40 ) {
-      rotation += getRandom() * 20 + Math.atan( 1 / diameter);
+      rotation += rand.random() * 20 + Math.atan( 1 / diameter);
     } else {
       ringIndex++
       arrRings[ringIndex] = [];
       // con.log('increasing diameter',ringIndex);
-      diameter += getRandom() * ringSize + 1/400;
+      diameter += rand.random() * ringSize + 1/400;
     }
     attempts++;
     newPlanet( index );
@@ -264,13 +264,13 @@ function drawInnerNode(planet, xp, yp) {
   if (settings.megaNodes) {
     ctx.beginPath();
     ctx.fillStyle = bgColour;
-    ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.7 * (settings.constantMegaNodeSize ? 1 : getRandom()));
+    ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.7 * (settings.constantMegaNodeSize ? 1 : rand.random()));
     ctx.fill();
 
-    if (settings.megaSubNodes && getRandom() > 0.5) {
+    if (settings.megaSubNodes && rand.random() > 0.5) {
       ctx.beginPath();
       ctx.fillStyle = planet.colour;
-      ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.9 * (settings.constantMegaSubNodeSize ? 1 : getRandom()));
+      ctx.drawCircle(planet.x * sw, planet.y * sh, radius * 0.9 * (settings.constantMegaSubNodeSize ? 1 : rand.random()));
       ctx.fill();
     }
   }
@@ -323,13 +323,13 @@ canvases.appendChild(bmp.canvas);
 function generate() {
   while(canvases.childNodes.length) canvases.removeChild(canvases.childNodes[0]);
 
-  seed = ~~(originalRand() * 1e9)
+  seed = ~~(rand.random() * 1e9)
 
   colours.getRandomPalette();
   fgColour = colours.getRandomColour();
   bgColour = colours.getNextColour();
 
-  seed = same;
+  // seed = same;
   makeCanvas(1);
   // seed = same;
   // makeCanvas(2);

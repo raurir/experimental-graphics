@@ -10,68 +10,103 @@ var spiderlimbs = {
 		"length": 0,
 		"offset": 0
 	},
-	"femur1": {
+
+
+
+"a2": {
+		"range": 0,
+		"baserot": 1.959,
+		"length": 90,
+		"offset": 1.368
+	},
+	"b2": {
+		"range": 0.333,
+		"baserot": 1.22,
+		"length": 105,
+		"offset": 0.7
+	},
+	"c2": {
+		"range": 0.4,
+		"baserot": 0.333,
+		"length": 53,
+		"offset": 4.99
+	},
+
+
+
+
+	"a1": {
 		"range": 0.2,
 		"baserot": -2,
 		"length": 90,
 		"offset": 0
 	},
-	"tibia1": {
+	"b1": {
 		"range": 0.2,
 		"baserot": 5.433,
 		"length": 90,
 		"offset": 1.6
 	},
-	"tarsus1": {
+	"c1": {
 		"range": 0.7,
 		"baserot": 0.4,
-		"length": 90,
+		"length": 53,
 		"offset": 1.6
 	},
-	"femur2": {
-		"range": 0.48,
-		"baserot": 1.663,
-		"length": 90,
-		"offset": 4.103
+
+
+	"a3": {
+		"range": 0.7020000000000001,
+		"baserot": 2.994,
+		"length": 46,
+		"offset": 2.846
 	},
-	"tibia2": {
-		"range": 0.85,
-		"baserot": 0.85,
-		"length": 114,
-		"offset": 3.289
+	"b3": {
+		"range": 0.333,
+		"baserot": 0,
+		"length": 58,
+		"offset": 5.655
 	},
-	"tarsus2": {
+	"c3": {
 		"range": 0.48,
-		"baserot": 0.7020000000000001,
-		"length": 91,
-		"offset": 5.581
-	}
+		"baserot": 5.803,
+		"length": 55,
+		"offset": 3.807
+	},
+
+
+
 };
 
 
+	// femur tibia tarsus 
 
 	var spider = [
 		{name: "body", parent: null, movement: spiderlimbs.body, phase: 0},
 
-		{name: "femur1", parent: "body", movement: spiderlimbs.femur1, phase: 0},
-		{name: "tibia1", parent: "femur1", movement: spiderlimbs.tibia1, phase: 0},
-		{name: "tarsus1", parent: "tibia1", movement: spiderlimbs.tarsus1, phase: 0},
+		{name: "a1", parent: "body", movement: spiderlimbs.a1, phase: 0},
+		{name: "b1", parent: "a1", movement: spiderlimbs.b1, phase: 0},
+		{name: "c1", parent: "b1", movement: spiderlimbs.c1, phase: 0},
 
-		{name: "femur2", parent: "body", movement: spiderlimbs.femur2, phase: 0}, //Math.PI},
-		{name: "tibia2", parent: "femur2", movement: spiderlimbs.tibia2, phase: 0}, //Math.PI},
-		{name: "tarsus2", parent: "tibia2", movement: spiderlimbs.tarsus2, phase: 0}, //Math.PI},
+		{name: "a2", parent: "body", movement: spiderlimbs.a2, phase: 0},
+		{name: "b2", parent: "a2", movement: spiderlimbs.b2, phase: 0},
+		{name: "c2", parent: "b2", movement: spiderlimbs.c2, phase: 0},
 
-		// {name: "femur3", parent: "body", movement: spiderlimbs.femur2, phase: 0},
-		// {name: "tibia3", parent: "femur3", movement: spiderlimbs.tibia2, phase: 0},
+		{name: "a3", parent: "body", movement: spiderlimbs.a3, phase: 0}, //Math.PI},
+		{name: "b3", parent: "a3", movement: spiderlimbs.b3, phase: 0}, //Math.PI},
+		{name: "c3", parent: "b3", movement: spiderlimbs.c3, phase: 0}, //Math.PI},
 
-		// {name: "femur4", parent: "body", movement: spiderlimbs.femur2, phase: Math.PI},
-		// {name: "tibia4", parent: "femur4", movement: spiderlimbs.tibia2, phase: Math.PI},
+		// {name: "a3", parent: "body", movement: spiderlimbs.a2, phase: 0},
+		// {name: "b3", parent: "a3", movement: spiderlimbs.b2, phase: 0},
 
-		// {name: "femur5", parent: "body", movement: spiderlimbs.femur3, phase: Math.PI},
-		// {name: "tibia5", parent: "femur5", movement: spiderlimbs.tibia3, phase: Math.PI},
+		// {name: "a4", parent: "body", movement: spiderlimbs.a2, phase: Math.PI},
+		// {name: "b4", parent: "a4", movement: spiderlimbs.b2, phase: Math.PI},
 
-		// {name: "femur6", parent: "body", movement: spiderlimbs.femur6, phase: Math.PI},
-		// {name: "tibia6", parent: "femur6", movement: spiderlimbs.tibia6, phase: Math.PI},
+		// {name: "a5", parent: "body", movement: spiderlimbs.a3, phase: Math.PI},
+		// {name: "b5", parent: "a5", movement: spiderlimbs.b3, phase: Math.PI},
+
+		// {name: "a6", parent: "body", movement: spiderlimbs.a6, phase: Math.PI},
+		// {name: "b6", parent: "a6", movement: spiderlimbs.b6, phase: Math.PI},
 
 	]
 

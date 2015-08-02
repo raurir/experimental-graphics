@@ -21,7 +21,13 @@ var rand = (function() {
       // return a float in [0, 1)
       // if z = m then z / m = 0 therefore (z % m) / m < 1 always
       return z / m;
+    },
+
+    getNumber: function(min, max) {
+      return min + this.random() * (max - min);
     }
+
+
   };
 }());
 

@@ -1,10 +1,10 @@
 var con = console;
-var isNode = (typeof module !== 'undefined');
+var isNode = (typeof module !== "undefined");
 
 // if (isNode) {
-// 	var dom = require('./dom.js');
-// 	var fs = require('fs');
-// 	var creature_creator = require('./creature_creator/creature_creator.js');
+// 	var dom = require("./dom.js");
+// 	var fs = require("fs");
+// 	var creature_creator = require("./creature_creator/creature_creator.js");
 // }
 
 var creature = function() {
@@ -23,7 +23,9 @@ var creature = function() {
 
 	require.config({
 		paths: {
-			'arachnid': 'js/creature_creator/arachnid',
+			"arachnid": "creature_creator/arachnid",
+      "creature_creator": "creature_creator/creature_creator",
+      "human": "creature_creator/human",
 		},
 	});
 	require(["creature_creator", "arachnid"], function(creature_creator, arachnid) {
