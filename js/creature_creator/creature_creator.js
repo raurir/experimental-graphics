@@ -9,7 +9,7 @@ if (isNode) {
 
 var creature_creator = function() {
 
-	var sw = 600;
+	var sw = 400;
 	var sh = 400;
 	var cx = 150;
 	var cy = 0;
@@ -17,7 +17,7 @@ var creature_creator = function() {
 	var blockSize = 10;
 	var creature = {};
 	var inputs = [];
-	
+
 	function createEditor(limbs) {
 
 		var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});
@@ -140,6 +140,7 @@ var creature_creator = function() {
 		// con.log("createLimbKeyframe", options)
 
 		var translationX = options.movement.length;
+		var translationY = 0;
 		var rotationStart = options.movement.baserot - options.movement.range;
 		var rotationEnd = options.movement.baserot + options.movement.range;
 
@@ -159,13 +160,14 @@ var creature_creator = function() {
 			"100% {transform: rotate(" + rotationStart + "rad);}"
 		];
 		var transformJoint = [
-			"0% {transform: translateX(" + translationX + "px) rotate(" + -rotationStart + "rad);}",
-		  "50% {transform: translateX(" + translationX + "px) rotate(" + -rotationEnd + "rad);}",
-		  "100% {transform: translateX(" + translationX + "px) rotate(" + -rotationStart + "rad);}"
+			"0% {transform: translate(" + translationX + "px," + translationY + "px) rotate(" + -rotationStart + "rad);}",
+		  "50% {transform: translate(" + translationX + "px," + translationY + "px) rotate(" + -rotationEnd + "rad);}",
+		  "100% {transform: translate(" + translationX + "px," + translationY + "px) rotate(" + -rotationStart + "rad);}"
 		];
 
 
 		var time = 2;
+		// 0.63 is a magic number - on my machine syncs up css keyframes with js.
 		var delay = (-0.63 + -time * (options.movement.offset + options.phase) / (Math.PI * 2));
 		var animation = options.name + "-animation " + time + "s " + delay + "s ease-in-out infinite;"
 		var animationOpposite = options.name + "-joint-animation " + time + "s " + delay + "s ease-in-out infinite;"
@@ -362,7 +364,7 @@ var creature_creator = function() {
 		}
 
 	}
-	
+
 
 
 
@@ -390,8 +392,8 @@ var creature_creator = function() {
 			createEditor(limbs);
 
 			var divnested = dom.element("div", {id: "nested", style: {position: "absolute",
-	  		left: -50,
-				top: sh + 50, //0, ???
+	  		left: 0,
+				top: sh, //0, ???
 				width: sh,
 				height: sw,
 				transform: "rotate(-90deg)scale(-1,1)",
@@ -401,8 +403,8 @@ var creature_creator = function() {
 			divnested.appendChild(creature.body.div);
 
 			var divKeyframes = dom.element("div", {id: "keyframes", style: {position: "absolute",
-				top: sh * 2 + 50,// 150,
-				left: -50, //cx - blockSize / 2,
+				top: sh * 2,// 150,
+				left: 0, //cx - blockSize / 2,
 				width: sh,
 				height: sw,
 				transform: "rotate(-90deg)scale(-1,1)",
@@ -428,10 +430,10 @@ var creature_creator = function() {
 				"}",
 				".joint {",
 					"background: rgba(0,0,255,0.9);",
-					"height: 10px;",
+					"height: 0;",
 					"position: absolute;",
 					"transform-origin: center center;",
-					"width: 10px;",
+					"width: 0;",
 					// "transform: translateX(0px)",
 				"}"
 			];

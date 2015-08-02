@@ -42,7 +42,7 @@ function initExperiments() {
   }
 
   function loadExperiment(params) {
-    con.log("loadExperiment", params);
+    con.log("! loadExperiment params:", params);
     if (params) {
 
       $(buttons).slide(false);
@@ -57,7 +57,7 @@ function initExperiments() {
       currentLoading = newLoading;
       currentRandom = newRandom;
 
-      con.log("currentExperiment", params);
+      con.log("currentExperiment set:", currentExperiment);
 
       if (currentExperiment) {
         currentExperiment.kill();
@@ -66,17 +66,26 @@ function initExperiments() {
       }
 
       if (experimentsLoaded[currentLoading]) {
-        // con.log("script already loaded...", currentLoading);
+        con.log("script already loaded...");
         currentExperiment = experimentsLoaded[currentLoading];
         initExperiment();
       } else {
         var exp = experiments[currentLoading];
-        // con.log("loadExperiment", exp );
-        for (var i = exp.length - 1; i > -1;i--) {
-          var file = exp[i];
-          var src = "experiments/" + file +  ".js" + "?" + Math.random() * 1e10;
-          createScript(src);
-        }
+        con.log("do loadExperiment exp", exp );
+        require(exp, function(experiment) {
+          // con.log("require loaded");
+          if (experiment) {
+            con.log("require loaded...", experiment);
+            // ExperimentFactory(experiment);
+            experimentLoaded(experiment);
+          } else {
+            con.log("require loaded... but experiment is null", experiment, arguments);
+          }
+        });
+
+
+
+
       }
     } else {
       $(buttons).slide(true);
@@ -88,15 +97,19 @@ function initExperiments() {
 
 
   addEventListener("load:complete", function(e) {
-    // con.log("Loaded", e);
-    currentExperiment = e.detail;
+    experimentLoaded(e.detail)
+  });
+
+  function experimentLoaded(_currentExperiment) {
+    con.log("Loaded", _currentExperiment);
+    currentExperiment = _currentExperiment;
     if (currentExperiment.init == undefined) return con.warn("Missing property init on currentExperiment");
     if (currentExperiment.kill == undefined) return con.warn("Missing property kill on currentExperiment");
     if (currentExperiment.resize == undefined) return con.warn("Missing property resize on currentExperiment");
     if (currentExperiment.stage == undefined) return con.warn("Missing property stage on currentExperiment");
     experimentsLoaded[currentLoading] = currentExperiment;
     initExperiment();
-  });
+  }
 
 
   var stage;
