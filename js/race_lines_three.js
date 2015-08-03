@@ -6,7 +6,7 @@ var camera, scene, projector, renderer, group;
 var mouse = { x: 0, y: 0 };
 var sw = window.innerWidth, sh = window.innerHeight;
 var theta = 0;
-var cols = 32;
+var cols = 30;
 var rows = 16;
 var gap = 20;
 var size = {
@@ -15,35 +15,35 @@ var size = {
 	depth: 200,
 }
 var boxes = [];
+var boxes1d = [];
 
 
 function draw(props) {
 	var col = 0x909090;
 
-	var uniforms = {
-		topColor: 	 { type: "c", value: new THREE.Color( 0x0077ff ) },
-		bottomColor: { type: "c", value: new THREE.Color( 0xff0000 ) },
-		offset:		 { type: "f", value: 400 },
-		exponent:	 { type: "f", value: 0.6 }
-	};
+	// var uniforms = {
+	// 	topColor: 	 { type: "c", value: new THREE.Color( 0x0077ff ) },
+	// 	bottomColor: { type: "c", value: new THREE.Color( 0xff0000 ) },
+	// 	offset:		 { type: "f", value: 400 },
+	// 	exponent:	 { type: "f", value: 0.6 }
+	// };
 
-	/*
-  var uniforms = {
-    // time: { type: "f", value: 1.0 },
-    // index: { type: "f", value: i / il},
-    // resolution: { type: "v2", value: new THREE.Vector2() },
-    // red: { type: "f", value: red },
-    // green: { type: "f", value: green},
-    // blue: { type: "f", value: blue },
-  };
-
-  var material = new THREE.ShaderMaterial( {
-    uniforms: uniforms,
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader
-  });
 	
-	*/
+  // var uniforms = {
+  //   // time: { type: "f", value: 1.0 },
+  //   // index: { type: "f", value: i / il},
+  //   // resolution: { type: "v2", value: new THREE.Vector2() },
+  //   // red: { type: "f", value: red },
+  //   // green: { type: "f", value: green},
+  //   // blue: { type: "f", value: blue },
+  // };
+
+  // var material = new THREE.ShaderMaterial( {
+  //   uniforms: uniforms,
+  //   vertexShader: vertexShader,
+  //   fragmentShader: fragmentShader
+  // });
+
 
 	// con.log("CustomMaterial:", THREE.CustomMaterial);
 	// var material = new THREE.CustomMaterial( { color: col } );
@@ -67,7 +67,7 @@ var emptySlot = "emptySlot";
 function init() {
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2(0x440000, 0.0004);
+	scene.fog = new THREE.FogExp2(0x002000, 0.001);
 
 	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
 	camera.position.set( 0, 300, 500 );
@@ -79,7 +79,7 @@ function init() {
 
 	lightAbove.castShadow = true;
 
-	var lightBelow = new THREE.DirectionalLight(0xff0080, 2);
+	var lightBelow = new THREE.DirectionalLight(0x002000, 2);
 	lightBelow.position.set(0, -1, 0.25).normalize();
 	scene.add( lightBelow );
 
@@ -128,12 +128,16 @@ function init() {
 		if (boxes[yai][zai][xai] === emptySlot) {
 			created++;
 			var box = draw(size);
-			box.position.set(x, y, z);
+			// box.position.set(x, y, z);
+			box.position.y = y;
 			box.isWarping = false;
-			box.offset = {x: x, z: z};
+			box.offset = {x: x, z: 0};
 			box.posZ = z;
 			// box.rotation.set(0, 0, i * 0.2);
 			boxes[yai][zai][xai] = box;
+
+			boxes1d.push(box);
+
 			group.add(box);
 		}
 	}
@@ -162,7 +166,7 @@ function render(time) {
 	theta += 0.01;
 
 	var camRadius = 10;
-	var speed = 3;
+	var speed = isMouseDown ? 0 : 6;
 
 	var zDistance = rows * (size.depth + gap);
 
@@ -171,15 +175,16 @@ function render(time) {
 
 		if (box !== emptySlot) {
 
-			box.posZ += speed;
-
 			box.position.x = box.offset.x;
 			box.position.z = box.offset.z + box.posZ;
 
 			if (box.position.z > 0) {
 				box.posZ -= zDistance;
+			} else {
+				// box.posZ += speed;
 			}
 
+			if (isMouseDown) return;
 			if (!box.isWarping) {
 				if (Math.random() > 0.999) {
 					// con.log("do it");
@@ -202,9 +207,15 @@ function render(time) {
 
 						boxes[y][zn][xn] = box;
 
-						TweenMax.to(box.offset, 0.5, {
-							x: getX(xn),
-							z: getZ(zn),
+						// con.log( box.offset.x,  box.offset.z);
+
+						TweenMax.to(box.offset, 0.1, {
+							x: box.offset.x + xo * (size.width + gap),
+							z: box.offset.z + zo * (size.depth + gap),
+							// x: getX(xn),
+							// z: getZ(zn),
+						});
+						TweenMax.to(box.offset, 0.2, {
 							onComplete: function() {
 								box.isWarping = false;
 							}
@@ -223,6 +234,10 @@ function render(time) {
 
 	// con.log(boxes);
 
+	for (var b = 0, bl = boxes1d.length; b < bl; b++) {
+		boxes1d[b].posZ += speed;
+	}
+
 	for (var j = 0, jl = rows; j < jl; j++) { // iterate through rows: z
 		for (var i = 0, il = cols; i < il; i++) { // iterate throw cols: x
 			// move(boxes.bottom[j][i]);
@@ -239,14 +254,14 @@ function render(time) {
 	// );
 
 	camera.position.set(
-		0, 
+		mouse.x * -20, 
 		0,
 		10
 	);
 
 	camera.lookAt( scene.position );
 
-	camera.rotation.z = time * 0.0001;
+	// camera.rotation.z = time * 0.0001;
 	// camera.rotation.y = -Math.PI / 2;//-= mouse.x * 0.1;
 
 	renderer.render( scene, camera );
@@ -258,7 +273,13 @@ function animate() {
 	render(0);
 }
 
+var isMouseDown = false;
+
 setTimeout(function() {
+
+	window.addEventListener("mousedown", function() {
+		isMouseDown = !isMouseDown;
+	});
 
 	// require(["three_custom_material"], function(b) {
 
