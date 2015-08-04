@@ -21,28 +21,23 @@ var boxes1d = [];
 function draw(props) {
 	var col = 0x909090;
 
-	// var uniforms = {
-	// 	topColor: 	 { type: "c", value: new THREE.Color( 0x0077ff ) },
-	// 	bottomColor: { type: "c", value: new THREE.Color( 0xff0000 ) },
-	// 	offset:		 { type: "f", value: 400 },
-	// 	exponent:	 { type: "f", value: 0.6 }
-	// };
+	function num(min, max) { return Math.random() * (max - min) + min; }
 
-	
-  // var uniforms = {
-  //   // time: { type: "f", value: 1.0 },
-  //   // index: { type: "f", value: i / il},
-  //   // resolution: { type: "v2", value: new THREE.Vector2() },
-  //   // red: { type: "f", value: red },
-  //   // green: { type: "f", value: green},
-  //   // blue: { type: "f", value: blue },
-  // };
+  var uniforms = {
+    // time: { type: "f", value: 1.0 },
+    // index: { type: "f", value: i / il},
+    // resolution: { type: "v2", value: new THREE.Vector2() },
+    red: { type: "f", value: num(0, 0.2) },
+    green: { type: "f", value:num(0.5, 0.9)},
+    blue: { type: "f", value: num(0.3, 0.7) },
+    distance: { type: "f", value: 1.0},
+  };
 
-  // var material = new THREE.ShaderMaterial( {
-  //   uniforms: uniforms,
-  //   vertexShader: vertexShader,
-  //   fragmentShader: fragmentShader
-  // });
+  var material = new THREE.ShaderMaterial( {
+    uniforms: uniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader
+  });
 
 
 	// con.log("CustomMaterial:", THREE.CustomMaterial);
@@ -67,7 +62,7 @@ var emptySlot = "emptySlot";
 function init() {
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2(0x002000, 0.001);
+	// scene.fog = new THREE.FogExp2(0x002000, 0.001);
 
 	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
 	camera.position.set( 0, 300, 500 );
@@ -98,7 +93,7 @@ function init() {
 	// renderer.sortObjects = false;
 	renderer.setSize( sw, sh );
 
-	renderer.setClearColor( scene.fog.color );
+	// renderer.setClearColor( scene.fog.color );
 
 
 	boxes = {
@@ -184,6 +179,7 @@ function render(time) {
 				// box.posZ += speed;
 			}
 
+			// return;
 			if (isMouseDown) return;
 			if (!box.isWarping) {
 				if (Math.random() > 0.999) {
@@ -236,6 +232,12 @@ function render(time) {
 
 	for (var b = 0, bl = boxes1d.length; b < bl; b++) {
 		boxes1d[b].posZ += speed;
+
+		// normalized distance from camera
+		var distance = 1 - ((zDistance-boxes1d[b].posZ) / (zDistance) - 1);
+
+		// boxes1d[b].material.uniforms.distance.value = distance;
+		// if (b ==0) con.log(zDistance, distanceFromCamera)
 	}
 
 	for (var j = 0, jl = rows; j < jl; j++) { // iterate through rows: z
@@ -248,13 +250,13 @@ function render(time) {
 	};
 
 	// camera.position.set(
-	// 	-700,//camRadius * Math.sin(theta), 
+	// 	-700,//camRadius * Math.sin(theta),
 	// 	100,//mouse.y * -20,
 	// 	700//camRadius * Math.cos(theta * Math.PI / 360)
 	// );
 
 	camera.position.set(
-		mouse.x * -20, 
+		mouse.x * -20,
 		0,
 		10
 	);
@@ -285,7 +287,7 @@ setTimeout(function() {
 
 		// con.log(THREE.CustomMaterial);
 
-	init(); 	
+	init();
 	animate();
 
 	// })
@@ -294,26 +296,6 @@ setTimeout(function() {
 
 
 
-var vertexShader = [
-"varying vec3 vWorldPosition;",
-"void main() {",
-"	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
-"	vWorldPosition = worldPosition.xyz;",
-"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-"}"].join("");
-
-var fragmentShader = [
-"uniform vec3 topColor;",
-"uniform vec3 bottomColor;",
-"uniform float offset;",
-"uniform float exponent;",
-"varying vec3 vWorldPosition;",
-"void main() {",
-	"float h = normalize( vWorldPosition + offset ).y;",
-	"gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );",
-"}"].join("");
-
-/*
 
 var vertexShader = [
 "varying vec2 vUv;",
@@ -326,17 +308,20 @@ var vertexShader = [
 
 var fragmentShader = [
 // "uniform float time;",
-// "uniform float red;",
-// "uniform float green;",
-// "uniform float blue;",
-// "uniform float index;",
+"uniform float red;",
+"uniform float green;",
+"uniform float blue;",
+"uniform float distance;",
 
 "varying vec2 vUv;",
 
 "void main( void ) {",
-"  float r = 1.0;",
-"  float g = 0.5;",
-"  float b = 1.0;",
+"  vec2 position = abs(-1.0 + 2.0 * vUv);",
+"  float edging = abs((pow(position.y, 5.0) + pow(position.x, 5.0)) / 2.0);",
+"  float perc = (0.2 + edging * 0.6) * distance;",
+"  float r = red * perc;",
+"  float g = green * perc;",
+"  float b = blue * perc;",
 "  gl_FragColor = vec4( r, g, b, 1.0 );",
 "}"].join("");
-*/
+
