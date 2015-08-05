@@ -172,7 +172,7 @@ var race_lines_three = function() {
 		theta += 0.01;
 
 		var camRadius = 10;
-		var speed = isMouseDown ? 0 : 16;
+		var speed = isMouseDown ? 0 : 4;
 
 
 
@@ -196,15 +196,23 @@ var race_lines_three = function() {
 					if (Math.random() > 0.999) {
 						// con.log("do it");
 
-						var dir = Math.floor(Math.random() * 4), xn = x, zn = z, xo = 0, zo = 0;
+						var yn = y, yi = 0;
+
+						var dir = Math.floor(Math.random() * 5), xn = x, zn = z, xo = 0, zo = 0;
+						dir = 4;
 						switch (dir) {
 							case 0 : xn++; xo = 1; break;
 							case 1 : xn--; xo = -1; break;
 							case 2 : zn++; zo = 1; break;
 							case 3 : zn--; zo = -1; break;
+							case 4 :
+								yn = (y === "top") ? "bottom" : "top";
+								yi = (y === "top") ? -1 : 1;
+
+								break;
 						}
 
-						if (boxes[y][zn] && boxes[y][zn][xn] === emptySlot) {
+						if (boxes[yn][zn] && boxes[yn][zn][xn] === emptySlot) {
 
 							boxes[y][z][x] = emptySlot;
 
@@ -212,17 +220,21 @@ var race_lines_three = function() {
 							// box.position.x = getX(xn);
 							// box.position.z = getZ(zn);
 
-							boxes[y][zn][xn] = box;
+							boxes[yn][zn][xn] = box;
 
 							// con.log( box.offset.x,  box.offset.z);
 
-							TweenMax.to(box.offset, 0.1, {
-								x: box.offset.x + xo * (size.width + gap),
-								z: box.offset.z + zo * (size.depth + gap),
-								// x: getX(xn),
-								// z: getZ(zn),
-							});
-							TweenMax.to(box.offset, 0.2, {
+							if (dir === 4) { // slide vertically
+								TweenMax.to(box.position, 0.5, {
+									y: yi * 200
+								});
+							} else { //slide horizontally
+								TweenMax.to(box.offset, 0.5, {
+									x: box.offset.x + xo * (size.width + gap),
+									z: box.offset.z + zo * (size.depth + gap),
+								});
+							}
+							TweenMax.to(box.offset, 0.6, {
 								onComplete: function() {
 									box.isWarping = false;
 								}
@@ -319,8 +331,8 @@ var race_lines_three = function() {
 	"void main( void ) {",
 	"  vec2 position = abs(-1.0 + 2.0 * vUv);",
 	"  float edging = abs((pow(position.y, 5.0) + pow(position.x, 5.0)) / 2.0);",
-	// "  float perc = (0.2 + edging * 0.6) * distanceZ * distanceX;",
-	"  float perc = distanceX * distanceZ;",
+	"  float perc = (0.2 + edging * 0.6) * distanceZ * distanceX;",
+	// "  float perc = distanceX * distanceZ;",
 
 	// "  vec2 checkPosition = vUv;",
 	// "  float checkerX = ceil(mod(checkPosition.x, 1.0 / checkerCols) - 1.0 / checkerCols / 2.0);",
