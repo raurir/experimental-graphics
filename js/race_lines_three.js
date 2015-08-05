@@ -1,10 +1,22 @@
+/*
+TODO
+
+touch events
+
+sine / morph in y positions
+
+*/
+
 var race_lines_three = function() {
 
 	var isMouseDown = false;
 
+	var emptySlot = "emptySlot", top = "top", bottom = "bottom";
 
 	var camera, scene, projector, renderer, group;
-	var mouse = { x: 0, y: 0 };
+	var mouse = {x: 0, y: 0};
+	var camPos = {x: 0, y: 0, z: 10};
+
 	var sw = window.innerWidth, sh = window.innerHeight;
 	var theta = 0;
 	var cols = 20;
@@ -15,21 +27,22 @@ var race_lines_three = function() {
 		height: 30,
 		depth: 200,
 	}
-	var boxes = [];
+	var planeOffset = 250;
+	var allRowsDepth = rows * (size.depth + gap);
+	var allColsWidth = cols * (size.depth + gap);
+	var boxes = {
+		bottom: [],
+		top: []
+	};
 	var boxes1d = [];
 
 
+	function num(min, max) { return Math.random() * (max - min) + min; }
+
 	function draw(props) {
-		var col = 0x909090;
-
-		function num(min, max) { return Math.random() * (max - min) + min; }
-
 		var uniforms = {
-			// time: { type: "f", value: 1.0 },
-			// index: { type: "f", value: i / il},
-			// resolution: { type: "v2", value: new THREE.Vector2() },
 			red: { type: "f", value: num(0, 0.2) },
-			green: { type: "f", value:num(0.5, 0.9)},
+			green: { type: "f", value: num(0.5, 0.9)},
 			blue: { type: "f", value: num(0.3, 0.7) },
 			distanceX: { type: "f", value: 1.0},
 			distanceZ: { type: "f", value: 1.0},
@@ -41,67 +54,32 @@ var race_lines_three = function() {
 			fragmentShader: fragmentShader
 		});
 
-
-		// con.log("CustomMaterial:", THREE.CustomMaterial);
-		// var material = new THREE.CustomMaterial( { color: col } );
-		// var material = new THREE.MeshLambertMaterial({ color: col });
 		var geometry = new THREE.BoxGeometry(props.width, props.height, props.depth);
 		var object = new THREE.Mesh(geometry, material);
 		return object;
 	}
 
-	function getX(xi) {
-		return (xi - cols / 2) * (size.width + gap);
-	};
-
-	function getZ(zi) {
-		return zi * (size.depth + gap);
-	};
-
-	var emptySlot = "emptySlot";
-
 
 	function init() {
 
 		scene = new THREE.Scene();
+		// fog doesn't work for shaders - custom solution with distance calculations instead
 		// scene.fog = new THREE.FogExp2(0x002000, 0.001);
 
 		camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
-		camera.position.set( 0, 300, 500 );
 		scene.add( camera );
 
-		var lightAbove = new THREE.DirectionalLight(0xff8080, 2);
-		lightAbove.position.set(0, 1, 0.25).normalize();
-		scene.add( lightAbove );
-
-		lightAbove.castShadow = true;
-
-		var lightBelow = new THREE.DirectionalLight(0x002000, 2);
-		lightBelow.position.set(0, -1, 0.25).normalize();
-		scene.add( lightBelow );
-
-		var lightLeft = new THREE.DirectionalLight(0xff0000, 4);
-		lightLeft.position.set(-1, 1, 0.25).normalize();
-		scene.add( lightLeft );
-
-		var lightRight = new THREE.DirectionalLight(0x80ffff, 1);
-		lightRight.position.set(1, 1, 0.25).normalize();
-		scene.add( lightRight );
+		// lights don't work either - out of the box anyway, not sure how to feed into shader
+		// var lightAbove = new THREE.DirectionalLight(0xff8080, 2);
+		// lightAbove.position.set(0, 1, 0.25).normalize();
+		// scene.add( lightAbove );
 
 		group = new THREE.Group();
 		scene.add(group);
 
 		renderer = new THREE.WebGLRenderer({antialias: true});
-		// renderer.sortObjects = false;
 		renderer.setSize( sw, sh );
-
 		// renderer.setClearColor( scene.fog.color );
-
-
-		boxes = {
-			bottom: [],
-			top: []
-		};
 
 		for (var j = 0, jl = rows; j < jl; j++) {
 			boxes.bottom[j] = [];
@@ -112,27 +90,23 @@ var race_lines_three = function() {
 			};
 		};
 
-		var created = 0;
 		function createBox() {
 			var xi = Math.floor(Math.random() * cols), xai = xi;// + cols / 2;
-			var yi = Math.random() > 0.5 ? 1 : -1, yai = yi === -1 ? "bottom" : "top";
+			var yi = Math.random() > 0.5 ? 1 : -1, yai = yi === -1 ? bottom : top;
 			var zi = Math.floor(Math.random() * rows), zai = zi;
 
-			var x = getX(xi);
-			var y = yi * 200;
-			var z = getZ(zi);
+			var x = (xi - cols / 2) * (size.width + gap);
+			var y = yi * planeOffset;
+			var z = zi * (size.depth + gap);
 
 			if (boxes[yai][zai][xai] === emptySlot) {
-				created++;
 				var box = draw(size);
-				// box.position.set(x, y, z);
 				box.position.y = y;
 				box.isWarping = false;
 				box.offset = {x: x, z: 0};
 				box.posZ = z;
-				// box.rotation.set(0, 0, i * 0.2);
-				boxes[yai][zai][xai] = box;
 
+				boxes[yai][zai][xai] = box;
 				boxes1d.push(box);
 
 				group.add(box);
@@ -146,13 +120,12 @@ var race_lines_three = function() {
 
 		document.body.appendChild(renderer.domElement);
 
-		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
+		window.addEventListener("mousemove", onDocumentMouseMove);
 		window.addEventListener("mousedown", function() {
 			isMouseDown = !isMouseDown;
 		});
 
-		animate();
+		render(0);
 
 	}
 
@@ -162,104 +135,90 @@ var race_lines_three = function() {
 		mouse.y = - ( event.clientY / sh ) * 2 + 1;
 	}
 
-	var posZ = 0;
 
-	var allRowsDepth = rows * (size.depth + gap);
-	var allColsWidth = cols * (size.depth + gap);
+	function move(x, y, z) {
+		var box = boxes[y][z][x];
+
+		if (box !== emptySlot) {
+
+			box.position.x = box.offset.x;
+			box.position.z = box.offset.z + box.posZ;
+
+			if (box.position.z > 0) {
+				box.posZ -= allRowsDepth;
+			}
+
+			// return;
+			// if (isMouseDown) return;
+			if (!box.isWarping && Math.random() > 0.999) {
+
+				var dir = Math.floor(Math.random() * 5), xn = x, zn = z, yn = y, yi = 0, xo = 0, zo = 0;
+				switch (dir) {
+					case 0 : xn++; xo = 1; break;
+					case 1 : xn--; xo = -1; break;
+					case 2 : zn++; zo = 1; break;
+					case 3 : zn--; zo = -1; break;
+					case 4 :
+						yn = (y === top) ? bottom : top;
+						yi = (y === top) ? -1 : 1;
+
+						break;
+				}
+
+				if (boxes[yn][zn] && boxes[yn][zn][xn] === emptySlot) {
+
+					boxes[y][z][x] = emptySlot;
+
+					box.isWarping = true;
+
+					boxes[yn][zn][xn] = box;
+
+					// con.log( box.offset.x,  box.offset.z);
+
+					if (dir === 4) { // slide vertically
+						TweenMax.to(box.position, 0.5, {
+							y: yi * planeOffset
+						});
+					} else { // slide horizontally
+						TweenMax.to(box.offset, 0.5, {
+							x: box.offset.x + xo * (size.width + gap),
+							z: box.offset.z + zo * (size.depth + gap),
+						});
+					}
+					TweenMax.to(box.offset, 0.6, {
+						onComplete: function() {
+							box.isWarping = false;
+						}
+					});
+
+				}
+			}
+
+		}
+	}
+
+
+
+
+
 
 	function render(time) {
 
-		theta += 0.01;
+		// theta += 0.01;
 
-		var camRadius = 10;
 		var speed = isMouseDown ? 0 : 4;
 
-
-
-		function move(x, y, z) {
-			var box = boxes[y][z][x];
-
-			if (box !== emptySlot) {
-
-				box.position.x = box.offset.x;
-				box.position.z = box.offset.z + box.posZ;
-
-				if (box.position.z > 0) {
-					box.posZ -= allRowsDepth;
-				} else {
-					// box.posZ += speed;
-				}
-
-				// return;
-				if (isMouseDown) return;
-				if (!box.isWarping) {
-					if (Math.random() > 0.999) {
-						// con.log("do it");
-
-						var yn = y, yi = 0;
-
-						var dir = Math.floor(Math.random() * 5), xn = x, zn = z, xo = 0, zo = 0;
-						dir = 4;
-						switch (dir) {
-							case 0 : xn++; xo = 1; break;
-							case 1 : xn--; xo = -1; break;
-							case 2 : zn++; zo = 1; break;
-							case 3 : zn--; zo = -1; break;
-							case 4 :
-								yn = (y === "top") ? "bottom" : "top";
-								yi = (y === "top") ? -1 : 1;
-
-								break;
-						}
-
-						if (boxes[yn][zn] && boxes[yn][zn][xn] === emptySlot) {
-
-							boxes[y][z][x] = emptySlot;
-
-							box.isWarping = true;
-							// box.position.x = getX(xn);
-							// box.position.z = getZ(zn);
-
-							boxes[yn][zn][xn] = box;
-
-							// con.log( box.offset.x,  box.offset.z);
-
-							if (dir === 4) { // slide vertically
-								TweenMax.to(box.position, 0.5, {
-									y: yi * 200
-								});
-							} else { //slide horizontally
-								TweenMax.to(box.offset, 0.5, {
-									x: box.offset.x + xo * (size.width + gap),
-									z: box.offset.z + zo * (size.depth + gap),
-								});
-							}
-							TweenMax.to(box.offset, 0.6, {
-								onComplete: function() {
-									box.isWarping = false;
-								}
-							});
-
-						}
-					}
-				}
-
-			}
-		}
-
-
-
 		var box;
-
 		// con.log(boxes);
 
 		for (var b = 0, bl = boxes1d.length; b < bl; b++) {
-			var box = boxes1d[b];
+			box = boxes1d[b];
 			box.posZ += speed;
 
-			// normalized distance from camera
+			// normalized z distance from camera
 			var distanceZ = 1 - ((allRowsDepth - box.posZ) / (allRowsDepth) - 1);
-			var distanceX = 1 - (Math.abs(box.position.x)) / (allColsWidth / 4);
+			// normalized x distance from camera (centre)
+			var distanceX = 1 - (Math.abs(box.position.x)) / (allColsWidth / 3);
 
 			box.material.uniforms.distanceX.value = distanceX;
 			box.material.uniforms.distanceZ.value = distanceZ;
@@ -271,39 +230,29 @@ var race_lines_three = function() {
 			for (var i = 0, il = cols; i < il; i++) { // iterate throw cols: x
 				// move(boxes.bottom[j][i]);
 				// move(boxes.top[j][i]);
-				move(i, "bottom", j);
-				move(i, "top", j);
+				move(i, bottom, j);
+				move(i, top, j);
 			};
 		};
 
-		// camera.position.set(
-		// 	-700,//camRadius * Math.sin(theta),
-		// 	100,//mouse.y * -20,
-		// 	700//camRadius * Math.cos(theta * Math.PI / 360)
-		// );
+		camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
+		camPos.y -= (camPos.y - mouse.y * 200) * 0.1;
+		camPos.z = -100;
+		camera.position.set(camPos.x, camPos.y, camPos.z);
 
-		camera.position.set(
-			mouse.x * -20,
-			// 0,
-			0,
-			10
-		);
-
-		camera.lookAt( scene.position );
+		// camera.lookAt( scene.position );
 
 		// camera.rotation.z = time * 0.0001;
-		// camera.rotation.y = -Math.PI / 2;//-= mouse.x * 0.1;
+		camera.rotation.y = camPos.x / -1000;
+		camera.rotation.x = camPos.y / 1000;
+		camera.rotation.z = camPos.x / -2000;
+		camera.rotation.z = (camPos.x - mouse.x * 400) / -2000;
 
 		renderer.render( scene, camera );
 
 		// if (time < 2000)
 		requestAnimationFrame( render );
 	}
-
-	function animate() {
-		render(0);
-	}
-
 
 	var vertexShader = [
 	"varying vec2 vUv;",
@@ -324,8 +273,8 @@ var race_lines_three = function() {
 
 	"varying vec2 vUv;",
 
-	"float checkerRows = 8.0;",
-	"float checkerCols = 16.0;",
+	// "float checkerRows = 8.0;",
+	// "float checkerCols = 16.0;",
 
 
 	"void main( void ) {",
@@ -333,7 +282,6 @@ var race_lines_three = function() {
 	"  float edging = abs((pow(position.y, 5.0) + pow(position.x, 5.0)) / 2.0);",
 	"  float perc = (0.2 + edging * 0.6) * distanceZ * distanceX;",
 	// "  float perc = distanceX * distanceZ;",
-
 	// "  vec2 checkPosition = vUv;",
 	// "  float checkerX = ceil(mod(checkPosition.x, 1.0 / checkerCols) - 1.0 / checkerCols / 2.0);",
 	// "  float checkerY = ceil(mod(checkPosition.y, 1.0 / checkerRows) - 1.0 / checkerRows / 2.0);",
@@ -345,9 +293,6 @@ var race_lines_three = function() {
 	"  float r = red * perc;",
 	"  float g = green * perc;",
 	"  float b = blue * perc;",
-
-
-
 	"  gl_FragColor = vec4( r, g, b, 1.0 );",
 	"}"].join("");
 
