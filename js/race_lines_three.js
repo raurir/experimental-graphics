@@ -17,8 +17,8 @@ var camPos = {x: 0, y: 0, z: 10};
 
 var sw = window.innerWidth, sh = window.innerHeight;
 
-var cols = 20;
-var rows = 16;
+var cols = 4//20;
+var rows = 4//16;
 var gap = 20;
 var size = {
 	width: 100,
@@ -183,7 +183,16 @@ function move(x, y, z) {
 			box.posZ -= allRowsDepth;
 		}
 
-		// return;
+		// var d = new THREE.Vector4(0, 0, 1);
+		// d.normalize();
+
+		var axis = new THREE.Vector3(0, 0, 10);
+		axis.normalize();
+
+		box.rotateOnAxis(axis, mouse.x * 10);
+
+
+		return;
 		// if (isMouseDown) return;
 		if (!box.isWarping && Math.random() > 0.999) {
 
@@ -215,10 +224,12 @@ function move(x, y, z) {
 						y: yi * planeOffset
 					});
 				} else { // slide horizontally
-					TweenMax.to(box.offset, 0.5, {
-						x: box.offset.x + xo * (size.width + gap),
-						z: box.offset.z + zo * (size.depth + gap),
-					});
+					// TweenMax.to(box.offset, 0.5, {
+					// 	x: box.offset.x + xo * (size.width + gap),
+					// 	z: box.offset.z + zo * (size.depth + gap),
+					// });
+
+
 				}
 				TweenMax.to(box.offset, 0.6, {
 					onComplete: function() {
@@ -275,6 +286,7 @@ function render(time) {
 		};
 	};
 
+/*
 	camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
 	camPos.y -= (camPos.y - mouse.y * 150) * 0.05;
 	camPos.z = -100;
@@ -287,7 +299,7 @@ function render(time) {
 	camera.rotation.x = camPos.y / 1000;
 	// camera.rotation.z = camPos.x / -2000;
 	camera.rotation.z = (camPos.x - mouse.x * 400) / 2000;
-
+*/
 	renderer.render( scene, camera );
 
 	// if (time < 800)
@@ -320,7 +332,7 @@ var fragmentShader = [
 "void main( void ) {",
 "  vec2 position = abs(-1.0 + 2.0 * vUv);",
 "  float edging = abs((pow(position.y, 5.0) + pow(position.x, 5.0)) / 2.0);",
-"  float perc = (0.2 * pow(speed + 1.0, 2.0) + edging * 0.8) * distanceZ * distanceX;",
+// "  float perc = (0.2 * pow(speed + 1.0, 2.0) + edging * 0.8) * distanceZ * distanceX;",
 
 // "  float perc = distanceX * distanceZ;",
 // "  vec2 checkPosition = vUv;",
@@ -331,7 +343,7 @@ var fragmentShader = [
 // "  float g = checker;",
 // "  float b = checker;",
 
-// "  float perc = 1.0;",
+"  float perc = 1.0;",
 "  float red = r * perc + pulse;",
 "  float green = g * perc + pulse;",
 "  float blue = b * perc + pulse;",
