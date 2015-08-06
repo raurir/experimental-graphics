@@ -1,6 +1,6 @@
 message=$1
 
-if ["$message" = ""]
+if [ "$message" = "" ]
 then
   echo "No message..."
   exit 1
@@ -8,7 +8,7 @@ fi
 
 
 echo "Copying files... "
-for file in index.html main.js lib/* js/* css/*
+for file in index.html main.js lib/* lib/**/* js/* js/**/* css/*
 do
   if [[ -f $file ]]; then
     cp "$file" "../raurir.github.io/$file"
