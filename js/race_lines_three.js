@@ -1,8 +1,6 @@
 /*
 TODO
 
-touch events
-
 sine / morph in y positions
 
 */
@@ -92,7 +90,7 @@ var race_lines_three = function() {
 		};
 
 		function createBox() {
-			var xi = Math.floor(Math.random() * cols), xai = xi;// + cols / 2;
+			var xi = Math.floor(Math.random() * cols), xai = xi;
 			var yi = Math.random() > 0.5 ? 1 : -1, yai = yi === -1 ? bottom : top;
 			var zi = Math.floor(Math.random() * rows), zai = zi;
 
@@ -121,20 +119,32 @@ var race_lines_three = function() {
 
 		document.body.appendChild(renderer.domElement);
 
-		window.addEventListener("mousemove", onDocumentMouseMove);
-		window.addEventListener("mousedown", function() {
-			isMouseDown = !isMouseDown;
+		function listen(eventNames, callback) {
+			for (var i = 0; i < eventNames.length; i++) {
+				window.addEventListener(eventNames[i], callback);
+			}
+		}
+		listen(["mousedown", "touchstart"], function(e) {
+			e.preventDefault();
+			isMouseDown = true;
+		});
+		listen(["mousemove", "touchmove"], function(e) {
+			e.preventDefault();
+			if (e.changedTouches && e.changedTouches[0]) e = e.changedTouches[0];
+			mouse.x = (e.clientX / sw) * 2 - 1;
+			mouse.y = -(e.clientY / sh) * 2 + 1;
+		});
+
+		listen(["mouseup", "touchend"], function(e) {
+			e.preventDefault();
+			isMouseDown = false;
 		});
 
 		render(0);
 
 	}
 
-	function onDocumentMouseMove( event ) {
-		event.preventDefault();
-		mouse.x = ( event.clientX / sw ) * 2 - 1;
-		mouse.y = - ( event.clientY / sh ) * 2 + 1;
-	}
+
 
 
 	function move(x, y, z) {
@@ -200,14 +210,15 @@ var race_lines_three = function() {
 
 
 
-
-
+	var speedNormal = 4;
+	var speedFast = 34;
+	var speed = speedNormal;
 
 	function render(time) {
 
 		// theta += 0.01;
 
-		var speed = isMouseDown ? 0 : 4;
+		speed -= (speed - (isMouseDown ? speedFast : speedNormal)) * 0.05;
 
 		var box;
 		// con.log(boxes);
@@ -224,7 +235,7 @@ var race_lines_three = function() {
 			var distanceX = 1 - (Math.abs(box.position.x)) / (allColsWidth / 3);
 			box.material.uniforms.distanceX.value = distanceX;
 
-			if (Math.random() > 0.9999) {
+			if (Math.random() > 0.99995) {
 				box.material.uniforms.pulse.value = 1;
 			}
 			box.material.uniforms.pulse.value -= box.material.uniforms.pulse.value * 0.1;
@@ -242,7 +253,7 @@ var race_lines_three = function() {
 		};
 
 		camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
-		camPos.y -= (camPos.y - mouse.y * 200) * 0.05;
+		camPos.y -= (camPos.y - mouse.y * 150) * 0.05;
 		camPos.z = -100;
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 
