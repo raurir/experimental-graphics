@@ -1,12 +1,7 @@
 /*
 TODO
-
-sine / morph in y positions
-
-horizontal movement euler + quarternion rotation around in between axis
-
-speed up change colours
-
+sine / morph in y positions ?
+horizontal movement euler + quarternion rotation around in between axis ?
 */
 
 var race_lines_three = function() {
@@ -15,12 +10,12 @@ var race_lines_three = function() {
 
 	var emptySlot = "emptySlot", top = "top", bottom = "bottom";
 
-	var camera, scene, projector, renderer, group;
+	var camera, scene, renderer;
 	var mouse = {x: 0, y: 0};
 	var camPos = {x: 0, y: 0, z: 10};
 
 	var sw = window.innerWidth, sh = window.innerHeight;
-	var theta = 0;
+
 	var cols = 20;
 	var rows = 16;
 	var gap = 20;
@@ -62,9 +57,9 @@ var race_lines_three = function() {
 		}
 
 		var uniforms = {
-			red: { type: "f", value: colours.slow.r},
-			green: { type: "f", value: colours.slow.g},
-			blue: { type: "f", value: colours.slow.b},
+			r: { type: "f", value: colours.slow.r},
+			g: { type: "f", value: colours.slow.g},
+			b: { type: "f", value: colours.slow.b},
 			distanceX: { type: "f", value: 1.0},
 			distanceZ: { type: "f", value: 1.0},
 			pulse: { type: "f", value: 0},
@@ -98,9 +93,6 @@ var race_lines_three = function() {
 		// lightAbove.position.set(0, 1, 0.25).normalize();
 		// scene.add( lightAbove );
 
-		group = new THREE.Group();
-		scene.add(group);
-
 		renderer = new THREE.WebGLRenderer({antialias: true});
 		renderer.setSize( sw, sh );
 		// renderer.setClearColor( scene.fog.color );
@@ -133,7 +125,7 @@ var race_lines_three = function() {
 				boxes[yai][zai][xai] = box;
 				boxes1d.push(box);
 
-				group.add(box);
+				scene.add(box);
 			}
 		}
 
@@ -236,13 +228,9 @@ var race_lines_three = function() {
 
 	function render(time) {
 
-		// theta += 0.01;
-
 		speed -= (speed - (isMouseDown ? speedFast : speedNormal)) * 0.05;
 
 		var box;
-		// con.log(boxes);
-
 		for (var b = 0, bl = boxes1d.length; b < bl; b++) {
 			box = boxes1d[b];
 			box.posZ += speed;
@@ -256,24 +244,26 @@ var race_lines_three = function() {
 			box.material.uniforms.distanceX.value = distanceX;
 
 			var colour = isMouseDown ? box.colours.fast : box.colours.slow;
-			box.material.uniforms.red.value -= (box.material.uniforms.red.value - colour.r) * 0.1;
-			box.material.uniforms.green.value -= (box.material.uniforms.green.value - colour.g) * 0.1;
-			box.material.uniforms.blue.value -= (box.material.uniforms.blue.value - colour.b) * 0.1;
+			box.material.uniforms.r.value -= (box.material.uniforms.r.value - colour.r) * 0.1;
+			box.material.uniforms.g.value -= (box.material.uniforms.g.value - colour.g) * 0.1;
+			box.material.uniforms.b.value -= (box.material.uniforms.b.value - colour.b) * 0.1;
 
-			if (Math.random() > 0.99995) {
-				box.material.uniforms.pulse.value = 1;
-			}
-			box.material.uniforms.pulse.value -= box.material.uniforms.pulse.value * 0.1;
 
 			// normalized speed
-			box.material.uniforms.speed.value = (speed - speedNormal) / (speedFast - speedNormal);
+			var currentSpeed = (speed - speedNormal) / (speedFast - speedNormal)
+			box.material.uniforms.speed.value = currentSpeed;
+
+			// pulses more with more speed... of course!
+			if (Math.random() > (0.99995 - currentSpeed * 0.005)) {
+				box.material.uniforms.pulse.value = 1;
+			}
+			box.material.uniforms.pulse.value -= box.material.uniforms.pulse.value * 0.1 / (currentSpeed + 1);
+
 			// if (b ==13) con.log(box.material.uniforms.speed.value);
 		}
 
 		for (var j = 0, jl = rows; j < jl; j++) { // iterate through rows: z
 			for (var i = 0, il = cols; i < il; i++) { // iterate throw cols: x
-				// move(boxes.bottom[j][i]);
-				// move(boxes.top[j][i]);
 				move(i, bottom, j);
 				move(i, top, j);
 			};
@@ -308,10 +298,9 @@ var race_lines_three = function() {
 	"}"].join("");
 
 	var fragmentShader = [
-	// "uniform float time;",
-	"uniform float red;",
-	"uniform float green;",
-	"uniform float blue;",
+	"uniform float r;",
+	"uniform float g;",
+	"uniform float b;",
 	"uniform float distanceZ;",
 	"uniform float distanceX;",
 	"uniform float pulse;",
@@ -321,7 +310,6 @@ var race_lines_three = function() {
 
 	// "float checkerRows = 8.0;",
 	// "float checkerCols = 16.0;",
-
 
 	"void main( void ) {",
 	"  vec2 position = abs(-1.0 + 2.0 * vUv);",
@@ -338,10 +326,10 @@ var race_lines_three = function() {
 	// "  float b = checker;",
 
 	// "  float perc = 1.0;",
-	"  float r = red * perc + pulse;",
-	"  float g = green * perc + pulse;",
-	"  float b = blue * perc + pulse;",
-	"  gl_FragColor = vec4( r, g, b, 1.0 );",
+	"  float red = r * perc + pulse;",
+	"  float green = g * perc + pulse;",
+	"  float blue = b * perc + pulse;",
+	"  gl_FragColor = vec4(red, green, blue, 1.0);",
 	"}"].join("");
 
 	return {
