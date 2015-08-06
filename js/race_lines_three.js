@@ -25,7 +25,7 @@ var race_lines_three = function() {
 	var size = {
 		width: 100,
 		height: 30,
-		depth: 200,
+		depth: 150,
 	}
 	var planeOffset = 250;
 	var allRowsDepth = rows * (size.depth + gap);
@@ -46,6 +46,7 @@ var race_lines_three = function() {
 			blue: { type: "f", value: num(0.3, 0.7) },
 			distanceX: { type: "f", value: 1.0},
 			distanceZ: { type: "f", value: 1.0},
+			pulse: { type: "f", value: 0},
 		};
 
 		var material = new THREE.ShaderMaterial( {
@@ -217,11 +218,16 @@ var race_lines_three = function() {
 
 			// normalized z distance from camera
 			var distanceZ = 1 - ((allRowsDepth - box.posZ) / (allRowsDepth) - 1);
+			box.material.uniforms.distanceZ.value = distanceZ;
+
 			// normalized x distance from camera (centre)
 			var distanceX = 1 - (Math.abs(box.position.x)) / (allColsWidth / 3);
-
 			box.material.uniforms.distanceX.value = distanceX;
-			box.material.uniforms.distanceZ.value = distanceZ;
+
+			if (Math.random() > 0.9999) {
+				box.material.uniforms.pulse.value = 1;
+			}
+			box.material.uniforms.pulse.value -= box.material.uniforms.pulse.value * 0.1;
 			// if (b ==13)
 			// con.log(distanceX)
 		}
@@ -236,7 +242,7 @@ var race_lines_three = function() {
 		};
 
 		camPos.x -= (camPos.x - mouse.x * 400) * 0.02;
-		camPos.y -= (camPos.y - mouse.y * 200) * 0.1;
+		camPos.y -= (camPos.y - mouse.y * 200) * 0.05;
 		camPos.z = -100;
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 
@@ -245,8 +251,8 @@ var race_lines_three = function() {
 		// camera.rotation.z = time * 0.0001;
 		camera.rotation.y = camPos.x / -1000;
 		camera.rotation.x = camPos.y / 1000;
-		camera.rotation.z = camPos.x / -2000;
-		camera.rotation.z = (camPos.x - mouse.x * 400) / -2000;
+		// camera.rotation.z = camPos.x / -2000;
+		camera.rotation.z = (camPos.x - mouse.x * 400) / 2000;
 
 		renderer.render( scene, camera );
 
@@ -270,6 +276,7 @@ var race_lines_three = function() {
 	"uniform float blue;",
 	"uniform float distanceZ;",
 	"uniform float distanceX;",
+	"uniform float pulse;",
 
 	"varying vec2 vUv;",
 
@@ -290,9 +297,9 @@ var race_lines_three = function() {
 	// "  float g = checker;",
 	// "  float b = checker;",
 
-	"  float r = red * perc;",
-	"  float g = green * perc;",
-	"  float b = blue * perc;",
+	"  float r = red * perc + pulse;",
+	"  float g = green * perc + pulse;",
+	"  float b = blue * perc + pulse;",
 	"  gl_FragColor = vec4( r, g, b, 1.0 );",
 	"}"].join("");
 
