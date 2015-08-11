@@ -3,7 +3,7 @@ var tunnel_tour_three = function() {
 
 var camera, scene, renderer;
 var mouse = {x: 0, y: 0};
-var camPos = {x: 0, y: 0, z: 500};
+var camPos = {x: 0, y: 0, z: 300};
 var sw = window.innerWidth, sh = window.innerHeight;
 
 function num(min, max) { return Math.random() * (max - min) + min; }
@@ -33,20 +33,18 @@ function init() {
 		return object;
 	}
 
-	var p = 10;
 
 	function createStraight(groupPos) {
 		var group = new THREE.Group();
 		group.position.set(groupPos.x, groupPos.y, groupPos.z);
 
-		p++;
-		var bits = 20;//;//parseInt(num(3, 15));
 
+		/*
+		var bits = parseInt(num(3, 15));
 		var size = {width: 20, height: 20, depth: 100};
-		var radius = 200;//num(100, 200);
-
+		var radius = num(100, 200);
 		for (var i = 0, il = bits; i < il; i++) {
-			var a = ((p % 2 == 0 ? 0 : 0.5 / il) + i / il) * Math.PI * 2;
+			var a = i / il * Math.PI * 2;
 			var x = Math.sin(a) * radius;
 			var y = Math.cos(a) * radius;
 			var z = 0;
@@ -55,10 +53,29 @@ function init() {
 			box.rotation.set(0, 0, -a);
 			group.add(box);
 		};
+		*/
+
+		var bits = 6;//parseInt(num(3, 15));
+		var size = {width: 20, height: 20, depth: 100};
+		var radius = 200;
+		for (var i = 0, il = bits; i < il; i++) {
+			var a = i / il * Math.PI * 2;
+			var x = Math.sin(a) * radius;
+			var y = Math.cos(a) * radius;
+			var z = 0;
+			var box = draw(size);
+			box.position.set(x, y, z);
+			// box.rotation.set(-Math.PI / 2, 0, -a);
+
+			box.rotateOnAxis( new THREE.Vector4(1,0,0,0), Math.random() * 20 );
+
+			group.add(box);
+		};
+
 		scene.add(group);
 	}
 
-	for (var j = 0, jl = 30; j < jl; j++) {
+	for (var j = 0, jl = 3; j < jl; j++) {
 		createStraight({x: 0, y: 0, z: j * -150});
 	};
 
