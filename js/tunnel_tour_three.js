@@ -49,9 +49,6 @@ function createSection(index) {
 
 
 
-
-
-
 function init() {
 
 	scene = new THREE.Scene();
@@ -72,7 +69,7 @@ function init() {
 
 	for (var j = 0, jl = segmentsInitial; j < jl; j++) {
 		createSection(j);
-	};
+	}
 
 	document.body.appendChild(renderer.domElement);
 
