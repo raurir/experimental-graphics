@@ -1,69 +1,64 @@
 var tunnel_tour_three = function() {
 
-
 var camera, scene, renderer;
-var mouse = {x: 0, y: 0};
-var camPos = {x: 0, y: 0, z: 500};
 var sw = window.innerWidth, sh = window.innerHeight;
+var light1, light2, light3;
+var mouse = {x: 0, y: 0};
+var isMouseDown = false;
+var bits = 20;
+var layers = 50;
+var size = 15
+var radius = 200;
+var groups = [];
+var camZ = 100;
 
-function num(min, max) { return Math.random() * (max - min) + min; }
+function groupRotation(index, time) {
+	return Math.floor(index * 0.015 + time * 0.00025) / bits * Math.PI;
+}
 
 function init() {
 
 	scene = new THREE.Scene();
+	scene.fog = new THREE.FogExp2(0xd0d0d0, 0.0006);
 
-	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
+	camera = new THREE.PerspectiveCamera(80, sw / sh, 1, 10000);
 	scene.add( camera );
 
-	var lightAbove = new THREE.DirectionalLight(0xffffff, 2);
-	lightAbove.position.set(0, 199, 100);//.normalize();
-	scene.add(lightAbove);
+	var lightwhite = new THREE.DirectionalLight(0xffffff, 1.5);
+	lightwhite.position.set(0, 0, 200);
+	scene.add(lightwhite);
 
-	var lightLeft = new THREE.DirectionalLight(0x0080ff, 2);
-	lightLeft.position.set(-100, 0, 100);//.normalize();
-	scene.add(lightLeft);
+	light1 = new THREE.DirectionalLight(0xff90ff, 1);
+	scene.add(light1);
+
+	light2 = new THREE.DirectionalLight(0x0080ff, 1);
+	scene.add(light2);
+
+	light3 = new THREE.DirectionalLight(0xf080ff, 1);
+	scene.add(light3);
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
-	renderer.setSize( sw, sh );
+	renderer.setSize(sw, sh);
+	renderer.setClearColor(scene.fog.color);
 
-	function draw(props) {
-		var material = new THREE.MeshLambertMaterial({color: 0xa0a0a0});
-		var geometry = new THREE.BoxGeometry(props.width, props.height, props.depth);
-		var object = new THREE.Mesh(geometry, material);
-		return object;
-	}
-
-	var p = 10;
-
-	function createStraight(groupPos) {
+	for (var j = 0, jl = layers; j < jl; j++) {
 		var group = new THREE.Group();
-		group.position.set(groupPos.x, groupPos.y, groupPos.z);
-
-		p++;
-		var bits = 20;//;//parseInt(num(3, 15));
-
-		var size = {width: 20, height: 20, depth: 100};
-		var radius = 200;//num(100, 200);
-
-		for (var i = 0, il = bits; i < il; i++) {
-			var a = ((p % 2 == 0 ? 0 : 0.5 / il) + i / il) * Math.PI * 2;
-			var x = Math.sin(a) * radius;
-			var y = Math.cos(a) * radius;
-			var z = 0;
-			var box = draw(size);
-			box.position.set(x, y, z);
+		group.position.set(0, 0, j * -100);
+		group.rotation.z = groupRotation(j, 0);
+		for (var i = 0; i < bits; i++) {
+			var a = (j % 2 * 0.5 + i) / bits * Math.PI * 2;
+			var material = new THREE.MeshLambertMaterial({color: 0xa0a0a0});
+			var geometry = new THREE.BoxGeometry(size, size, size);
+			var box = new THREE.Mesh(geometry, material);
+			box.position.set(Math.sin(a) * radius, Math.cos(a) * radius, 0);
 			box.rotation.set(0, 0, -a);
 			group.add(box);
 		};
 		scene.add(group);
-	}
-
-	for (var j = 0, jl = 30; j < jl; j++) {
-		createStraight({x: 0, y: 0, z: j * -150});
+		groups[j] = group;
 	};
 
 	document.body.appendChild(renderer.domElement);
-
 
 	function listen(eventNames, callback) {
 		for (var i = 0; i < eventNames.length; i++) {
@@ -77,44 +72,34 @@ function init() {
 		camera.updateProjectionMatrix();
 		renderer.setSize(sw, sh);
 	});
-	// listen(["mousedown", "touchstart"], function(e) {
-	// 	e.preventDefault();
-	// 	isMouseDown = true;
-	// });
-	listen(["mousemove", "touchmove"], function(e) {
+	listen(["mousedown", "touchstart"], function(e) {
 		e.preventDefault();
-		if (e.changedTouches && e.changedTouches[0]) e = e.changedTouches[0];
-		mouse.x = (e.clientX / sw) * 2 - 1;
-		mouse.y = -(e.clientY / sh) * 2 + 1;
+		isMouseDown = true;
 	});
-	// listen(["mouseup", "touchend"], function(e) {
-	// 	e.preventDefault();
-	// 	isMouseDown = false;
-	// });
-
+	listen(["mouseup", "touchend"], function(e) {
+		e.preventDefault();
+		isMouseDown = false;
+	});
 
 	render(0);
-
 }
 
 function render(time) {
 
-	camPos.x = mouse.x * 100;
-	camPos.y = mouse.y * 100;
-	camPos.z = 500;
-
-	camera.position.set(camPos.x, camPos.y, camPos.z);
-	camera.lookAt( scene.position );
-
-	// camera.rotation.z = time * 0.0001;
-	// camera.rotation.y = camPos.x / -1000;
-	// camera.rotation.x = camPos.y / 1000;
-	// camera.rotation.z = (camPos.x - mouse.x * 400) / 2000;
-
+	camZ -= (camZ - (isMouseDown ? -3000 : 100)) * 0.01;
+ 
+	camera.position.set(Math.sin(time * 0.001) * 100, Math.cos(time * 0.00101) * 100, camZ);
+	light1.position.set(Math.cos(time * -0.0001) * 200, Math.sin(time * -0.0001) * 200, 0);
+	light2.position.set(Math.sin(1 + time * -0.0003) * 200, Math.cos(1 + time * -0.0003) * 200, 0);
+	light3.position.set(Math.sin(2 + time * -0.0004) * 200, Math.cos(2 + time * -0.0004) * 200, 0);
 	renderer.render( scene, camera );
+	requestAnimationFrame( render );
 
-	// if (time < 800)
-		requestAnimationFrame( render );
+	for (var j = 0, jl = layers; j < jl; j++) {
+		var group = groups[j];
+		var gr = groupRotation(j, time);
+		group.rotation.z -= (group.rotation.z - gr) * 0.1;
+	};
 }
 
 return {
