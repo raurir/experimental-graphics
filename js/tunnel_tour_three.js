@@ -33,17 +33,20 @@ function init() {
 		return object;
 	}
 
+	var p = 10;
+
 	function createStraight(groupPos) {
 		var group = new THREE.Group();
 		group.position.set(groupPos.x, groupPos.y, groupPos.z);
 
-		var bits = parseInt(num(3, 15));
+		p++;
+		var bits = 20;//;//parseInt(num(3, 15));
 
 		var size = {width: 20, height: 20, depth: 100};
 		var radius = 200;//num(100, 200);
 
 		for (var i = 0, il = bits; i < il; i++) {
-			var a = i / il * Math.PI * 2;
+			var a = ((p % 2 == 0 ? 0 : 0.5 / il) + i / il) * Math.PI * 2;
 			var x = Math.sin(a) * radius;
 			var y = Math.cos(a) * radius;
 			var z = 0;
@@ -55,7 +58,7 @@ function init() {
 		scene.add(group);
 	}
 
-	for (var j = 0, jl = 10; j < jl; j++) {
+	for (var j = 0, jl = 30; j < jl; j++) {
 		createStraight({x: 0, y: 0, z: j * -150});
 	};
 
