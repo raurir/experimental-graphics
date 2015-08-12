@@ -7,6 +7,7 @@ var sw = window.innerWidth, sh = window.innerHeight;
 
 function num(min, max) { return Math.random() * (max - min) + min; }
 
+con.log(colours);
 
 var segmentIndex = 0;
 var segmentLength = 200;
@@ -22,13 +23,14 @@ function sphere(props) {
 
 function cylinder(props) {
 	var group = new THREE.Group();
-	var material = new THREE.MeshLambertMaterial({color: 0xa0f0a0});
+	var material = new THREE.MeshLambertMaterial({color: props.colour});
 	//radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength
 	var geometry = new THREE.CylinderGeometry(props.radius, props.radius, props.height, 14 );
 	var object = new THREE.Mesh(geometry, material);
 	object.position.y = props.height / 2;
 	group.add(object);
 	return {
+		colour: props.colour,
 		group: group,
 		object: object
 	};
@@ -38,7 +40,7 @@ function getEndsCylinder(cylinder) {
 	var numVertices = cylinder.object.geometry.vertices.length;
 	var e0 = cylinder.object.geometry.vertices[numVertices - 1];
 	var e1 = cylinder.object.geometry.vertices[numVertices - 2];
-	con.log(e0,e1)
+	// con.log(e0,e1)
 	return [{
 		x: e0.x + cylinder.object.position.x,
 		y: e0.y + cylinder.object.position.y,
@@ -50,14 +52,18 @@ function getEndsCylinder(cylinder) {
 	}]
 }
 
-
+var holder;
 
 function init() {
+
+	colours.getRandomPalette();
 
 	scene = new THREE.Scene();
 
 	camera = new THREE.PerspectiveCamera( 100, sw / sh, 1, 10000 );
-	scene.add( camera );
+	scene.add(camera);
+
+
 
 	var lightAbove = new THREE.DirectionalLight(0xffffff, 0.5);
 	lightAbove.position.set(0, 200, 100);
@@ -70,14 +76,15 @@ function init() {
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.setSize( sw, sh );
 
+	holder = new THREE.Group();
+	scene.add(holder);
 
-	var c = cylinder({radius: 2, height: 20});
-	scene.add(c.group);
+	// holder.position.y = -100;
 
-	for (var k = 0, kl = 14; k < kl; k++) {
+	var attempts = 0;
+	var bail = 140;
 
-
-		// con.log(c)
+	function addSection(c) {
 
 		/*
 		for (var k = 0, kl = c.geometry.vertices.length; k < kl; k++) {
@@ -97,24 +104,52 @@ function init() {
 		// s.position.set(v.x, v.y, v.z);
 
 		var v = ends[1];
-		var s = sphere({radius: 5});
-		c.group.add(s);
-		s.position.set(v.x, v.y, v.z);
+		// var s = sphere({radius: 3});
+		// c.group.add(s);
+		// s.position.set(v.x, v.y, v.z);
 
-		var c2 = cylinder({radius: 2, height: 20});
-		c2.group.position.set(v.x, v.y, v.z);
-		c2.group.position.set(v.x, v.y, v.z);
-		c2.group.rotation.z = k * 0.1;
-		c.group.add(c2.group);
 
-		c = c2;
+		// c = c2;
 
-		con.log(v)
+		attempts ++;
+
+		if (attempts < bail) {
+			var kids = parseInt(num(1, 3));
+			for (var i = 0; i < kids; i++) {
+
+				var colour = colours.mutateColour(c.colour, 30);
+
+				var c2 = cylinder({radius: 2, height: 20, colour: colour});
+				c2.group.position.set(v.x, v.y, v.z);
+				c2.group.rotation.z = num(-0.5, 0.5) * Math.PI;
+				c2.group.rotation.y = num(0, 2) * Math.PI;
+				c.group.add(c2.group);
+
+				(function(a, parent) {
+					setTimeout(function() {
+						addSection(parent);
+					}, a * 10);
+				})(attempts, c2);
+			};
+		}
 
 	}
 
+	var seeds = 13;
 
+	for (var j = 0; j < seeds; j++) {
 
+		var colour = colours.getRandomColour();
+
+		var c = cylinder({radius: 2, height: 20, colour: colour});
+		c.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
+		holder.add(c.group);
+
+		addSection(c);
+	};
+
+	
+	// addSection(c);
 
 	document.body.appendChild(renderer.domElement);
 
@@ -153,9 +188,12 @@ function init() {
 
 
 function render(time) {
-	camPos.x = mouse.x * 100;
+
+	if (time > 10000 && holder.rotation.y < Math.PI * 2)holder.rotation.y += 0.01;
+
+	// camPos.x = mouse.x * 100;
 	// camPos.y = mouse.y * 100;
-	camPos.z = 50;
+	camPos.z = 150;
 	camera.position.set(camPos.x, camPos.y, camPos.z);
 	camera.lookAt( scene.position );
 	renderer.render( scene, camera );
