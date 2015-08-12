@@ -74,7 +74,7 @@ function init() {
 	var c = cylinder({radius: 2, height: 20});
 	scene.add(c.group);
 
-	for (var k = 0, kl = 3; k < kl; k++) {
+	for (var k = 0, kl = 14; k < kl; k++) {
 
 
 		// con.log(c)
@@ -91,22 +91,25 @@ function init() {
 
 		var ends = getEndsCylinder(c);
 
-		var v = ends[0];
-		var s = sphere({radius: 5});
-		scene.add(s);
-		s.position.set(v.x, v.y, v.z);
+		// var v = ends[0];
+		// var s = sphere({radius: 5});
+		// c.group.add(s);
+		// s.position.set(v.x, v.y, v.z);
 
 		var v = ends[1];
 		var s = sphere({radius: 5});
-		scene.add(s);
+		c.group.add(s);
 		s.position.set(v.x, v.y, v.z);
 
 		var c2 = cylinder({radius: 2, height: 20});
 		c2.group.position.set(v.x, v.y, v.z);
-		// c2.group.rotation.z = Math.PI / 2;
-		scene.add(c2.group);
+		c2.group.position.set(v.x, v.y, v.z);
+		c2.group.rotation.z = k * 0.1;
+		c.group.add(c2.group);
 
 		c = c2;
+
+		con.log(v)
 
 	}
 
