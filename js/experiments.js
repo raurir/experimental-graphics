@@ -44,6 +44,8 @@ var experiments = (function() {
 
 
   var experiments = [
+    ["molecular_three", "THREE"],
+
     ["unknown"],
     ["_test"],
     ["additive"],
