@@ -34,6 +34,7 @@ var experiments = (function() {
 
   require.config({
     baseUrl: "js",
+    urlArgs: "bust=" + (new Date()).getTime(),
     paths: {
       "THREE": "../lib/three/three.min",
       "TweenMax": "../lib/greensock/TweenMax.min",

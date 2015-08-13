@@ -6,6 +6,10 @@ then
   exit 1
 fi
 
+cd ../raurir.github.io/
+git pull
+
+cd ../experimental-graphics/
 
 echo "Copying files... "
 for file in index.html main.js lib/* lib/**/* js/* js/**/* css/*
