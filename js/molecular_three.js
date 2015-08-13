@@ -11,6 +11,9 @@ var segmentLength = 50;
 var segmentRadius = 10;
 var sphereRadius = segmentRadius * 1.2;
 
+var holder;
+var vectors = [];
+var generationComplete = false;
 
 var attempts = 0;
 var bail = 300;
@@ -18,10 +21,10 @@ var bail = 300;
 
 var renderMessage = dom.element("div", {innerHTML: "rendering", style:{
 	color:"white",
-  position: "absolute",
-  top: "10px",
-  width: "100%",
-  textAlign: "center",
+	position: "absolute",
+	top: "10px",
+	width: "100%",
+	textAlign: "center",
 }});
 
 function sphere(props) {
@@ -47,10 +50,8 @@ function cylinder(props) {
 	};
 }
 
-function getEndsCylinder(cylinder) {
-
+function getSectionEnd(cylinder) {
 	var numVertices = cylinder.object.geometry.vertices.length;
-
 	/*
 	for (var k = 0, kl = c.geometry.vertices.length; k < kl; k++) {
 		var v = c.geometry.vertices[k];
@@ -60,28 +61,14 @@ function getEndsCylinder(cylinder) {
 		con.log(v);
 	}
 	*/
-
-	// var e0 = cylinder.object.geometry.vertices[numVertices - 1];
-	// {
-	// 	x: e0.x + cylinder.object.position.x,
-	// 	y: e0.y + cylinder.object.position.y,
-	// 	z: e0.z + cylinder.object.position.z
-	// }
-
-	var e1 = cylinder.object.geometry.vertices[numVertices - 2];
-	// con.log(e0,e1)
-	var end = new THREE.Vector3(
-		e1.x + cylinder.object.position.x,
-	  e1.y + cylinder.object.position.y,
-		e1.z + cylinder.object.position.z
+	var end = cylinder.object.geometry.vertices[numVertices - 2];
+	return new THREE.Vector3(
+		end.x + cylinder.object.position.x,
+		end.y + cylinder.object.position.y,
+		end.z + cylinder.object.position.z
 	);
-
-	return end;
 }
 
-var holder;
-var vectors = [];
-var generationComplete = false;
 
 function init() {
 
@@ -92,8 +79,6 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera( 80, sw / sh, 1, 10000 );
 	scene.add(camera);
-
-
 
 	var lightAbove = new THREE.DirectionalLight(0xffffff, 1.5);
 	lightAbove.position.set(0, 200, 100);
@@ -109,31 +94,28 @@ function init() {
 	holder = new THREE.Group();
 	scene.add(holder);
 
-	// holder.position.y = -100;
+	function drawSection(parent, endPoint) {
 
+		var colour = colours.mutateColour(parent.colour, 50);
 
-	function drawSection(c, v) {
+		var child = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
+		child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
+		child.group.rotation.z = num(-0.5, 0.5) * 0.2 * Math.PI * (attempts / bail * 6);
+		child.group.rotation.y = num(0, 2) * Math.PI;
 
-		var colour = colours.mutateColour(c.colour, 50);
-
-		var c2 = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
-		c2.group.position.set(v.x, v.y, v.z);
-		c2.group.rotation.z = num(-0.5, 0.5) * 0.2 * Math.PI * (attempts / bail * 6);
-		c2.group.rotation.y = num(0, 2) * Math.PI;
-
-		var end = getEndsCylinder(c2);
+		var end = getSectionEnd(child);
 		var endSphere = sphere({radius: 3, colour: 0xff0000}); // this is just the point to draw.
 		endSphere.position.set(end.x, end.y, end.z);
-		c2.group.add(endSphere);
+		child.group.add(endSphere);
 
-		c.group.add(c2.group);
+		parent.group.add(child.group);
 
-		c.group.updateMatrixWorld();
+		parent.group.updateMatrixWorld();
 
 		var globalPosition = new THREE.Vector3();
 		globalPosition.setFromMatrixPosition(endSphere.matrixWorld);
 
-		c2.group.remove(endSphere); // done with calc ditch it... 
+		child.group.remove(endSphere); // done with calc ditch it... 
 		
 
 		var st = new Date().getTime();
@@ -161,14 +143,14 @@ function init() {
 			s.position.set(globalPosition.x, globalPosition.y, globalPosition.z);
 			holder.add(s);
 
-			return c2;
+			return child;
 
 		} else {
 
-			// con.warn("bad distance", distance);
+			con.warn("bad distance", distance);
 
-			c2.group.remove(endSphere);
-			c.group.remove(c2.group);
+			child.group.remove(endSphere);
+			parent.group.remove(child.group);
 
 			return null;
 			
@@ -177,29 +159,30 @@ function init() {
 	}
 
 
-	function addSection(c) {
+	function addSection(parent) {
 		attempts ++;
 
 		if (attempts < bail) {
 
 			renderMessage.innerHTML = "Rendering " + Math.round(attempts/bail * 100) + "%";
 
-			var v = getEndsCylinder(c);
+			// TODO maybe parent can specify it's end point in generation. (drawSection/cylinder returns endpoint)
+			var endPoint = getSectionEnd(parent);
 
 			var kids = parseInt(num(1, 3));
 			for (var i = 0; i < kids; i++) {
 
-				var c2 = drawSection(c, v);
+				var newSection = drawSection(parent, endPoint);
 
-				if (c2) {
+				if (newSection) {
 
-					(function(a, parent) {
+					(function(a, p) {
 						var timeout = a * 10;
 						// con.log("timeout", timeout);
 						setTimeout(function() {
-							addSection(parent);
+							addSection(p);
 						}, timeout);
-					})(attempts, c2);
+					})(attempts, newSection);
 				
 
 				} else {
@@ -217,23 +200,42 @@ function init() {
 
 	}
 
-	var colour = colours.getRandomColour();
-
 	var seeds = 32;//parseInt(num(1, 10));
+
+	// var parent = {
+	// 	group: new THREE.Group(),
+	// 	colour: colours.getRandomColour()
+	// }
+	// holder.add(parent.group);
+
+	var colour =  colours.getRandomColour()
 
 	for (var j = 0; j < seeds; j++) {
 
-	
-		var c = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
-		c.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
-		holder.add(c.group);
+		/*
+		var parent = {
+			group: new THREE.Group(),
+			colour: colours.getRandomColour()
+		}
+		holder.add(parent.group);
 
-		var end = getEndsCylinder(c);
+		parent.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
+
+		addSection(parent);
+		*/
+
+		
+		var baseSection = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
+		baseSection.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
+		holder.add(baseSection.group);
+
+		var end = getSectionEnd(baseSection);
 		var endSphere = sphere({radius: sphereRadius, colour: colour});
 		endSphere.position.set(end.x, end.y, end.z);
-		c.group.add(endSphere);
+		baseSection.group.add(endSphere);
 
-		addSection(c);
+		addSection(baseSection);
+		
 	};
 
 	
