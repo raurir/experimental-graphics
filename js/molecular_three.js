@@ -7,10 +7,15 @@ var sw = window.innerWidth, sh = window.innerHeight;
 
 function num(min, max) { return Math.random() * (max - min) + min; }
 
+var segmentCreationInterval = 0;
+var segmentLastCreated;
+
 var segmentLengthInitial = 50;
 var segmentLength = segmentLengthInitial;
-var segmentRadius = 10;
-var sphereRadius = segmentRadius * 1.2;
+var segmentRadius = num(4, 15);
+var sphereRadius = segmentRadius * num(1, 3);
+
+var branchingAngle = num(0, 10);
 
 var holder;
 var vectors = [];
@@ -130,7 +135,7 @@ function init() {
 
 		var child = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
 		child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
-		child.group.rotation.z = num(-0.5, 0.5) * 0.2 * Math.PI * (attempts / bail * 6);
+		child.group.rotation.z = num(-0.5, 0.5) * 2 * Math.PI * attempts / bail * branchingAngle;
 		child.group.rotation.y = num(0, 2) * Math.PI;
 
 		var end = getSectionEnd(child);
@@ -170,13 +175,22 @@ function init() {
 
 	}
 
+	segmentCreationInterval = setInterval(function() {
+		if (new Date().getTime() - segmentLastCreated > 3000) {
+			con.log("more than 3 seconds... bailing!");
+			generationComplete = true;
+			clearInterval(segmentCreationInterval);
+		}
+	}, 500);
+
 
 	function addSection(parent) {
-		attempts ++;
+		attempts++;
 
 		segmentLength = (2 - attempts / bail) * segmentLengthInitial / 2;
 
 		if (attempts < bail) {
+
 
 			renderMessage.innerHTML = "Rendering " + Math.round(attempts/bail * 100) + "%";
 
@@ -190,11 +204,18 @@ function init() {
 
 				if (newSection) {
 
+					segmentLastCreated = new Date().getTime();
+
 					(function(a, p) {
 						var timeout = a * 10;
 						// con.log("timeout", timeout);
 						setTimeout(function() {
-							addSection(p);
+							if (generationComplete) {
+								con.log("wanted to created another, but time out...")
+							}	else {
+								addSection(p);
+							}
+
 						}, timeout);
 					})(attempts, newSection);
 
@@ -210,7 +231,7 @@ function init() {
 
 	}
 
-	var seeds = 32;//parseInt(num(1, 10));
+	var seeds = parseInt(num(10, 50));
 
 	var colour = colours.getRandomColour()
 
@@ -229,24 +250,15 @@ function init() {
 
 		var distance = checkDistance(endSphere);
 		if (distance.ok) {
-			con.log('OK')
 			vectors.push(distance.vector);
 			addSection(baseSection);
-
 		} else {
-			con.log("too close");
-
 			baseSection.group.remove(endSphere);
 			holder.remove(baseSection.group);
-
 		}
-
-		//
 
 	};
 
-
-	// addSection(c);
 
 	document.body.appendChild(renderer.domElement);
 	document.body.appendChild(renderMessage);
