@@ -10,10 +10,16 @@ function initExperiments() {
   document.body.appendChild(buttons);
   document.body.appendChild(holder);
 
+  require.config({
+    baseUrl: "../experiments/",
+    urlArgs: "bust="+new Date().getTime()
+  });
+
+
   var experiments = {
     "bezier_flow": ["bezier_flow"],
     "hexagon_tile": ["hexagon_tile"],
-    "maze": ["maze"],
+    "rectangular_fill": ["rectangular_fill"],
 
     // "Mining_Branches": ["mining_branches"],
     // "Oscillate_Curtain": ["oscillate_curtain"],
@@ -114,6 +120,7 @@ function initExperiments() {
 
   var stage;
   function initExperiment() {
+    con.log('initExperiment');
     if (typeof currentExperiment.stage === "function") {
       stage = currentExperiment.stage();
     } else {
