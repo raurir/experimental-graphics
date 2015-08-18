@@ -104,6 +104,7 @@ function init() {
 		child.group.rotation.y = num(0, 2) * Math.PI;
 
 		var end = getSectionEnd(child);
+		// TODO use Object3D();
 		var endSphere = sphere({radius: 3, colour: 0xff0000}); // this is just the point to draw.
 		endSphere.position.set(end.x, end.y, end.z);
 		child.group.add(endSphere);
