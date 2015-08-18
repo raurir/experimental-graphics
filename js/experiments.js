@@ -74,12 +74,6 @@ var experiments = (function() {
     ["voronoi_stripes", "voronoi"],
   ];
 
-  function createScript(s) {
-    var script = dom.element("script");
-    script.src = s;
-    document.body.appendChild(script);
-  }
-
   function createStyleSheet(s) {
     var link  = dom.element("link");
     // link.id = cssId;

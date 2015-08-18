@@ -109,7 +109,7 @@ var rectangular_fill = function() {
 
     if (available.length) {
       if ((attempts + 1) % 1e3 == 0) {
-        con.log("delaying call");
+        // con.log("delaying call");
         setTimeout(tryPosition, 100);
       } else {
         tryPosition();
@@ -121,7 +121,7 @@ var rectangular_fill = function() {
   }
 
   function init() {
-    con.log("Rectangular fill init");
+    // con.log("Rectangular fill init");
 
     colours.getRandomPalette();
 
@@ -188,12 +188,12 @@ var rectangular_fill = function() {
     name: "Rectangular Fill",
     stage: bmp.canvas,
     resize: function(w,h) {
-      con.log('resize', w, h);
-      bmp.setSize(w, h);
+      // bmp.c(w, h);
+      bmp.setSize(w, h, true);
       // sw = w;
       // sh = h;
-      // bmp.canvas.width = sw;
-      // bmp.canvas.height = sh;
+      // bmp.canvas.style.width = sw + "px";
+      // bmp.canvas.style.height = sh + "px";
     },
     init: init,
     kill: function() {}

@@ -77,9 +77,13 @@ var dom = (function() {
 			ctx.arc(x, y, r, 0, circleRads, false);
 		}
 
-		var setSize = function(w,h) {
-			c.width = w;
-			c.height = h;
+		var setSize = function(w, h, preserveCanvas) {
+			if (preserveCanvas) {
+				c.setSize(w, h);
+			} else {
+				c.width = w;
+				c.height = h;
+			}
 		}
 
 		return {

@@ -10,7 +10,7 @@ if (isNode) {
 
 // seed 3 is awesome.
 
-var hexagon_tile = (function() {
+var hexagon_tile = function() {
 
 
 var size = 600 * 1, // 600 dpi * 10 inches.
@@ -51,12 +51,7 @@ function init(_callback) {
   var backgroundColor = colours.getRandomColour();
 
   // window.removeEventListener("resize", resize);
-  if (isNode) {
-    callback("render:start");
-  } else {
-    dispatchEvent(new Event("render:start"));
-  }
-
+  progress("render:start");
 
   radiusOuter = (5 + rand.random() * 25) / 1000;
   strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
@@ -295,11 +290,7 @@ function batch() {
   currentBatch++;
   if (currentBatch == batches) {
     //
-    if (isNode) {
-      callback("render:complete");
-    } else {
-      dispatchEvent(new Event("render:complete"));
-    }
+    progress("render:complete");
 
     // document.body.addEventListener("click", init);
 
@@ -308,15 +299,7 @@ function batch() {
     resize();
   } else {
 
-    if (isNode) {
-      callback("render:progress", currentBatch / batches);
-    } else {
-      dispatchEvent(new CustomEvent("render:progress", {"detail": currentBatch / batches}));
-    }
-
-
-
-
+    progress("render:progress", currentBatch / batches);
 
 
     resize();
@@ -353,7 +336,8 @@ function resize(sw,sh) {
 
     inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
   } else {
-    con.log("no canvas resize...");
+    // con.log("no canvas resize...");
+    stage.setSize(sw, sh, true);
   }
 }
 
@@ -367,11 +351,12 @@ var experiment = {
   kill: function() {}
 }
 
-if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
-
-
 return experiment;
 
-})();
+};
 
-if (isNode) module.exports = hexagon_tile;
+if (isNode) {
+  module.exports = hexagon_tile();
+} else {
+  define("hexagon_tile", hexagon_tile);
+}
