@@ -1,3 +1,4 @@
+/*
 var isNode = (typeof module !== 'undefined');
 var con = console;
 
@@ -34,3 +35,4 @@ function ExperimentFactory(experiment, callback) {
 }
 
 if (isNode) module.exports = ExperimentFactory;
+*/
