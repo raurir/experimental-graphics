@@ -1,7 +1,7 @@
 function initExperiments() {
 
   require.config({
-    baseUrl: "../experiments/",
+    baseUrl: "./experiments/",
     urlArgs: "bust="+new Date().getTime()
   });
 
