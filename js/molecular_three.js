@@ -7,9 +7,15 @@ var sw = window.innerWidth, sh = window.innerHeight;
 
 function num(min, max) { return Math.random() * (max - min) + min; }
 
-var segmentLength = 50;
-var segmentRadius = 10;
-var sphereRadius = segmentRadius * 1.2;
+var segmentCreationInterval = 0;
+var segmentLastCreated;
+
+var segmentLengthInitial = 50;
+var segmentLength = segmentLengthInitial;
+var segmentRadius = num(4, 15);
+var sphereRadius = segmentRadius * num(1, 3);
+
+var branchingAngle = num(0, 10);
 
 var holder;
 var vectors = [];
@@ -94,30 +100,10 @@ function init() {
 	holder = new THREE.Group();
 	scene.add(holder);
 
-	function drawSection(parent, endPoint) {
-
-		var colour = colours.mutateColour(parent.colour, 50);
-
-		var child = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
-		child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
-		child.group.rotation.z = num(-0.5, 0.5) * 0.2 * Math.PI * (attempts / bail * 6);
-		child.group.rotation.y = num(0, 2) * Math.PI;
-
-		var end = getSectionEnd(child);
-		// TODO use Object3D();
-		var endSphere = sphere({radius: 3, colour: 0xff0000}); // this is just the point to draw.
-		endSphere.position.set(end.x, end.y, end.z);
-		child.group.add(endSphere);
-
-		parent.group.add(child.group);
-
-		parent.group.updateMatrixWorld();
+	function checkDistance(reference) {
 
 		var globalPosition = new THREE.Vector3();
-		globalPosition.setFromMatrixPosition(endSphere.matrixWorld);
-
-		child.group.remove(endSphere); // done with calc ditch it... 
-		
+		globalPosition.setFromMatrixPosition(reference.matrixWorld);
 
 		var st = new Date().getTime();
 		var distance;
@@ -134,36 +120,77 @@ function init() {
 		var en = new Date().getTime();
 		var proc = en - st;
 		if (proc > 3) con.warn("proc time = ", proc);
-		if (distanceOk) {
 
-			vectors.push(globalPosition);
+		return {
+			vector: globalPosition,
+			ok: distanceOk
+		}
+
+	}
+
+
+	function drawSection(parent, endPoint) {
+
+		var colour = colours.mutateColour(parent.colour, 50);
+
+		var child = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
+		child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
+		child.group.rotation.z = num(-0.5, 0.5) * 2 * Math.PI * attempts / bail * branchingAngle;
+		child.group.rotation.y = num(0, 2) * Math.PI;
+
+		var end = getSectionEnd(child);
+		var endSphere = sphere({radius: 3, colour: 0xff0000}); // this is just the point to draw.
+		endSphere.position.set(end.x, end.y, end.z);
+		child.group.add(endSphere);
+
+		parent.group.add(child.group);
+		parent.group.updateMatrixWorld();
+
+		var distance = checkDistance(endSphere);
+
+		child.group.remove(endSphere); // done with calc ditch it...
+
+		if (distance.ok) {
+
+			vectors.push(distance.vector);
 
 			// colour = colours.mutateColour(colour, 30);
 
 			var s = sphere({radius: sphereRadius, colour: colour});
-			s.position.set(globalPosition.x, globalPosition.y, globalPosition.z);
+			s.position.set(distance.vector.x, distance.vector.y, distance.vector.z);
 			holder.add(s);
 
 			return child;
 
 		} else {
 
-			con.warn("bad distance", distance);
+			// con.warn("bad distance", distance);
 
 			child.group.remove(endSphere);
 			parent.group.remove(child.group);
 
 			return null;
-			
+
 		}
 
 	}
 
+	segmentCreationInterval = setInterval(function() {
+		if (new Date().getTime() - segmentLastCreated > 3000) {
+			con.log("more than 3 seconds... bailing!");
+			generationComplete = true;
+			clearInterval(segmentCreationInterval);
+		}
+	}, 500);
+
 
 	function addSection(parent) {
-		attempts ++;
+		attempts++;
+
+		segmentLength = (2 - attempts / bail) * segmentLengthInitial / 2;
 
 		if (attempts < bail) {
+
 
 			renderMessage.innerHTML = "Rendering " + Math.round(attempts/bail * 100) + "%";
 
@@ -177,19 +204,22 @@ function init() {
 
 				if (newSection) {
 
+					segmentLastCreated = new Date().getTime();
+
 					(function(a, p) {
 						var timeout = a * 10;
 						// con.log("timeout", timeout);
 						setTimeout(function() {
-							addSection(p);
+							if (generationComplete) {
+								con.log("wanted to created another, but time out...")
+							}	else {
+								addSection(p);
+							}
+
 						}, timeout);
 					})(attempts, newSection);
-				
 
-				} else {
-					// con.log("this one ends here!");
 				}
-
 
 			};
 		} else {
@@ -201,31 +231,12 @@ function init() {
 
 	}
 
-	var seeds = 32;//parseInt(num(1, 10));
+	var seeds = parseInt(num(10, 50));
 
-	// var parent = {
-	// 	group: new THREE.Group(),
-	// 	colour: colours.getRandomColour()
-	// }
-	// holder.add(parent.group);
-
-	var colour =  colours.getRandomColour()
+	var colour = colours.getRandomColour()
 
 	for (var j = 0; j < seeds; j++) {
 
-		/*
-		var parent = {
-			group: new THREE.Group(),
-			colour: colours.getRandomColour()
-		}
-		holder.add(parent.group);
-
-		parent.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
-
-		addSection(parent);
-		*/
-
-		
 		var baseSection = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
 		baseSection.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
 		holder.add(baseSection.group);
@@ -235,12 +246,19 @@ function init() {
 		endSphere.position.set(end.x, end.y, end.z);
 		baseSection.group.add(endSphere);
 
-		addSection(baseSection);
-		
+		baseSection.group.updateMatrixWorld();
+
+		var distance = checkDistance(endSphere);
+		if (distance.ok) {
+			vectors.push(distance.vector);
+			addSection(baseSection);
+		} else {
+			baseSection.group.remove(endSphere);
+			holder.remove(baseSection.group);
+		}
+
 	};
 
-	
-	// addSection(c);
 
 	document.body.appendChild(renderer.domElement);
 	document.body.appendChild(renderMessage);
