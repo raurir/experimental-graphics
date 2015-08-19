@@ -1,4 +1,4 @@
-function initRenderProgress() {
+function experiments_progress() {
   // con.log('initRenderProgress');
   var loader, graph, bar;
 
@@ -43,3 +43,5 @@ function initRenderProgress() {
     }
   }, false);
 }
+
+define("experiments_progress", experiments_progress);

@@ -1,4 +1,4 @@
-function initExperiments() {
+function experiments_infinite() {
 
   require.config({
     baseUrl: "./experiments/",
@@ -121,7 +121,7 @@ function initExperiments() {
     rand.setSeed(currentRandom);
 
     if (initialised === false) {
-      initRenderProgress();
+      // initRenderProgress();
       initWindowListener();
       initialised = true;
     };
@@ -133,7 +133,7 @@ function initExperiments() {
   for(var e in experiments) {
     var button = dom.element("div", {className: "button", key: e, innerHTML: e});
     button.addEventListener("click", function(event){
-      clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * 1e10));
+      infinite.clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * 1e10));
     });
     buttons.appendChild(button);
   }
@@ -153,3 +153,5 @@ function initExperiments() {
   };
 
 };
+
+define("experiments_infinite", experiments_infinite);
