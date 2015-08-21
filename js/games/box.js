@@ -5,10 +5,11 @@ var sw = 200, sh = 200;
 
 var bmp = dom.canvas(sw, sh);
 var container = dom.element("div");
+var output = dom.element("div", {style:{color:"white"}});
 
 
 function tilt(x,y) {
-  con.log('tilt', x, y)
+  output.innerHTML = ['tilt', Math.round(x * 100), Math.round(y * 100)];
   bmp.ctx.fillStyle = "rgba(0,0,0,0.4)";
   bmp.ctx.fillRect(0, 0, sw, sh);
   bmp.ctx.fillStyle = "red";
@@ -41,6 +42,7 @@ function init() {
 
   document.body.appendChild(container);
   container.appendChild(bmp.canvas);
+  container.appendChild(output);
 
 
 }
@@ -53,6 +55,7 @@ function init() {
 return {
   init: init,
   stage: container,
+  resize: function() {}
 }
 
 }
