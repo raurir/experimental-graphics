@@ -1,5 +1,5 @@
 (function() {
-  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, harden, init, iterations, iterativeDraw, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
+  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, getMaze, harden, init, iterations, iterativeDraw, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
 
   con = console;
 
@@ -10,6 +10,10 @@
   can = d.createElement("canvas");
 
   time = 0;
+
+  xwide = 30;
+
+  yhigh = 30;
 
   ran = Math.random();
 
@@ -29,10 +33,6 @@
       return array;
     }
   };
-
-  xwide = 140;
-
-  yhigh = 140;
 
   field = [];
 
@@ -194,17 +194,17 @@
 
   e = Math.E;
 
-  branchrate = 0;
+  branchrate = 20;
 
   iterations = 0;
 
   unit = 4;
 
-  init = function() {
+  init = function(cb, _xwide, _yhigh) {
     can.width = xwide * unit;
     can.height = yhigh * unit;
     ctx = can.getContext("2d");
-    return draw();
+    return draw(cb);
   };
 
   iterativeDraw = function() {
@@ -227,7 +227,7 @@
     return iterations++;
   };
 
-  draw = function() {
+  draw = function(cb) {
     var rgb, _k, _l, _m;
     time += 0.5;
     for (d = _k = 0; _k < 1000; d = ++_k) {
@@ -236,7 +236,7 @@
     for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {
       for (x = _m = 0; 0 <= xwide ? _m < xwide : _m > xwide; x = 0 <= xwide ? ++_m : --_m) {
         if (field[y][x] === "#") {
-          rgb = 200;
+          rgb = 20;
           ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
           ctx.fillRect(x * unit, y * unit, unit, unit);
         }
@@ -245,15 +245,21 @@
     if (frontier.length) {
       return requestAnimationFrame(draw);
     } else {
-      return console.log("done");
+      console.log("done");
+      return typeof cb === "function" ? cb() : void 0;
     }
   };
 
+  getMaze = (function(_this) {
+    return function() {
+      return field;
+    };
+  })(this);
+
   maze = {
+    getMaze: getMaze,
     init: init,
-    stage: function() {
-      return can;
-    },
+    stage: can,
     resize: function() {
       return console.log("resize maze not implemented!");
     },
@@ -262,8 +268,8 @@
     }
   };
 
-  dispatchEvent(new CustomEvent("load:complete", {
-    detail: maze
-  }));
+  window.maze = maze;
+
+  define("maze", window.maze);
 
 }).call(this);

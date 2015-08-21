@@ -1,11 +1,14 @@
 # http://pcg.wikidot.com/pcg-algorithm:maze
 
+
 con = console
 d = document
 
 ctx = null
 can = d.createElement("canvas")
 time = 0 # Math.random() * 1e10
+xwide = 30
+yhigh = 30
 
 ran = Math.random()
 
@@ -22,11 +25,6 @@ random = {
       array[i] = t
     return array
 }
-
-
-
-xwide = 140
-yhigh = 140
 
 #the grid of the maze
 #each cell of the maze is one of the following:
@@ -180,7 +178,7 @@ carve(ychoice,xchoice)
 
 e = Math.E
 
-branchrate = 0
+branchrate = 20
 
 iterations = 0
 
@@ -196,13 +194,15 @@ iterations = 0
 
 
 unit = 4
-init = () ->
+init = (cb, _xwide, _yhigh) ->
+  # xwide = _xwide if _xwide?
+  # ywide = _yhigh if _yhigh?
   can.width = xwide * unit
   can.height = yhigh * unit
   # d.body.appendChild(can)
 
   ctx = can.getContext("2d")
-  draw()
+  draw(cb)
 
 iterativeDraw = () ->
   if frontier.length and iterations < 1e10
@@ -224,7 +224,7 @@ iterativeDraw = () ->
 
   iterations++
 
-draw = () ->
+draw = (cb) ->
   # can.width = can.width
   time += 0.5
 
@@ -241,7 +241,7 @@ draw = () ->
   for y in [0...yhigh]
     for x in [0...xwide]
       if field[y][x] == "#"
-        rgb = 200 # i * 10
+        rgb = 20 #200 # i * 10
         ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
         ctx.fillRect(x * unit, y * unit, unit, unit)
 
@@ -250,6 +250,7 @@ draw = () ->
     requestAnimationFrame(draw)
   else
     console.log "done"
+    cb?()
 
     # for y in [0...yhigh]
     #   for x in [0...xwide]
@@ -260,15 +261,22 @@ draw = () ->
     #       ctx.fillRect(x * unit, y * unit, unit, unit)
 
 
+getMaze = () =>
+  return field
 
 # init()
 # draw()
 
 maze = {
+  getMaze: getMaze
   init: init
-  stage: () -> can
+  stage: can
   resize: () -> console.log "resize maze not implemented!"
   kill: () -> console.log "kill maze not implemented!"
 }
 
-dispatchEvent(new CustomEvent("load:complete", {detail: maze}));
+# con.log(maze)
+
+# dispatchEvent(new CustomEvent("load:complete", {detail: maze}));
+window.maze = maze
+define("maze", window.maze)
