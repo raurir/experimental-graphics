@@ -1,6 +1,6 @@
 var box = function() {
 
-var sw = 200, sh = 200;
+var sw = 800, sh = 800;
 
 
 var bmp = dom.canvas(sw, sh);
@@ -8,7 +8,7 @@ var container = dom.element("div");
 var output = dom.element("div", {style:{color:"white"}});
 
 
-function tilt(x,y) {
+function tilt(y, x) {
   output.innerHTML = ['tilt', Math.round(x * 100), Math.round(y * 100)];
   bmp.ctx.fillStyle = "rgba(0,0,0,0.4)";
   bmp.ctx.fillRect(0, 0, sw, sh);
