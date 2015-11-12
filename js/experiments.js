@@ -49,6 +49,7 @@ var experiments = (function() {
     ["molecular_three", "THREE"],
 
     ["box", "maze"],
+    ["rainbow_particles"],
 
     ["unknown"],
     ["_test"],
