@@ -78,7 +78,7 @@ var colours = (function() {
 
 	function mutateColour(colour, amount) {
 		var mutation = mutateHex(colour, amount);
-		return mutateHex(colour, amount);
+		return mutation;
 		// TODO mutateRGB...
 	}
 

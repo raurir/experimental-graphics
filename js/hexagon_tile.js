@@ -45,7 +45,7 @@ if (vector) {
 var callback;
 function init(_callback) {
   callback = _callback;
-  con.log("hex init rand", rand.random(), rand.getSeed());
+  // con.log("hex init rand", rand.random(), rand.getSeed());
 
   var palette = colours.getRandomPalette();
   var backgroundColor = colours.getRandomColour();
@@ -196,7 +196,7 @@ function init(_callback) {
   }
   randomHexes = shuffle(hexs.slice());
 
-  con.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
+  // con.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
   // con.log('randomHexes', randomHexes.length, hexs.length);
 
   render();
