@@ -5,7 +5,7 @@ function experiments_infinite() {
     urlArgs: "bust="+new Date().getTime()
   });
 
-  var currentExperiment, experimentsLoaded = {}, currentLoading = null;
+  var currentExperiment, experimentsLoaded = {}, currentLoading = null, artSpecs = {};
   var initialised = false;
   var currentRandom;
 
@@ -51,7 +51,9 @@ function experiments_infinite() {
       var newLoading = params[0];
       var newRandom = params[1];
 
-      if (newLoading === currentLoading && newRandom === currentRandom) return con.warn("Already loaded experiment...");
+      if (newLoading === currentLoading && newRandom === currentRandom) {
+        return; // con.warn("Already loaded experiment...");
+      }
 
       currentLoading = newLoading;
       currentRandom = newRandom;
@@ -65,20 +67,15 @@ function experiments_infinite() {
       }
 
       if (experimentsLoaded[currentLoading]) {
-        // con.log("script already loaded...");
         currentExperiment = experimentsLoaded[currentLoading];
         initExperiment();
       } else {
         var exp = experiments[currentLoading];
-        // con.log("do loadExperiment exp", exp );
         require(exp, function(experiment) {
-          // con.log("require loaded");
           if (experiment) {
-            // con.log("require loaded...", experiment);
-            // ExperimentFactory(experiment);
             experimentLoaded(experiment);
           } else {
-            con.warn("Experiment loaded... but experiment is null", experiment, arguments);
+            con.warn("Experiment loaded... but experiment is null", experiment);
           }
         });
 
@@ -92,9 +89,10 @@ function experiments_infinite() {
 
 
 
-  addEventListener("load:complete", function(e) {
-    experimentLoaded(e.detail)
-  });
+  // addEventListener("load:complete", function(e) {
+  //   con.log("load complete called!");
+  //   experimentLoaded(e.detail)
+  // });
 
   function experimentLoaded(_currentExperiment) {
     // con.log("experimentLoaded", _currentExperiment);
@@ -110,7 +108,6 @@ function experiments_infinite() {
 
   var stage;
   function initExperiment() {
-    // con.log('initExperiment');
     if (typeof currentExperiment.stage === "function") {
       stage = currentExperiment.stage();
     } else {
@@ -126,6 +123,11 @@ function experiments_infinite() {
       initialised = true;
     };
 
+    artSpecs = {
+      design: currentLoading,
+      seed: currentRandom
+    }
+
     currentExperiment.init();
     resize();
   }
@@ -133,23 +135,27 @@ function experiments_infinite() {
   for(var e in experiments) {
     var button = dom.element("div", {className: "button", key: e, innerHTML: e});
     button.addEventListener("click", function(event){
-      infinite.clickHandler("design:" + event.target.key + "," + Math.round(Math.random() * 1e10));
+      var design = event.target.key;
+      var seed = Math.round(Math.random() * 1e10);
+      infinite.clickHandler("design:" + design + "," + seed);
     });
     buttons.appendChild(button);
   }
 
   function getArt(w, h) {
-
-    // currentExperiment.getPrint(w, h);
-
     return stage.toDataURL("image/png"); // "image/jpeg"
+  }
+
+  function getArtSpecs() {
+    return artSpecs;
   }
 
   return {
     buttons: buttons,
     loadExperiment: loadExperiment,
     experiments: experiments,
-    getArt: getArt
+    getArt: getArt,
+    getArtSpecs: getArtSpecs
   };
 
 };

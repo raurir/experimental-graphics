@@ -13,7 +13,7 @@ if (isNode) {
 var hexagon_tile = function() {
 
 
-var size = 600 * 1, // 600 dpi * 10 inches.
+var size = 800 * 10, // 600 dpi * 10 inches.
   vector = false,
   sw = size,
   sh = size,
