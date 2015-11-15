@@ -122,7 +122,7 @@ var bezier_flow = function() {
 
   function render(j) {
 
-    con.log("render ========================", lines);
+    // con.log("render ========================", lines);
 
     for (var j = 0; j < lines;j++) {
 
