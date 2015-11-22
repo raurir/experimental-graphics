@@ -12,7 +12,7 @@ var circleRads = Math.PI * 2;
 
 var numInitial = 500;
 var numCurrent = numInitial;
-var numMax = 30;
+var numMax = numInitial * 3;
 var particles = [];
 var zones = [];
 
@@ -39,10 +39,10 @@ function moveParticle(p) {
   // con.log('index', x, y, index, isRed);
 
   var padding = 100;
-  if (p.x > sw + padding) p.x -= sw + padding * 2;
-  if (p.x < -padding) p.x += sw + padding * 2;
-  if (p.y > sh + padding) p.y -= sh + padding * 2;
-  if (p.y < -padding) p.y += sh + padding * 2;
+  if (p.x > sw + padding) { p.x -= sw + padding * 2; p.px = p.x; }
+  if (p.x < -padding) { p.x += sw + padding * 2; p.px = p.x; }
+  if (p.y > sh + padding) { p.y -= sh + padding * 2; p.py = p.y; }
+  if (p.y < -padding) { p.y += sh + padding * 2; p.py = p.y; }
 
   // p.angle = Math.atan(p.vy / p.vx);
   // var a = -p.angle;
@@ -59,23 +59,33 @@ function moveParticle(p) {
   var index = (x1 + y1 * sw) * 4;
   var isRed = hitpixels.data[index];
 
-  ctx.fillStyle = isRed ? "blue" : "red";// p.palette;
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, circleRads, false);
-  ctx.closePath();
-  ctx.fill();
+  if (!isRed) {
+    // ctx.fillStyle = p.palette;
+    ctx.lineWidth = r;
+    ctx.strokeStyle = p.palette;
+    ctx.beginPath();
+    // ctx.arc(x, y, r, 0, circleRads, false);
+    ctx.moveTo(p.px, p.py);
+    ctx.lineTo(x, y);
+    // ctx.closePath();
+    // ctx.fill();
+    ctx.stroke();
+  }
 
   if (isRed) {
-    p.speed *= -1;//0.9;
+    // p.speed *= -1;//0.9;
+    p.dir = Math.random() * Math.PI * 2;
   }
+
+  p.px = p.x;
+  p.py = p.y;
+
 
   if (p.dying && p.age > 500) {
     killParticle(p);
   } else if (p.children == 0 && numCurrent < numMax && Math.random() > 0.99) {
     spawnParticle(p);
   }
-
 }
 
 function killParticle(p) {
@@ -99,8 +109,12 @@ function generateParticle(parent) {
       vy: parent.vy,
       x: parent.x,
       y: parent.y,
+      px: parent.x,
+      py: parent.y,
     }
   } else {
+    var x = Math.random() * sw,
+      y = Math.random() * sh;
     return {
       age: 0,
       children: 0,
@@ -111,8 +125,10 @@ function generateParticle(parent) {
       speed: Math.random() * 2.5 + 2.5,
       vx: 0,
       vy: 0,
-      x: Math.random() * sw,
-      y: Math.random() * sh,
+      x: x,
+      y: y,
+      px: x, 
+      py: y,
     }
   }
 }
@@ -138,6 +154,12 @@ function generate() {
     w: 20,
     h: 100
   });
+  zones.push({
+    x: 300,
+    y: 50,
+    w: 100,
+    h: 300
+  });
 
 
   for (var j = 0; j < zones.length; j++) {
@@ -155,11 +177,11 @@ function generate() {
 }
 
 function render(time) {
-  ctx.clearRect(0,0,sw,sh);
-  // ctx.fillStyle = "rgba(0,0,0,0.04)";
-  // ctx.fillRect(0,0,sw,sh);
+  // ctx.clearRect(0,0,sw,sh);
+  ctx.fillStyle = "rgba(0,0,0,0.04)";
+  ctx.fillRect(0,0,sw,sh);
 
-  ctx.drawImage(hit.canvas, 0, 0);
+  // ctx.drawImage(hit.canvas, 0, 0);
 
   for (var i = 0; i < numCurrent; i++) {
     moveParticle(particles[i]);
