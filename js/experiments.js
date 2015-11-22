@@ -48,34 +48,37 @@ var experiments = (function() {
   var experiments = [
     ["molecular_three", "THREE"],
 
-    ["box", "maze"],
-    ["rainbow_particles"],
 
     ["unknown"],
     ["_test"],
+
+
     ["additive"],
     ["anemone_three", "THREE"],
     ["bezier_flow"],
+    ["box", "maze"],
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
+    ["fool", "css/fool"],
     ["hexagon_tile"],
     ["isometric_cubes"],
-    ["fool", "css/fool"],
     ["maze"],
-    ["mining_branches"],
     ["meandering_polygons"],
+    ["mining_branches"],
     ["oscillate_curtain"],
     ["pattern_check", "css/pattern_check"],
     ["pattern_circles"],
     ["polyhedra","3d"],
     ["polyhedra_three","THREE"],
     ["race_lines_three","THREE", "TweenMax"],
-    ["recursive"],
+    ["rainbow_particles"],
     ["rectangular_fill"],
+    ["recursive"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
     ["tunnel_tour_three","THREE", "TweenMax"],
     ["voronoi_stripes", "voronoi"],
+    ["zoned_particles"],
   ];
 
   function createStyleSheet(s) {
