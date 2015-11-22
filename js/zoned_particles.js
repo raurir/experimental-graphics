@@ -10,7 +10,7 @@ var hitpixels;
 var ctx = canvas.ctx;
 var circleRads = Math.PI * 2;
 
-var numInitial = 500;
+var numInitial = 30;
 var numCurrent = numInitial;
 var numMax = numInitial * 3;
 var particles = [];
@@ -164,7 +164,7 @@ function generate() {
 
   for (var j = 0; j < zones.length; j++) {
     var z = zones[j];
-    hit.ctx.fillStyle = "rgba(100,0,0,1)";
+    hit.ctx.fillStyle = "rgba(50,0,0,1)";
     hit.ctx.fillRect(z.x, z.y, z.w, z.h);
   };
 
@@ -181,7 +181,7 @@ function render(time) {
   ctx.fillStyle = "rgba(0,0,0,0.04)";
   ctx.fillRect(0,0,sw,sh);
 
-  // ctx.drawImage(hit.canvas, 0, 0);
+  ctx.drawImage(hit.canvas, 0, 0);
 
   for (var i = 0; i < numCurrent; i++) {
     moveParticle(particles[i]);
