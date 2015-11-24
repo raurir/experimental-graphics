@@ -143,6 +143,7 @@ function experiments_infinite() {
     });
     var image = dom.element("div", {
       className: "design-image",
+      key: e,
       style: {backgroundImage: "url(/images/" + e + ".png)"},
     });
     button.appendChild(image);
