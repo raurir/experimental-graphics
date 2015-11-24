@@ -132,8 +132,20 @@ function experiments_infinite() {
     resize();
   }
 
+  var header = dom.element("h1", {innerHTML: "Welcome to FunkyVector. Pick an experiment..."});
+  // buttons.appendChild(header);
+
   for(var e in experiments) {
-    var button = dom.element("div", {className: "button", key: e, innerHTML: e});
+    var button = dom.element("div", {
+      className: "experiment-button", 
+      key: e
+      // innerHTML: e
+    });
+    var image = dom.element("div", {
+      className: "design-image",
+      style: {backgroundImage: "url(/images/" + e + ".png)"},
+    });
+    button.appendChild(image);
     button.addEventListener("click", function(event){
       var design = event.target.key;
       var seed = Math.round(Math.random() * 1e10);
