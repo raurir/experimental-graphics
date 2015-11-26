@@ -137,14 +137,14 @@ function experiments_infinite() {
 
   for(var e in experiments) {
     var button = dom.element("div", {
-      className: "experiment-button", 
+      className: "experiment-button",
       key: e
       // innerHTML: e
     });
     var image = dom.element("div", {
       className: "design-image",
       key: e,
-      style: {backgroundImage: "url(/images/" + e + ".png)"},
+      style: {backgroundImage: "url(images/" + e + ".png)"},
     });
     button.appendChild(image);
     button.addEventListener("click", function(event){
