@@ -69,6 +69,7 @@ var experiments = (function() {
     ["pattern_circles"],
     ["polyhedra","3d"],
     ["polyhedra_three","THREE"],
+    ["pine_three","THREE"],
     ["race_lines_three","THREE", "TweenMax"],
     ["rainbow_particles"],
     ["rectangular_fill"],

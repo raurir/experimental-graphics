@@ -12,8 +12,8 @@ function experiments_infinite() {
   var buttons = dom.element("div", {className:"experiment-buttons"});
   var holder = dom.element("div", {className:"experiment-holder"});
 
-  document.body.appendChild(buttons);
-  document.body.appendChild(holder);
+  $(".infinite").prepend(buttons);
+  $(".infinite").prepend(holder);
 
   var experiments = {
     "bezier_flow": ["bezier_flow"],
@@ -41,7 +41,7 @@ function experiments_infinite() {
   }
 
   function loadExperiment(params) {
-    // con.log("! loadExperiment params:", params);
+    con.log("! loadExperiment params:", params);
     if (params) {
 
       $(buttons).slide(false);
@@ -52,7 +52,7 @@ function experiments_infinite() {
       var newRandom = params[1];
 
       if (newLoading === currentLoading && newRandom === currentRandom) {
-        return; // con.warn("Already loaded experiment...");
+        return con.warn("Already loaded experiment...", newLoading, newRandom);
       }
 
       currentLoading = newLoading;
@@ -115,6 +115,8 @@ function experiments_infinite() {
     }
     holder.appendChild(stage);
 
+    initSettings();
+
     rand.setSeed(currentRandom);
 
     if (initialised === false) {
@@ -131,6 +133,49 @@ function experiments_infinite() {
     currentExperiment.init();
     resize();
   }
+
+
+  function initSettings() {
+    function makeSetting(s) {
+      var setting = settings[s];
+      con.log("makeSetting", s, setting);
+      var input = dom.element("input", {
+        value: setting.cur,
+        type: "number",
+        style: {
+          position: "absolute",
+          top: "40px",
+          left: "100px"
+        }
+      });
+      input.addEventListener("change", function(e) {
+        con.log("e", s, this.value);
+        currentExperiment.settings[s].cur = Number(this.value);
+        currentExperiment.render();//s, this.value);
+      })
+
+      holder.appendChild(input);
+    }
+
+
+    var settings = currentExperiment.settings;
+    con.log("exp - settings", settings);
+    if (settings) {
+      if (currentExperiment.render) {
+        for (var s in settings) {
+          makeSetting(s);
+        }
+      } else {
+        con.warn("experiment has not exposed render function");
+      }
+    }
+  }
+
+
+
+
+
+
 
   var header = dom.element("h1", {innerHTML: "Welcome to FunkyVector. Pick an experiment..."});
   // buttons.appendChild(header);

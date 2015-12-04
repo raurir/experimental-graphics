@@ -13,6 +13,14 @@ if (isNode) {
 
 var bezier_flow = function() {
 
+  var settings = {
+    renderlimit: {
+      min: 1,
+      max: Number.POSITIVE_INFINITY,
+      cur: 1
+    }
+  };
+
   var sw = sh = size = 1000;
 
   // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
@@ -27,6 +35,8 @@ var bezier_flow = function() {
 
   function init() {
     lines = Math.round(10 + rand.random() * 50);
+    settings.renderlimit.max = lines;
+    settings.renderlimit.cur = lines / 2;
     sections = Math.round(2 + rand.random() * 3);
     radius = 0.4 + rand.random() * 0.2;
     points = [];
@@ -120,11 +130,15 @@ var bezier_flow = function() {
 
   }
 
-  function render(j) {
+  function render() {
 
-    // con.log("render ========================", lines);
+    ctx.clearRect(0, 0, sw, sh);
 
-    for (var j = 0; j < lines;j++) {
+    con.log("render ========================", settings.renderlimit.cur);
+
+    for (var j = 0; j < settings.renderlimit.cur; j++) {
+
+      con.log(j);
 
     // if (true) {
 
@@ -237,7 +251,9 @@ var bezier_flow = function() {
       bmp.setSize(w, h, true);
     },
     init: init,
-    kill: function() {}
+    kill: function() {},
+    settings: settings,
+    render: render
   }
   // dispatchEvent(new CustomEvent("load:complete", {detail: experiment}));
 
