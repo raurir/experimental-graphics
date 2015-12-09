@@ -134,11 +134,11 @@ var bezier_flow = function() {
 
     ctx.clearRect(0, 0, sw, sh);
 
-    con.log("render ========================", settings.renderlimit.cur);
+    // con.log("render ========================", settings.renderlimit.cur);
 
     for (var j = 0; j < settings.renderlimit.cur; j++) {
 
-      con.log(j);
+      // con.log(j);
 
     // if (true) {
 

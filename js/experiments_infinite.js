@@ -136,6 +136,7 @@ function experiments_infinite() {
 
 
   function initSettings() {
+    /*
     function makeSetting(s) {
       var setting = settings[s];
       con.log("makeSetting", s, setting);
@@ -169,6 +170,7 @@ function experiments_infinite() {
         con.warn("experiment has not exposed render function");
       }
     }
+    */
   }
 
 
