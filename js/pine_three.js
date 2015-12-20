@@ -58,28 +58,26 @@ function init() {
 	var segmentRadius = 10, segmentLength  = 50;
 
 	function drawSection(parent, endPoint) {
-
 		var colour = colours.mutateColour(parent.colour, 50);
-
 		var child = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
-		child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
-		child.group.rotation.z = num(-0.5, 0.5) * 2 * Math.PI * attempts / bail * branchingAngle;
-		child.group.rotation.y = num(0, 2) * Math.PI;
-
+		// child.group.position.set(endPoint.x, endPoint.y, endPoint.z);
+		// child.group.rotation.z = num(-0.5, 0.5) * 2 * Math.PI * attempts / bail * branchingAngle;
+		// child.group.rotation.y = num(0, 2) * Math.PI;
 		parent.group.add(child.group);
 		parent.group.updateMatrixWorld();
-
+		return child;
 	}
 
 	var colour = colours.getRandomColour();
 
-	var baseSection = cylinder({radius: segmentRadius, height: segmentLength, colour: colour});
-	baseSection.group.rotation.set(num(0,2) * Math.PI, num(0,2) * Math.PI, num(0,2) * Math.PI);
-	holder.add(baseSection.group);
-
 	var endPoint = new THREE.Vector3(0, 0, 0);
 
-	drawSection(baseSection, endPoint);
+	var baseSection = {
+		colour: colour,
+		group: holder
+	}
+
+	var one = drawSection(baseSection, endPoint);
 
 	document.body.appendChild(renderer.domElement);
 
