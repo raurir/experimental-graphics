@@ -128,7 +128,7 @@ var rectangular_fill = function() {
     block = Math.round(20 * (0.2 + rand.random() * 0.8));
     stroke = block * (0.1 + rand.random()) * 0.4;
 
-    bmp.setSize(block * cols, block * rows); 
+    bmp.setSize(block * cols, block * rows);
 
     for (var x = 0; x < cols; x++) {
       populated[x] = [];
@@ -180,7 +180,7 @@ var rectangular_fill = function() {
       bmp.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
     }
 
-    progress("render:complete");
+    progress("render:complete", bmp.canvas);
 
   }
 

@@ -180,7 +180,7 @@ function experiments_infinite() {
 
 
   var header = dom.element("h1", {innerHTML: "Welcome to FunkyVector. Pick an experiment..."});
-  // buttons.appendChild(header);
+  buttons.appendChild(header);
 
   for(var e in experiments) {
     var button = dom.element("div", {

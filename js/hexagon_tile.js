@@ -290,7 +290,7 @@ function batch() {
   currentBatch++;
   if (currentBatch == batches) {
     //
-    progress("render:complete");
+    progress("render:complete", experiment.stage);
 
     // document.body.addEventListener("click", init);
 

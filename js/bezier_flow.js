@@ -237,7 +237,7 @@ var bezier_flow = function() {
     //   setTimeout(function() { render(j)}, 100);
     // }
 
-    progress("render:complete");
+    progress("render:complete", bmp.canvas);
 
   }
 

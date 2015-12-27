@@ -71,6 +71,7 @@ var experiments = (function() {
     ["polyhedra_three","THREE"],
     ["pine_three","THREE"],
     ["race_lines_three","THREE", "TweenMax"],
+    ["radial_sine"],
     ["rainbow_particles"],
     ["rectangular_fill"],
     ["recursive"],
