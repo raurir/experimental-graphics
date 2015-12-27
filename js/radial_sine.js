@@ -1,15 +1,27 @@
 var sw = window.innerWidth, sh = window.innerHeight;
 var bmp = dom.canvas(sw,sh);
 var ctx = bmp.ctx;
-var rays, colourInner, colourOuter, colourBG, oscillators, oscs;
+var layers, rays, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
 document.body.appendChild(bmp.canvas);
 
 function generate() {
   colours.getRandomPalette();
-  colourBG = colours.getRandomColour();
+  colourBG = "#000000"; // colours.getRandomColour();
   colourInner = colours.getNextColour();
   colourOuter = colours.getNextColour();
+
+  layers = ~~(1 + Math.random() * 4);
+  colourLayers = [];
+  lengthLayers = [0];
+  for (var l = 0; l < layers; l++) {
+    colourLayers.push(colours.getNextColour());
+    lengthLayers.push(Math.random()); // push in random lengths, sort afterwards.
+  }
+  lengthLayers.sort();
+  lengthLayers[layers] = 1; 
+  // lengthLayers = [0.1, 0.2, 0.5, 1];
+  colourLayers = ["rgba(255,0,0,0.3)", "rgba(0,255,0,0.3)", "rgba(255,0,255,0.3)", "rgba(255,255,0,0.3)"]
 
   rays = ~~(10 + Math.random() * 300);
   oscillators = ~~(1 + Math.random() * 13);
@@ -22,7 +34,7 @@ function generate() {
     });
   };
 
-  render();
+  render(0);
 }
 
 function oscillate(rotation, time) {
@@ -33,50 +45,60 @@ function oscillate(rotation, time) {
   return t / oscillators;
 }
 
+function renderLine(rotation, start, end, width, colour) {
+  ctx.save();
+
+  ctx.translate(sw / 2, sh / 2);
+  ctx.rotate(rotation);
+
+  ctx.beginPath();
+  ctx.fillStyle = colour;
+
+  ctx.moveTo(start, -width);
+  ctx.lineTo(end, -width);
+  ctx.arc(end, 0, width, -Math.PI / 2, Math.PI / 2, false); // draw cap
+  ctx.lineTo(end, width);
+  ctx.lineTo(start, width);
+  ctx.arc(start, 0, width, Math.PI / 2, -Math.PI / 2, false); // draw cap
+
+  ctx.fill();
+  ctx.closePath();
+
+  ctx.restore();
+}
+
+
+
 function render(time) {
   ctx.fillStyle = colourBG;
   ctx.fillRect(0, 0, sw, sh);
 
   var minDimension = (sw > sh ? sh : sw);
   var innerRadius = minDimension / 2 * 0.2;
-  var outerRadius = minDimension / 2 * 0.8;
-  var lineWidth = innerRadius * Math.tan(1 / rays / 2 * Math.PI * 2);
+  var outerRadius = minDimension / 2 * 1;
+  var maxRadius = (outerRadius - innerRadius);
+  var lineWidth = innerRadius * Math.tan(1 / rays / 2 * Math.PI * 2); // ensure inner lines don't meet.
 
-  function renderLine(rotation, s, e, w, colour) {
-    ctx.save();
+  // con.log("innerRadius, outerRadius", innerRadius, outerRadius, maxRadius, lengthLayers);
 
-    ctx.translate(sw / 2, sh / 2);
-    ctx.rotate(rotation);
-
-    ctx.beginPath();
-    ctx.fillStyle = colour;
-
-    // ctx.lineWidth = 3;
-    // ctx.strokeStyle = colour;
-
-    ctx.moveTo(s, -w);
-    ctx.lineTo(s + e, -w);
-    ctx.arc(s + e, 0, w, -Math.PI / 2, Math.PI / 2, false);
-    ctx.lineTo(s + e, w);
-    ctx.lineTo(s, w);
-    ctx.arc(s, 0, w, Math.PI / 2, -Math.PI / 2, false);
-
-    // ctx.stroke();
-    ctx.fill();
-    ctx.closePath();
-
-    ctx.restore();
-  }
+  // ctx.beginPath();
+  // ctx.fillStyle = "#666"
+  // ctx.drawCircle(sw / 2, sh / 2, outerRadius);
+  // ctx.fill();
+  // ctx.beginPath();
+  // ctx.fillStyle = "#999"
+  // ctx.drawCircle(sw / 2, sh / 2, innerRadius);
+  // ctx.fill();
+  // return;
 
   for (var i = 0; i < rays; i++) {
     var frac = i / rays;
     var rotation = frac * Math.PI * 2;
-    var xs = innerRadius;
-    var xe = oscillate(rotation, time) * outerRadius;
-    renderLine(rotation, xs, xe, lineWidth * 0.5, colourInner);
-    xs = xs + xe + lineWidth * 4;
-    xe = oscillate(rotation + 0.34, time) * outerRadius;
-    renderLine(rotation, xs, xe, lineWidth * 0.8, colourOuter);
+    for (var l = 0; l < layers; l++) {
+      xs = innerRadius + oscillate(rotation, time) * maxRadius * lengthLayers[l] + lineWidth * 2;
+      xe = innerRadius + oscillate(rotation, time) * maxRadius * lengthLayers[l + 1] - lineWidth * 2;
+      renderLine(rotation, xs, xe, lineWidth, colourLayers[l]);
+    }
   }
 
 }
