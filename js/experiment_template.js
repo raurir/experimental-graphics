@@ -1,7 +1,6 @@
-var con = console;
 var isNode = (typeof module !== 'undefined');
 
-var running_man = (function() {
+var experiment_template = function() {
 
 	var sw = 600, sh = 600;
 
@@ -19,15 +18,18 @@ var running_man = (function() {
 		inner: null,
 		resize: function() {},
 		init: function() {},
-		kill: function() {}
+		kill: function() {},
+		settings: {} // or null
 	}
 
-	if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
+	progress("render:complete", bmp.canvas);
 
 	return experiment;
 
-})();
+};
 
-// con.log(running_man);
-
-if (isNode) module.exports = running_man;
+if (isNode) {
+  module.exports = experiment_template();
+} else {
+  define("experiment_template", experiment_template);
+}

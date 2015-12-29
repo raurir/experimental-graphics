@@ -17,6 +17,7 @@ function experiments_infinite() {
 
   var experiments = {
     "bezier_flow": ["bezier_flow"],
+    "corona_sine": ["corona_sine"],
     "hexagon_tile": ["hexagon_tile"],
     "rectangular_fill": ["rectangular_fill"],
 
