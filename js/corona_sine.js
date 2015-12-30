@@ -2,19 +2,36 @@ var isNode = (typeof module !== 'undefined');
 
 var corona_sine = function() {
 
+  var settings = {
+    layers: {
+      label: "Layers",
+      min: 12,
+      max: 312,
+      cur: 0
+    },
+    rays: {
+      label: "Rays",
+      min: 12,
+      max: 312,
+      cur: 0
+    },
+  };
+
   var sw = window.innerWidth, sh = window.innerHeight;
   var bmp = dom.canvas(sw,sh);
   var ctx = bmp.ctx;
-  var lastGenerate, layers, rays, colourLayers, lengthLayers, colourBG, oscillators, oscs;
+  var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
   function generate() {
     lastGenerate = new Date().getTime();
     colours.getRandomPalette();
     colourBG = colours.getRandomColour();
 
-    layers = ~~(1 + Math.random() * 4);
+    var layers = settings.layers.cur = ~~(1 + Math.random() * 4);
+
+    settings.rays.cur = ~~(12 + Math.random() * 300);
     colourLayers = [];
-    lengthLayers = [-0.2];
+    lengthLayers = [0];//-0.2];
     for (var l = 0; l < layers; l++) {
       colourLayers.push(colours.getNextColour());
       lengthLayers.push(Math.random()); // push in random lengths, sort afterwards.
@@ -24,7 +41,6 @@ var corona_sine = function() {
 
     // colourLayers = ["red", "green", "blue", "yellow", "white"];
 
-    rays = ~~(10 + Math.random() * 300);
     oscillators = ~~(1 + Math.random() * 13);
     oscs = [];
     for (var o = 0; o < oscillators; o++) {
@@ -74,6 +90,10 @@ var corona_sine = function() {
 
 
   function render(time) {
+    if (!time) time = 0;
+    var rays = settings.rays.cur;
+    var layers = settings.layers.cur;
+
     // con.log("render", time);
     ctx.fillStyle = colourBG;
     ctx.fillRect(0, 0, sw, sh);
@@ -133,8 +153,10 @@ var corona_sine = function() {
     stage: bmp.canvas,
     inner: null,
     resize: resize,
+    render: render,
     init: generate,
-    kill: function() {}
+    kill: function() {},
+    settings: settings
   }
 
   progress("render:complete", bmp.canvas);

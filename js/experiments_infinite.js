@@ -137,17 +137,33 @@ function experiments_infinite() {
 
 
   function initSettings() {
-    /*
+    var i = 0;
     function makeSetting(s) {
+      i++;
       var setting = settings[s];
-      con.log("makeSetting", s, setting);
+      // con.log("makeSetting", s, setting);
+      var div = dom.element("div", {
+        style: {
+          position: "absolute",
+          top: i * 40 + "px",
+          left: "100px"
+        }
+      });
+      var label = dom.element("label", {
+        innerHTML: setting.label,
+        style: {
+        //   position: "absolute",
+        //   top: "40px",
+        //   left: "100px"
+        }
+      });
       var input = dom.element("input", {
         value: setting.cur,
         type: "number",
         style: {
-          position: "absolute",
-          top: "40px",
-          left: "100px"
+          // position: "absolute",
+          // top: "40px",
+          // left: "100px"
         }
       });
       input.addEventListener("change", function(e) {
@@ -155,8 +171,9 @@ function experiments_infinite() {
         currentExperiment.settings[s].cur = Number(this.value);
         currentExperiment.render();//s, this.value);
       })
-
-      holder.appendChild(input);
+      div.appendChild(label);
+      div.appendChild(input);
+      holder.appendChild(div);
     }
 
 
@@ -171,7 +188,7 @@ function experiments_infinite() {
         con.warn("experiment has not exposed render function");
       }
     }
-    */
+    
   }
 
 

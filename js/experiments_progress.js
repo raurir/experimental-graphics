@@ -32,9 +32,7 @@ function experiments_progress() {
     bar.style.width = Math.round(e.detail * 100) + "%";
   }, false);
   addEventListener('render:complete', function (e) {
-
-    con.log("e", e);
-
+    // con.log("e", e);
     if (loader) {
       bar.style.width = "100%";
       loader.classList.add("complete");
