@@ -100,12 +100,21 @@ var corona_sine = function() {
     ctx.restore();
   }
 
+  function renderRay(frac, time, innerRadius, maxRadius, lineWidth) {
+    var layers = settings.layers.cur;
+    var rotation = frac * Math.PI * 2;
+    var oscLength = oscillate(rotation, time);
+    for (var l = 0; l < layers; l++) {
+      var start = innerRadius + oscLength * maxRadius * lengthLayers[l] + lineWidth * 2;
+      var end = innerRadius + oscLength * maxRadius * lengthLayers[l + 1] - lineWidth * 2;
+      renderLine(rotation, start, end, lineWidth, colourLayers[l]);
+    }
+  }
 
 
   function render(time) {
     if (!time) time = 0;
     var rays = settings.rays.cur;
-    var layers = settings.layers.cur;
 
     // con.log("render", time);
     ctx.fillStyle = colourBG;
@@ -127,18 +136,25 @@ var corona_sine = function() {
     // ctx.fill();
     // return;
 
-    for (var i = 0; i < rays; i++) {
-      var frac = i / rays;
-      var rotation = frac * Math.PI * 2;
-      var oscLength = oscillate(rotation, time);
-      for (var l = 0; l < layers; l++) {
-        var start = innerRadius + oscLength * maxRadius * lengthLayers[l] + lineWidth * 2;
-        var end = innerRadius + oscLength * maxRadius * lengthLayers[l + 1] - lineWidth * 2;
-        renderLine(rotation, start, end, lineWidth, colourLayers[l]);
+    var batchSize = 20;
+    function renderBatch(batch) {
+      // con.log("renderBatch", batch);
+      var start = batch * batchSize, end = start + batchSize;
+      if (end > rays) end = rays;
+      for (var i = start; i < end; i++) {
+        var frac = i / rays;
+        renderRay(frac, time, innerRadius, maxRadius, lineWidth);
+      }
+      if (end < rays) {
+        progress("render:progress", end / rays);
+        setTimeout(function () {
+          renderBatch(batch + 1);
+        }, 100);
+      } else {
+        progress("render:complete", bmp.canvas);
       }
     }
-
-    progress("render:complete", bmp.canvas);
+    renderBatch(0);
 
   }
 
@@ -149,7 +165,7 @@ var corona_sine = function() {
   function resize() {
     // bmp.canvas.width = sw = window.innerWidth;
     // bmp.canvas.height = sh = window.innerHeight;
-    render(0);
+    // render(0);
   }
 
   // generate();
