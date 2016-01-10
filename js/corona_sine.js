@@ -1,4 +1,11 @@
 var isNode = (typeof module !== 'undefined');
+var con = console;
+
+if (isNode) {
+  var rand = require('./rand.js');
+  var dom = require('./dom.js');
+  var colours = require('./colours.js');
+}
 
 var corona_sine = function() {
 
@@ -17,7 +24,13 @@ var corona_sine = function() {
     },
   };
 
-  var sw = window.innerWidth, sh = window.innerHeight;
+  var size = 10000, sw = size, sh = size;
+
+  if (typeof window != "undefined") {
+    sw = window.innerWidth;
+    sh = window.innerHeight;
+  }
+
   var bmp = dom.canvas(sw,sh);
   var ctx = bmp.ctx;
   var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
@@ -27,27 +40,27 @@ var corona_sine = function() {
     colours.getRandomPalette();
     colourBG = colours.getRandomColour();
 
-    var layers = settings.layers.cur = ~~(1 + Math.random() * 4);
+    var layers = settings.layers.cur = ~~(1 + rand.random() * 4);
 
-    settings.rays.cur = ~~(12 + Math.random() * 300);
+    settings.rays.cur = ~~(12 + rand.random() * 300);
     colourLayers = [];
     lengthLayers = [0];//-0.2];
     for (var l = 0; l < layers; l++) {
       colourLayers.push(colours.getNextColour());
-      lengthLayers.push(Math.random()); // push in random lengths, sort afterwards.
+      lengthLayers.push(rand.random()); // push in random lengths, sort afterwards.
     }
     lengthLayers.sort();
     lengthLayers[layers] = 1;
 
     // colourLayers = ["red", "green", "blue", "yellow", "white"];
 
-    oscillators = ~~(1 + Math.random() * 13);
+    oscillators = ~~(1 + rand.random() * 13);
     oscs = [];
     for (var o = 0; o < oscillators; o++) {
       oscs.push({
-        offset: Math.random() * Math.PI * 2,
-        phase: ~~(Math.random() * 6),
-        speed: Math.random() * 0.003
+        offset: rand.random() * Math.PI * 2,
+        phase: ~~(rand.random() * 6),
+        speed: rand.random() * 0.003
       });
     };
     render(0);
@@ -104,8 +117,6 @@ var corona_sine = function() {
     var maxRadius = (outerRadius - innerRadius);
     var lineWidth = innerRadius * Math.tan(1 / rays / 2 * Math.PI * 2); // ensure inner lines don't meet.
 
-    // con.log("innerRadius, outerRadius", innerRadius, outerRadius, maxRadius, lengthLayers, colourLayers);
-
     // ctx.beginPath();
     // ctx.fillStyle = "#666"
     // ctx.drawCircle(sw / 2, sh / 2, outerRadius);
@@ -127,14 +138,17 @@ var corona_sine = function() {
       }
     }
 
+    progress("render:complete", bmp.canvas);
+
   }
 
-  bmp.canvas.addEventListener("click", generate);
+  // bmp.canvas.addEventListener("click", generate);
 
   // window.addEventListener("resize", );
+
   function resize() {
-    bmp.canvas.width = sw = window.innerWidth;
-    bmp.canvas.height = sh = window.innerHeight;
+    // bmp.canvas.width = sw = window.innerWidth;
+    // bmp.canvas.height = sh = window.innerHeight;
     render(0);
   }
 
@@ -158,8 +172,6 @@ var corona_sine = function() {
     kill: function() {},
     settings: settings
   }
-
-  progress("render:complete", bmp.canvas);
 
   return experiment;
 

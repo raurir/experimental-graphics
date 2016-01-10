@@ -3,7 +3,7 @@ var isNode = (typeof module !== 'undefined');
 
 var unknown = function() {
 
-  var sw = sh = size = 800;
+  var size = 800, sw = size, sh = size;
   var bmp = dom.canvas(size,size);
   var ctx = bmp.ctx;
 
