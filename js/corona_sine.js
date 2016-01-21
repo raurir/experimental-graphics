@@ -24,7 +24,7 @@ var corona_sine = function() {
     },
   };
 
-  var size = 10000, sw = size, sh = size;
+  var size = 5000, sw = size, sh = size;
 
   if (typeof window != "undefined") {
     sw = window.innerWidth;
