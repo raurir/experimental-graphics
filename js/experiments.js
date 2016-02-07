@@ -79,6 +79,7 @@ var experiments = (function() {
     ["squaretracer"],
     ["tea"],
     ["tunnel_tour_three","THREE", "TweenMax"],
+    ["typography"],
     ["voronoi_stripes", "voronoi"],
     ["zoned_particles"],
   ];
