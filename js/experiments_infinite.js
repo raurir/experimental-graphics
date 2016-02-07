@@ -137,6 +137,8 @@ function experiments_infinite() {
 
 
   function initSettings() {
+    con.warn("experiments_infinite initSettings");
+    return;
     var i = 0;
     function makeSetting(s) {
       i++;
