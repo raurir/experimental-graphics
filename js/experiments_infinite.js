@@ -46,7 +46,7 @@ function experiments_infinite() {
     if (params) {
 
       $(buttons).slide(false);
-      $('#buy').show();
+      $('#buy, #cycle').slide(true);//.show();
 
       params = params.split(",");
       var newLoading = params[0];
@@ -83,7 +83,7 @@ function experiments_infinite() {
       }
     } else {
       $(buttons).slide(true);
-      $('#buy').hide();
+      $('#buy, #cycle').slide(false); //hide();
     }
 
   }
@@ -188,7 +188,7 @@ function experiments_infinite() {
         con.warn("experiment has not exposed render function");
       }
     }
-    
+
   }
 
 
