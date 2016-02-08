@@ -25,8 +25,11 @@ var rand = (function() {
 
     getNumber: function(min, max) {
       return min + this.random() * (max - min);
-    }
+    },
 
+    getInteger: function(min,max) {
+      return Math.round(this.getNumber(min, max));
+    }
 
   };
 }());

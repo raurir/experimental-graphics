@@ -9,6 +9,9 @@ if (isNode) {
 
 var typography = function() {
 
+  rand.setSeed(309484);
+  rand.setSeed(Math.random());
+
   var block = 128;
   var sw = block * 6, sh = block * 6;
   var bmp = dom.canvas(sw,sh);
@@ -18,14 +21,19 @@ var typography = function() {
 
   ctx.clearRect(0, 0, sw, sh);
 
-  var string = "Typography";
+  var numerals = [], numeralsLength = rand.getInteger(1, 5), n = 0;
+  while (n++ < numeralsLength) {
+    numerals.push(rand.getInteger(0, 9));
+  }
+  numerals = numerals.join("");
   function getString() {
-    var str = string;
-    var ss = Math.round(Math.random() * str.length);
-    var se = ss + Math.round(Math.random() * (str.length - ss));
+    var strings = ["Typography", numerals];
+    var str = strings[Math.floor(rand.random() * strings.length)];
+    var ss = Math.round(rand.random() * str.length);
+    var se = ss + Math.round(rand.random() * (str.length - ss));
     str = str.substr(ss, se);
     // con.log(ss, se);
-    var textCase = Math.floor(Math.random() * 3);
+    var textCase = Math.floor(rand.random() * 3);
     switch (textCase) {
       case 0 : str = str.toLowerCase(); break;
       case 1 : str = str.toUpperCase(); break;
@@ -42,56 +50,20 @@ var typography = function() {
   //   test ++;
   // }
   function drawBlock(x, y) {
-    var w = Math.round(Math.random() * 3);
-    var h = Math.round(Math.random() * 3);
+    var w = Math.round(rand.random() * 3);
+    var h = Math.round(rand.random() * 3);
     ctx.save();
     ctx.translate(x * block, y * block);
     ctx.fillStyle = colours.getRandomColour();
     ctx.fillRect(0, 0, block * w, block * h);
 
-    if (Math.random() > 0.8) {
-      drawInnerBlock();
-    }
-
-    if (Math.random() > 0.8) {
-      drawSubdivion();
-    }
-
-    if (Math.random() > 0.8) {
-      drawPattern();
-    }
-
-    if (Math.random() > 0.4) {
-      drawText();
-    }
+    if (rand.random() > 0.8) drawInnerBlock();
+    if (rand.random() > 0.9) drawSubdivion();
+    if (rand.random() > 0.9) drawPattern();
+    if (rand.random() > 0.8) drawRuler();
+    if (rand.random() > 0.4) drawText();
 
     ctx.restore();
-  }
-
-  function drawSubdivion() {
-    var divs = Math.pow(2, Math.ceil(Math.random() * 3));
-    var size = block / divs;
-    con.log("======", divs);
-    for (var i = 0; i < divs * divs; i++) {
-      var x = (i % divs);
-      var y = Math.floor(i / divs);
-      con.log(x,y, size);
-      ctx.fillStyle = colours.getRandomColour();
-      ctx.fillRect(x * size, y * size, size, size);
-    };
-  }
-
-  function drawText() {
-    var angle = Math.floor(Math.random() * 4) / 4;
-    var xo = Math.random() * block;
-    var yo = Math.random() * block;
-    var fontSize = Math.round(Math.random() * 200) / 4;
-    var font = "Helvetica";
-    ctx.rotate(angle * Math.PI * 2);
-    ctx.translate(xo, yo);
-    ctx.font = fontSize + 'px ' + font;
-    ctx.fillStyle = colours.getRandomColour();
-    ctx.fillText(getString(), 0, 0);
   }
 
   function drawInnerBlock() {
@@ -99,25 +71,68 @@ var typography = function() {
     ctx.fillRect(0 + 10, 0 + 10, block - 20, block - 20);
   }
 
+  function drawSubdivion() {
+    var divs = Math.pow(2, Math.ceil(rand.random() * 3));
+    var size = block / divs;
+    for (var i = 0; i < divs * divs; i++) {
+      var x = (i % divs);
+      var y = Math.floor(i / divs);
+      ctx.fillStyle = colours.getRandomColour();
+      ctx.fillRect(x * size, y * size, size, size);
+    };
+  }
+
+  function drawRuler() {
+    ctx.save();
+    var angle = Math.floor(rand.random() * 4) / 4;
+    ctx.rotate(angle * Math.PI * 2);
+    var majors = Math.pow(2, rand.getInteger(1, 4));
+    var minors = rand.getInteger(1, 4);
+    var majorSize = rand.getInteger(5, 10);
+    var minorSize = majorSize * rand.getNumber(0.2, 0.8);
+    ctx.fillStyle = colours.getRandomColour();
+    for (var m = 0; m < majors; m++) {
+      var x = m / majors * block;
+      var y = 0;
+      ctx.fillRect(x, y, 1, majorSize);
+      for (var n = 0; n < minors; n++) {
+        var xn = x + n / minors * block / majors;
+        var yn = 0;
+        ctx.fillRect(xn, yn, 1, minorSize);
+      }
+    }
+    ctx.restore();
+  }
+
   function drawPattern() {
-    var rotation = Math.round(Math.random() * 4) / 4 * Math.PI;
-    var rowSize = 2 + Math.floor(Math.random() * 8);
+    var rotation = Math.round(rand.random() * 4) / 4 * Math.PI;
+    var rowSize = 2 + Math.floor(rand.random() * 8);
     var patternColoured = dom.canvas(block * rowSize / 2, block * rowSize / 2);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, block, block);
-    // ctx.translate(block / 2, block / 2)
     ctx.rotate(rotation);
     patternColoured.ctx.fillStyle = colours.getRandomColour();
     for (var py = 0; py < block / rowSize * 4; py++) {
       patternColoured.ctx.fillRect(0, py * rowSize * 2, block * rowSize, rowSize);
-      // patternColoured.canvas.style.border = "10px solid red";
-      // document.body.appendChild(patternColoured.canvas);
     }
-
     ctx.fillStyle = ctx.createPattern(patternColoured.canvas, "repeat");
     ctx.fill();
     ctx.restore();
+  }
+
+  function drawText() {
+    var angle = Math.floor(rand.random() * 4) / 4;
+    var xo = rand.random() * block;
+    var yo = rand.random() * block;
+    var fontSize = Math.round(Math.pow(2, 1 + rand.random() * 8));
+    con.log(fontSize);
+    var font = "Helvetica";
+    ctx.rotate(angle * Math.PI * 2);
+    ctx.translate(xo, yo);
+    ctx.font = fontSize + 'px ' + font;
+    ctx.fillStyle = colours.getRandomColour();
+    ctx.fillText(getString(), 0, 0);
   }
 
   function init() {
