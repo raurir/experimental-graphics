@@ -9,8 +9,9 @@ if (isNode) {
 
 var typography = function() {
 
-  rand.setSeed(309484);
-  rand.setSeed(Math.random());
+  // rand.setSeed(309484);
+  // rand.setSeed(Math.random());
+  rand.setSeed(3);
 
   var block = 128;
   var sw = block * 6, sh = block * 6;
@@ -145,6 +146,7 @@ var typography = function() {
         drawBlock(x, y);
       }
     }
+    progress("render:complete", bmp.canvas);
   }
 
   var experiment = {
