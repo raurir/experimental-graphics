@@ -1,30 +1,4 @@
-// // var seed = 411930879;
-// var seed = ~~(Math.random() * 1e9)
-// // seed = 662718928;
-// // con.log(seed);
-// var same = seed;
-
-// var originalRand = Math.random
-
-// Math.random = function() {
-//   var x = (Math.sin(seed) + 1) * 10000;
-//   seed += 1;
-//   return x % 1;
-// }
-// getRandom = Math.random;
-
-
-
-function progress() {con.log("experiments progress", arguments);}
-
-
-
-
-
-
-
-// rand.setSeed(411930879); // this doesn"t work for bezier flow
-rand.setSeed();
+function progress() {/*con.log("experiments progress", arguments);*/}
 
 
 var experiments = (function() {
@@ -42,8 +16,6 @@ var experiments = (function() {
       "box": "games/box"
     },
   });
-
-
 
   var experiments = [
     ["molecular_three", "THREE"],
@@ -95,76 +67,13 @@ var experiments = (function() {
   }
 
   function loadExperiment(index) {
-    var exp = experiments[index];
-
-    var src = [];
-
-    /*
-    for (var i = exp.length - 1; i > -1;i--) {
-      var file = exp[i]
-      if (/css/.test(file)) {
-        createStyleSheet(file);
-      } else {
-        switch(file) {
-          case "THREE" :
-            src.push("lib/three/three.min");
-            break;
-          case "Matter" :
-            src.push("lib/matter/matter-0.8.0");
-            break;
-           case "P2" :
-            src.push("lib/p2/p2");//, "lib/p2/p2.renderer");
-            break;
-          default:
-
-            src.push("js/" + file);
-        }
-        // createScript(src);
-      }
-    }
-    */
-
-    src = exp;
-
-    // con.log("loadExperiment", exp);
-    // con.log("loadExperiment src to load:",  src.length);
-
-    // require(["js/creature_creator/creature"], function(creature) {
-    //   con.log("creature!!!!!!!!", creature);
-    // })
-
-
-
-
-
-
-
-
-    // require([
-    //   "testmod",
-    //   "zetestmod",
-    //   "creature"
-    // ], function(testmod, zetestmod, creature) {
-    //     console.log("experiments:", testmod, zetestmod, creature);
-    // });
-
-
-
-
-
-
-
-
-
-
+    var src = experiments[index];
     require(src, function(experiment) {
-      // con.log("require loaded");
       if (experiment) {
-        con.log("require loaded...", experiment);
-        // ExperimentFactory(experiment);
+        // con.log("require loaded...", experiment);
         experimentLoaded(experiment);
       } else {
-        con.log("require loaded... but experiment is null", experiment, arguments);
+        con.warn("require loaded... but experiment is null", experiment, arguments);
       }
     });
 
@@ -185,6 +94,17 @@ var experiments = (function() {
 
   if (window.location.search) {
     var key = window.location.search.split("?")[1], index = 0, found = false;
+    var seed = key.split(",");
+    if (seed[1]) {
+      key = seed[0];
+      seed = seed[1];
+      // rand.setSeed(seed);
+      blah = seed;
+    } else {
+      // rand.setSeed();
+      blah = seed;
+    }
+
     while(index < experiments.length && found == false) {
       if ( experiments[index][0] == key) {
         found = true;
@@ -200,11 +120,10 @@ var experiments = (function() {
   var currentExperiment;
 
   function resize() {
-    con.log("resize!");
+    // con.log("resize!");
     var sw = window.innerWidth, sh = window.innerHeight;
 
     currentExperiment.resize(sw,sh);
-
 
     // currentExperiment.stage.setSize(sw,sh);
 
@@ -219,7 +138,6 @@ var experiments = (function() {
 
     // currentExperiment.inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
 
-
   }
 
   function initWindowListener() {
@@ -231,7 +149,7 @@ var experiments = (function() {
     if (currentExperiment.stage) {
       holder.appendChild(currentExperiment.stage);
     } else {
-      con.log("experimentLoaded, but no stage:", currentExperiment.stage);
+      con.warn("experimentLoaded, but no stage:", currentExperiment.stage);
     }
     // initRenderProgress(); // experiments_progress
     initWindowListener();
@@ -240,14 +158,13 @@ var experiments = (function() {
   }
 
   addEventListener("load:complete", function(e) {
-    con.log("Loaded", e);
+    // con.log("Loaded", e);
     experimentLoaded(e.detail);
   });
 
 
-
-  console.log("Experiments init");
   // document.body.appendChild(colours.showPalette());
+ 
   return {
    load: loadExperiment,
    experiments: experiments

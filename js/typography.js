@@ -12,13 +12,15 @@ var typography = function() {
   // rand.setSeed(309484);
   // rand.setSeed(Math.random());
   rand.setSeed(3);
+  var size = blah * 100;
 
-  var block = 128;
-  var sw = block * 6, sh = block * 6;
+  var sw = size, sh = size;
+  var block = Math.ceil(1 / 8 * size);
+  con.log(block);
   var bmp = dom.canvas(sw,sh);
   var ctx = bmp.ctx;
-  var rows = Math.floor(sh / block);
-  var cols = Math.floor(sw / block);
+  var rows = 8;//Math.floor(sh / block);
+  var cols = 8;//Math.floor(sw / block);
 
   ctx.clearRect(0, 0, sw, sh);
 
@@ -51,25 +53,27 @@ var typography = function() {
   //   test ++;
   // }
   function drawBlock(x, y) {
-    var w = Math.round(rand.random() * 3);
-    var h = Math.round(rand.random() * 3);
+    var w = 1;//Math.round(rand.random() * 3);
+    var h = 1;//Math.round(rand.random() * 3);
     ctx.save();
     ctx.translate(x * block, y * block);
     ctx.fillStyle = colours.getRandomColour();
     ctx.fillRect(0, 0, block * w, block * h);
 
-    if (rand.random() > 0.8) drawInnerBlock();
-    if (rand.random() > 0.9) drawSubdivion();
-    if (rand.random() > 0.9) drawPattern();
-    if (rand.random() > 0.8) drawRuler();
-    if (rand.random() > 0.4) drawText();
+    // if (rand.random() > 0.8) drawInnerBlock();
+    // if (rand.random() > 0.9) drawSubdivion();
+    // if (rand.random() > 0.9) 
+      drawPattern();
+    // if (rand.random() > 0.8) drawRuler();
+    // if (rand.random() > 0.4) drawText();
 
     ctx.restore();
   }
 
   function drawInnerBlock() {
+    var border = 0.1 * block;
     ctx.fillStyle = colours.getRandomColour();
-    ctx.fillRect(0 + 10, 0 + 10, block - 20, block - 20);
+    ctx.fillRect(border, border, block - border * 2, block - border * 2);
   }
 
   function drawSubdivion() {
@@ -107,16 +111,20 @@ var typography = function() {
 
   function drawPattern() {
     var rotation = Math.round(rand.random() * 4) / 4 * Math.PI;
-    var rowSize = 2 + Math.floor(rand.random() * 8);
-    var patternColoured = dom.canvas(block * rowSize / 2, block * rowSize / 2);
+    var rowSize = Math.round((2 + Math.floor(rand.random() * 8)) * size / 1000);
+    con.log(rowSize);
+    var patternColoured = dom.canvas(block * rowSize, block * rowSize);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, block, block);
     ctx.rotate(rotation);
-    patternColoured.ctx.fillStyle = colours.getRandomColour();
+    patternColoured.ctx.fillStyle = colours.getNextColour();// getRandomColour();
     for (var py = 0; py < block / rowSize * 4; py++) {
       patternColoured.ctx.fillRect(0, py * rowSize * 2, block * rowSize, rowSize);
+
     }
+    document.body.appendChild(patternColoured.canvas);
+    patternColoured.canvas.style.border = "2px solid green";
     ctx.fillStyle = ctx.createPattern(patternColoured.canvas, "repeat");
     ctx.fill();
     ctx.restore();
