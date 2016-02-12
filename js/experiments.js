@@ -99,10 +99,10 @@ var experiments = (function() {
       key = seed[0];
       seed = seed[1];
       // rand.setSeed(seed);
-      blah = seed;
+      // blah = seed;
     } else {
       // rand.setSeed();
-      blah = seed;
+      // blah = seed;
     }
 
     while(index < experiments.length && found == false) {
@@ -164,7 +164,7 @@ var experiments = (function() {
 
 
   // document.body.appendChild(colours.showPalette());
- 
+
   return {
    load: loadExperiment,
    experiments: experiments

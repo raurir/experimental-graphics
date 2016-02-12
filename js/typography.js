@@ -10,19 +10,13 @@ if (isNode) {
 var typography = function() {
 
   // rand.setSeed(309484);
-  // rand.setSeed(Math.random());
-  rand.setSeed(3);
-  var size = blah * 100;
-
-  var sw = size, sh = size;
-  var block = Math.ceil(1 / 4 * size);
-  con.log(block);
-  var bmp = dom.canvas(sw,sh);
+  rand.setSeed(Math.random());
+  // rand.setSeed(3);
+  var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
-  var rows = 4;//Math.floor(sh / block);
-  var cols = 4;//Math.floor(sw / block);
-
-  ctx.clearRect(0, 0, sw, sh);
+  var size, sw, sh, block;
+  var rows = 4;
+  var cols = 4;
 
   var numerals = [], numeralsLength = rand.getInteger(1, 5), n = 0;
   while (n++ < numeralsLength) {
@@ -42,7 +36,7 @@ var typography = function() {
       case 1 : str = str.toUpperCase(); break;
       default : // do nothing to case
     }
-    return str
+    return str;
   }
 
   // var test = 0;
@@ -144,9 +138,19 @@ var typography = function() {
     ctx.fillText(getString(), 0, 0);
   }
 
-  function init() {
+  function init(_size) {
+    size = _size;
+    sw = size;
+    sh = size;
+    block = Math.ceil(1 / 4 * size);
+    bmp.setSize(sw, sh);
+    con.log("size", sw, sh)
+    ctx.clearRect(0, 0, sw, sh);
+
     con.log('init', cols, rows);
+
     var palette = colours.getRandomPalette();
+
     // drawBlock(0, 0);
     // return;
     for (var x = 0; x < cols; x++) {

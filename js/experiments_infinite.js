@@ -130,8 +130,8 @@ function experiments_infinite() {
       design: currentLoading,
       seed: currentRandom
     }
-
-    currentExperiment.init();
+    con.log("calling init");
+    currentExperiment.init(1000);
     resize();
   }
 
