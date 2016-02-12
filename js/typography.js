@@ -15,12 +15,12 @@ var typography = function() {
   var size = blah * 100;
 
   var sw = size, sh = size;
-  var block = Math.ceil(1 / 8 * size);
+  var block = Math.ceil(1 / 4 * size);
   con.log(block);
   var bmp = dom.canvas(sw,sh);
   var ctx = bmp.ctx;
-  var rows = 8;//Math.floor(sh / block);
-  var cols = 8;//Math.floor(sw / block);
+  var rows = 4;//Math.floor(sh / block);
+  var cols = 4;//Math.floor(sw / block);
 
   ctx.clearRect(0, 0, sw, sh);
 
@@ -53,19 +53,18 @@ var typography = function() {
   //   test ++;
   // }
   function drawBlock(x, y) {
-    var w = 1;//Math.round(rand.random() * 3);
-    var h = 1;//Math.round(rand.random() * 3);
+    var w = rand.getInteger(1, 3);
+    var h = rand.getInteger(1, 3);
     ctx.save();
     ctx.translate(x * block, y * block);
     ctx.fillStyle = colours.getRandomColour();
     ctx.fillRect(0, 0, block * w, block * h);
 
-    // if (rand.random() > 0.8) drawInnerBlock();
-    // if (rand.random() > 0.9) drawSubdivion();
-    // if (rand.random() > 0.9) 
-      drawPattern();
-    // if (rand.random() > 0.8) drawRuler();
-    // if (rand.random() > 0.4) drawText();
+    if (rand.random() > 0.8) drawInnerBlock();
+    if (rand.random() > 0.9) drawSubdivion();
+    if (rand.random() > 0.9) drawPattern();
+    if (rand.random() > 0.8) drawRuler();
+    if (rand.random() > 0.4) drawText();
 
     ctx.restore();
   }
@@ -93,17 +92,18 @@ var typography = function() {
     ctx.rotate(angle * Math.PI * 2);
     var majors = Math.pow(2, rand.getInteger(1, 4));
     var minors = rand.getInteger(1, 4);
-    var majorSize = rand.getInteger(5, 10);
+    var majorSize = rand.getInteger(5, 10) * size / 400;
     var minorSize = majorSize * rand.getNumber(0.2, 0.8);
     ctx.fillStyle = colours.getRandomColour();
+    var width = 1 * size / 300;
     for (var m = 0; m < majors; m++) {
       var x = m / majors * block;
       var y = 0;
-      ctx.fillRect(x, y, 1, majorSize);
+      ctx.fillRect(x, y, width, majorSize);
       for (var n = 0; n < minors; n++) {
         var xn = x + n / minors * block / majors;
         var yn = 0;
-        ctx.fillRect(xn, yn, 1, minorSize);
+        ctx.fillRect(xn, yn, width, minorSize);
       }
     }
     ctx.restore();
@@ -112,8 +112,7 @@ var typography = function() {
   function drawPattern() {
     var rotation = Math.round(rand.random() * 4) / 4 * Math.PI;
     var rowSize = Math.round((2 + Math.floor(rand.random() * 8)) * size / 1000);
-    con.log(rowSize);
-    var patternColoured = dom.canvas(block * rowSize, block * rowSize);
+    var patternColoured = dom.canvas(rowSize, rowSize * 2);
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, block, block);
@@ -123,8 +122,9 @@ var typography = function() {
       patternColoured.ctx.fillRect(0, py * rowSize * 2, block * rowSize, rowSize);
 
     }
-    document.body.appendChild(patternColoured.canvas);
-    patternColoured.canvas.style.border = "2px solid green";
+    // document.body.appendChild(patternColoured.canvas);
+    // patternColoured.canvas.style.border = "2px solid green";
+    // patternColoured.canvas.style.width = "100px";
     ctx.fillStyle = ctx.createPattern(patternColoured.canvas, "repeat");
     ctx.fill();
     ctx.restore();
@@ -134,7 +134,7 @@ var typography = function() {
     var angle = Math.floor(rand.random() * 4) / 4;
     var xo = rand.random() * block;
     var yo = rand.random() * block;
-    var fontSize = Math.round(Math.pow(2, 1 + rand.random() * 8));
+    var fontSize = Math.round(Math.pow(2, 2 + rand.random() * 6) * size / 400);
     con.log(fontSize);
     var font = "Helvetica";
     ctx.rotate(angle * Math.PI * 2);
