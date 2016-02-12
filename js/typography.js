@@ -144,22 +144,36 @@ var typography = function() {
     sh = size;
     block = Math.ceil(1 / 4 * size);
     bmp.setSize(sw, sh);
-    con.log("size", sw, sh)
+    // con.log("size", sw, sh)
     ctx.clearRect(0, 0, sw, sh);
-
-    con.log('init', cols, rows);
-
+    // con.log('init', cols, rows);
     var palette = colours.getRandomPalette();
-
     // drawBlock(0, 0);
     // return;
-    for (var x = 0; x < cols; x++) {
-      for (var y = 0; y < rows; y++) {
-        drawBlock(x, y);
-      }
-    }
-    progress("render:complete", bmp.canvas);
+    renderBatch(0);
   }
+
+  function renderBatch(batch) {
+    // for (var x = 0; x < cols; x++) {
+    //   for (var y = 0; y < rows; y++) {
+    //     drawBlock(x, y);
+    //   }
+    // }
+    var total = rows * cols;
+    var x = batch % cols;
+    var y = Math.floor(batch / cols);
+    drawBlock(x, y);
+    progress("render:progress", batch / total);
+    if (batch < total) {
+      setTimeout(function () {
+        renderBatch(batch + 1);
+      }, 100);
+    } else {
+      progress("render:complete", bmp.canvas);
+    }
+  }
+
+
 
   var experiment = {
     stage: bmp.canvas,

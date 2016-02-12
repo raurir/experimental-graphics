@@ -20,6 +20,7 @@ function experiments_infinite() {
     "corona_sine": ["corona_sine"],
     "hexagon_tile": ["hexagon_tile"],
     "rectangular_fill": ["rectangular_fill"],
+    "typography": ["typography"],
 
     // "Mining_Branches": ["mining_branches"],
     // "Oscillate_Curtain": ["oscillate_curtain"],
@@ -131,7 +132,7 @@ function experiments_infinite() {
       seed: currentRandom
     }
     con.log("calling init");
-    currentExperiment.init(1000);
+    currentExperiment.init(600);
     resize();
   }
 

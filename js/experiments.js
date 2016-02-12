@@ -153,7 +153,7 @@ var experiments = (function() {
     }
     // initRenderProgress(); // experiments_progress
     initWindowListener();
-    currentExperiment.init();
+    currentExperiment.init(800);
     resize();
   }
 
