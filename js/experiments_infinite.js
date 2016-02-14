@@ -260,7 +260,7 @@ function experiments_infinite() {
             if (blockIndex + 1 < blocks * blocks) {
               setTimeout(function() {
                 drawBlock(blockIndex + 1);
-              }, 5)
+              }, 3)
             }
           }
           drawBlock(0);
@@ -268,7 +268,7 @@ function experiments_infinite() {
 
           setTimeout(function() {
             drawImage(++index % images.length);
-          }, 10 * blocks * blocks + 2000);
+          }, 3 * blocks * blocks + 2000);
         }
 
         // con.log("drawImage", index);
