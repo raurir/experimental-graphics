@@ -47,13 +47,14 @@ var typography = function() {
   //   test ++;
   // }
   function drawBlock(x, y) {
-    var w = rand.getInteger(1, 3);
-    var h = rand.getInteger(1, 3);
     ctx.save();
     ctx.translate(x * block, y * block);
-    ctx.fillStyle = colours.getRandomColour();
-    ctx.fillRect(0, 0, block * w, block * h);
-
+    if (rand.random() > 0.6) {
+      var w = rand.getInteger(1, 3);
+      var h = rand.getInteger(1, 3);
+      ctx.fillStyle = colours.getRandomColour();
+      ctx.fillRect(0, 0, block * w, block * h);
+    }
     if (rand.random() > 0.8) drawInnerBlock();
     if (rand.random() > 0.9) drawSubdivion();
     if (rand.random() > 0.9) drawPattern();
