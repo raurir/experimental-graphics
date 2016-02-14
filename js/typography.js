@@ -147,7 +147,9 @@ var typography = function() {
     // con.log("size", sw, sh)
     ctx.clearRect(0, 0, sw, sh);
     // con.log('init', cols, rows);
-    var palette = colours.getRandomPalette();
+    colours.getRandomPalette();
+    colours.setPaletteRange(3);
+
     // drawBlock(0, 0);
     // return;
     renderBatch(0);

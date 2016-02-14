@@ -23,6 +23,14 @@ var colours = (function() {
 		paletteIndex = _paletteIndex;
 		currentPalette = palettes[paletteIndex];
 	}
+
+	function setPaletteRange(range) {
+		if (range > currentPalette.length) return con.warn("setPaletteRange - current palette has less than", range, "colours!");
+		var palette = currentPalette.slice().sort(Math.random());
+		currentPalette = palette.splice(0, range);
+		return currentPalette;
+	}
+
 	function getRandomColour() {
 		if (currentPalette == null) getRandomPalette(true);
 		colourIndex = ~~(random() * currentPalette.length);
@@ -303,6 +311,7 @@ var colours = (function() {
 		setPalette: function(p) { currentPalette = p; },
 		setRandomPalette: setRandomPalette,
 		setColourIndex: setColourIndex,
+		setPaletteRange: setPaletteRange,
 		showPalette: showPalette,
 		showColours: showColours,
 
