@@ -170,7 +170,7 @@ var typography = function() {
     if (batch < total) {
       setTimeout(function () {
         renderBatch(batch + 1);
-      }, 100);
+      }, 15);
     } else {
       progress("render:complete", bmp.canvas);
     }

@@ -1,5 +1,18 @@
 function experiments_infinite() {
 
+
+  function shuffleArray(array) {
+      for (var i = array.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+      }
+      return array;
+  }
+
+
+
   require.config({
     baseUrl: "./experiments/",
     urlArgs: "bust="+new Date().getTime()
@@ -209,11 +222,79 @@ function experiments_infinite() {
       key: e
       // innerHTML: e
     });
-    var image = dom.element("div", {
-      className: "design-image",
-      key: e,
-      style: {backgroundImage: "url(images/" + e + ".png)"},
-    });
+
+    var image;
+    if (e === "typography") {
+      var images = [
+        "typography_2543346430_7cb66a0b_design.png",
+        "typography_2636178320_708cdf2c_design.png",
+        "typography_3414241921_1e328cad4_design.png",
+        "typography_3898719153_8c0fe796_design.png",
+        "typography_447817068_e2576321_design.png",
+        "typography_4868228168_17bc9760b_design.png",
+        "typography_5478291640_23c552116_design.png",
+        "typography_7464597120_14e4f0fcc_design.png",
+        "typography_7839074228_2364bf7b8_design.png",
+        "typography_8621043707_1178edf84_design.png"
+      ];
+      var preloaded = [];
+      var thumbSize = 180;
+      var canvas = dom.canvas(thumbSize, thumbSize);
+      function drawImage(index) {
+
+        function renderImage(image) {
+          var block = 18;
+          var blocks = thumbSize / block;
+          var order = [];
+          while(order.length < blocks * blocks) { order.push(order.length); }
+          shuffleArray(order);
+          // con.log(order);
+          function drawBlock(blockIndex) {
+            // con.log("drawBlock", blockIndex, blocks * blocks);
+            var posIndex = order[blockIndex];
+            var x = (posIndex % blocks) * block;
+            var y = Math.floor(posIndex / blocks) * block;
+            canvas.ctx.clearRect(x, y, block, block);
+            canvas.ctx.drawImage(image, x, y, block, block, x, y, block, block);
+
+            if (blockIndex + 1 < blocks * blocks) {
+              setTimeout(function() {
+                drawBlock(blockIndex + 1);
+              }, 5)
+            }
+          }
+          drawBlock(0);
+
+
+          setTimeout(function() {
+            drawImage(++index % images.length);
+          }, 10 * blocks * blocks + 2000);
+        }
+
+        // con.log("drawImage", index);
+
+        if (preloaded[index]) {
+          renderImage(preloaded[index]);
+        } else {
+          var currentImage = dom.element("img");
+          currentImage.onload = function() {
+            renderImage(currentImage);
+          }
+          currentImage.src = "images/out/" + images[index];
+          preloaded[index] = currentImage;
+        }
+      }
+      drawImage(0);
+      image = canvas.canvas;
+
+    } else {
+      image = dom.element("div", {
+        className: "design-image",
+        key: e,
+        style: {backgroundImage: "url(images/" + e + ".png)"},
+      });
+    }
+
     button.appendChild(image);
     button.addEventListener("click", function(event){
       var design = event.target.key;

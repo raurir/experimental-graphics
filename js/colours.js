@@ -3,6 +3,15 @@ if (isNode) {
 	var rand = require('./rand.js');
 }
 
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
 
 var colours = (function() {
 
@@ -26,7 +35,7 @@ var colours = (function() {
 
 	function setPaletteRange(range) {
 		if (range > currentPalette.length) return con.warn("setPaletteRange - current palette has less than", range, "colours!");
-		var palette = currentPalette.slice().sort(Math.random());
+		var palette = shuffleArray(currentPalette.slice());
 		currentPalette = palette.splice(0, range);
 		return currentPalette;
 	}
