@@ -225,6 +225,7 @@ function experiments_infinite() {
 
     var image;
     if (e === "typography") {
+      /*
       var images = [
         "typography_2543346430_7cb66a0b_design.png",
         "typography_2636178320_708cdf2c_design.png",
@@ -286,6 +287,64 @@ function experiments_infinite() {
       }
       drawImage(0);
       image = canvas.canvas;
+      */
+
+
+
+
+
+      var tiledColumns = 6; // this is what imagemagic does.
+      var thumbSize = 180;
+      var tiles = 22;
+      var block = 18;
+      var blocks = thumbSize / block;
+
+      var canvas = dom.canvas(thumbSize, thumbSize);
+      var currentImage = dom.element("img");
+
+      function drawImage(index) {
+        // con.log("drawImage", index);
+
+        var tileX = (index % tiledColumns) * thumbSize;
+        var tileY = Math.floor(index / tiledColumns) * thumbSize;
+
+        var order = [];
+        while(order.length < blocks * blocks) { order.push(order.length); }
+        shuffleArray(order);
+
+        // con.log(order);
+        function drawBlock(blockIndex) {
+          // con.log("drawBlock", blockIndex, blocks * blocks);
+          var posIndex = order[blockIndex];
+          var x = (posIndex % blocks) * block;
+          var y = Math.floor(posIndex / blocks) * block;
+          canvas.ctx.clearRect(x, y, block, block);
+          canvas.ctx.drawImage(currentImage, tileX + x, tileY + y, block, block, x, y, block, block);
+
+          var nextBlock = blockIndex + 1;
+          if (nextBlock < blocks * blocks) {
+            setTimeout(function() {
+              drawBlock(nextBlock);
+            }, 3);
+          }
+        }
+        drawBlock(0);
+
+        setTimeout(function() {
+          drawImage(++index % tiles);
+        }, 3 * blocks * blocks + 2000);
+
+      }
+
+      currentImage.onload = function() {
+        drawImage(0);
+      }
+      currentImage.src = "images/" + e + ".png";
+
+      image = canvas.canvas;
+
+
+
 
     } else {
       image = dom.element("div", {

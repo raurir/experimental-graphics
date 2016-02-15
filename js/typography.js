@@ -55,11 +55,11 @@ var typography = function() {
       ctx.fillStyle = colours.getRandomColour();
       ctx.fillRect(0, 0, block * w, block * h);
     }
-    if (rand.random() > 0.8) drawInnerBlock();
-    if (rand.random() > 0.9) drawSubdivion();
-    if (rand.random() > 0.9) drawPattern();
-    if (rand.random() > 0.8) drawRuler();
-    if (rand.random() > 0.4) drawText();
+    try { if (rand.random() > 0.8) { drawInnerBlock(); } } catch(err) { con.log("err drawInnerBlock", err); }
+    try { if (rand.random() > 0.9) { drawSubdivion(); } } catch(err) { con.log("err drawSubdivion", err); }
+    try { if (rand.random() > 0.9) { drawPattern(); } } catch(err) { con.log("err drawPattern", err); }
+    try { if (rand.random() > 0.8) { drawRuler(); } } catch(err) { con.log("err drawRuler", err); }
+    try { if (rand.random() > 0.4) { drawText(); } } catch(err) { con.log("err drawText", err); }
 
     ctx.restore();
   }
@@ -130,7 +130,7 @@ var typography = function() {
     var xo = rand.random() * block;
     var yo = rand.random() * block;
     var fontSize = Math.round(Math.pow(2, 2 + rand.random() * 6) * size / 400);
-    con.log(fontSize);
+    // con.log(fontSize);
     var font = "Helvetica";
     ctx.rotate(angle * Math.PI * 2);
     ctx.translate(xo, yo);
@@ -145,9 +145,7 @@ var typography = function() {
     sh = size;
     block = Math.ceil(1 / 4 * size);
     bmp.setSize(sw, sh);
-    // con.log("size", sw, sh)
     ctx.clearRect(0, 0, sw, sh);
-    // con.log('init', cols, rows);
     colours.getRandomPalette();
     colours.setPaletteRange(3);
 
@@ -170,7 +168,7 @@ var typography = function() {
     if (batch < total) {
       setTimeout(function () {
         renderBatch(batch + 1);
-      }, 15);
+      }, 150);
     } else {
       progress("render:complete", bmp.canvas);
     }
