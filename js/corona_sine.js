@@ -24,18 +24,22 @@ var corona_sine = function() {
     },
   };
 
-  var size = 5000, sw = size, sh = size;
+  var size, sw, sh;
 
   if (typeof window != "undefined") {
     sw = window.innerWidth;
     sh = window.innerHeight;
   }
 
-  var bmp = dom.canvas(sw,sh);
+  var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
   var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
-  function generate() {
+  function init(_size) {
+    size = _size;
+    sw = size;
+    sh = size;
+    bmp.setSize(sw, sh);
     lastGenerate = new Date().getTime();
     colours.getRandomPalette();
     colourBG = colours.getRandomColour();
@@ -158,7 +162,7 @@ var corona_sine = function() {
 
   }
 
-  // bmp.canvas.addEventListener("click", generate);
+  // bmp.canvas.addEventListener("click", init);
 
   // window.addEventListener("resize", );
 
@@ -168,13 +172,13 @@ var corona_sine = function() {
     // render(0);
   }
 
-  // generate();
+  // init();
   // animate(0);
 
   function animate(time) {
     requestAnimationFrame(animate);
     // if (Math.random() > 0.99 && new Date().getTime() - lastGenerate > 3000) {
-    //   generate();
+    //   init();
     // }
     render(time);
   }
@@ -184,7 +188,7 @@ var corona_sine = function() {
     inner: null,
     resize: resize,
     render: render,
-    init: generate,
+    init: init,
     kill: function() {},
     settings: settings
   }

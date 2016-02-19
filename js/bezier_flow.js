@@ -21,11 +21,11 @@ var bezier_flow = function() {
     }
   };
 
-  var sw = sh = size = 1000;
+  var sw, sh, size;
 
   // http://www.gorenje.com/karimrashid/en/products/hobs?c=280789
 
-  var bmp = dom.canvas(size,size);
+  var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
   var lines, sections, radius, points, lineStyles;
 
@@ -33,7 +33,11 @@ var bezier_flow = function() {
     return points[(sections + d) % sections];
   }
 
-  function init() {
+  function init(_size) {
+    size = _size;
+    sw = size;
+    sh = size;
+    bmp.setSize(sw, sh);
     lines = Math.round(10 + rand.random() * 50);
     settings.renderlimit.max = lines;
     settings.renderlimit.cur = lines / 2;

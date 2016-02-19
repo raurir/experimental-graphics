@@ -3,17 +3,19 @@ if (isNode) {
 	var rand = require('./rand.js');
 }
 
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-}
-
 var colours = (function() {
+
+	function shuffleArray(array) {
+		for (var i = array.length - 1; i > 0; i--) {
+			var j = Math.floor(Math.random() * (i + 1));
+			var temp = array[i];
+			array[i] = array[j];
+			array[j] = temp;
+		}
+		return array;
+	}
+
+
 
 	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
 
@@ -170,9 +172,9 @@ var colours = (function() {
 		var style = dom.element('style');
 		style.type = 'text/css';
 		if (style.styleSheet){
-		  style.styleSheet.cssText = css;
+			style.styleSheet.cssText = css;
 		} else {
-		  style.appendChild(document.createTextNode(css));
+			style.appendChild(document.createTextNode(css));
 		}
 		document.head.appendChild(style);
 		previewCSSAdded = true;
