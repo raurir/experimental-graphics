@@ -166,11 +166,13 @@ var corona_sine = function() {
 
   // window.addEventListener("resize", );
 
-  function resize() {
-    // bmp.canvas.width = sw = window.innerWidth;
-    // bmp.canvas.height = sh = window.innerHeight;
-    // render(0);
-  }
+  // function resize(w, h) {
+  //   con.log("resize args", arguments);
+  //   // bmp.canvas.width = sw = window.innerWidth;
+  //   // bmp.canvas.height = sh = window.innerHeight;
+  //   // render(0);
+  //   bmp.setSize(w, h, true);
+  // }
 
   // init();
   // animate(0);
@@ -185,11 +187,8 @@ var corona_sine = function() {
 
   var experiment = {
     stage: bmp.canvas,
-    inner: null,
-    resize: resize,
     render: render,
     init: init,
-    kill: function() {},
     settings: settings
   }
 

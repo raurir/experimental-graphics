@@ -1,24 +1,9 @@
-
-
 var con = console;
 
 var isNode = (typeof module !== 'undefined');
 if (isNode) {
   var Canvas = require('canvas');
 }
-
-// (function (module) {
-//     if (typeof define === "function" && define.amd) {
-//         define(function () { return module; });
-//     } else {
-//         window.myfunction = module.myfunction;
-//     }
-// }({
-//     myfunction: function () {
-//         /* ... */
-//     }
-// }));
-
 
 var dom = (function() {
 

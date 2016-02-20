@@ -251,11 +251,7 @@ var bezier_flow = function() {
 
   var experiment = {
     stage: bmp.canvas,
-    resize: function(w,h) {
-      bmp.setSize(w, h, true);
-    },
     init: init,
-    kill: function() {},
     settings: settings,
     render: render
   }

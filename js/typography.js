@@ -174,14 +174,9 @@ var typography = function() {
     }
   }
 
-
-
   var experiment = {
     stage: bmp.canvas,
-    // inner: inner,
-    resize: function() {},
     init: init,
-    kill: function() {}
   }
 
   return experiment;
