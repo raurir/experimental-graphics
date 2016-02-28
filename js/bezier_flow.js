@@ -34,6 +34,7 @@ var bezier_flow = function() {
   }
 
   function init(_size) {
+    con.log("init called", _size, rand.getSeed());
     size = _size;
     sw = size;
     sh = size;
@@ -41,7 +42,8 @@ var bezier_flow = function() {
     lines = Math.round(10 + rand.random() * 50);
     settings.renderlimit.max = lines;
     settings.renderlimit.cur = lines / 2;
-    sections = Math.round(2 + rand.random() * 3);
+    sections = rand.getInteger(3, 6);
+    con.log("sections", sections);
     radius = 0.4 + rand.random() * 0.2;
     points = [];
     lineStyles = [];
@@ -104,20 +106,21 @@ var bezier_flow = function() {
 
         // con.log("angle", dy, dx, this.a, -Math.atan(dy/dx));
         // con.log("angle", next.cx, prev.cx);
-        // var x = cx * size, y = cy * size;
-        // ctx.fillStyle = "red";
-        // ctx.fillRect(x - 2, y - 2, 4, 4);
-        // ctx.strokeStyle = "red";
-        // ctx.beginPath();
-        // ctx.moveTo(x,y);
-        // ctx.lineTo(x + 20 * Math.sin(this.a), y + 20 * Math.cos(this.a));
-        // ctx.stroke();
+        var x = cx * size, y = cy * size;
+        ctx.fillStyle = "red";
+        ctx.fillRect(x - 2, y - 2, 4, 4);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "red";
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.lineTo(x + 20 * Math.sin(this.a), y + 20 * Math.cos(this.a));
+        ctx.stroke();
 
-        // ctx.strokeStyle = "yellow";
-        // ctx.beginPath();
-        // ctx.moveTo(this.cx * size, this.cy * size);
-        // ctx.lineTo(prev.cx * size, prev.cy * size);
-        // ctx.stroke();
+        ctx.strokeStyle = "yellow";
+        ctx.beginPath();
+        ctx.moveTo(this.cx * size, this.cy * size);
+        ctx.lineTo(prev.cx * size, prev.cy * size);
+        ctx.stroke();
 
       },
       move: function() {
@@ -138,7 +141,7 @@ var bezier_flow = function() {
 
     ctx.clearRect(0, 0, sw, sh);
 
-    // con.log("render ========================", settings.renderlimit.cur);
+    con.log("render ========================", settings.renderlimit.cur);
 
     for (var j = 0; j < settings.renderlimit.cur; j++) {
 
@@ -223,7 +226,9 @@ var bezier_flow = function() {
         // ctx.stroke();
 
         ctx.strokeStyle = lineStyles[j].strokeStyle;
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
         ctx.lineWidth = lineStyles[j].lineWidth * (j + 1) * 0.4;
+        ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.moveTo(x1 * size, y1 * size);
@@ -241,13 +246,14 @@ var bezier_flow = function() {
     //   setTimeout(function() { render(j)}, 100);
     // }
 
+    con.log("render complete called");
     progress("render:complete", bmp.canvas);
 
   }
 
 
 
-  var resizeMode = "contain";
+  // var resizeMode = "contain";
 
   var experiment = {
     stage: bmp.canvas,

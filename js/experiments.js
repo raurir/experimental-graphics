@@ -98,11 +98,9 @@ var experiments = (function() {
     if (seed[1]) {
       key = seed[0];
       seed = seed[1];
-      // rand.setSeed(seed);
-      // blah = seed;
+      rand.setSeed(seed);
     } else {
-      // rand.setSeed();
-      // blah = seed;
+      rand.setSeed();
     }
 
     while(index < experiments.length && found == false) {
@@ -123,7 +121,7 @@ var experiments = (function() {
     // con.log("resize!");
     var sw = window.innerWidth, sh = window.innerHeight;
 
-    currentExperiment.resize(sw,sh);
+    if (currentExperiment.resize) currentExperiment.resize(sw,sh);
 
     // currentExperiment.stage.setSize(sw,sh);
 
@@ -152,6 +150,7 @@ var experiments = (function() {
       con.warn("experimentLoaded, but no stage:", currentExperiment.stage);
     }
     // initRenderProgress(); // experiments_progress
+    con.log("inittted!!!!!!");
     initWindowListener();
     currentExperiment.init(800);
     resize();
