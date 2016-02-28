@@ -100,7 +100,7 @@ var experiments = (function() {
       seed = seed[1];
       rand.setSeed(seed);
     } else {
-      rand.setSeed(3557188243); // 2985219014
+      rand.setSeed(); // 2985219014
     }
 
     while(index < experiments.length && found == false) {

@@ -27,7 +27,7 @@ var bezier_flow = function() {
 
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
-  var lines, sections, points, lineStyles, exponential;
+  var lines, sections, points, lineStyles, exponential, scalePerLine;
 
   function getPoint(d) {
     return points[(sections + d) % sections];
@@ -39,23 +39,28 @@ var bezier_flow = function() {
     sw = size;
     sh = size;
     bmp.setSize(sw, sh);
-    lines = rand.getInteger(10, 50);
+    lines = rand.getInteger(10, 500);
     settings.renderlimit.max = lines;
     settings.renderlimit.cur = lines;// / 2;
     sections = rand.getInteger(3, 6);
     con.log("sections", sections);
 
     exponential = rand.random() > 0.5;
+    scalePerLine = rand.random() > 0.5;
+    constantBaseLine = rand.random() > 0.5;
 
     points = [];
     lineStyles = [];
 
     colours.getRandomPalette();
 
+    function baseLineWidth() { return 1 + rand.random() * 3; }
+    var fixedConstantBaseLine = baseLineWidth();
+
     for (var l = 0; l < lines; l++) {
       lineStyles[l] = {
         strokeStyle: colours.getRandomColour(),
-        lineWidth: 1 + rand.random() * 3
+        lineWidth: constantBaseLine ? fixedConstantBaseLine : baseLineWidth()
       }
     }
 
@@ -127,22 +132,22 @@ var bezier_flow = function() {
 
         // con.log("angle", dy, dx, this.a, -Math.atan(dy/dx));
         // con.log("angle", next.cx, prev.cx);
-        var dot = 14;
-        var x = cx * size, y = cy * size;
-        ctx.fillStyle = "red";
-        ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "green";
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + 120 * Math.sin(this.a), y + 120 * Math.cos(this.a));
-        ctx.stroke();
+        // var dot = 14;
+        // var x = cx * size, y = cy * size;
+        // ctx.fillStyle = "red";
+        // ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot);
+        // ctx.lineWidth = 1;
+        // ctx.strokeStyle = "green";
+        // ctx.beginPath();
+        // ctx.moveTo(x, y);
+        // ctx.lineTo(x + 120 * Math.sin(this.a), y + 120 * Math.cos(this.a));
+        // ctx.stroke();
 
-        ctx.strokeStyle = "yellow";
-        ctx.beginPath();
-        ctx.moveTo(this.cx * size, this.cy * size);
-        ctx.lineTo(prev.cx * size, prev.cy * size);
-        ctx.stroke();
+        // ctx.strokeStyle = "yellow";
+        // ctx.beginPath();
+        // ctx.moveTo(this.cx * size, this.cy * size);
+        // ctx.lineTo(prev.cx * size, prev.cy * size);
+        // ctx.stroke();
 
       },
       move: function() {
@@ -249,10 +254,10 @@ var bezier_flow = function() {
         // ctx.lineTo(x2 * size, y2 * size);
         // ctx.stroke();
 
-        // ctx.strokeStyle = lineStyles[j].strokeStyle;
-        // ctx.lineWidth = lineStyles[j].lineWidth * (j + 1) * 0.4;
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = lineStyles[j].strokeStyle;
+        ctx.lineWidth = lineStyles[j].lineWidth * (scalePerLine ? (j + 1) * 0.4 : 1);
+        // ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        // ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.moveTo(x1 * size, y1 * size);
