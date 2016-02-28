@@ -39,7 +39,7 @@ var bezier_flow = function() {
     sw = size;
     sh = size;
     bmp.setSize(sw, sh);
-    lines = rand.getInteger(10, 500);
+    lines = rand.getInteger(100, 500);
     settings.renderlimit.max = lines;
     settings.renderlimit.cur = lines;// / 2;
     sections = rand.getInteger(3, 6);
@@ -74,13 +74,13 @@ var bezier_flow = function() {
     angles.sort();
     con.log(angles);
     */
-    var angleVariance = 1 / sections * 0.3;
+    var angleVariance = 1 / sections * 0.1;
 
 
     for (var p = 0; p < sections; p++) {
       // var a = baseAngle + angles[p] * Math.PI * 2;
 
-      var radius = 0.3 + rand.random() * 0.2;
+      var radius = 0.3 + rand.random() * 0.1;
       var a = baseAngle + (p / sections + rand.getNumber(-angleVariance, angleVariance)) * Math.PI * 2;
 
       var cx = 0.5 + Math.sin(a) * radius;// + (rand.random() - 0.5) * 0.1;
@@ -255,7 +255,7 @@ var bezier_flow = function() {
         // ctx.stroke();
 
         ctx.strokeStyle = lineStyles[j].strokeStyle;
-        ctx.lineWidth = lineStyles[j].lineWidth * (scalePerLine ? (j + 1) * 0.4 : 1);
+        ctx.lineWidth = lineStyles[j].lineWidth * (scalePerLine ? (j + 1) * 0.1 : 1);
         // ctx.strokeStyle = "rgba(255,255,255,0.2)";
         // ctx.lineWidth = 2;
 
