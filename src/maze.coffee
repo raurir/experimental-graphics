@@ -277,6 +277,5 @@ maze = {
 
 # con.log(maze)
 
-# dispatchEvent(new CustomEvent("load:complete", {detail: maze}));
 window.maze = maze
 define("maze", window.maze)

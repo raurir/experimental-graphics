@@ -326,6 +326,4 @@ var meandering = {
   kill: function() {}
 }
 
-dispatchEvent(new CustomEvent("load:complete", {detail:meandering}));
-
 })();

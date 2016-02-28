@@ -70,7 +70,7 @@ var experiments = (function() {
     var src = experiments[index];
     require(src, function(experiment) {
       if (experiment) {
-        // con.log("require loaded...", experiment);
+        con.log("require loaded...", experiment);
         experimentLoaded(experiment);
       } else {
         con.warn("require loaded... but experiment is null", experiment, arguments);
@@ -100,7 +100,7 @@ var experiments = (function() {
       seed = seed[1];
       rand.setSeed(seed);
     } else {
-      rand.setSeed();
+      rand.setSeed(3557188243); // 2985219014
     }
 
     while(index < experiments.length && found == false) {
@@ -150,17 +150,11 @@ var experiments = (function() {
       con.warn("experimentLoaded, but no stage:", currentExperiment.stage);
     }
     // initRenderProgress(); // experiments_progress
-    con.log("inittted!!!!!!");
+    // con.log("inittted!!!!!!");
     initWindowListener();
     currentExperiment.init(800);
     resize();
   }
-
-  addEventListener("load:complete", function(e) {
-    // con.log("Loaded", e);
-    experimentLoaded(e.detail);
-  });
-
 
   // document.body.appendChild(colours.showPalette());
 
