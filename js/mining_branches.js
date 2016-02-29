@@ -373,8 +373,4 @@ var experiment = {
   kill: function() {}
 }
 
-
-
-dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
-
 })();

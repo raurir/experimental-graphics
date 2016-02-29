@@ -9,9 +9,6 @@ if (isNode) {
 
 var typography = function() {
 
-  // rand.setSeed(309484);
-  rand.setSeed(Math.random());
-  // rand.setSeed(3);
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
   var size, sw, sh, block;

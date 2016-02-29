@@ -5,9 +5,11 @@ if (isNode) {
 
 var colours = (function() {
 
+	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
+
 	function shuffleArray(array) {
 		for (var i = array.length - 1; i > 0; i--) {
-			var j = Math.floor(Math.random() * (i + 1));
+			var j = Math.floor(random() * (i + 1));
 			var temp = array[i];
 			array[i] = array[j];
 			array[j] = temp;
@@ -17,14 +19,12 @@ var colours = (function() {
 
 
 
-	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
-
 	var paletteIndex = -1, currentPalette = null;
 	var colourIndex = 0;
 	var previewCSSAdded = false;
 
 	function getRandomPalette(warning) {
-		// con.log("getRandomPalette");
+		// con.log("getRandomPalette", warning);
 		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
 		currentPalette = palettes[paletteIndex];
@@ -43,6 +43,7 @@ var colours = (function() {
 	}
 
 	function getRandomColour() {
+		// con.log("getRandomColour", currentPalette);
 		if (currentPalette == null) getRandomPalette(true);
 		colourIndex = ~~(random() * currentPalette.length);
 		return currentPalette[colourIndex];

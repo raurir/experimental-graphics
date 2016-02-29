@@ -27,38 +27,64 @@ var bezier_flow = function() {
 
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
-  var lines, sections, radius, points, lineStyles;
+  var lines, sections, points, lineStyles, exponential, scalePerLine;
 
   function getPoint(d) {
     return points[(sections + d) % sections];
   }
 
   function init(_size) {
+    con.log("init called", _size, rand.getSeed());
     size = _size;
     sw = size;
     sh = size;
     bmp.setSize(sw, sh);
-    lines = Math.round(10 + rand.random() * 50);
+    lines = rand.getInteger(100, 500);
     settings.renderlimit.max = lines;
-    settings.renderlimit.cur = lines / 2;
-    sections = Math.round(2 + rand.random() * 3);
-    radius = 0.4 + rand.random() * 0.2;
+    settings.renderlimit.cur = lines;// / 2;
+    sections = rand.getInteger(3, 6);
+    con.log("sections", sections);
+
+    exponential = rand.random() > 0.5;
+    scalePerLine = rand.random() > 0.5;
+    constantBaseLine = rand.random() > 0.5;
+
     points = [];
     lineStyles = [];
 
     colours.getRandomPalette();
 
+    function baseLineWidth() { return 1 + rand.random() * 3; }
+    var fixedConstantBaseLine = baseLineWidth();
+
     for (var l = 0; l < lines; l++) {
       lineStyles[l] = {
         strokeStyle: colours.getRandomColour(),
-        lineWidth: 1 + rand.random() * 3
+        lineWidth: constantBaseLine ? fixedConstantBaseLine : baseLineWidth()
       }
     }
 
+    var baseAngle = 0.0001 + rand.random() * Math.PI;
+
+    /*
+    var angles = [];
+    while (angles.length < sections) {
+      angles.push(rand.random());
+    }
+    angles.sort();
+    con.log(angles);
+    */
+    var angleVariance = 1 / sections * 0.1;
+
+
     for (var p = 0; p < sections; p++) {
-      var a = p / sections * Math.PI * 2,
-        cx = 0.5 + Math.sin(a) * radius,// + (rand.random() - 0.5) * 0.1,
-        cy = 0.5 + Math.cos(a) * radius// + (rand.random() - 0.5) * 0.1;
+      // var a = baseAngle + angles[p] * Math.PI * 2;
+
+      var radius = 0.3 + rand.random() * 0.1;
+      var a = baseAngle + (p / sections + rand.getNumber(-angleVariance, angleVariance)) * Math.PI * 2;
+
+      var cx = 0.5 + Math.sin(a) * radius;// + (rand.random() - 0.5) * 0.1;
+      var cy = 0.5 + Math.cos(a) * radius;// + (rand.random() - 0.5) * 0.1;
       createPoint({index: p, cx: cx, cy: cy});
     }
     for (var p = 0; p < sections; p++) {
@@ -73,24 +99,26 @@ var bezier_flow = function() {
 
   function createPoint(origin) {
 
-    var cx = origin.cx || rand.random(),
-      cy = origin.cy || rand.random(),
-      a = rand.random() * Math.PI * 2
-      gapScale = rand.random() / 3 * 5;
+    var cx = origin.cx || rand.random();
+    var cy = origin.cy || rand.random();
+     // a = rand.random() * Math.PI * 2
+    var gapScale = rand.random() * 0.7 / lines;
 
     var gaps = [];
     var total = 0;
     for (var i = 0; i < lines; i++) {
-      var gap = (0.1 + rand.random()) * gapScale / lines;
+      var gap = (0.1 + rand.random()) * gapScale;
       gaps[i] = total;
-      total += gap;
+      total += gap * (exponential ? Math.pow(2, 1 + (i * 0.2)) * 0.1 : 1);
     }
+
+    // con.log(gaps);
 
     points.push({
       index: origin.index,
       cx: cx,
       cy: cy,
-      a: a,
+      a: null,//a,
       total: total,
       gaps: gaps,
       angle: function() {
@@ -100,17 +128,19 @@ var bezier_flow = function() {
         var dy = next.cy - prev.cy;
 
 
-        this.a = -Math.atan(dy/dx) - (dx > 0 ? Math.PI : 0);
+        this.a = -Math.atan(dy / dx) - (dx < 0 ? 0 : Math.PI);
 
         // con.log("angle", dy, dx, this.a, -Math.atan(dy/dx));
         // con.log("angle", next.cx, prev.cx);
+        // var dot = 14;
         // var x = cx * size, y = cy * size;
         // ctx.fillStyle = "red";
-        // ctx.fillRect(x - 2, y - 2, 4, 4);
-        // ctx.strokeStyle = "red";
+        // ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot);
+        // ctx.lineWidth = 1;
+        // ctx.strokeStyle = "green";
         // ctx.beginPath();
-        // ctx.moveTo(x,y);
-        // ctx.lineTo(x + 20 * Math.sin(this.a), y + 20 * Math.cos(this.a));
+        // ctx.moveTo(x, y);
+        // ctx.lineTo(x + 120 * Math.sin(this.a), y + 120 * Math.cos(this.a));
         // ctx.stroke();
 
         // ctx.strokeStyle = "yellow";
@@ -125,9 +155,12 @@ var bezier_flow = function() {
         this.angle();
       },
       lines: function(i) {
+        // var r = gaps[i] - total / 2;
+        // var r = gaps[i];
+        var r = gaps[i] - 0.2;
         return [
-          cx - Math.sin(this.a) * (-total / 2 + gaps[i]),
-          cy - Math.cos(this.a) * (-total / 2 + gaps[i])
+          cx - Math.sin(this.a) * r,
+          cy - Math.cos(this.a) * r
         ];
       }
     });
@@ -138,7 +171,7 @@ var bezier_flow = function() {
 
     ctx.clearRect(0, 0, sw, sh);
 
-    // con.log("render ========================", settings.renderlimit.cur);
+    con.log("render ========================", settings.renderlimit.cur);
 
     for (var j = 0; j < settings.renderlimit.cur; j++) {
 
@@ -147,7 +180,7 @@ var bezier_flow = function() {
     // if (true) {
 
 
-      for (var i = 0; i < points.length; i++) {
+      for (var i = 0, il = points.length; i < il; i++) {
 
 
         var p1 = getPoint(i - 1);
@@ -187,18 +220,17 @@ var bezier_flow = function() {
         var x2b = 1.1;
         var y2b = m2 * x2b + c2;
 
-
+        // var err = 5;
         // ctx.strokeStyle = "green";
         // ctx.beginPath();
-        // ctx.moveTo(x1a * size, y1a * size);
-        // ctx.lineTo(x1b * size, y1b * size);
+        // ctx.moveTo(x1a * size - err, y1a * size - err);
+        // ctx.lineTo(x1b * size - err, y1b * size - err);
         // ctx.stroke();
-
 
         // ctx.strokeStyle = "cyan";
         // ctx.beginPath();
-        // ctx.moveTo(x2a * size, y2a * size);
-        // ctx.lineTo(x2b * size, y2b * size);
+        // ctx.moveTo(x2a * size + err, y2a * size + err);
+        // ctx.lineTo(x2b * size + err, y2b * size + err);
         // ctx.stroke();
 
         var inter = geom.intersectionAnywhere(
@@ -223,7 +255,9 @@ var bezier_flow = function() {
         // ctx.stroke();
 
         ctx.strokeStyle = lineStyles[j].strokeStyle;
-        ctx.lineWidth = lineStyles[j].lineWidth * (j + 1) * 0.4;
+        ctx.lineWidth = lineStyles[j].lineWidth * (scalePerLine ? (j + 1) * 0.1 : 1);
+        // ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        // ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.moveTo(x1 * size, y1 * size);
@@ -241,13 +275,14 @@ var bezier_flow = function() {
     //   setTimeout(function() { render(j)}, 100);
     // }
 
+    con.log("render complete called");
     progress("render:complete", bmp.canvas);
 
   }
 
 
 
-  var resizeMode = "contain";
+  // var resizeMode = "contain";
 
   var experiment = {
     stage: bmp.canvas,
@@ -255,7 +290,6 @@ var bezier_flow = function() {
     settings: settings,
     render: render
   }
-  // dispatchEvent(new CustomEvent("load:complete", {detail: experiment}));
 
   return experiment;
 

@@ -501,8 +501,6 @@ var running_man = (function(settings, limbs) {
 		kill: function() {}
 	}
 
-	if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
-
 	return experiment;
 
 })(spider, spiderlimbs);

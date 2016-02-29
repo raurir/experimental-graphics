@@ -485,8 +485,6 @@ var creature_creator = function() {
 		kill: function() {}
 	}
 
-	// if (!isNode) dispatchEvent(new CustomEvent("load:complete", {detail:experiment}));
-
 	return experiment;
 
 }

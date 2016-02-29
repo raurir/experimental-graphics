@@ -70,7 +70,7 @@ var experiments = (function() {
     var src = experiments[index];
     require(src, function(experiment) {
       if (experiment) {
-        // con.log("require loaded...", experiment);
+        con.log("require loaded...", experiment);
         experimentLoaded(experiment);
       } else {
         con.warn("require loaded... but experiment is null", experiment, arguments);
@@ -98,11 +98,17 @@ var experiments = (function() {
     if (seed[1]) {
       key = seed[0];
       seed = seed[1];
-      // rand.setSeed(seed);
-      // blah = seed;
+      rand.setSeed(seed);
     } else {
+<<<<<<< HEAD
       rand.setSeed();
       // blah = seed;
+||||||| merged common ancestors
+      // rand.setSeed();
+      // blah = seed;
+=======
+      rand.setSeed(); // 2985219014
+>>>>>>> 900de6e06b689cee1a3587578bfac4edf7868d92
     }
 
     while(index < experiments.length && found == false) {
@@ -152,16 +158,11 @@ var experiments = (function() {
       con.warn("experimentLoaded, but no stage:", currentExperiment.stage);
     }
     // initRenderProgress(); // experiments_progress
+    // con.log("inittted!!!!!!");
     initWindowListener();
     currentExperiment.init(800);
     resize();
   }
-
-  addEventListener("load:complete", function(e) {
-    // con.log("Loaded", e);
-    experimentLoaded(e.detail);
-  });
-
 
   // document.body.appendChild(colours.showPalette());
 
