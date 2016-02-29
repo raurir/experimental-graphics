@@ -10,7 +10,7 @@ var rand = (function() {
       c = 1013904223,
       seed, z;
 
-  var alphaToInteger = (s) => {
+  var alphaToInteger = function(s){
     var num = 0;
     for (var i = 0, il = s.length; i < il; i++) {
       num += s.charCodeAt(i) * c;
@@ -41,9 +41,13 @@ var rand = (function() {
 
   return {
     setSeed : function(val) {
-      if (/[a-zA-Z]/.test(val)) {
-        con.log("converting alphaToInteger");
+      if (/[^\d]/.test(val)) {
+        con.log("setting alpha seed", val);
         val = alphaToInteger(val);
+        con.log("setting alpha now", val);
+      } else {
+        val = Number(val);
+        con.log("setting numeric seed", val);
       }
       z = seed = val || Math.round(Math.random() * m);
     },
