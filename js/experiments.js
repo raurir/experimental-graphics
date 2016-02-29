@@ -101,7 +101,7 @@ var experiments = (function() {
       // rand.setSeed(seed);
       // blah = seed;
     } else {
-      // rand.setSeed();
+      rand.setSeed();
       // blah = seed;
     }
 
@@ -123,7 +123,7 @@ var experiments = (function() {
     // con.log("resize!");
     var sw = window.innerWidth, sh = window.innerHeight;
 
-    currentExperiment.resize(sw,sh);
+    if (currentExperiment.resize) currentExperiment.resize(sw,sh);
 
     // currentExperiment.stage.setSize(sw,sh);
 
