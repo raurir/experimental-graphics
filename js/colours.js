@@ -1,3 +1,4 @@
+var con = console;
 var isNode = (typeof module !== 'undefined');
 if (isNode) {
 	var rand = require('./rand.js');
