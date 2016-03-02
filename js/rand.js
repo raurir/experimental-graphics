@@ -1,3 +1,4 @@
+var con = console;
 // from https://gist.github.com/Protonk/5367430
 var rand = (function() {
   // Set to values from http://en.wikipedia.org/wiki/Numerical_Recipes
