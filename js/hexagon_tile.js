@@ -43,7 +43,7 @@ var hexagon_tile = function() {
     stage = dom.canvas(sw, sh);
   }
 
-  function init(_size) {
+  function init(_size, options) {
     size = _size;
     sw = size;
     sh = size;
