@@ -100,15 +100,8 @@ var experiments = (function() {
       seed = seed[1];
       rand.setSeed(seed);
     } else {
-<<<<<<< HEAD
       rand.setSeed();
       // blah = seed;
-||||||| merged common ancestors
-      // rand.setSeed();
-      // blah = seed;
-=======
-      rand.setSeed(); // 2985219014
->>>>>>> 900de6e06b689cee1a3587578bfac4edf7868d92
     }
 
     while(index < experiments.length && found == false) {

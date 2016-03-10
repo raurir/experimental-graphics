@@ -17,22 +17,22 @@ var unknown = function() {
       var rows = 10;
       var y = -10;
 
-      colours.setRandomPalette(5);
+      colours.getRandomPalette();
 
       // radius
       var rOffset = rand.getNumber(0, 2);
       var rBase = rand.getNumber(1, 2);
-      var rPower = 1;//rand.getNumber(1.01, 1.5);
+      var rPower = rand.getNumber(1.01, 1.5);
 
       // x gap
-      var gOffset = 10;//rand.getNumber(-2, 2);
-      var gBase = 5;//rand.getNumber(8000, 10000);
-      var gPower = 1;//rand.getNumber(0.4, 0.6);
+      var gOffset = rand.getNumber(-2, 2);
+      var gBase = rand.getNumber(8000, 10000);
+      var gPower = rand.getNumber(0.4, 0.6);
 
       // y gap
-      var yOffset = 2;//rand.getNumber(-2, 2);
+      var yOffset = rand.getNumber(-2, 2);
       var yBase = rand.getNumber(1.2, 2);
-      var yPower = 1;// rand.getNumber(1.2, 1.6);
+      var yPower = rand.getNumber(1.2, 1.6);
       var yMultiplier = rand.getNumber(2, 3);
 
       for(var i = 0; i < rows; i++) {
