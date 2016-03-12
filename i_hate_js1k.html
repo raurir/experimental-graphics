@@ -1,0 +1,228 @@
+<html>
+<body>
+<script>
+
+var fgColour = "#f00";
+var bgColour = "#0f0";
+var planets = 400;
+
+var size = 600;
+
+var bmp;
+
+
+var rand = Math;
+
+var sw = size;
+var sh = sw;
+bmp = document.createElement("canvas");
+bmp.width = sw;
+bmp.height = sh;
+var ctx = bmp.getContext("2d");
+var circleRads = Math.PI * 2;
+ctx.drawCircle = function(x, y, r) {
+  ctx.arc(x, y, r, 0, circleRads, false);
+}
+
+
+
+var circleRads = Math.PI*2;
+var cx = 0.5;
+var cy = 0.5;
+
+var i,j;
+
+var lastPlanet;
+
+
+
+var arrPlanets = [];
+var arrRings = [[]];
+var ringIndex = 0;
+
+var diameter = 0.01;
+var ringSize = 0.01;
+var rotation = 0;
+var attempts = 0;
+
+
+function createPlanet(index, planet) {
+  planet.index = index;
+  lastPlanet = planet;
+  arrPlanets[index] = planet;
+  arrRings[ringIndex].push(planet);
+}
+createPlanet(0, {
+  x:cx,
+  y:cy,
+  distance: 0,
+  rotation: 0,
+  // hue: ~~(rand.random() * 360),
+  colour: fgColour,
+  mutationRate: 10 //rand.random()
+});
+
+
+
+
+
+
+function newPlanet( index ) {
+
+  var planet = {
+    x: cx + Math.sin(rotation) * diameter + (rand.random() - 0.5) * 0.05,
+    y: cy + Math.cos(rotation) * diameter + (rand.random() - 0.5) * 0.05,
+    rotation: rotation,
+    distance: diameter
+  };
+
+  var ok = true;
+
+  //var closest = 0;
+  var lastDistance = 1e7;
+
+  i = arrPlanets.length - 1;
+
+  // con.log("arrPlanets.length", arrPlanets.length)
+
+  while( i > -1 && ok ) {
+    var other = arrPlanets[i];
+    var dx = planet.x - other.x;
+    var dy = planet.y - other.y;
+    var distance = Math.sqrt(dx*dx+dy*dy);
+
+    if ( distance < 0.04 ) {
+      ok = false
+    } else {
+      lastDistance = Math.min(distance,lastDistance);
+      if ( lastDistance == distance) {
+        planet.closest = arrPlanets[i];
+      }
+    }
+    i--
+  }
+
+  if(planet.x == lastPlanet.x && planet.y == lastPlanet.y ) {
+    ok = false;
+  }
+
+  if ( ok ) {
+    attempts = 0;
+
+    planet.colour = planet.closest.colour;
+
+    createPlanet(index, planet)
+  } else {
+    if ( attempts < 40 ) {
+      rotation += rand.random() * 20 + Math.atan( 1 / diameter);
+    } else {
+      ringIndex++
+      arrRings[ringIndex] = [];
+      // con.log('increasing diameter',ringIndex);
+      diameter += rand.random() * ringSize + 1/400;
+    }
+    attempts++;
+    newPlanet( index );
+  }
+}
+
+
+
+
+
+
+function drawNodes() {
+  ctx.fillStyle = bgColour;
+  ctx.fillRect(0, 0, sw, sh);
+  var j = arrPlanets.length - 1;
+  while(j > -1) {
+    var planet = arrPlanets[ j ];
+    var xp = planet.x;
+    var yp = planet.y;
+    drawNode(planet, xp, yp);
+    j--;
+  }
+}
+
+
+
+function animPlanets(frame) {
+
+  ctx.fillStyle = bgColour;
+  ctx.fillRect(0, 0, sw, sh);
+
+  var r = arrRings.length - 1;
+  while(r > -1) {
+    var ring = arrRings[r];
+    var j = ring.length - 1;
+    while(j > -1) {
+
+      var planet = arrPlanets[ j ];
+      var xp = planet.x;
+      var yp = planet.y;
+
+      var f = frame / 5;
+      var ringDelta = Math.abs(f - r);
+      if (ringDelta < 2) {
+        var morph = planet.distance + (2 - ringDelta) * 10;
+        xp = cx + Math.sin(planet.rotation) * morph;
+        yp = cy + Math.cos(planet.rotation) * morph;
+        // if (frame < 100 ) con.log(xp, planet.rotation, planet.distance)
+        // con.log(xp)
+      }
+
+      drawNode(planet, xp, yp);
+
+      j--;
+    }
+    r--;
+  }
+
+  requestAnimationFrame(animPlanets)
+}
+
+
+
+function drawNode(planet, xp, yp) {
+
+  var closest = planet.closest;
+  var colour = closest ? closest.colour : planet.colour;
+  var size = 1 - planet.distance;
+
+  var radius = size * 5;
+  ctx.beginPath();
+  ctx.fillStyle = colour;
+  ctx.drawCircle(planet.x * sw, planet.y * sh, radius);
+  ctx.fill();
+
+  if (closest) {
+    ctx.beginPath();
+    ctx.lineWidth = Math.pow(1.1, size * 6);
+    ctx.strokeStyle = colour;
+    ctx.lineCap = 'round';
+    ctx.moveTo(xp * sw, yp * sh);
+    ctx.lineTo(closest.x * sw, closest.y * sh);
+    ctx.stroke();
+
+    // ctx.closePath();
+    // var label = planet.index + ":" + planet.closest.index;
+    // ctx.fillStyle = "#000";
+    // ctx.fillText(label, planet.x, planet.y);
+
+  }
+}
+
+j = 1;
+while( j < planets ) {
+  newPlanet(j);
+  j++;
+}
+drawNodes();
+
+document.body.appendChild(bmp);
+
+// animPlanets(0);
+
+</script>
+</body>
+</html>
