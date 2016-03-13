@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Pi</title>
+    <meta charset="utf-8">
+    <style>
+      html, body { margin: 0; padding: 0; border: 0; }
+      #c { display: block; } /* kill scrollbars from hell */
+    </style>
+  </head>
+  <body>
+<div id="o"></div>
+<script>
+
+// https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Pi-symbol.svg/200px-Pi-symbol.svg.png
+
+var con = console;
+
+function canvas(width, height) {
+  var a = document.createElement("canvas");
+  document.body.appendChild(a);
+  a.width = width;
+  a.height = height;
+  var c = a.getContext('2d');
+  var circleRads = Math.PI * 2;
+  c.drawCircle = function(x, y, r) {
+    c.arc(x, y, r, 0, circleRads, false);
+  }
+  return {
+    canvas: a,
+    ctx: c
+  }
+}
+
+var sw = 300;
+var sh = 300;
+var c = canvas(sw, sh);
+
+var test = canvas(sw, sh);
+var progress = canvas(sw, sh);
+
+var polygons = [];
+var anim = 0;
+var imgd;
+
+function pointInPolygon(point) {
+
+  test.ctx.globalCompositeOperation = 'source-over';
+  test.ctx.drawImage(progress.canvas, 0, 0);
+  test.ctx.globalCompositeOperation = 'source-in';
+  drawGlyph(test.ctx, point, "#f00");
+
+  var pad = 2;
+
+  var size = Math.ceil(point.size + pad);
+  var xs = Math.floor(point.x - size);
+  var ys = Math.floor(point.y - size);
+  size = size * 2;
+
+  var imgd = test.ctx.getImageData(xs, ys, size, size);
+  var pixels = imgd.data;
+
+  var ok = true;
+  for (var x = 0; x < size && ok; x++) {
+    for (var y = 0; y < size && ok; y++) {
+      var pixel = (y * size + x) * 4;
+      ok = pixels[pixel] === 0;
+    }
+  }
+
+
+  test.ctx.globalCompositeOperation = 'source-over';
+  test.ctx.fillStyle = ok ? "rgba(0, 0, 255, 0.25)" : "rgba(255, 0, 0, 0.25)";
+  test.ctx.fillRect(xs, ys, size, size);
+
+  // con.log(ok);
+  return ok;
+
+  // pixels[i  ] = 255 - pix[i  ]; // red
+  // pixels[i+1] = 255 - pix[i+1]; // green
+  // pixels[i+2] = 255 - pix[i+2]; // blue
+
+}
+
+
+function newPosition() {
+  var pad = 10;
+  var x = pad + Math.random() * (sw - pad * 2);
+  var y = pad + Math.random() * (sh - pad * 2);
+  var minSize = 2;
+
+  var dy = y - sh / 2;
+  var dx = x - sw / 2;
+
+  return {
+    x: x,
+    y: y,
+    // rotation: Math.random() > 1.7 ? Math.random() * Math.PI : Math.atan(dy / dx) + Math.PI / 2 + (dx < 0 ? Math.PI : 0),
+    // shape: shapes[ ~~(Math.random() * shapes.length) ],
+    size: Math.random() * 60,
+    colour: "hsla(100," + ~~(Math.random() * 50 + 10) + "%, " + ~~(Math.random() * 50 + 40) + "%, 1)"
+  }
+}
+function drawGlyph(target, props, colour) {
+  // target.beginPath();
+  // target.fillStyle = colour;
+  // target.drawCircle(props.x, props.y, props.size);
+  // target.closePath();
+  // target.fill();
+  var scale = props.size / 200;
+  target.save();
+  target.translate(props.x, props.y);
+  target.scale(scale, scale);
+  target.drawImage(pi, 0, 0);
+  target.restore();
+}
+
+function generate() {
+  var proposed = newPosition();
+  var ok = pointInPolygon(proposed);
+
+  if (ok) {
+    drawGlyph(c.ctx, proposed, proposed.colour);
+    drawGlyph(progress.ctx, proposed, "#f00");
+  } else {
+    // con.log("not ok!");
+  }
+}
+
+function r() {
+  // var now = new Date().getTime();
+  anim++;
+
+  var iterationsPerFrame = 10;
+  for (var i = 0; i < iterationsPerFrame; i++) {
+    generate();
+  }
+
+  // var calctime = new Date().getTime() - now;
+  // var out = document.getElementById('o');
+  // out.innerHTML = anim + " " + polygons.length + " " +  calctime;
+  if (anim < 2000) requestAnimationFrame(r);
+  // setTimeout(r, 1000);
+}
+// r();
+// r();
+
+
+var pi = new Image();
+pi.onload = function() {
+  con.log("load");
+  r();
+}
+pi.src = "pi-red.png";
+
+
+</script>
+</body></html>
