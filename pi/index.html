@@ -55,6 +55,12 @@ var test = canvas(sw, sh);
 var progress = canvas(sw, sh);
 
 var anim = 0;
+var chosenOne = 31;//null;
+var modeIndex = 0;
+var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
+var mode = modes[modeIndex];
+var phaseLength = 100;
+
 
 function pointInPolygon(point) {
 
@@ -115,13 +121,26 @@ function newPosition() {
   }
 }
 
-function drawGlyph(target, props, colour) {
+function drawGlyph(target, props, colour, chosen) {
   // target.fillCircle(props.x, props.y, props.size, colour);
   var scale = 2 * props.size / bmp;// /  * outScale;
+  // con.log(scale);
   target.save();
   target.translate(props.x - props.size, props.y - props.size);
+
+
+  // if (chosen) {
+  //   target.strokeStyle = red;
+  //   target.lineWidth = 1;
+  //   target.beginPath();
+  //   target.fillRect(0, 0, props.size, props.size);
+  //   target.closePath();
+  //   target.stroke();
+  // }
+
   target.scale(scale, scale);
   target.drawImage(pi, 0, 0);
+
   target.restore();
 }
 
@@ -129,18 +148,18 @@ function generate() {
   var proposed = newPosition();
   var ok = pointInPolygon(proposed);
 
+  var chosen = false;//anim > chosenOne;
+  var colour = chosen ? "#F0F" : red;
+
+
   if (ok) {
-    drawGlyph(output.ctx, proposed, proposed.colour);
-    drawGlyph(progress.ctx, proposed, red);
+    drawGlyph(output.ctx, proposed, colour, chosen);
+    drawGlyph(progress.ctx, proposed, colour, chosen);
   } else {
     // con.log("not ok!");
   }
 }
 
-var modeIndex = 0;
-var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
-var mode = modes[modeIndex];
-var phaseLength = 100;
 
 function r() {
   var now = new Date().getTime();
@@ -167,7 +186,7 @@ function r() {
 
   if (anim % phaseLength === 0) {
     modeIndex ++;
-    modeIndex %= 2;
+    modeIndex %= 1;
     mode = modes[modeIndex];
     zoomer.ctx.drawImage(output.canvas, 0, 0);
     anim = 0;
