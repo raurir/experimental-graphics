@@ -5,8 +5,7 @@
     <title>Pi</title>
     <meta charset="utf-8">
     <style>
-      html, body { margin: 0; padding: 0; border: 0; }
-      #c { display: block; } /* kill scrollbars from hell */
+      html, body { margin: 0; padding: 0; border: 0; background: #444; }
     </style>
   </head>
   <body>
@@ -27,29 +26,42 @@ function canvas(width, height) {
   c.drawCircle = function(x, y, r) {
     c.arc(x, y, r, 0, circleRads, false);
   }
+  c.fillCircle = function(x, y, size, colour) {
+    c.beginPath();
+    c.fillStyle = colour;
+    c.drawCircle(x, y, size);
+    c.closePath();
+    c.fill();
+  }
   return {
     canvas: a,
     ctx: c
   }
 }
 
-var sw = 300;
-var sh = 300;
-var c = canvas(sw, sh);
+var out = document.getElementById('o');
 
+var red = "#f00";
+
+var bmp = 800;
+var outScale = 0.5;
+var outSize = bmp * outScale;
+var sw = outSize;
+var sh = outSize;
+
+var output = canvas(sw, sh);
+var zoomer = canvas(sw, sh);
 var test = canvas(sw, sh);
 var progress = canvas(sw, sh);
 
-var polygons = [];
 var anim = 0;
-var imgd;
 
 function pointInPolygon(point) {
 
   test.ctx.globalCompositeOperation = 'source-over';
   test.ctx.drawImage(progress.canvas, 0, 0);
   test.ctx.globalCompositeOperation = 'source-in';
-  drawGlyph(test.ctx, point, "#f00");
+  drawGlyph(test.ctx, point, red);
 
   var pad = 2;
 
@@ -98,19 +110,16 @@ function newPosition() {
     y: y,
     // rotation: Math.random() > 1.7 ? Math.random() * Math.PI : Math.atan(dy / dx) + Math.PI / 2 + (dx < 0 ? Math.PI : 0),
     // shape: shapes[ ~~(Math.random() * shapes.length) ],
-    size: Math.random() * 60,
+    size: 2 + Math.random() * 10,
     colour: "hsla(100," + ~~(Math.random() * 50 + 10) + "%, " + ~~(Math.random() * 50 + 40) + "%, 1)"
   }
 }
+
 function drawGlyph(target, props, colour) {
-  // target.beginPath();
-  // target.fillStyle = colour;
-  // target.drawCircle(props.x, props.y, props.size);
-  // target.closePath();
-  // target.fill();
-  var scale = props.size / 200;
+  // target.fillCircle(props.x, props.y, props.size, colour);
+  var scale = 2 * props.size / bmp;// /  * outScale;
   target.save();
-  target.translate(props.x, props.y);
+  target.translate(props.x - props.size, props.y - props.size);
   target.scale(scale, scale);
   target.drawImage(pi, 0, 0);
   target.restore();
@@ -121,38 +130,79 @@ function generate() {
   var ok = pointInPolygon(proposed);
 
   if (ok) {
-    drawGlyph(c.ctx, proposed, proposed.colour);
-    drawGlyph(progress.ctx, proposed, "#f00");
+    drawGlyph(output.ctx, proposed, proposed.colour);
+    drawGlyph(progress.ctx, proposed, red);
   } else {
     // con.log("not ok!");
   }
 }
 
-function r() {
-  // var now = new Date().getTime();
-  anim++;
+var modeIndex = 0;
+var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
+var mode = modes[modeIndex];
+var phaseLength = 100;
 
-  var iterationsPerFrame = 10;
-  for (var i = 0; i < iterationsPerFrame; i++) {
-    generate();
+function r() {
+  var now = new Date().getTime();
+  anim++;
+  switch (mode) {
+    case "piTime" :
+      var iterationsPerFrame = 1;
+      for (var i = 0; i < iterationsPerFrame; i++) {
+        generate();
+      }
+      break;
+    case "piZoom" :
+      var zoomScale = (phaseLength - anim) / phaseLength;
+      // con.log("zoom", zoomScale);
+      output.ctx.clearRect(0, 0, sw, sh);
+      output.ctx.save();
+      output.ctx.translate(sw / 2, sh / 2);
+      output.ctx.scale(zoomScale, zoomScale);
+      output.ctx.translate(- sw / 2, - sh / 2);
+      output.ctx.drawImage(zoomer.canvas, 0, 0);
+      output.ctx.restore();
   }
 
-  // var calctime = new Date().getTime() - now;
-  // var out = document.getElementById('o');
-  // out.innerHTML = anim + " " + polygons.length + " " +  calctime;
-  if (anim < 2000) requestAnimationFrame(r);
+
+  if (anim % phaseLength === 0) {
+    modeIndex ++;
+    modeIndex %= 2;
+    mode = modes[modeIndex];
+    zoomer.ctx.drawImage(output.canvas, 0, 0);
+    anim = 0;
+  }
+  // if (anim < 400) 
+
+  var calctime = new Date().getTime() - now;
+  out.innerHTML = [mode, anim, calctime];
+
+  requestAnimationFrame(r);
+
   // setTimeout(r, 1000);
+  // if (anim < 400) requestAnimationFrame(r);
 }
-// r();
-// r();
 
+function drawInverted() {
+  progress.ctx.fillStyle = red;
+  progress.ctx.fillRect(0, 0, sw, sh);
+  progress.ctx.globalCompositeOperation = 'destination-out';
+  /*
+  progress.ctx.save();
+  progress.ctx.scale(outScale, outScale);
+  progress.ctx.drawImage(pi, 0, 0);
+  progress.ctx.restore();
+  */
+  progress.ctx.fillCircle(sw / 2, sw / 2, sw / 2);
+  progress.ctx.globalCompositeOperation = 'source-over';
+}
 
-var pi = new Image();
+var piInverted = new Image(), pi = new Image();
 pi.onload = function() {
-  con.log("load");
+  drawInverted();
   r();
 }
-pi.src = "pi-red.png";
+pi.src = "pi-red-800.png";
 
 
 </script>
