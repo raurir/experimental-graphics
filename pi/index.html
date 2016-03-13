@@ -55,7 +55,8 @@ var test = canvas(sw, sh);
 var progress = canvas(sw, sh);
 
 var anim = 0;
-var chosenOne = 31;//null;
+var chosenOne = 31;
+var chosen = null;
 var modeIndex = 0;
 var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
 var mode = modes[modeIndex];
@@ -67,7 +68,7 @@ function pointInPolygon(point) {
   test.ctx.globalCompositeOperation = 'source-over';
   test.ctx.drawImage(progress.canvas, 0, 0);
   test.ctx.globalCompositeOperation = 'source-in';
-  drawGlyph(test.ctx, point, red);
+  drawGlyph(test.ctx, point, red, false);
 
   var pad = 2;
 
@@ -121,40 +122,33 @@ function newPosition() {
   }
 }
 
-function drawGlyph(target, props, colour, chosen) {
-  // target.fillCircle(props.x, props.y, props.size, colour);
-  var scale = 2 * props.size / bmp;// /  * outScale;
-  // con.log(scale);
-  target.save();
-  target.translate(props.x - props.size, props.y - props.size);
-
-
-  // if (chosen) {
-  //   target.strokeStyle = red;
-  //   target.lineWidth = 1;
-  //   target.beginPath();
-  //   target.fillRect(0, 0, props.size, props.size);
-  //   target.closePath();
-  //   target.stroke();
-  // }
-
-  target.scale(scale, scale);
-  target.drawImage(pi, 0, 0);
-
-  target.restore();
+function drawGlyph(target, props, colour, chooseNow) {
+  // con.log(chooseNow);
+  if (chooseNow) {
+    target.fillCircle(props.x, props.y, props.size, colour);
+  } else {
+    var scale = 2 * props.size / bmp;// /  * outScale;
+    target.save();
+    target.translate(props.x - props.size, props.y - props.size);
+    target.scale(scale, scale);
+    target.drawImage(pi, 0, 0);
+    target.restore();
+  }
 }
 
 function generate() {
   var proposed = newPosition();
   var ok = pointInPolygon(proposed);
 
-  var chosen = false;//anim > chosenOne;
-  var colour = chosen ? "#F0F" : red;
+  var chooseNow = anim == chosenOne
 
+  chosen = chooseNow ? proposed : chosen;
+  // con.log(chosen);
+  var colour = chooseNow ? "#F0F" : red;
 
   if (ok) {
-    drawGlyph(output.ctx, proposed, colour, chosen);
-    drawGlyph(progress.ctx, proposed, colour, chosen);
+    drawGlyph(output.ctx, proposed, colour, chooseNow);
+    drawGlyph(progress.ctx, proposed, colour, chooseNow);
   } else {
     // con.log("not ok!");
   }
@@ -172,13 +166,22 @@ function r() {
       }
       break;
     case "piZoom" :
-      var zoomScale = (phaseLength - anim) / phaseLength;
       // con.log("zoom", zoomScale);
       output.ctx.clearRect(0, 0, sw, sh);
       output.ctx.save();
-      output.ctx.translate(sw / 2, sh / 2);
+
+      // var zoomScale = 2 - (phaseLength - anim) / phaseLength;
+      var zoomScale = 1 + (1 - (phaseLength - anim) / phaseLength) * outSize / chosen.size;
+      con.log(zoomScale);
+      output.ctx.translate(chosen.x, chosen.y);
       output.ctx.scale(zoomScale, zoomScale);
-      output.ctx.translate(- sw / 2, - sh / 2);
+      output.ctx.translate(- chosen.x, - chosen.y);
+
+      // var zoomScale = (phaseLength - anim) / phaseLength;
+      // output.ctx.translate(sw / 2, sh / 2);
+      // output.ctx.scale(zoomScale, zoomScale);
+      // output.ctx.translate(- sw / 2, - sh / 2);
+
       output.ctx.drawImage(zoomer.canvas, 0, 0);
       output.ctx.restore();
   }
@@ -186,9 +189,12 @@ function r() {
 
   if (anim % phaseLength === 0) {
     modeIndex ++;
-    modeIndex %= 1;
+    modeIndex %= 2;
     mode = modes[modeIndex];
+    drawInverted();
+    zoomer.ctx.clearRect(0, 0, sw, sh);
     zoomer.ctx.drawImage(output.canvas, 0, 0);
+    output.ctx.clearRect(0, 0, sw, sh);
     anim = 0;
   }
   // if (anim < 400) 
@@ -203,6 +209,7 @@ function r() {
 }
 
 function drawInverted() {
+  progress.ctx.clearRect(0, 0, sw, sh);
   progress.ctx.fillStyle = red;
   progress.ctx.fillRect(0, 0, sw, sh);
   progress.ctx.globalCompositeOperation = 'destination-out';
