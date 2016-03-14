@@ -13,6 +13,7 @@
         width: 400px;
         height: 400px;
         opacity: 0.3;
+        display: none;
       }
       #o {display: none;}
     </style>
@@ -70,15 +71,15 @@ var chosen = null;
 var modeIndex = 0;
 var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
 var mode = modes[modeIndex];
-var phaseLength = 500;
+var phaseLength = 100;
 
 
-function pointInPolygon(point) {
+function pointInShape(point, pi) {
 
   test.ctx.globalCompositeOperation = 'source-over';
   test.ctx.drawImage(progress.canvas, 0, 0);
   test.ctx.globalCompositeOperation = 'source-in';
-  drawGlyph(test.ctx, point, red, false);
+  drawGlyph(test.ctx, point, pi);
 
   var pad = 2;
 
@@ -132,48 +133,47 @@ function newPosition() {
   }
 }
 
-function drawGlyph(target, props, colour, chooseNow) {
-  // con.log(chooseNow);
-  if (chooseNow) {
-    target.fillCircle(props.x, props.y, props.size, colour);
-  } else {
+function drawGlyph(target, props, pi) {
+  if (pi) {
     var scale = 2 * props.size / bmp;// /  * outScale;
     target.save();
     target.translate(props.x - props.size, props.y - props.size);
     target.scale(scale, scale);
-    target.drawImage(pi, 0, 0);
+    target.drawImage(piImage, 0, 0);
     target.restore();
+  } else {
+    target.fillCircle(props.x, props.y, props.size, red);
   }
 }
 
-function generate() {
+function generate(index, pi) {
   var proposed = newPosition();
-  var ok = pointInPolygon(proposed);
+  var ok = pointInShape(proposed, pi);
 
   if (ok) {
 
-    var chooseNow = anim >= chosenOne && !chosen;
+    var chooseNow = index >= chosenOne && !chosen;
     if (chooseNow) {
       chosen = proposed;
     }
-    var colour = red;
 
-    drawGlyph(output.ctx, proposed, colour);
-    drawGlyph(progress.ctx, proposed, colour);
+    drawGlyph(output.ctx, proposed, pi);
+    drawGlyph(progress.ctx, proposed, pi);
   } else {
     // con.log("not ok!");
   }
 }
 
+var glyphIndex = 0;
 
 function r() {
   var now = new Date().getTime();
   anim++;
   switch (mode) {
     case "piTime" :
-      var iterationsPerFrame = 1;
+      var iterationsPerFrame = 40;
       for (var i = 0; i < iterationsPerFrame; i++) {
-        generate();
+        generate(anim * iterationsPerFrame + i, glyphIndex === 0);
       }
       break;
     case "piZoom" :
@@ -215,6 +215,8 @@ function r() {
 
     if (modeIndex == 0) {
       chosen = null;
+      glyphIndex++
+      glyphIndex %= 2;
     }
 
     anim = 0;
@@ -231,26 +233,42 @@ function r() {
 }
 
 function drawInverted() {
+  if (glyphIndex === 0) {
+    drawInvertedPi();
+  } else {
+    drawInvertedCircle();
+  }
+}
+
+function drawInvertedPi() {
   progress.ctx.clearRect(0, 0, sw, sh);
   progress.ctx.fillStyle = red;
   progress.ctx.fillRect(0, 0, sw, sh);
   progress.ctx.globalCompositeOperation = 'destination-out';
-  /*
   progress.ctx.save();
   progress.ctx.scale(outScale, outScale);
-  progress.ctx.drawImage(pi, 0, 0);
+  progress.ctx.drawImage(piImage, 0, 0);
   progress.ctx.restore();
-  */
+  progress.ctx.globalCompositeOperation = 'source-over';
+}
+
+function drawInvertedCircle() {
+  progress.ctx.clearRect(0, 0, sw, sh);
+  progress.ctx.fillStyle = red;
+  progress.ctx.fillRect(0, 0, sw, sh);
+  progress.ctx.globalCompositeOperation = 'destination-out';
   progress.ctx.fillCircle(sw / 2, sw / 2, sw / 2);
   progress.ctx.globalCompositeOperation = 'source-over';
 }
 
-var piInverted = new Image(), pi = new Image();
-pi.onload = function() {
-  drawInverted();
+
+
+var piImage = new Image();
+piImage.onload = function() {
+  drawInvertedCircle();
   r();
 }
-pi.src = "pi-red-800.png";
+piImage.src = "pi-red-800.png";
 
 
 </script>
