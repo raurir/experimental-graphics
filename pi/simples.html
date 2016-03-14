@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Pi</title>
+    <meta charset="utf-8">
+    <style>
+      html, body { margin: 0; padding: 0; border: 0; background: #300; }
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 400px;
+        height: 400px;
+        opacity: 0.3;
+        display: none;
+      }
+      #o {display: none;}
+    </style>
+  </head>
+  <body>
+<div id="o"></div>
+<img src='pi-red-800.png'>
+<script>
+
+// https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Pi-symbol.svg/200px-Pi-symbol.svg.png
+
+function canvas(width, height, append) {
+  var a = document.createElement("canvas");
+  if (append) 
+    document.body.appendChild(a);
+  a.width = width;
+  a.height = height;
+  var c = a.getContext('2d');
+  var circleRads = Math.PI * 2;
+  c.fillCircle = function(x, y, r, colour) {
+    c.beginPath();
+    c.fillStyle = colour;
+    c.arc(x, y, r, 0, circleRads, false);
+    c.closePath();
+    c.fill();
+  }
+  return {
+    canvas: a,
+    ctx: c
+  }
+}
+
+var red = "#f00";
+
+var bmpSize = 100;
+var outputScale = 4;
+var dim = bmpSize * outputScale;
+
+function render(pi) {
+  var output = canvas(dim, dim, true);
+  var test = canvas(dim, dim);
+  var progress = canvas(dim, dim);
+
+  function pointInShape(point) {
+
+    test.ctx.globalCompositeOperation = 'source-over';
+    test.ctx.drawImage(progress.canvas, 0, 0);
+    test.ctx.globalCompositeOperation = 'source-in';
+    drawShape(test.ctx, point, false);
+
+    var pad = 2;
+
+    var size = Math.ceil(point.size + pad);
+    var xs = Math.floor(point.x - size);
+    var ys = Math.floor(point.y - size);
+    size = size * 2;
+
+    var pixels = test.ctx.getImageData(xs, ys, size, size).data;
+    var ok = true;
+    for (var x = 0; x < size && ok; x++) {
+      for (var y = 0; y < size && ok; y++) {
+        var pixel = (y * size + x) * 4;
+        ok = pixels[pixel] === 0;
+      }
+    }
+
+    // test.ctx.globalCompositeOperation = 'source-over';
+    // test.ctx.fillStyle = ok ? "rgba(0, 0, 255, 0.25)" : "rgba(255, 0, 0, 0.25)";
+    // test.ctx.fillRect(xs, ys, size, size);
+
+    return ok;
+  }
+
+
+  function newPosition() {
+    var pad = 0;
+    return {
+      x: pad + Math.random() * (dim - pad * 2),
+      y: pad + Math.random() * (dim - pad * 2),
+      size: 0.8 + Math.random() * 20
+    }
+  }
+
+  function drawShape(target, props, fx) {
+    if (fx) {
+      target.shadowColor = '#100';
+      target.shadowBlur = 2;
+    }
+    if (pi) {
+      var scale = 2 * props.size / bmpSize;
+      target.save();
+      target.translate(props.x - props.size, props.y - props.size);
+      target.scale(scale, scale);
+      target.drawImage(piImage, 0, 0);
+      target.restore();
+    } else {
+      target.fillCircle(props.x, props.y, props.size / 2, red);
+    }
+  }
+
+  function generate() {
+    var proposed = newPosition();
+    var ok = pointInShape(proposed);
+    if (ok) {
+      drawShape(output.ctx, proposed, true);
+      drawShape(progress.ctx, proposed, true);
+    }
+  }
+
+  function r() {
+    var iterationsPerFrame = 20;
+    for (var i = 0; i < iterationsPerFrame; i++) {
+      generate(true);
+      generate(false);
+    }
+    requestAnimationFrame(r);
+  }
+
+  progress.ctx.clearRect(0, 0, dim, dim);
+  progress.ctx.fillStyle = red;
+  progress.ctx.fillRect(0, 0, dim, dim);
+  progress.ctx.globalCompositeOperation = 'destination-out';
+  if (pi) {
+    progress.ctx.fillCircle(dim / 2, dim / 2, dim / 2 - 10);
+  } else {
+    progress.ctx.save();
+    progress.ctx.scale(outputScale, outputScale);
+    progress.ctx.drawImage(piImage, 0, 0);
+    progress.ctx.restore();
+  }
+  progress.ctx.globalCompositeOperation = 'source-over';
+
+  r();
+
+}
+
+var piImage = new Image();
+piImage.onload = function() {
+  render(true);
+  render(false);
+}
+// piImage.src = "pi-red-100.png";
+piImage.src = "data:image/png;base64,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";
+
+
+</script>
+</body></html>
