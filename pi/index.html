@@ -27,9 +27,9 @@
 
 var con = console;
 
-function canvas(width, height) {
+function canvas(width, height, append) {
   var a = document.createElement("canvas");
-  document.body.appendChild(a);
+  if (append) document.body.appendChild(a);
   a.width = width;
   a.height = height;
   var c = a.getContext('2d');
@@ -55,23 +55,25 @@ var out = document.getElementById('o');
 var red = "#f00";
 
 var bmp = 800;
-var outScale = 0.5;
+var outScale = 0.25;
 var outSize = bmp * outScale;
 var sw = outSize;
 var sh = outSize;
 
-var output = canvas(sw, sh);
+var output = canvas(sw, sh, true);
 var zoomer = canvas(sw, sh);
 var test = canvas(sw, sh);
 var progress = canvas(sw, sh);
+
+var nextImage = [canvas(sw, sh), canvas(sw, sh)];
 
 var anim = 0;
 var chosenOne = 31;
 var chosen = null;
 var modeIndex = 0;
-var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
+var modes = ["piTime", "piZoom"];
 var mode = modes[modeIndex];
-var phaseLength = 100;
+var phaseLength = 300;
 
 
 function pointInShape(point, pi) {
@@ -157,6 +159,8 @@ function generate(index, pi) {
       chosen = proposed;
     }
 
+    drawGlyph(nextImage[ pi ? 0 : 1 ].ctx, proposed, pi);
+
     drawGlyph(output.ctx, proposed, pi);
     drawGlyph(progress.ctx, proposed, pi);
   } else {
@@ -171,12 +175,14 @@ function r() {
   anim++;
   switch (mode) {
     case "piTime" :
+      phaseLength = 300;
       var iterationsPerFrame = 40;
       for (var i = 0; i < iterationsPerFrame; i++) {
         generate(anim * iterationsPerFrame + i, glyphIndex === 0);
       }
       break;
     case "piZoom" :
+      phaseLength = 50;
       // con.log("zoom", zoomScale);
       output.ctx.clearRect(0, 0, sw, sh);
       output.ctx.save();
@@ -193,14 +199,26 @@ function r() {
         -chosen.x - (chosen.x - sw / 2) / zoomScale * zoomRatio, 
         -chosen.y - (chosen.y - sh / 2) / zoomScale * zoomRatio
       );
-
-      // var zoomScale = (phaseLength - anim) / phaseLength;
-      // output.ctx.translate(sw / 2, sh / 2);
-      // output.ctx.scale(zoomScale, zoomScale);
-      // output.ctx.translate(- sw / 2, - sh / 2);
-
+      output.ctx.globalAlpha = 1 - zoomRatio;
       output.ctx.drawImage(zoomer.canvas, 0, 0);
       output.ctx.restore();
+
+
+      var zoomStart = chosen.size / outSize;
+      var zoom = (1 - zoomStart) * zoomRatio;
+
+      var tx = chosen.x * (1 - zoomRatio);
+      var ty = chosen.y * (1 - zoomRatio);
+
+      // con.log("zoom", zoom, startZoom)
+
+      output.ctx.save();
+      output.ctx.translate(tx, ty);
+      output.ctx.scale(zoom, zoom);
+      output.ctx.globalAlpha = zoomRatio;
+      output.ctx.drawImage(nextImage[ (glyphIndex + 1) % 2 ].canvas, 0, 0);
+      output.ctx.restore();
+
   }
 
 
@@ -217,6 +235,9 @@ function r() {
       chosen = null;
       glyphIndex++
       glyphIndex %= 2;
+      nextImage[ glyphIndex ].ctx.clearRect(0, 0, sw, sh);
+    } else {
+
     }
 
     anim = 0;
@@ -265,8 +286,19 @@ function drawInvertedCircle() {
 
 var piImage = new Image();
 piImage.onload = function() {
-  drawInvertedCircle();
-  r();
+
+  drawInvertedPi();
+  var iterationsPerFrame = 40 * phaseLength;
+  for (var i = 0; i < iterationsPerFrame; i++) {
+    generate(anim * iterationsPerFrame + i, false);
+  }
+
+  output.ctx.clearRect(0, 0, sw, sh);
+  setTimeout(function() {
+    drawInvertedCircle();
+    r();
+  }, 2000);
+
 }
 piImage.src = "pi-red-800.png";
 
