@@ -6,10 +6,20 @@
     <meta charset="utf-8">
     <style>
       html, body { margin: 0; padding: 0; border: 0; background: #444; }
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 400px;
+        height: 400px;
+        opacity: 0.3;
+      }
+      #o {display: none;}
     </style>
   </head>
   <body>
 <div id="o"></div>
+<img src='pi-red-800.png'>
 <script>
 
 // https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Pi-symbol.svg/200px-Pi-symbol.svg.png
@@ -60,7 +70,7 @@ var chosen = null;
 var modeIndex = 0;
 var modes = ["piTime", "piZoom", "circleTime", "circleZoom"];
 var mode = modes[modeIndex];
-var phaseLength = 100;
+var phaseLength = 500;
 
 
 function pointInPolygon(point) {
@@ -140,15 +150,16 @@ function generate() {
   var proposed = newPosition();
   var ok = pointInPolygon(proposed);
 
-  var chooseNow = anim == chosenOne
-
-  chosen = chooseNow ? proposed : chosen;
-  // con.log(chosen);
-  var colour = chooseNow ? "#F0F" : red;
-
   if (ok) {
-    drawGlyph(output.ctx, proposed, colour, chooseNow);
-    drawGlyph(progress.ctx, proposed, colour, chooseNow);
+
+    var chooseNow = anim >= chosenOne && !chosen;
+    if (chooseNow) {
+      chosen = proposed;
+    }
+    var colour = red;
+
+    drawGlyph(output.ctx, proposed, colour);
+    drawGlyph(progress.ctx, proposed, colour);
   } else {
     // con.log("not ok!");
   }
@@ -171,11 +182,17 @@ function r() {
       output.ctx.save();
 
       // var zoomScale = 2 - (phaseLength - anim) / phaseLength;
-      var zoomScale = 1 + (1 - (phaseLength - anim) / phaseLength) * outSize / chosen.size;
-      con.log(zoomScale);
+      var zoomRatio = (1 - (phaseLength - anim) / phaseLength); // 0 to 1
+      var zoomScale = 1 + zoomRatio * (outSize / 2) / chosen.size;
+
+      // con.log(zoomRatio, zoomScale);
+
       output.ctx.translate(chosen.x, chosen.y);
       output.ctx.scale(zoomScale, zoomScale);
-      output.ctx.translate(- chosen.x, - chosen.y);
+      output.ctx.translate(
+        -chosen.x - (chosen.x - sw / 2) / zoomScale * zoomRatio, 
+        -chosen.y - (chosen.y - sh / 2) / zoomScale * zoomRatio
+      );
 
       // var zoomScale = (phaseLength - anim) / phaseLength;
       // output.ctx.translate(sw / 2, sh / 2);
@@ -195,6 +212,11 @@ function r() {
     zoomer.ctx.clearRect(0, 0, sw, sh);
     zoomer.ctx.drawImage(output.canvas, 0, 0);
     output.ctx.clearRect(0, 0, sw, sh);
+
+    if (modeIndex == 0) {
+      chosen = null;
+    }
+
     anim = 0;
   }
   // if (anim < 400) 
