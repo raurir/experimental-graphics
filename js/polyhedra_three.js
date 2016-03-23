@@ -12,33 +12,6 @@ var polyhedra_three = function() {
 	var radius = 20;
 	var n;
 
-
-
-	// polys: http://stemkoski.github.io/Three.js/
-	// http://stemkoski.github.io/Three.js/js/polyhedra.js
-
-	// var t = ( 1 + Math.sqrt( 5 ) ) / 2
-	// var CodedIcosahedron = {
-	// 	name: "CodedIcosahedron",
-	//  	vertices: [
-	// 		-1,  t,  0,1,  t,  0,-1, -t,  0,1, -t,  0,
-	// 		0, -1,  t,0,  1,  t,0, -1, -t,0,  1, -t,
-	// 		t,  0, -1,t,  0,  1,-t,  0, -1,-t,  0,  1
-	// 	],
-	// 	faces:[
-	// 		0, 11,  5,
-	// 		0,  5,  1,
-	// 		0,  1,  7,
-	// 		0,  7, 10,
-	// 		0, 10, 11,
-	// 		1,  5,  9,5, 11,  4,11, 10,  2,10,  7,  6,7,  1,  8,
-	// 		3,  9,  4,3,  4,  2,3,  2,  6,3,  6,  8,3,  8,  9,
-	// 		4,  9,  5,2,  4, 11,6,  2, 10,8,  6,  7,9,  8,  1
-	// 	]
-	// }
-
-
-
 	var settings = {};
 	settings.lineScale = 1;
 	settings.lineSize = 1 + Math.random() * 10 * settings.lineScale;
@@ -100,110 +73,29 @@ var polyhedra_three = function() {
 
 
 
+	function draw(props) {
+		var i;
+		// con.log(props);
 
-function draw(data)
-{
-	// this draw function directly stolen from stemkoski - http://stemkoski.github.io/Three.js/Polyhedra.html
-	var polyhedron = new THREE.Object3D();
-	
-	// convert vertex data to THREE.js vectors
-	var vertex = [] 
-	for (var i = 0; i < data.vertex.length; i++)
-		vertex.push( new THREE.Vector3( data.vertex[i][0], data.vertex[i][1], data.vertex[i][2] ).multiplyScalar(100) );
+		var faces = [], faceRange = [], totalFaces = 0;
+		props.face.map((face) => { 
+			for (i = 0, il = face.length - 2; i < il; i++) {
+				faces.push(face[0], face[i + 1], face[i + 2]);
+			}
+			totalFaces += il;
+			faceRange.push(totalFaces);
+		});
 
-	var vertexGeometry = new THREE.SphereGeometry( 6, 12, 6 );
-	var vertexMaterial = new THREE.MeshLambertMaterial( { color: 0x222244 } );
-	var vertexSingleMesh = new THREE.Mesh( vertexGeometry );
-
-	// var vertexAmalgam = new THREE.Geometry();
-	// for (var i = 0; i < data.vertex.length; i++)
-	// {
-	// 	var vMesh = vertexSingleMesh.clone();
-	// 	vMesh.position = vertex[i];
-	// 	THREE.GeometryUtils.merge( vertexAmalgam, vMesh );
-	// }
-	// var vertexMesh = new THREE.Mesh( vertexAmalgam, vertexMaterial );
-	// polyhedron.add( vertexMesh );
-	
-
-	
-	// convert face data to a single (triangulated) geometry
-	var faceMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors, side: THREE.FrontSide, transparent: false, opacity:0.8 } );
-	var faceColors = 
-	{
-	    3: new THREE.Color( 0xcc0000 ),
-	    4: new THREE.Color( 0x00cc00 ),
-	    5: new THREE.Color( 0x0000cc ),
-	    6: new THREE.Color( 0xcccc00 ),
-	    7: new THREE.Color( 0x999999 ),
-	    8: new THREE.Color( 0x990099 ),
-	    9: new THREE.Color( 0xff6600 ),
-	    10: new THREE.Color( 0x6666ff )
-	};
-	
-	var geometry = new THREE.Geometry();
-	geometry.vertices = vertex;
-	var faceIndex = 0;
-	for (var faceNum = 0; faceNum < data.face.length; faceNum++)
-	{
-		for (var i = 0; i < data.face[faceNum].length - 2; i++)
-		{
-			geometry.faces[faceIndex] = new THREE.Face3( data.face[faceNum][0], data.face[faceNum][i+1], data.face[faceNum][i+2] );
-			geometry.faces[faceIndex].color = faceColors[data.face[faceNum].length];
-			faceIndex++;
-		}
-	}
-	
-	geometry.computeFaceNormals();
-	geometry.computeVertexNormals();
-
-	faces = new THREE.Mesh(geometry, faceMaterial);
-	faces.scale.multiplyScalar(1.01);
-	polyhedron.add(faces);
-	
-	var interiorMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors, side: THREE.BackSide } );
-	
-	var interiorFaces = new THREE.Mesh(geometry, interiorMaterial);
-	interiorFaces.scale.multiplyScalar(0.99);
-	polyhedron.add( interiorFaces );
-	
-	return polyhedron;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	function drawOld(props) {
-
-		con.log(props);
-
-		var tempFaces = [];
-		props.face.map((face) => { face.map((vertex) => { tempFaces.push(vertex); }) })
-
-		var tempVertices = [];
-		props.vertex.map((vertex) => { vertex.map((vertexIndex) => { tempVertices.push(vertexIndex); }) })
-
-		var faces = tempFaces;
-		var vertices = tempVertices
+		var vertices = [];
+		props.vertex.map((vertex) => { 
+			vertex.map((vertexIndex) => {
+				vertices.push(vertexIndex);
+			});
+		});
 
 		var materials = [];
-		for (var i=0; i < faces.length / 3; i++) {
+		
+		for (i = 0; i < props.face.length; i++) {
 			// var img = new Image();
 			// img.src = i + '.png';
 			// var tex = new THREE.Texture(img);
@@ -212,71 +104,88 @@ function draw(data)
 			//   this.tex.needsUpdate = true;
 			// };
 
-			var pattern = createPattern(1000);
-			var texture = new THREE.Texture(pattern);
-			texture.needsUpdate = true;
-			var material = new THREE.MeshBasicMaterial( {map: texture, side:THREE.DoubleSide } );
+			// var pattern = createPattern(1000);
+			// var texture = new THREE.Texture(pattern);
+			// texture.needsUpdate = true;
+			// var material = new THREE.MeshBasicMaterial( {map: texture, side:THREE.DoubleSide } );
 			// material.transparent = true;
 
-			// var material = new THREE.MeshLambertMaterial( { color: col } )
+			var r = Math.round(Math.random() * 255);
+			var g = Math.round(Math.random() * 255);
+			var b = Math.round(Math.random() * 255);
+			var col = r << 16 | g << 8 | b;
 
-			var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture});
+			var material = new THREE.MeshLambertMaterial( { color: col } )
+			// var material = new THREE.MeshBasicMaterial( { color: col } )
+			// var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture});
+			// var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture});
 			materials.push(material);
 		}
 
 		var geometry = new THREE.PolyhedronGeometry( vertices, faces, 200, 0 );
 		// var geometry = new THREE.BoxGeometry( 200, 200, 400, 1, 1, 1 );
 
-		for (var i=0; i < geometry.faces.length; i++) {
-			con.log(i, geometry.faces[ i ] );
-			geometry.faces[ i ].materialIndex = i;
+		con.log('geometry', geometry);
+
+		var materialIndex = 0;
+		for (i = 0, il = geometry.faces.length; i < il; i++) {
+			if (faceRange.indexOf(i) > -1) materialIndex++;
+			geometry.faces[ i ].materialIndex = materialIndex;
 		}
+
+		// var material = new THREE.MeshLambertMaterial( { color: col } )
 
 		var material = new THREE.MeshFaceMaterial( materials );
 		var object = new THREE.Mesh( geometry, material );
 
-		// var object = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-
-		// object.position.x = props.x;
-		// object.position.y = props.y;
-		// object.position.z = props.z;
-
 		return object;
 	}
 
+	var polyhedron;
 
 	function init() {
+
+		var time1 = new Date().getTime();
 
 		scene = new THREE.Scene();
 
 		camera = new THREE.PerspectiveCamera( 70, sw / sh, 1, 10000 );
-		camera.position.set( 0, 300, 500 );
+		camera.position.set( 0, 100, 500 );
 		scene.add( camera );
 
 		var light = new THREE.DirectionalLight( 0xffffff, 2 );
 		light.position.set( 1, 1, 1 ).normalize();
 		scene.add( light );
 
-		var light = new THREE.DirectionalLight( 0xffffff );
-		light.position.set( -1, -1, -1 ).normalize();
+		var light = new THREE.DirectionalLight( 0xff00ff );
+		light.position.set( -1, 0, 0 ).normalize();
 		scene.add( light );
 
 		renderer = new THREE.WebGLRenderer();
-		renderer.sortObjects = false;
+		// renderer.sortObjects = false;
 		renderer.setSize( sw, sh );
 
-		var mesh = POLYHEDRA.TruncatedCubocahedron;
-		// var mesh = POLYHEDRA.J22 //Icosidodecahedron;
-		con.log("POLYHEDRA", mesh);
+		// var mesh = POLYHEDRA.TruncatedCubocahedron;
+		// var mesh = POLYHEDRA.J74;
+		// var mesh = POLYHEDRA.Dodecahedron;
+		// var mesh = POLYHEDRA.J22;
+		var mesh = POLYHEDRA.Icosidodecahedron;
+		// con.log("POLYHEDRA", mesh);
 
-		var object = draw(mesh);
-		scene.add( object );
+		polyhedron = draw(mesh);
+		scene.add(polyhedron);
 
 		stage.appendChild(renderer.domElement);
 
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
 		animate();
+
+		var time2 = new Date().getTime();
+		render();
+		var time3 = new Date().getTime();
+
+		con.log("times", time2 - time1, time3 - time2);
 	}
 
 	function onDocumentMouseMove( event ) {
@@ -291,9 +200,11 @@ function draw(data)
 
 		theta += mouse.x * 4;
 
-		camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
-		camera.position.y = mouse.y * 10;
-		camera.position.z = camRadius * Math.cos( theta * Math.PI / 360 );
+		// camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
+		// camera.position.y = mouse.y * 10;
+		// camera.position.z = camRadius * Math.cos( theta * Math.PI / 360 );
+
+		polyhedron.rotation.y = theta * 0.1;
 
 		camera.lookAt( scene.position );
 
