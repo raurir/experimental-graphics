@@ -11,6 +11,7 @@ var polyhedra_three = function() {
 	var i = 0;
 	var radius = 20;
 	var n;
+	var polyhedron;
 
 	var settings = {};
 	settings.lineScale = 1;
@@ -74,9 +75,7 @@ var polyhedra_three = function() {
 
 
 	function draw(props) {
-		var i;
-		// con.log(props);
-
+		var i, il;
 		var faces = [], faceRange = [], totalFaces = 0;
 		props.face.map((face) => { 
 			for (i = 0, il = face.length - 2; i < il; i++) {
@@ -94,8 +93,8 @@ var polyhedra_three = function() {
 		});
 
 		var materials = [];
-		
-		for (i = 0; i < props.face.length; i++) {
+
+		for (i = 0, il = props.face.length; i < il; i++) {
 			// var img = new Image();
 			// img.src = i + '.png';
 			// var tex = new THREE.Texture(img);
@@ -118,12 +117,11 @@ var polyhedra_three = function() {
 			var material = new THREE.MeshLambertMaterial( { color: col } )
 			// var material = new THREE.MeshBasicMaterial( { color: col } )
 			// var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture});
-			// var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: texture});
+
 			materials.push(material);
 		}
 
-		var geometry = new THREE.PolyhedronGeometry( vertices, faces, 200, 0 );
-		// var geometry = new THREE.BoxGeometry( 200, 200, 400, 1, 1, 1 );
+		var geometry = new THREE.PolyhedronGeometry(vertices, faces, 200, 0);
 
 		con.log('geometry', geometry);
 
@@ -141,7 +139,7 @@ var polyhedra_three = function() {
 		return object;
 	}
 
-	var polyhedron;
+
 
 	function init() {
 
@@ -157,7 +155,7 @@ var polyhedra_three = function() {
 		light.position.set( 1, 1, 1 ).normalize();
 		scene.add( light );
 
-		var light = new THREE.DirectionalLight( 0xff00ff );
+		var light = new THREE.DirectionalLight( 0xff00ff, 2 );
 		light.position.set( -1, 0, 0 ).normalize();
 		scene.add( light );
 
@@ -179,13 +177,13 @@ var polyhedra_three = function() {
 
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
-		animate();
 
 		var time2 = new Date().getTime();
 		render();
 		var time3 = new Date().getTime();
 
 		con.log("times", time2 - time1, time3 - time2);
+		animate();
 	}
 
 	function onDocumentMouseMove( event ) {
