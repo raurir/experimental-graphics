@@ -40,8 +40,8 @@ var experiments = (function() {
     ["oscillate_curtain"],
     ["pattern_check", "css/pattern_check"],
     ["pattern_circles"],
-    ["polyhedra","3d"],
-    ["polyhedra_three","THREE"],
+    ["polyhedra","3d"], // 3d is not moduled!
+    ["polyhedra_three","THREE", "../lib/stemkoski/polyhedra"],
     ["pine_three","THREE"],
     ["race_lines_three","THREE", "TweenMax"],
     ["rainbow_particles"],
