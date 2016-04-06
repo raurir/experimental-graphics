@@ -55,7 +55,7 @@ var hexagon_tile = function() {
     var backgroundColor = colours.getRandomColour();
 
     // window.removeEventListener("resize", resize);
-    progress("render:start");
+    // progress("render:start");
 
     radiusOuter = (5 + rand.random() * 25) / 1000;
     strokeSize = (rand.random() * rand.random() * rand.random() * radiusOuter);
