@@ -44,29 +44,11 @@ var corona_sine = function() {
     colours.getRandomPalette();
     colourBG = colours.getRandomColour();
 
-    var layers = settings.layers.cur = ~~(1 + rand.random() * 4);
-
+    settings.layers.cur = ~~(1 + rand.random() * 4);
     settings.rays.cur = ~~(12 + rand.random() * 300);
-    colourLayers = [];
-    lengthLayers = [0];//-0.2];
-    for (var l = 0; l < layers; l++) {
-      colourLayers.push(colours.getNextColour());
-      lengthLayers.push(rand.random()); // push in random lengths, sort afterwards.
-    }
-    lengthLayers.sort();
-    lengthLayers[layers] = 1;
 
-    // colourLayers = ["red", "green", "blue", "yellow", "white"];
+    progress("render:settings", settings);
 
-    oscillators = ~~(1 + rand.random() * 13);
-    oscs = [];
-    for (var o = 0; o < oscillators; o++) {
-      oscs.push({
-        offset: rand.random() * Math.PI * 2,
-        phase: ~~(rand.random() * 6),
-        speed: rand.random() * 0.003
-      });
-    };
     render(0);
   }
 
@@ -118,9 +100,32 @@ var corona_sine = function() {
 
   function render(time) {
     if (!time) time = 0;
+
+    var layers = settings.layers.cur
     var rays = settings.rays.cur;
 
-    // con.log("render", time);
+    colourLayers = [];
+    lengthLayers = [0];//-0.2];
+    for (var l = 0; l < layers; l++) {
+      colourLayers.push(colours.getNextColour());
+      lengthLayers.push(rand.random()); // push in random lengths, sort afterwards.
+    }
+    lengthLayers.sort();
+    lengthLayers[layers] = 1;
+
+    // colourLayers = ["red", "green", "blue", "yellow", "white"];
+
+    oscillators = ~~(1 + rand.random() * 13);
+    oscs = [];
+    for (var o = 0; o < oscillators; o++) {
+      oscs.push({
+        offset: rand.random() * Math.PI * 2,
+        phase: ~~(rand.random() * 6),
+        speed: rand.random() * 0.003
+      });
+    };
+
+    con.log("render", time);
     ctx.fillStyle = colourBG;
     ctx.fillRect(0, 0, sw, sh);
 
