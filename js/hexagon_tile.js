@@ -35,6 +35,23 @@ var hexagon_tile = function() {
 
   var stage, inner;
 
+
+  var settings = {
+    spread: {
+      type: "Number",
+      label: "Spread",
+      min: 1,
+      max: 10,
+      cur: 10
+    },
+    background: {
+      type: "Boolean",
+      label: "Background",
+      cur: true
+    }
+  };
+
+
   if (vector) {
     stage = dom.svg("svg", {width:sw, height:sh});
     inner = dom.svg("g");
@@ -48,6 +65,12 @@ var hexagon_tile = function() {
     sw = size;
     sh = size;
     stage.setSize(sw, sh);
+
+    if (options.settings) {
+      settings = options.settings;
+    }
+
+    progress('settings:initialised', settings);
 
     // con.log("hex init rand", rand.random(), rand.getSeed());
 
@@ -66,8 +89,10 @@ var hexagon_tile = function() {
       while (inner.firstChild) inner.removeChild(inner.firstChild);
       stage.setAttribute("style", "background-color:" + backgroundColor);
     } else {
-      stage.ctx.fillStyle = backgroundColor;
-      stage.ctx.fillRect(0, 0, size, size);
+      if (settings.background.cur) {
+        stage.ctx.fillStyle = backgroundColor;
+        stage.ctx.fillRect(0, 0, size, size);
+      }
     }
 
     // var neighbourGroups = dom.svg("g");
@@ -218,9 +243,10 @@ var hexagon_tile = function() {
 
 
   function batch() {
+    var maxRender = Math.ceil(settings.spread.cur / settings.spread.max * hexagons);
     var loopStart = currentBatch * batchSize,
       loopEnd = loopStart + batchSize;
-    if (loopEnd > hexagons) loopEnd = hexagons;
+    if (loopEnd > maxRender) loopEnd = maxRender;
     for(var h = loopStart; h < loopEnd; h++) {
 
       var index = randomHexes[h].index;
@@ -348,13 +374,17 @@ var hexagon_tile = function() {
   }
 
 
+  function update(s) {
+    init({size: size, settings: s})
+  }
+
 
   var experiment = {
-    stage: vector ? stage : stage.canvas,
-    // inner: inner,
-    // resize: resize,
     init: init,
-    // kill: function() {}
+    render: render,
+    settings: settings,
+    stage: vector ? stage : stage.canvas,
+    update: update
   }
 
   return experiment;
