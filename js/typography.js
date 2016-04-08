@@ -136,8 +136,8 @@ var typography = function() {
     ctx.fillText(getString(), 0, 0);
   }
 
-  function init(_size) {
-    size = _size;
+  function init(options) {
+    size = options.size;
     sw = size;
     sh = size;
     block = Math.ceil(1 / 4 * size);

@@ -25,9 +25,9 @@ var colours = (function() {
 	var previewCSSAdded = false;
 
 	function getRandomPalette(warning) {
-		// con.log("getRandomPalette", warning);
 		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
+		con.log("getRandomPalette", paletteIndex, palettes.length);
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
 	}

@@ -33,9 +33,9 @@ var bezier_flow = function() {
     return points[(sections + d) % sections];
   }
 
-  function init(_size) {
-    con.log("init called", _size, rand.getSeed());
-    size = _size;
+  function init(options) {
+    con.log("init called", rand.getSeed());
+    size = options.size;
     sw = size;
     sh = size;
     bmp.setSize(sw, sh);

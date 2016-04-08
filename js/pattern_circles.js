@@ -9,8 +9,8 @@ var pattern_circles = function() {
   var colourBG;
   var rotation;
 
-  function init(_size) {
-    size = _size;
+  function init(options) {
+    size = options.size;
     sw = size;
     sh = size;
     var cx = sw / 2;

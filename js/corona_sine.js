@@ -12,8 +12,8 @@ var corona_sine = function() {
   var settings = {
     layers: {
       label: "Layers",
-      min: 12,
-      max: 312,
+      min: 2,
+      max: 6,
       cur: 0
     },
     rays: {
@@ -35,19 +35,23 @@ var corona_sine = function() {
   var ctx = bmp.ctx;
   var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
-  function init(_size) {
-    size = _size;
+  function init(options) {
+    size = options.size;
     sw = size;
     sh = size;
     bmp.setSize(sw, sh);
     lastGenerate = new Date().getTime();
-    colours.getRandomPalette();
-    colourBG = colours.getRandomColour();
 
-    settings.layers.cur = ~~(1 + rand.random() * 4);
-    settings.rays.cur = ~~(12 + rand.random() * 300);
+    // settings.layers.cur = ~~(1 + rand.random() * 4);
+    // settings.rays.cur = ~~(12 + rand.random() * 300);
+    settings.layers.cur = ~~(1 + rand.random() * 2);
+    settings.rays.cur = ~~(10 + rand.random() * 5);
 
-    progress("render:settings", settings);
+    if (options.settings) {
+      settings = options.settings;
+    }
+
+    progress("settings:initialised", settings);
 
     render(0);
   }
@@ -97,9 +101,18 @@ var corona_sine = function() {
     }
   }
 
+  function update(s) {
+    rand.random();
+    rand.random();
+    settings = s;
+    render();
+  }
 
   function render(time) {
     if (!time) time = 0;
+
+    colours.getRandomPalette();
+    colourBG = colours.getRandomColour();
 
     var layers = settings.layers.cur
     var rays = settings.rays.cur;
@@ -125,7 +138,7 @@ var corona_sine = function() {
       });
     };
 
-    con.log("render", time);
+    // con.log("render", time);
     ctx.fillStyle = colourBG;
     ctx.fillRect(0, 0, sw, sh);
 
@@ -145,7 +158,7 @@ var corona_sine = function() {
     // ctx.fill();
     // return;
 
-    var batchSize = 20;
+    var batchSize = 100;
     function renderBatch(batch) {
       // con.log("renderBatch", batch);
       var start = batch * batchSize, end = start + batchSize;
@@ -194,7 +207,8 @@ var corona_sine = function() {
     stage: bmp.canvas,
     render: render,
     init: init,
-    settings: settings
+    settings: settings,
+    update: update
   }
 
   return experiment;
