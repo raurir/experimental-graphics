@@ -27,6 +27,7 @@ var experiments = (function() {
 
     ["additive"],
     ["anemone_three", "THREE"],
+    ["any_image_url"],
     ["bezier_flow"],
     ["box", "maze"],
     ["corona_sine"],
