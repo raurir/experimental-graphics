@@ -24,6 +24,11 @@ var corona_sine = function() {
       cur: 0,
       type: "Number"
     },
+    background: {
+      type: "Boolean",
+      label: "Background",
+      cur: true
+    }
   };
 
   var size, sw, sh;
@@ -141,8 +146,12 @@ var corona_sine = function() {
     };
 
     // con.log("render", time);
-    ctx.fillStyle = colourBG;
-    ctx.fillRect(0, 0, sw, sh);
+    if (settings.background.cur) {
+      ctx.fillStyle = colourBG;
+      ctx.fillRect(0, 0, sw, sh);
+    } else {
+      ctx.clearRect(0, 0, sw, sh);
+    }
 
     var minDimension = (sw > sh ? sh : sw);
     var innerRadius = minDimension / 2 * 0.2;
