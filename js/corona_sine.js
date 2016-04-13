@@ -14,13 +14,15 @@ var corona_sine = function() {
       label: "Layers",
       min: 2,
       max: 6,
-      cur: 0
+      cur: 0,
+      type: "Number"
     },
     rays: {
       label: "Rays",
       min: 12,
       max: 312,
-      cur: 0
+      cur: 0,
+      type: "Number"
     },
   };
 
@@ -47,9 +49,9 @@ var corona_sine = function() {
     settings.layers.cur = ~~(1 + rand.random() * 2);
     settings.rays.cur = ~~(10 + rand.random() * 5);
 
-    if (options.settings) {
-      settings = options.settings;
-    }
+  if (options.settings) {
+    settings = options.settings;
+  }
 
     progress("settings:initialised", settings);
 
