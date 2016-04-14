@@ -12,8 +12,8 @@ var corona_sine = function() {
   var settings = {
     layers: {
       label: "Layers",
-      min: 2,
-      max: 6,
+      min: 1,
+      max: 30,
       cur: 0,
       type: "Number"
     },
