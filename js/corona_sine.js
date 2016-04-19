@@ -54,9 +54,9 @@ var corona_sine = function() {
     settings.layers.cur = ~~(1 + rand.random() * 2);
     settings.rays.cur = ~~(10 + rand.random() * 5);
 
-  if (options.settings) {
-    settings = options.settings;
-  }
+    if (options.settings) {
+      settings = options.settings;
+    }
 
     progress("settings:initialised", settings);
 
