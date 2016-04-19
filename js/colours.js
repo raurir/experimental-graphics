@@ -27,7 +27,7 @@ var colours = (function() {
 	function getRandomPalette(warning) {
 		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
-		con.log("getRandomPalette", paletteIndex, palettes.length);
+		// con.log("getRandomPalette", paletteIndex, palettes.length);
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
 	}

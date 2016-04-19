@@ -18,9 +18,11 @@ var rand = (function() {
       num %= m;
     };
     // console.log("string", s.length)
-    console.log("seed", num);
+    // console.log("seed", num);
     return num;
   }
+
+
 
   var strings = [
     "a",
@@ -45,16 +47,16 @@ var rand = (function() {
       var valDefined = val || val === 0;
       if (valDefined) {
         if (/[^\d]/.test(val)) {
-          con.log("setting alpha seed", val);
+          // con.log("setting alpha seed", val);
           val = alphaToInteger(val);
-          con.log("setting alpha now", val);
+          // con.log("setting alpha now", val);
         } else {
           val = Number(val);
-          con.log("setting numeric seed", val);
+          // con.log("setting numeric seed", val);
         }
       } else {
         val = Math.round(Math.random() * m);
-        con.log("setting random seed", val);
+        // con.log("setting random seed", val);
       }
       z = seed = val;
     },

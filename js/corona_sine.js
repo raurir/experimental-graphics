@@ -49,11 +49,8 @@ var corona_sine = function() {
     bmp.setSize(sw, sh);
     lastGenerate = new Date().getTime();
 
-    // settings.layers.cur = ~~(1 + rand.random() * 4);
-    // settings.rays.cur = ~~(12 + rand.random() * 300);
-    settings.layers.cur = ~~(1 + rand.random() * 2);
-    settings.rays.cur = ~~(10 + rand.random() * 5);
-
+    settings.layers.cur = ~~(1 + rand.random() * 4);
+    settings.rays.cur = ~~(12 + rand.random() * 300);
     if (options.settings) {
       settings = options.settings;
     }
