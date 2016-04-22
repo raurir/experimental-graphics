@@ -14,9 +14,15 @@ var https = require("https");
 var any_image_url = function() {
 
   // list a range of valid seeds.
-  var images = {
-    "526": "http://ecx.images-amazon.com/images/I/81YJhtVbHvL._SL1200_.jpg",
-    "834199129": "http://ajournalofmusicalthings.com/wp-content/uploads/Guns_N_Roses-logo.jpg",
+  var allowed = {
+    "526": { // use your illusion cover
+      image: "http://ecx.images-amazon.com/images/I/81YJhtVbHvL._SL1200_.jpg",
+      scale: 1.2
+    },
+    "834199129": { // GNR logo - this seed is numerical equivalent to 'gnr'
+      image: "http://ajournalofmusicalthings.com/wp-content/uploads/Guns_N_Roses-logo.jpg",
+      scale: 0.8
+    }
   }
 
   var size, sw, sh, cx, cy;
@@ -24,8 +30,6 @@ var any_image_url = function() {
   var ctx = bmp.ctx;
 
   function init(options) {
-
-    con.log("init", options)
 
     size = options.size;
     sw = size;
@@ -51,9 +55,9 @@ var any_image_url = function() {
     //   '<path fill="white" d="M17 10.51c0-.56-.25-1.521-.8-2.309-.649-.928-1.532-1.399-2.627-1.399H4.387c.118 1.016.46 1.819 1.022 2.393.987 1.01 2.372 1.027 2.41 1.027l.827-.013v.859c0 2.216 1.685 2.515 3.333 2.515h.132v1.692h-.132c-3.562 0-4.68-1.726-4.912-3.437-.738-.13-1.869-.483-2.801-1.437C3.234 9.345 2.711 7.85 2.711 5.956V5.11h10.862c1.366 0 2.425.515 3.214 1.255C15.735 2.685 12.455 0 8.571 0 3.837 0 0 3.987 0 8.905c0 4.918 3.837 8.905 8.57 8.905 4.202 0 7.697-3.142 8.43-7.287v-.013" fill-rule="evenodd"/>',
     //   '</svg>'].join(""), 50, 17, 18);
 
-    var image = images[rand.getSeed()];
-    if (image) {
-      renderBMPFromURL(image, 0.5, 1000, 1000);
+    var ok = allowed[rand.getSeed()];
+    if (ok && ok.image ) {
+      renderBMPFromURL(ok.image, ok.scale);
     } else {
       con.warn("Cannot find image:", rand.getSeed());
     }
@@ -79,9 +83,10 @@ var any_image_url = function() {
     img.src = url;
   }
 
-  function renderBMPFromURL(url, scale, width, height) {
+  function renderBMPFromURL(url, scale) {
 
     function drawToContext(img) {
+      var width = img.width, height = img.height;
       con.log("drawToContext");
       ctx.translate(cx, cy);
       ctx.scale(scale, scale);
@@ -90,12 +95,10 @@ var any_image_url = function() {
       progress("render:complete", bmp.canvas);
     }
 
-
     if (isNode) {
+      // promise didn't work!
       loadImageURL(url, function(buffer) {
-        // con.log("loadImageURL success", buffer);
         makeImage(buffer, function(img) {
-          con.log("makeImage success", img);
           drawToContext(img);
         }, function(err) {
           con.log("makeImage fail", err);
