@@ -1,6 +1,11 @@
 var con = console;
 var isNode = (typeof module !== 'undefined');
 
+if (isNode) {
+  var rand = require('./rand.js');
+  var dom = require('./dom.js');
+}
+
 var state_of_origin_52_6 = function() {
 
 	var QLD = "QLD", NSW = "NSW";
@@ -8,19 +13,7 @@ var state_of_origin_52_6 = function() {
 	var red = "#f00";
 	var bmpSize = 200;
 	var outputScale = 4;
-	var output = canvas(bmpSize * outputScale, bmpSize * outputScale, true);
-
-	function canvas(width, height, append) {
-		var a = document.createElement("canvas");
-		if (append)
-			document.body.appendChild(a);
-		a.width = width;
-		a.height = height;
-		return {
-			canvas: a,
-			ctx: a.getContext('2d')
-		}
-	}
+	var output = dom.canvas(bmpSize * outputScale, bmpSize * outputScale, true);
 
 
 	// collect progress events and batch em. wtf is this code even? hahaha. not funny.
@@ -51,11 +44,11 @@ var state_of_origin_52_6 = function() {
 		// no, because 52 takes up more space than 6...
 		// ... go back to my first point.
 
-		var count = 0, countMax = 70 * maxGlyphs;
+		var count = 0, countMax = 200 * maxGlyphs;
 		var min = 0;
 
-		var testCanvas = canvas(bmpSize, bmpSize);
-		var progressCanvas = canvas(bmpSize, bmpSize);
+		var testCanvas = dom.canvas(bmpSize, bmpSize);
+		var progressCanvas = dom.canvas(bmpSize, bmpSize);
 
 		var c0 = document.createElement("div");
 		// document.body.appendChild(c0);
@@ -98,9 +91,9 @@ var state_of_origin_52_6 = function() {
 			var padX = bmpSize * 0;
 			var padY = bmpSize * 0.1;
 			return {
-				x: padX + Math.random() * (bmpSize - padX * 2),
-				y: padY + Math.random() * (bmpSize - padY * 2),
-				size: min// + Math.random() * 3// / ((count + 1) * 0.01)
+				x: padX + rand.random() * (bmpSize - padX * 2),
+				y: padY + rand.random() * (bmpSize - padY * 2),
+				size: min// + rand.random() * 3// / ((count + 1) * 0.01)
 			}
 		}
 
@@ -147,10 +140,27 @@ var state_of_origin_52_6 = function() {
 			}
 		}
 
-		function r() {
-			min = Math.pow(1.15, (10 - Math.floor(count / (countMax * 0.1) )));
+		function getScaleFromCount(c) {
+			// return 5 - Math.pow(8, (c / (countMax * 1.2)));
+			var sc = 0.75 + rand.random() * 4 * (0.001 + countMax - c) / countMax;
+			// con.log(c, sc);
+			return sc;
+		}
 
-			var iterationsPerFrame = 30;
+		getScaleFromCount(0);
+		getScaleFromCount(10);
+		getScaleFromCount(20);
+		getScaleFromCount(30);
+		getScaleFromCount(40);
+		getScaleFromCount(countMax);
+
+
+
+
+		function r() {
+			min = getScaleFromCount(count);
+
+			var iterationsPerFrame = 300;
 			for (var i = 0; i < iterationsPerFrame; i++) {
 				generate(true);
 				generate(false);
@@ -160,7 +170,7 @@ var state_of_origin_52_6 = function() {
 			} else {
 				stateProgress(state, "render:complete", output.canvas);
 			}
-			c0.innerHTML = [count,min].join(" ");
+			// c0.innerHTML = [count,min].join(" ");
 
 			// con.log(count, countMax, count / countMax);
 
@@ -186,8 +196,8 @@ var state_of_origin_52_6 = function() {
 	}
 
 	function init() {
-		render(QLD, 52, -0.02, 0.9, 1.6);
-		render(NSW, 6, 0.23, 0.9, 1);
+		render(QLD, 52, -0.02, 0.9, 2);
+		render(NSW, 6, 0.23, 0.9, 2);
 	}
 
 	var experiment = {
