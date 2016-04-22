@@ -8,42 +8,57 @@ var state_of_origin_52_6 = function() {
 	var red = "#f00";
 	var bmpSize = 200;
 	var outputScale = 4;
-	var dim = bmpSize;
-	var output = canvas(dim * outputScale, dim * outputScale, true);
+	var output = canvas(bmpSize * outputScale, bmpSize * outputScale, true);
 
 	function canvas(width, height, append) {
 		var a = document.createElement("canvas");
-	// if (append)
+		if (append)
 			document.body.appendChild(a);
 		a.width = width;
 		a.height = height;
-		var c = a.getContext('2d');
-		var circleRads = Math.PI * 2;
-		c.fillCircle = function(x, y, r, colour) {
-			c.beginPath();
-			c.fillStyle = colour;
-			c.arc(x, y, r, 0, circleRads, false);
-			c.closePath();
-			c.fill();
-		}
 		return {
 			canvas: a,
-			ctx: c
+			ctx: a.getContext('2d')
 		}
 	}
 
-	function render(state, score, x, y) {
 
-		con.log("render", arguments);
+	// collect progress events and batch em. wtf is this code even? hahaha. not funny.
+	var progressions = {
+		NSW: 0,
+		QLD: 0
+	};
+	var complete = {
+		NSW: false,
+		QLD: false
+	}
+	function stateProgress(state, eventName, detail) {
+		if (eventName === "render:progress") {
+			progressions[state] = detail;
+			progress(eventName, (progressions.NSW + progressions.QLD) / 2);
+		} else if (eventName === "render:complete") {
+			complete[state] = true;
+			if (complete.NSW && complete.QLD) {
+				progress(eventName, detail);
+			}
+		}
+	}
 
-		var count = 0, countMax = 1e5;
+
+
+	function render(state, score, x, y, maxGlyphs) {
+		// QLD can fit more glyphs... because they are a better team...
+		// no, because 52 takes up more space than 6...
+		// ... go back to my first point.
+
+		var count = 0, countMax = 70 * maxGlyphs;
 		var min = 0;
 
-		var testCanvas = canvas(dim, dim);
-		var progressCanvas = canvas(dim, dim);
+		var testCanvas = canvas(bmpSize, bmpSize);
+		var progressCanvas = canvas(bmpSize, bmpSize);
 
 		var c0 = document.createElement("div");
-		document.body.appendChild(c0);
+		// document.body.appendChild(c0);
 
 		function pointInShape(point) {
 
@@ -52,7 +67,7 @@ var state_of_origin_52_6 = function() {
 			testCanvas.ctx.globalCompositeOperation = 'source-in';
 			drawShape(testCanvas.ctx, point, false, false);
 
-			var pad = 2;
+			var pad = 20;
 
 			var width = Math.ceil(point.size + pad) * 2;
 			var height = Math.ceil(point.size + pad);
@@ -80,17 +95,19 @@ var state_of_origin_52_6 = function() {
 
 
 		function newPosition() {
-			var pad = 0;
+			var padX = bmpSize * 0;
+			var padY = bmpSize * 0.1;
 			return {
-				x: pad + Math.random() * (dim - pad * 2),
-				y: pad + Math.random() * (dim - pad * 2),
+				x: padX + Math.random() * (bmpSize - padX * 2),
+				y: padY + Math.random() * (bmpSize - padY * 2),
 				size: min// + Math.random() * 3// / ((count + 1) * 0.01)
 			}
 		}
 
 		function drawShape(target, props, fx, renderOuput) {
+			var fillStyle;
 			if (fx) {
-				// target.shadowColor = '#fff';
+				// target.shadowColor = '#000';
 				// target.shadowBlur = 2;
 			}
 			var overScale = 1;
@@ -101,17 +118,21 @@ var state_of_origin_52_6 = function() {
 			var x = (props.x - props.size) * overScale;
 			var y = (props.y - props.size) * overScale;
 
-			if (state === NSW && renderOuput) {
-				y += bmpSize * overScale;
+			if (renderOuput) {
+				x += bmpSize * overScale / 2;
+				if (state === NSW) {
+					y += bmpSize * overScale * 0.8;
+				}
+				fillStyle = "white";
+			} else {
+				fillStyle = red;
 			}
-
 
 			target.save();
 			target.translate(x, y);
 			target.scale(scale, scale);
-			// target.drawImage(piImage, 0, 0);
 			target.font = font;
-			target.fillStyle = red;
+			target.fillStyle = fillStyle;
 			target.fillText(state, 0, 0);
 			target.restore();
 		}
@@ -127,7 +148,7 @@ var state_of_origin_52_6 = function() {
 		}
 
 		function r() {
-			min = Math.pow(1.15, (10 - Math.floor(count / 1000)));
+			min = Math.pow(1.15, (10 - Math.floor(count / (countMax * 0.1) )));
 
 			var iterationsPerFrame = 30;
 			for (var i = 0; i < iterationsPerFrame; i++) {
@@ -137,25 +158,23 @@ var state_of_origin_52_6 = function() {
 			if (count < countMax) {
 				requestAnimationFrame(r);
 			} else {
-				min += "done!";
+				stateProgress(state, "render:complete", output.canvas);
 			}
 			c0.innerHTML = [count,min].join(" ");
 
 			// con.log(count, countMax, count / countMax);
 
-			if (state === QLD) {
-				progress("render:progress", count / countMax);
-			}
+			stateProgress(state, "render:progress", count / countMax);
 
 			// setTimeout(r, 1000);
 		}
 
-		progressCanvas.ctx.clearRect(0, 0, dim, dim);
+		progressCanvas.ctx.clearRect(0, 0, bmpSize, bmpSize);
 		progressCanvas.ctx.fillStyle = red;
-		progressCanvas.ctx.fillRect(0, 0, dim, dim);
+		progressCanvas.ctx.fillRect(0, 0, bmpSize, bmpSize);
 		progressCanvas.ctx.globalCompositeOperation = 'destination-out';
 		progressCanvas.ctx.save();
-		progressCanvas.ctx.translate(dim * x, dim * y);
+		progressCanvas.ctx.translate(bmpSize * x, bmpSize * y);
 		// progressCanvas.ctx.scale(outputScale, outputScale);
 		progressCanvas.ctx.font = font;
 		progressCanvas.ctx.fillText(score, 0, 0);
@@ -167,9 +186,8 @@ var state_of_origin_52_6 = function() {
 	}
 
 	function init() {
-		con.log("ok");
-		render(QLD, 52, -0.02, 0.9);
-		render(NSW, 6, 0.23, 0.9);
+		render(QLD, 52, -0.02, 0.9, 1.6);
+		render(NSW, 6, 0.23, 0.9, 1);
 	}
 
 	var experiment = {
