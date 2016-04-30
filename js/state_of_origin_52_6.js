@@ -25,17 +25,6 @@ var state_of_origin_52_6 = function() {
     NSW: false,
     QLD: false
   }
-  function stateProgress(state, eventName, detail) {
-    if (eventName === "render:progress") {
-      progressions[state] = detail;
-      progress(eventName, (progressions.NSW + progressions.QLD) / 2);
-    } else if (eventName === "render:complete") {
-      complete[state] = true;
-      if (complete.NSW && complete.QLD) {
-        progress(eventName, detail);
-      }
-    }
-  }
 
   function initState(state, score, x, y, maxGlyphs) {
     // state & are score are obvious
@@ -46,7 +35,7 @@ var state_of_origin_52_6 = function() {
     // no, because 52 takes up more space than 6...
     // ... go back to my first point.
 
-    var count = 0, countMax = 100 * maxGlyphs;
+    var count = 0, countMax = 150 * maxGlyphs;
     var testCanvas = dom.canvas(bmpSize, bmpSize);
     var progressCanvas = dom.canvas(bmpSize, bmpSize);
 
@@ -162,22 +151,18 @@ var state_of_origin_52_6 = function() {
     progressCanvas.ctx.restore();
     progressCanvas.ctx.globalCompositeOperation = 'source-over';
 
-
-    function bruteForce() {
+    function bruteForce() { // like mal squashing lawrie
       // con.log("bruteForce", state, count, countMax);
       if (count < countMax) {
-
         var iterationsPerFrame = 100;
-        for (var i = 0; i < iterationsPerFrame; i++) {
+        for (var i = 0; i < iterationsPerFrame && count < countMax; i++) {
           generate(true);
           generate(false);
         }
-
-        stateProgress(state, "render:progress", count / countMax);
+        progressions[state] = count / countMax
       } else {
-        stateProgress(state, "render:complete", output.canvas);
+        complete[state] = true;
       }
-      // con.log(count, countMax, count / countMax);
     }
 
     machines[state] = bruteForce;
@@ -198,9 +183,9 @@ var state_of_origin_52_6 = function() {
     machines.NSW();
     machines.QLD();
     if (complete.NSW && complete.QLD) {
-      con.log("complete");
+      progress("render:complete", output.canvas)
     } else {
-      // con.log("progress", progressions.NSW, progressions.QLD);
+      progress("render:progress", (progressions.NSW + progressions.QLD) / 2);
       setTimeout(loop, 1);
     }
   }
