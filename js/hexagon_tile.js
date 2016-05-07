@@ -12,6 +12,24 @@ if (isNode) {
 
 var hexagon_tile = function() {
 
+  // need an alternate but reliable random, based on input number
+  // code lifted from http://en.wikipedia.org/wiki/Xorshift, which I used on Airtasker maps jittering
+  function randomXORShift(x) {
+    x ^= (x << 21);
+    x ^= (x >>> 35);
+    x ^= (x << 4);
+    x *= 0.000000001; // ranges from -2.147465216 to 2.147426304
+    return x / 2.15; // ranges from -1 to 1 (about .9988295)
+  }
+  // test alternate random
+  // var max = 0, min = 1e10;
+  // for (var i = 0; i < 1e8; i++) {
+  //   var out = randomXORShift(Math.random() * 1e20);
+  //   max = Math.max(max, out);
+  //   min = Math.min(min, out);
+  // };
+  // con.log(min, max);
+
 
   var size = 100,
     vector = false,
@@ -75,6 +93,9 @@ var hexagon_tile = function() {
 
     progress('settings:initialised', settings);
 
+    var shifterX = rand.getSeed() * 0.00000000001;
+    var shifterY = shifterX * randomXORShift(shifterX) * 1000;
+
     // con.log("hex init rand", rand.random(), rand.getSeed());
 
     var palette = colours.getRandomPalette();
@@ -122,7 +143,6 @@ var hexagon_tile = function() {
     // cols -= 3;
     // rows -= 6;
     hexagons = cols * rows;
-    // con.log(rows,cols, hexagons);
 
     hexs = [];
 
@@ -213,7 +233,10 @@ var hexagon_tile = function() {
         }
       });
       */
-
+      var shiftX = randomXORShift(i * shifterX) * 0.1;
+      var shiftY = randomXORShift(i * shifterY) * 0.1;
+      var dx = x - 0.5 + shiftX, dy = y - 0.5 + shiftY;
+      var distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
 
       hexs[i] = {
         index: i,
@@ -222,6 +245,7 @@ var hexagon_tile = function() {
         y: y,
         colour: null,
         rendered: false,
+        distance: distanceFromCenter
         // neighbours: neighbours
       };
 
@@ -246,7 +270,8 @@ var hexagon_tile = function() {
 
 
   function batch() {
-    var maxRender = Math.ceil(settings.spread.cur / settings.spread.max * hexagons);
+    var shouldRender = settings.spread.cur / settings.spread.max;
+    var maxRender = hexagons;
     var loopStart = currentBatch * batchSize,
       loopEnd = loopStart + batchSize;
     if (loopEnd > maxRender) loopEnd = maxRender;
@@ -299,19 +324,22 @@ var hexagon_tile = function() {
       if (vector) {
         item.hex.setAttribute("style", "fill:" + colour);
       } else {
-        stage.ctx.fillStyle = colour;
-        stage.ctx.beginPath();
-        for (var i = 0; i < 6; i++) {
-          var x = (item.x + item.hex[i].x) * size,
-            y = (item.y + item.hex[i].y) * size;
-          if (i === 0) {
-            stage.ctx.moveTo(x, y);
-          } else {
-            stage.ctx.lineTo(x, y);
-          }
-        };
-        stage.ctx.closePath();
-        stage.ctx.fill();
+        // con.log("item.distance < shouldRender", item.distance, shouldRender);
+        if (item.distance < shouldRender) {
+          stage.ctx.fillStyle = colour;
+          stage.ctx.beginPath();
+          for (var i = 0; i < 6; i++) {
+            var x = (item.x + item.hex[i].x) * size,
+              y = (item.y + item.hex[i].y) * size;
+            if (i === 0) {
+              stage.ctx.moveTo(x, y);
+            } else {
+              stage.ctx.lineTo(x, y);
+            }
+          };
+          stage.ctx.closePath();
+          stage.ctx.fill();
+        }
       }
 
       hexs[index].rendered = true;
