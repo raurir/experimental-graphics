@@ -17,6 +17,18 @@ var typography = function() {
       max: 64,
       cur: 4,
       type: "Number"
+    },
+    // phrase: {
+    //   label: "Phrase",
+    //   min: 1,
+    //   max: 100,
+    //   cur: "Typography",
+    //   type: "String"
+    // }
+    background: {
+      type: "Boolean",
+      label: "Background",
+      cur: false
     }
   };
 
@@ -32,7 +44,9 @@ var typography = function() {
   }
   numerals = numerals.join("");
   function getString() {
-    var strings = ["Typography", numerals];
+    var phrase = "Typography";
+    // var strings = [settings.phrase.cur, numerals];
+    var strings = [phrase, numerals];
     var str = strings[Math.floor(rand.random() * strings.length)];
     var ss = Math.round(rand.random() * str.length);
     var se = ss + Math.round(rand.random() * (str.length - ss));
@@ -145,7 +159,9 @@ var typography = function() {
     sw = size;
     sh = size;
 
+    settings.background.cur = false;
     settings.boxes.cur = 4;
+    // settings.phrase.cur = "Typography";
     if (options.settings) {
       settings = options.settings;
     }
@@ -164,6 +180,10 @@ var typography = function() {
   }
 
   function render() {
+    if (settings.background.cur) {
+      ctx.fillStyle = colours.getCurrentColour(); // cannot do next colour or rand will be shifted along. always add a background render first!
+      ctx.fillRect(0, 0, sw, sh);
+    }
     renderBatch(0);
   }
 
@@ -177,8 +197,8 @@ var typography = function() {
     var x = batch % cols;
     var y = Math.floor(batch / cols);
     drawBlock(x, y);
-    progress("render:progress", batch / total);
     if (batch < total) {
+      progress("render:progress", batch / total);
       setTimeout(function () {
         renderBatch(batch + 1);
       }, 5);
@@ -188,8 +208,8 @@ var typography = function() {
   }
 
 
-  function update(s) {
-    init({size: size, settings: s})
+  function update(settings) {
+    init({size: size, settings: settings});
   }
 
 
@@ -197,7 +217,7 @@ var typography = function() {
     stage: bmp.canvas,
     init: init,
     render: render,
-    settings: settings, 
+    settings: settings,
     update: update
   }
 
