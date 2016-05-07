@@ -66,6 +66,9 @@ var hexagon_tile = function() {
     sh = size;
     stage.setSize(sw, sh);
 
+    settings.spread.cur = 10;
+    settings.background.cur = true;
+
     if (options.settings) {
       settings = options.settings;
     }
