@@ -9,6 +9,17 @@ if (isNode) {
 
 var typography = function() {
 
+
+  var settings = {
+    boxes: {
+      label: "Boxes",
+      min: 2,
+      max: 64,
+      cur: 4,
+      type: "Number"
+    }
+  };
+
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
   var size, sw, sh, block;
@@ -36,13 +47,6 @@ var typography = function() {
     return str;
   }
 
-  // var test = 0;
-  // while (test < 1000) {
-  //   if (getString() == string) {
-  //     con.log("got it...");
-  //   }
-  //   test ++;
-  // }
   function drawBlock(x, y) {
     ctx.save();
     ctx.translate(x * block, y * block);
@@ -140,14 +144,26 @@ var typography = function() {
     size = options.size;
     sw = size;
     sh = size;
-    block = Math.ceil(1 / 4 * size);
+
+    settings.boxes.cur = 4;
+    if (options.settings) {
+      settings = options.settings;
+    }
+    progress('settings:initialised', settings);
+
+    cols = settings.boxes.cur;
+    rows = settings.boxes.cur;
+
+    block = Math.ceil(1 / cols * size);
     bmp.setSize(sw, sh);
     ctx.clearRect(0, 0, sw, sh);
     colours.getRandomPalette();
     colours.setPaletteRange(3);
 
-    // drawBlock(0, 0);
-    // return;
+    render();
+  }
+
+  function render() {
     renderBatch(0);
   }
 
@@ -165,15 +181,24 @@ var typography = function() {
     if (batch < total) {
       setTimeout(function () {
         renderBatch(batch + 1);
-      }, 25);
+      }, 5);
     } else {
       progress("render:complete", bmp.canvas);
     }
   }
 
+
+  function update(s) {
+    init({size: size, settings: s})
+  }
+
+
   var experiment = {
     stage: bmp.canvas,
     init: init,
+    render: render,
+    settings: settings, 
+    update: update
   }
 
   return experiment;
