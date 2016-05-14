@@ -71,6 +71,10 @@ var rand = (function() {
       return z / m;
     },
 
+    getLastRandom: function() {
+      return z / m;
+    },
+
     getNumber: function(min, max) {
       return min + this.random() * (max - min);
     },

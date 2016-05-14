@@ -12,24 +12,14 @@ if (isNode) {
 
 var hexagon_tile = function() {
 
-  // need an alternate but reliable random, based on input number
-  // code lifted from http://en.wikipedia.org/wiki/Xorshift, which I used on Airtasker maps jittering
-  function randomXORShift(x) {
-    x ^= (x << 21);
-    x ^= (x >>> 35);
-    x ^= (x << 4);
-    x *= 0.000000001; // ranges from -2.147465216 to 2.147426304
-    return x / 2.15; // ranges from -1 to 1 (about .9988295)
+  var spreadSeed;
+  var spreadGradient = 0.1;
+  // need an alternate seeded random, based on input number.
+  // more notes on this in a further blog post: backwards compatibility!
+  function getJitter() {
+    spreadSeed += 1.89127398;
+    return (Math.sin(spreadSeed) + Math.cos(spreadSeed * 2.12387891)) / 2 * 0.1;
   }
-  // test alternate random
-  // var max = 0, min = 1e10;
-  // for (var i = 0; i < 1e8; i++) {
-  //   var out = randomXORShift(Math.random() * 1e20);
-  //   max = Math.max(max, out);
-  //   min = Math.min(min, out);
-  // };
-  // con.log(min, max);
-
 
   var size = 100,
     vector = false,
@@ -79,6 +69,20 @@ var hexagon_tile = function() {
   }
 
   function init(options) {
+
+    spreadSeed = rand.getSeed();
+    spreadGradient = rand.getLastRandom() * 0.5;
+    con.log("spreadGradient", spreadGradient);
+    // test alternate random
+    // var max = 0, min = 1e10;
+    // for (var i = 0; i < 1e4; i++) {
+    //   var out = getJitter();
+    //   max = Math.max(max, out);
+    //   min = Math.min(min, out);
+    // };
+    // con.log(min, max);
+
+
     size = options.size;
     sw = size;
     sh = size;
@@ -93,15 +97,9 @@ var hexagon_tile = function() {
 
     progress('settings:initialised', settings);
 
-    var shifterX = rand.getSeed() * 0.00000000001;
-    var shifterY = shifterX * randomXORShift(shifterX) * 1000;
-
-    // con.log("hex init rand", rand.random(), rand.getSeed());
-
     var palette = colours.getRandomPalette();
     var backgroundColor = colours.getRandomColour();
 
-    // window.removeEventListener("resize", resize);
     // progress("render:start");
 
     radiusOuter = (5 + rand.random() * 25) / 1000;
@@ -233,10 +231,6 @@ var hexagon_tile = function() {
         }
       });
       */
-      var shiftX = randomXORShift(i * shifterX) * 0.1;
-      var shiftY = randomXORShift(i * shifterY) * 0.1;
-      var dx = x - 0.5 + shiftX, dy = y - 0.5 + shiftY;
-      var distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
 
       hexs[i] = {
         index: i,
@@ -245,7 +239,6 @@ var hexagon_tile = function() {
         y: y,
         colour: null,
         rendered: false,
-        distance: distanceFromCenter
         // neighbours: neighbours
       };
 
@@ -258,19 +251,15 @@ var hexagon_tile = function() {
     render();
   }
 
+  // shuffle lifted from somewhere
   function shuffle(o){
-      for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-      return o;
+    for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
   };
 
-
-
-
-
-
-
   function batch() {
-    var shouldRender = settings.spread.cur / settings.spread.max;
+    var shouldRender = settings.spread.cur / settings.spread.max * 10;
+    con.log("shouldRender", shouldRender);
     var maxRender = hexagons;
     var loopStart = currentBatch * batchSize,
       loopEnd = loopStart + batchSize;
@@ -279,7 +268,6 @@ var hexagon_tile = function() {
 
       var index = randomHexes[h].index;
       var item = hexs[index];
-
 
       // var neighbours = [];
       // for(var i = 0; i < item.neighbours.length; i++) {
@@ -295,26 +283,20 @@ var hexagon_tile = function() {
       for(var i = 0; i < hexagons; i++) {
         if (i != h) {
           var otherItem = randomHexes[i];
-          // con.log(otherItem)
           if (otherItem.rendered) {
-
             var dx = item.x - otherItem.x,
               dy = item.y - otherItem.y,
               d = Math.sqrt(dx * dx + dy * dy);
-
-              // con.log(item.x, otherItem.x)
-
-              if (d < radiusOuter * smoothSize) {
-                close.push(otherItem.colour);
-              }
-
+            if (d < radiusOuter * smoothSize) {
+              close.push(otherItem.colour);
+            }
           }
         }
       }
 
       // con.log(neighbours.length,close.length);
       var colour;
-      if (close.length > 0 ) {
+      if (close.length > 0) {
         colour = colours.mixColours(close);
         // colour = colours.mutateColour(colour, 3);
       } else {
@@ -324,8 +306,10 @@ var hexagon_tile = function() {
       if (vector) {
         item.hex.setAttribute("style", "fill:" + colour);
       } else {
-        // con.log("item.distance < shouldRender", item.distance, shouldRender);
-        if (item.distance < shouldRender) {
+        var dx = item.x - 0.5 + getJitter(), dy = item.y - 0.5 + getJitter();
+        var distanceFromCenter = Math.round(Math.sqrt(dx * dx + dy * dy) * 10);
+
+        if (distanceFromCenter < shouldRender) {
           stage.ctx.fillStyle = colour;
           stage.ctx.beginPath();
           for (var i = 0; i < 6; i++) {
@@ -342,6 +326,10 @@ var hexagon_tile = function() {
         }
       }
 
+      // stage.ctx.font = '18px Helvetica';
+      // stage.ctx.fillStyle = "#FFF";
+      // stage.ctx.fillText(distanceFromCenter, item.x*size - 4, item.y*size + 4);// con.log(item.x, item.y);
+
       hexs[index].rendered = true;
       hexs[index].colour = colour;
 
@@ -354,16 +342,9 @@ var hexagon_tile = function() {
       progress("render:complete", experiment.stage);
 
       // document.body.addEventListener("click", init);
-
-      // window.addEventListener("resize", resize);
-
-      // resize();
     } else {
 
       progress("render:progress", currentBatch / batches);
-
-
-      // resize();
       // requestAnimationFrame(batch);
       setTimeout(batch, 25);
     }
@@ -377,6 +358,8 @@ var hexagon_tile = function() {
 
   }
 
+  /*
+  // resize code done inside funkyvector now.
   function resize(sw, sh) {
     // con.log("resize! hex");
     if (isNode) return;
@@ -403,10 +386,10 @@ var hexagon_tile = function() {
       stage.setSize(sw, sh, true);
     }
   }
+  */
 
-
-  function update(s) {
-    init({size: size, settings: s})
+  function update(settings) {
+    init({size: size, settings: settings})
   }
 
 
