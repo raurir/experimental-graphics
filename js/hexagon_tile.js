@@ -72,7 +72,7 @@ var hexagon_tile = function() {
 
     spreadSeed = rand.getSeed();
     spreadGradient = rand.getLastRandom() * 0.5;
-    con.log("spreadGradient", spreadGradient);
+    // con.log("spreadGradient", spreadGradient);
     // test alternate random
     // var max = 0, min = 1e10;
     // for (var i = 0; i < 1e4; i++) {
