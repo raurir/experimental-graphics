@@ -102,7 +102,8 @@ var state_of_origin_52_6 = function() {
         if (state === NSW) {
           y += bmpSize * renderScale * 0.8;
         }
-        fillStyle = "white";
+        var grey = rand.getInteger(200,254);
+        fillStyle = "rgb(" + grey + "," + grey + "," + grey + ")";
       } else {
         fillStyle = red;
       }
