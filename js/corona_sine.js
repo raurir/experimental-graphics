@@ -44,8 +44,8 @@ var corona_sine = function() {
 
   function init(options) {
     size = options.size;
-    sw = size;
-    sh = size;
+    sw = options.sw || size;
+    sh = options.sh || size;
     bmp.setSize(sw, sh);
     lastGenerate = new Date().getTime();
 

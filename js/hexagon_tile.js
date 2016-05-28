@@ -84,8 +84,8 @@ var hexagon_tile = function() {
 
 
     size = options.size;
-    sw = size;
-    sh = size;
+    sw = options.sw || size;
+    sh = options.sh || size;
     stage.setSize(sw, sh);
 
     settings.spread.cur = 10;
