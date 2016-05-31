@@ -15,12 +15,12 @@ var any_image_url = function() {
 
   // list a range of valid seeds.
   var allowed = {
-    "526": { // use your illusion cover
-      image: "http://ecx.images-amazon.com/images/I/81YJhtVbHvL._SL1200_.jpg",
-      scale: 1.2
+    "526": {
+      image: "https://funkyvector.com/blog/wp-content/uploads/2016/05/state_of_origin_52_6_22_d5243594_design.png",
+      scale: 0.5
     },
     "834199129": { // GNR logo - this seed is numerical equivalent to 'gnr'
-      image: "http://ajournalofmusicalthings.com/wp-content/uploads/Guns_N_Roses-logo.jpg",
+      // image: "http://ajournalofmusicalthings.com/wp-content/uploads/Guns_N_Roses-logo.jpg",
       scale: 0.8
     }
   }
