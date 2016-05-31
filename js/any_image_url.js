@@ -17,7 +17,7 @@ var any_image_url = function() {
   var allowed = {
     "526": {
       image: "https://funkyvector.com/blog/wp-content/uploads/2016/05/state_of_origin_52_6_22_d5243594_design.png",
-      scale: 0.5
+      scale: isNode ? 1 : 0.5
     },
     "834199129": { // GNR logo - this seed is numerical equivalent to 'gnr'
       // image: "http://ajournalofmusicalthings.com/wp-content/uploads/Guns_N_Roses-logo.jpg",
@@ -87,7 +87,7 @@ var any_image_url = function() {
 
     function drawToContext(img) {
       var width = img.width, height = img.height;
-      con.log("drawToContext");
+      // con.log("drawToContext");
       ctx.translate(cx, cy);
       ctx.scale(scale, scale);
       ctx.translate(-width / 2, -height / 2);
@@ -109,6 +109,7 @@ var any_image_url = function() {
     } else {
       var img = new Image();
       img.onload = function () {
+        // con.log('on load');
         drawToContext(img);
       }
       img.onerror = function(err) {
