@@ -1,7 +1,12 @@
 Experimental graphics
 =====================
 
-This repo is an absolute mess. Part of the Infinite Print project, it's a long way from professional code. It is 'experimental' after all.
+This repository is an absolute mess. Part of the Infinite Print project, all the generative graphics aglorithms on FunkyVector are availabla here. It's a long way from professional code; it is 'experimental' after all, this code is hardly 'business class code' and does not adhere to the normal rules. Since there is no I in 'team', but 5 in 'individually brilliant', for most of the time this code is only viewed by myself and executed by FunkyVector. Finished experiments run in a browser and on a node server.
+
+It is also occasionaly viewable on [raurir.github.io](http://raurir.github.io/)
+
+Dec 18, 2014
+------------
 
 Today I decided that I need to make my experimental artwork more accessible to myself primarily, and in the process make the code more accessible to others.
 
