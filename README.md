@@ -1,7 +1,7 @@
 Experimental graphics
 =====================
 
-This repository is an absolute mess. Part of the Infinite Print project, all the generative graphics aglorithms on FunkyVector are available here. It's a long way from professional code; it is 'experimental' after all. This code is hardly 'business class code' and does not adhere to the normal [rules](http://www.goodreads.com/quotes/9168-programs-must-be-written-for-people-to-read-and-only) of code. Since there is no I in 'team', but 5 in 'individually brilliant', for most of the time this code is only viewed by myself and executed by FunkyVector. Finished experiments run in a browser and on a node server.
+This repository is an absolute mess. Part of the Infinite Print project, all the generative graphics algorithms on FunkyVector are available here. It's a long way from professional code; it is 'experimental' after all. This code is hardly 'business class code' and does not adhere to the normal [rules](http://www.goodreads.com/quotes/9168-programs-must-be-written-for-people-to-read-and-only) of code. Since there is no I in 'team', but 5 in 'individually brilliant', for most of the time this code is only viewed by myself and executed by FunkyVector. Finished experiments run in a browser (client) and in node (server).
 
 It is also occasionaly viewable on [raurir.github.io](http://raurir.github.io/)
 
