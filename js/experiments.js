@@ -48,6 +48,7 @@ var experiments = (function() {
     ["rainbow_particles"],
     ["rectangular_fill"],
     ["recursive"],
+    ["recursive_polygon"],
     ["spiral_even"],
     ["squaretracer"],
     ["tea"],
