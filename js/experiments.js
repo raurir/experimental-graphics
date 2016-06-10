@@ -30,6 +30,7 @@ var experiments = (function() {
     ["any_image_url"],
     ["bezier_flow"],
     ["box", "maze"],
+    ["circle_packing"],
     ["corona_sine"],
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
     ["fool", "css/fool"],
