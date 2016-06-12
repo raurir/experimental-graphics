@@ -1,71 +1,75 @@
 var isNode = (typeof module !== 'undefined');
 
+if (isNode) {
+  // var rand = require('./rand.js');
+  var dom = require('./dom.js');
+  // var colours = require('./colours.js');
+}
+
 var recursive_polygon = function() {
 
 	var sw = 600, sh = 600;
-	var bmp = dom.canvas(sw,sh);
-	bmp.ctx.clearRect(0, 0, sw, sh);
+	var bmp = dom.canvas(sw, sh);
+	// bmp.ctx.clearRect(0, 0, sw, sh);
 
-	var experiment = {
-		stage: bmp.canvas,
-		inner: null,
-		resize: function() {},
-		init: function() {},
-		kill: function() {},
-		settings: {} // or null
-	}
 	var iterations = 0;
 	function drawNext(parent, thread) {
-		iterations ++;
-		if (iterations > 1e5) return;
-		var i;
-		if (parent && parent.points) {
-			con.log("drawNext", parent.points.length, thread);
-			if (parent.points.length > 3) {
-				var slicerStart = rand.getInteger(0, parent.points.length - 2);
-				var slicerEnd = rand.getInteger(slicerStart, parent.points.length);
-				var pointsA = parent.points.slice();
-				var pointsB = pointsA.splice(slicerStart, slicerEnd - slicerStart);
-				// con.log(parent.points.length, slicerStart, slicerEnd);
-				// con.log(pointsA.length, pointsB.length, pointsA, pointsB);
-				var colourA = colours.mutateColour(parent.colour, 20);
-				var colourB = colours.mutateColour(parent.colour, 20);
+		setTimeout(delayedDraw, 100);
+		function delayedDraw() {
+			iterations ++;
+			if (iterations > 3000) return;
+			var i;
+			if (parent && parent.points) {
+				con.log("drawNext", parent.points.length, thread);
+				if (parent.points.length > 3) {
 
-				// drawPoints(pointsA, colourA);
-				drawPoints(pointsB, colourB);
+					var slicerStart = rand.getInteger(1, parent.points.length - 2);
+					var slicerEnd = rand.getInteger(slicerStart, parent.points.length);
+					var newArrays = splitArray(parents.points, slicerStart, slicerEnd);
+					var pointsA = newArrays[0];
+					var pointsB = newArrays[1];
 
-				drawNext({points: pointsA, colour: colourA}, thread);
-				drawNext({points: pointsB, colour: colourB}, thread + 1);
+					// con.log(parent.points.length, slicerStart, slicerEnd);
+					// con.log(pointsA.length, pointsB.length, pointsA, pointsB);
+					var colourA = "red";//colours.mutateColour(parent.colour, 20);
+					var colourB = "green"; colours.mutateColour(parent.colour, 20);
 
-			} else {
-				if (parent.points.length == 3) {
-					drawPoints(parent.points, parent.colour, true);
+					drawPoints(pointsA, colourA, true);
+					drawPoints(pointsB, colourB, true);
+
+					drawNext({points: pointsA, colour: colourA}, thread);
+					drawNext({points: pointsB, colour: colourB}, thread + 1);
+
 				} else {
-					// drawPoints(parent.points, parent.colour);
+					if (parent.points.length == 3) {
+						drawPoints(parent.points, parent.colour, true);
+					} else {
+						// drawPoints(parent.points, parent.colour);
+					}
 				}
+			} else {
+				i = 0;
+				var cx = 0.5;//rand.random();
+				var cy = 0.5;//rand.random();
+				var sides = 24;//rand.getInteger(15, 68);
+				var points = [];
+				var angles = [];
+				while(angles.length < sides) {
+					// angles.push(rand.random());
+					angles.push(i / sides);
+					i++;
+				};
+				angles.sort();
+				for (i = 0; i < angles.length; i++) {
+					var angle = angles[i] * Math.PI * 2;
+					var x = cx + Math.sin(angle) * 0.4;//rand.random() / 2;
+					var y = cy + Math.cos(angle) * 0.4;//rand.random() / 2;
+					// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
+					points.push({x: x * sw, y: y * sh});
+				};
+				drawPoints(points, parent.colour);
+				drawNext({points: points, colour: parent.colour}, thread);
 			}
-		} else {
-			i = 0;
-			var cx = 0.5;//rand.random();
-			var cy = 0.5;//rand.random();
-			var sides = 24;//rand.getInteger(15, 68);
-			var points = [];
-			var angles = [];
-			while(angles.length < sides) {
-				// angles.push(rand.random());
-				angles.push(i / sides);
-				i++;
-			};
-			angles.sort();
-			for (i = 0; i < angles.length; i++) {
-				var angle = angles[i] * Math.PI * 2;
-				var x = cx + Math.sin(angle) * 0.4;//rand.random() / 2;
-				var y = cy + Math.cos(angle) * 0.4;//rand.random() / 2;
-				// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
-				points.push({x: x * sw, y: y * sh});
-			};
-			// drawPoints(points, parent.colour);
-			drawNext({points: points, colour: parent.colour}, thread);
 		}
 	}
 
@@ -85,15 +89,20 @@ var recursive_polygon = function() {
 		}
 	}
 
+	function init() {
+		drawNext({colour: colours.getNextColour()}, 0);
+		con.log(iterations);
+		iterations =0;
+		drawNext({colour: "red"});
 
-	drawNext({colour: colours.getNextColour()}, 0);
-	con.log(iterations);
-	// iterations =0;
-	// drawNext({colour: "red"});
+		progress("render:complete", bmp.canvas);
+	}
 
-	progress("render:complete", bmp.canvas);
-
-	return experiment;
+	return {
+		stage: bmp.canvas,
+		init: init,
+		settings: {}
+	}
 
 };
 
