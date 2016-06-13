@@ -36,24 +36,29 @@ var recursive_polygon = function() {
 	var sw = 600, sh = 600;
 	var bmp = dom.canvas(sw, sh);
 	// bmp.ctx.clearRect(0, 0, sw, sh);
-
+	addEventListener("click", function() {
+		con.log(stack.length);
+		if (stack[0]) stack[0]();
+	});
+	var stack = [];
 	var iterations = 0;
 	function drawNext(parent) {
-		setTimeout(delayedDraw, 500);
+		// setTimeout(delayedDraw, 500);
 		function delayedDraw() {
+			stack.shift();
 			iterations ++;
-			if (iterations > 10) return;
+			// if (iterations > 4) return;
 			var i;
 			if (parent && parent.points) {
 				var copied = parent.points.slice();
 				var len = copied.length;
 				if (len > 3) {
-					var offset = rand.getInteger(0, len);
+					var offset = 0;//rand.getInteger(0, len);
 					// shift array around offset
 					var shifted = copied.splice(0, offset);
 					copied = copied.concat(shifted);
 
-					var slicerStart = 0; // always slice from 0 don't need randomise this now, array has been shifted around.
+					var slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
 					var slicerEnd = rand.getInteger(2, len - 2);
 
 					var newArrays = splitPolygon(copied, slicerStart, slicerEnd);
@@ -68,7 +73,7 @@ var recursive_polygon = function() {
 					drawPoints(pointsB, colourB, true);
 
 					drawNext({points: pointsA, colour: colourA});
-					// drawNext({points: pointsB, colour: colourB});
+					drawNext({points: pointsB, colour: colourB});
 
 				} else {
 					if (len == 3) {
@@ -111,6 +116,7 @@ var recursive_polygon = function() {
 				drawNext({points: points, colour: parent.colour});
 			}
 		}
+		stack.push(delayedDraw);
 	}
 
 	function drawPoints(points, colour, fill) {
