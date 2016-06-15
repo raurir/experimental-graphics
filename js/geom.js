@@ -41,51 +41,49 @@ var geom = (function() {
 
 
 
+  // get the equation of a line that goes through two points, ie slope and intercept.
+  // doesn't currently deal with divide by zero!
+  function linearEquationFromPoints(p0, p1) {
+    var dx = p1.x - p0.x;
+    if (dx === 0) {
+      con.warn("divide by zero error in geom.linearEquationFromPoints");
+    }
+    var dy = p1.y - p0.y;
+    var m = dy / dx;
+    // y = mx + c
+    // intercept c = y - mx
+    var c = p0.y - m * p0.x; // which is same as p1.y - slope * p1.x
+    return {
+      c: c,
+      m: m
+    }
+  }
+
   // http://www.softwareandfinance.com/Turbo_C/Intersection_Two_lines_EndPoints.html might be more suitable.
-
   function intersectionAnywhere(p0, p1, p2, p3) {
-
     // con.log("intersectionAnywhere", p0, p1, p2, p3);
+    var line1 = linearEquationFromPoints(p0, p1);
+    var m1 = line1.m;
+    var c1 = line1.c;
 
-    var m1, c1, m2, c2, x1, y1, x2, y2, dx, dy;
-
-    x1 = p0.x;
-    y1 = p0.y;
-    x2 = p1.x;
-    y2 = p1.y;
-
-    dx = x2 - x1;
-    dy = y2 - y1;
-
-    m1 = dy / dx;
-    // y = mx + c
-    // intercept c = y - mx
-    c1 = y1 - m1 * x1; // which is same as y2 - slope * x2
-
-    x1 = p2.x;
-    y1 = p2.y;
-    x2 = p3.x;
-    y2 = p3.y;
-
-    dx = x2 - x1;
-    dy = y2 - y1;
-
-    m2 = dy / dx;
-    // y = mx + c
-    // intercept c = y - mx
-    c2 = y1 - m2 * x1; // which is same as y2 - slope * x2
+    var line2 = linearEquationFromPoints(p2, p3);
+    var m2 = line2.m;
+    var c2 = line2.c;
 
     // con.log("Equation of line1: Y = %.2fX %c %.2f\n", m1, (c1 < 0) ? ' ' : '+',  c1);
     // con.log("Equation of line2: Y = %.2fX %c %.2f\n", m2, (c2 < 0) ? ' ' : '+',  c2);
 
-    if(m1 - m2 == 0) {
+    if (m1 - m2 == 0) {
       // con.log("intersectionAnywhere: no intercept");
-      return null
+      return null;
     } else {
-      var intersection_X = (c2 - c1) / (m1 - m2);
-      var intersection_Y = m1 * intersection_X + c1;
+      var intersectionX = (c2 - c1) / (m1 - m2);
+      var intersectionY = m1 * intersectionX + c1;
       // con.log("intersectionAnywhere:", intersection_X, intersection_Y);
-      return {x: intersection_X, y: intersection_Y};
+      return {
+        x: intersectionX,
+        y: intersectionY
+      };
     }
 }
 
@@ -98,6 +96,7 @@ var geom = (function() {
 
 
   return {
+    linearEquationFromPoints: linearEquationFromPoints,
     intersectionAnywhere: intersectionAnywhere,
     intersectionBetweenPoints: intersectionBetweenPoints
   }
