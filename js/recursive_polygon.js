@@ -122,6 +122,15 @@ var recursive_polygon = function() {
 
 	}
 
+	function drawLine(p0, p1, colour, lineWidth) {
+		bmp.ctx.strokeStyle = colour;
+		bmp.ctx.lineWidth = lineWidth;
+		bmp.ctx.beginPath();
+		bmp.ctx.moveTo(p0.x, p0.y);
+		bmp.ctx.lineTo(p1.x, p1.y);
+		bmp.ctx.stroke();
+	}
+
 	function generateParent() {
 		var colour = colours.getNextColour()
 		// con.log("generateParent");
@@ -149,33 +158,77 @@ var recursive_polygon = function() {
 	}
 
 
+	// http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
+	function perp(a, b, distance){
+		var p = {
+			x: a.x - b.x,
+			y: a.y - b.y
+		};
+		var n = {
+			x: -p.y,
+			y: p.x
+		};
+		var normalisedLength = Math.sqrt((n.x * n.x) + (n.y * n.y));
+		n.x /= normalisedLength;
+		n.y /= normalisedLength;
+		return {
+			x: distance * n.x,
+			y: distance * n.y
+		};
+	}
+
 	function init() {
 		// colours.getRandomPalette();
 		// generateParent();
 
-		drawPoints([
-			{x: 100, y: 200},
-			{x: 500, y: 200},
-			{x: 400, y: 400}
-		], 'red', false, 1);
+		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}, {x:120, y:40}];
 
-		drawPoints([
-			{x: 300, y: 250},
-			{x: 250, y: 400}
-		], 'green', false, 1);
+		function getParallelPoints(p0, p1, distance) {
+			drawLine(p0, p1, 'red', 1);
+			var per = perp(p0, p1, distance);
+			var parrallel0 = {
+				x: p0.x + per.x,
+				y: p0.y + per.y
+			};
+			var parrallel1 = {
+				x: p1.x + per.x,
+				y: p1.y + per.y
+			};
+			drawLine(parrallel0, parrallel1, 'green', 1);
+			bmp.ctx.fillStyle = "green";
+			bmp.ctx.beginPath();
+			bmp.ctx.drawCircle(parrallel0.x, parrallel0.y, 4);
+			bmp.ctx.fill();
+			bmp.ctx.beginPath();
+			bmp.ctx.drawCircle(parrallel1.x, parrallel1.y, 4);
+			bmp.ctx.fill();
+			return [parrallel0, parrallel1];
+		}
+		var distance = 10;
+		var parallels = [];
+		for (var i = 0, il = points.length; i < il; i++) {
+			var pp0 = points[i];
+			var pp1 = points[(i + 1) % il]; // wrap back to 0 at end of loop!
+			// con.log(i, pp0, pp1);
+			parallels.push(getParallelPoints(pp0, pp1, distance));
+		};
 
-		var intersection = geom.intersectionAnywhere(
-			{x: 100, y: 200},
-			{x: 400, y: 400},
-			{x: 300, y: 250},
-			{x: 250, y: 400}
-		);
+		for (i = 0, il = parallels.length; i < il; i++) {
+			var parallel0 = parallels[i]; // start of line
+			var parallel1 = parallels[(i + 1) % il]; // end of line
+			var intersection = geom.intersectionAnywhere(
+				parallel0[0],
+				parallel0[1],
+				parallel1[0],
+				parallel1[1]
+			);
+			// con.log(intersection);
+			bmp.ctx.beginPath();
+			bmp.ctx.fillStyle = "yellow";
+			bmp.ctx.drawCircle(intersection.x, intersection.y, 5);
+			bmp.ctx.fill();
+		}
 
-		con.log(intersection);
-
-		bmp.ctx.fillStyle = "blue";
-		bmp.ctx.drawCircle(intersection.x, intersection.y, 10);
-		bmp.ctx.fill();
 
 		// drawNext({colour: colours.getNextColour()});
 		// con.log(iterations);
