@@ -35,9 +35,9 @@ var recursive_polygon = function() {
 
 	var sw = 800, sh = 800;
 	var bmp = dom.canvas(sw, sh);
-	addEventListener("click", function() {
-		if (stack[0]) stack[0]();
-	});
+	// addEventListener("click", function() {
+	// 	if (stack[0]) stack[0]();
+	// });
 	var stack = [];
 	var iterations = 0;
 	function drawNext(parent) {
@@ -181,11 +181,12 @@ var recursive_polygon = function() {
 		// colours.getRandomPalette();
 		// generateParent();
 
-		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}, {x:120, y:40}];
+		var offset = 10;
+		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}];//, {x:120, y:40}];
 
-		function getParallelPoints(p0, p1, distance) {
+		function getParallelPoints(p0, p1, offset) {
 			drawLine(p0, p1, 'red', 1);
-			var per = perp(p0, p1, distance);
+			var per = perp(p0, p1, offset);
 			var parrallel0 = {
 				x: p0.x + per.x,
 				y: p0.y + per.y
@@ -204,31 +205,51 @@ var recursive_polygon = function() {
 			bmp.ctx.fill();
 			return [parrallel0, parrallel1];
 		}
-		var distance = 10;
-		var parallels = [];
-		for (var i = 0, il = points.length; i < il; i++) {
-			var pp0 = points[i];
-			var pp1 = points[(i + 1) % il]; // wrap back to 0 at end of loop!
-			// con.log(i, pp0, pp1);
-			parallels.push(getParallelPoints(pp0, pp1, distance));
-		};
 
-		for (i = 0, il = parallels.length; i < il; i++) {
-			var parallel0 = parallels[i]; // start of line
-			var parallel1 = parallels[(i + 1) % il]; // end of line
-			var intersection = geom.intersectionAnywhere(
-				parallel0[0],
-				parallel0[1],
-				parallel1[0],
-				parallel1[1]
-			);
-			// con.log(intersection);
-			bmp.ctx.beginPath();
-			bmp.ctx.fillStyle = "yellow";
-			bmp.ctx.drawCircle(intersection.x, intersection.y, 5);
-			bmp.ctx.fill();
+		function drawInset(points, offset) {
+			var parallels = [];
+			for (var i = 0, il = points.length; i < il; i++) {
+				var pp0 = points[i];
+				var pp1 = points[(i + 1) % il]; // wrap back to 0 at end of loop!
+				// con.log(i, pp0, pp1);
+				parallels.push(getParallelPoints(pp0, pp1, offset));
+			};
+
+			for (i = 0, il = parallels.length; i < il; i++) {
+				var parallel0 = parallels[i]; // start of line
+				var parallel1 = parallels[(i + 1) % il]; // end of line
+				var intersection = geom.intersectionAnywhere(
+					parallel0[0],
+					parallel0[1],
+					parallel1[0],
+					parallel1[1]
+				);
+				// con.log(intersection);
+				bmp.ctx.beginPath();
+				bmp.ctx.fillStyle = "yellow";
+				bmp.ctx.drawCircle(intersection.x, intersection.y, 5);
+				bmp.ctx.fill();
+			}
 		}
 
+		drawInset(points, offset);
+
+		addEventListener("keydown", function(e) {
+			con.log(e.which);
+			switch (e.which) {
+				case 38 : offset += 1; break;
+				case 40 : offset -= 1; break;
+			}
+			redraw();
+		});
+		addEventListener("click", function(e) {
+			points.push({x: e.x, y: e.y});
+			redraw();
+		});
+		function redraw() {
+			bmp.ctx.clearRect(0, 0, sw, sh);
+			drawInset(points, offset);
+		}
 
 		// drawNext({colour: colours.getNextColour()});
 		// con.log(iterations);
