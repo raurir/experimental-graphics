@@ -232,47 +232,48 @@ var recursive_polygon = function() {
 		// colours.getRandomPalette();
 		// generateParent();
 
-		var offset = 10;
-		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}];//, {x:120, y:40}];
-		while (points.length < 10000) {
-			points.push({x: Math.random() * sw, y: Math.random() * sh});
-		}
-		var point = null;
+		// var offset = 10;
+		var points = [];
+		var point = {x: 100, y: 200};
 		addEventListener("keydown", function(e) {
-			con.log(e.which);
-			switch (e.which) {
-				case 38 : offset += 1; break;
-				case 40 : offset -= 1; break;
+			// con.log(e.which);
+			// switch (e.which) {
+			// 	case 38 : offset += 1; break;
+			// 	case 40 : offset -= 1; break;
+			// }
+			points = [];
+			while (points.length < 10) {
+				points.push({x: rand.getInteger(0, sw), y: rand.getInteger(0, sh)});
 			}
 			redraw();
 		});
 		addEventListener("mousemove", function(e) {
-			perf.start("mousemove");
-			point = {x: e.x, y: e.y};
-			redraw();
-			perf.end("mousemove");
+			// perf.start("mousemove");
+			// perf.end("mousemove");
 		});
 		addEventListener("click", function(e) {
+			point = {x: ~~e.x, y: ~~e.y};
 			redraw();
 		});
 		function redraw() {
-			perf.start("redraw");
+			// perf.start("redraw");
 			bmp.ctx.clearRect(0, 0, sw, sh);
 			// drawInset(points, offset);
-			if (point) {
-				perf.start("geom.pointInPolygon");
-				var inside = geom.pointInPolygon(points, point);
-				perf.end("geom.pointInPolygon");
+			// perf.start("geom.pointInPolygon");
+			var inside = geom.pointInPolygon(points, point);
+			// perf.end("geom.pointInPolygon");
 
-				perf.start("drawPolygon");
-				drawPolygon(points, {fillStyle: inside ? "green" : "red"});
-				perf.end("drawPolygon");
-				bmp.ctx.beginPath();
-				bmp.ctx.fillStyle = "yellow";
-				bmp.ctx.drawCircle(point.x, point.y, 5);
-				bmp.ctx.fill();
-			}
-			perf.end("redraw");
+			// perf.start("drawPolygon");
+			drawPolygon(points, {fillStyle: inside ? "green" : "red"});
+			// perf.end("drawPolygon");
+			bmp.ctx.beginPath();
+			bmp.ctx.fillStyle = "yellow";
+			bmp.ctx.drawCircle(point.x, point.y, 5);
+			bmp.ctx.fill();
+			// perf.end("redraw");
+			var test = `expect(geom.pointInPolygon(${JSON.stringify(points)}, ${JSON.stringify(point)})).toBe(${inside})`;
+			con.log(test);
+
 		}
 		redraw();
 
