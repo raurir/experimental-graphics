@@ -228,33 +228,13 @@ var recursive_polygon = function() {
 		return insetPoints;
 	}
 
-	var perf = (function() {
-		var stacks = {};
-		return {
-			start: function(id) {
-				// id = id || 0;
-				stacks[id] = {
-					timeStart: new Date().getTime()
-				};
-			},
-			end: function(id) {
-				// id = id || 0;
-				stacks[id].timeEnd = new Date().getTime();
-				var time = stacks[id].timeEnd - stacks[id].timeStart;
-				con.log("performance", id, time);
-				stacks[id].timeProcessing = time;
-			}
-		}
-	})();
-
-
 	function init() {
 		// colours.getRandomPalette();
 		// generateParent();
 
 		var offset = 10;
 		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}];//, {x:120, y:40}];
-		while (points.length < 1000000) {
+		while (points.length < 10000) {
 			points.push({x: Math.random() * sw, y: Math.random() * sh});
 		}
 		var point = null;
@@ -285,7 +265,7 @@ var recursive_polygon = function() {
 				perf.end("geom.pointInPolygon");
 
 				perf.start("drawPolygon");
-				// drawPolygon(points, {fillStyle: inside ? "green" : "red"});
+				drawPolygon(points, {fillStyle: inside ? "green" : "red"});
 				perf.end("drawPolygon");
 				bmp.ctx.beginPath();
 				bmp.ctx.fillStyle = "yellow";
