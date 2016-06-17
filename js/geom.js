@@ -40,16 +40,25 @@ var geom = (function() {
     return null; // No collision
   }
 
+  var INFINITY = "INFINITY";
 
 
   // get the equation of a line that goes through two points, ie slope and intercept.
   // doesn't currently deal with divide by zero!
   function linearEquationFromPoints(p0, p1) {
     var dx = p1.x - p0.x;
-    if (dx === 0) {
-      con.warn("divide by zero error in geom.linearEquationFromPoints");
-    }
     var dy = p1.y - p0.y;
+    // occasionally finding an irregularity - turns out dx was 0.0000000000003141611368683772161603
+    // which for all intents and purposes is 0.
+    if (dx == 0 || dx > -0.000001 && dx < 0.000001) {
+      // con.warn("divide by zero error in geom.linearEquationFromPoints");
+      // equation is in the form x = number, rather than y = mx + c
+      return {
+        c: null,
+        m: dy > 0 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY,
+        x: p0.x // so define x intercept, equation is x = p0.x
+      }
+    }
     var m = dy / dx;
     // y = mx + c
     // intercept c = y - mx
@@ -62,30 +71,41 @@ var geom = (function() {
 
   // http://www.softwareandfinance.com/Turbo_C/Intersection_Two_lines_EndPoints.html might be more suitable.
   function intersectionAnywhere(p0, p1, p2, p3) {
+    var intersectionX, intersectionY;
     // con.log("intersectionAnywhere", p0, p1, p2, p3);
-    var line1 = linearEquationFromPoints(p0, p1);
-    var m1 = line1.m;
-    var c1 = line1.c;
+    var line0 = linearEquationFromPoints(p0, p1);
+    var line1 = linearEquationFromPoints(p2, p3);
+    var isLine1Vertical = line0.c === null;
+    var isLine2Vertical = line1.c === null;
 
-    var line2 = linearEquationFromPoints(p2, p3);
-    var m2 = line2.m;
-    var c2 = line2.c;
-
-    // con.log("Equation of line1: Y = %.2fX %c %.2f\n", m1, (c1 < 0) ? ' ' : '+',  c1);
-    // con.log("Equation of line2: Y = %.2fX %c %.2f\n", m2, (c2 < 0) ? ' ' : '+',  c2);
-
-    if (m1 - m2 == 0) {
-      // con.log("intersectionAnywhere: no intercept");
+    if (isLine1Vertical && isLine2Vertical) { // both vertical!, no intercept
       return null;
+    } else if (isLine1Vertical) { // handle equations that don't match y = mx + c - lines that are vertical
+      intersectionX = line0.x;
+      intersectionY = line1.m * intersectionX + line1.c;
+    } else if (isLine2Vertical) {
+      intersectionX = line1.x;
+      intersectionY = line0.m * intersectionX + line0.c;
     } else {
-      var intersectionX = (c2 - c1) / (m1 - m2);
-      var intersectionY = m1 * intersectionX + c1;
-      // con.log("intersectionAnywhere:", intersection_X, intersection_Y);
-      return {
-        x: intersectionX,
-        y: intersectionY
-      };
+      if (line0.m - line1.m == 0) {
+        // con.log("intersectionAnywhere: no intercept");
+        return null;
+      } else {
+        intersectionX = (line1.c - line0.c) / (line0.m - line1.m);
+        intersectionY = line0.m * intersectionX + line0.c;
+        // con.log("intersectionAnywhere:", intersection_X, intersection_Y);
+      }
     }
+    if (intersectionY == 0) {
+      con.log("intersectionY IS 0!", isLine1Vertical, isLine2Vertical, line0, line1);
+      con.log("intersectionY p0 p1", p0, p1);
+      con.log("intersectionY p2 p3", p2, p3);
+    }
+
+    return {
+      x: intersectionX,
+      y: intersectionY
+    };
   }
 
   // from https://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html

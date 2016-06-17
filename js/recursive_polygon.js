@@ -33,6 +33,8 @@ function lerp(a, b, ratio) {
 
 var recursive_polygon = function() {
 
+	// rand.setSeed(3152156569);
+
 	var sw = 800, sh = 800;
 	var bmp = dom.canvas(sw, sh);
 	// addEventListener("click", function() {
@@ -46,7 +48,7 @@ var recursive_polygon = function() {
 			// bmp.ctx.clearRect(0, 0, sw, sh);
 			stack.shift();
 			var depth = parent.depth + 1;
-			if (depth > 4) return;
+			if (depth > 5) return;
 			iterations ++;
 			if (iterations > 4000) return;
 			var copied = parent.points.slice();
@@ -76,27 +78,31 @@ var recursive_polygon = function() {
 			}
 
 			var newArrays = splitPolygon(copied, slicerStart, slicerEnd);
-			var pointsA = newArrays[0], pointsB = newArrays[1];
-			var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
-			var colourA = rand.random() < 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
-			var colourB = rand.random() < 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
-
-			// drawPolygon(pointsA, {fillStyle: colourA});
-			// drawPolygon(pointsB, {fillStyle: colourB});
-
-			var insetPointsA = drawInset(pointsA, 5);
-			var insetPointsB = drawInset(pointsB, 5);
-
-			drawPolygon(insetPointsA, {fillStyle: colourA});//"rgba(0, 0, 0, 0.5)"});
-			drawPolygon(insetPointsB, {fillStyle: colourB});//"rgba(0, 0, 0, 0.5)"});
-
-			drawNext({points: pointsA, colour: colourA, depth: depth});
-			drawNext({points: pointsB, colour: colourB, depth: depth});
-
+			drawSplit(parent, newArrays[0], depth);
+			drawSplit(parent, newArrays[1], depth);
 			// drawPolygon(parent.points, "rgba(0,255,255,0.3)", false, 7);
 		}
 		stack.push(delayedDraw);
 	}
+
+	function drawSplit(parent, points, depth) {
+		// var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
+		var colour = rand.random() < 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
+		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
+		var inset = rand.random() > 0.5;
+		if (inset) {
+			var insetPoints = drawInset(points, 5);
+			if (insetPoints) {
+				drawPolygon(points, {fillStyle: colour});
+				drawPolygon(insetPoints, {fillStyle: "black"});
+				drawNext({points: points, colour: colour, depth: depth});
+			}
+		} else {
+			drawPolygon(points, {fillStyle: colour});
+		}
+	}
+
+
 
 	function drawPolygon(points, options) {
 		bmp.ctx.beginPath();
@@ -179,7 +185,7 @@ var recursive_polygon = function() {
 
 
 	function getParallelPoints(p0, p1, offset) {
-		// drawLine(p0, p1, 'red', 1);
+		// drawLine(p0, p1, 'red', 4);
 		var per = perp(p0, p1, offset);
 		var parrallel0 = {
 			x: p0.x + per.x,
@@ -192,10 +198,10 @@ var recursive_polygon = function() {
 		// drawLine(parrallel0, parrallel1, 'green', 1);
 		// bmp.ctx.fillStyle = "green";
 		// bmp.ctx.beginPath();
-		// bmp.ctx.drawCircle(parrallel0.x, parrallel0.y, 4);
+		// bmp.ctx.drawCircle(parrallel0.x, parrallel0.y, 1.5);
 		// bmp.ctx.fill();
 		// bmp.ctx.beginPath();
-		// bmp.ctx.drawCircle(parrallel1.x, parrallel1.y, 4);
+		// bmp.ctx.drawCircle(parrallel1.x, parrallel1.y, 1.5);
 		// bmp.ctx.fill();
 		return [parrallel0, parrallel1];
 	}
@@ -209,6 +215,7 @@ var recursive_polygon = function() {
 			// con.log(i, pp0, pp1);
 			parallels.push(getParallelPoints(pp0, pp1, offset));
 		};
+		con.log(parallels.length);
 		for (i = 0, il = parallels.length; i < il; i++) {
 			var parallel0 = parallels[i]; // start of line
 			var parallel1 = parallels[(i + 1) % il]; // end of line
@@ -218,70 +225,33 @@ var recursive_polygon = function() {
 				parallel1[0],
 				parallel1[1]
 			);
-			// con.log(intersection);
-			// bmp.ctx.beginPath();
-			// bmp.ctx.fillStyle = "yellow";
-			// bmp.ctx.drawCircle(intersection.x, intersection.y, 5);
-			// bmp.ctx.fill();
-			insetPoints.push(intersection);
+			con.log(intersection);
+
+			var inside = geom.pointInPolygon(points, intersection);
+			if (inside) {
+				insetPoints.push(intersection);
+			} else {
+				// drawPolygon(points, {lineWidth: 1, strokeStyle: "blue"});
+				con.warn("fail");
+				// return null; // bail, we can't inset this shape!
+			}
+			// drawPoint(intersection);
 		}
+
 		return insetPoints;
 	}
 
+	function drawPoint(p) {
+		// con.log("drawPoint", p);
+		bmp.ctx.beginPath();
+		bmp.ctx.fillStyle = "yellow";
+		bmp.ctx.drawCircle(p.x, p.y, 5);
+		bmp.ctx.fill();
+	}
+
 	function init() {
-		// colours.getRandomPalette();
-		// generateParent();
-
-		// var offset = 10;
-		var points = [];
-		var point = {x: 100, y: 200};
-		addEventListener("keydown", function(e) {
-			// con.log(e.which);
-			// switch (e.which) {
-			// 	case 38 : offset += 1; break;
-			// 	case 40 : offset -= 1; break;
-			// }
-			points = [];
-			while (points.length < 10) {
-				points.push({x: rand.getInteger(0, sw), y: rand.getInteger(0, sh)});
-			}
-			redraw();
-		});
-		addEventListener("mousemove", function(e) {
-			// perf.start("mousemove");
-			// perf.end("mousemove");
-		});
-		addEventListener("click", function(e) {
-			point = {x: ~~e.x, y: ~~e.y};
-			redraw();
-		});
-		function redraw() {
-			// perf.start("redraw");
-			bmp.ctx.clearRect(0, 0, sw, sh);
-			// drawInset(points, offset);
-			// perf.start("geom.pointInPolygon");
-			var inside = geom.pointInPolygon(points, point);
-			// perf.end("geom.pointInPolygon");
-
-			// perf.start("drawPolygon");
-			drawPolygon(points, {fillStyle: inside ? "green" : "red"});
-			// perf.end("drawPolygon");
-			bmp.ctx.beginPath();
-			bmp.ctx.fillStyle = "yellow";
-			bmp.ctx.drawCircle(point.x, point.y, 5);
-			bmp.ctx.fill();
-			// perf.end("redraw");
-			var test = `expect(geom.pointInPolygon(${JSON.stringify(points)}, ${JSON.stringify(point)})).toBe(${inside})`;
-			con.log(test);
-
-		}
-		redraw();
-
-		// drawNext({colour: colours.getNextColour()});
-		// con.log(iterations);
-		// iterations =0;
-		// drawNext({colour: "red"});
-
+		colours.getRandomPalette();
+		generateParent();
 		progress("render:complete", bmp.canvas);
 	}
 
