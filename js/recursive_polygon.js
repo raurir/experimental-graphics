@@ -228,16 +228,36 @@ var recursive_polygon = function() {
 		return insetPoints;
 	}
 
+	var perf = (function() {
+		var stacks = {};
+		return {
+			start: function(id) {
+				// id = id || 0;
+				stacks[id] = {
+					timeStart: new Date().getTime()
+				};
+			},
+			end: function(id) {
+				// id = id || 0;
+				stacks[id].timeEnd = new Date().getTime();
+				var time = stacks[id].timeEnd - stacks[id].timeStart;
+				con.log("performance", id, time);
+				stacks[id].timeProcessing = time;
+			}
+		}
+	})();
+
 
 	function init() {
-		colours.getRandomPalette();
-		generateParent();
-/*
+		// colours.getRandomPalette();
+		// generateParent();
+
 		var offset = 10;
 		var points = [{x: 100, y: 200}, {x: 400, y: 400}, {x: 500, y: 200}];//, {x:120, y:40}];
-
-		drawInset(points, offset);
-
+		while (points.length < 1000000) {
+			points.push({x: Math.random() * sw, y: Math.random() * sh});
+		}
+		var point = null;
 		addEventListener("keydown", function(e) {
 			con.log(e.which);
 			switch (e.which) {
@@ -246,15 +266,36 @@ var recursive_polygon = function() {
 			}
 			redraw();
 		});
+		addEventListener("mousemove", function(e) {
+			perf.start("mousemove");
+			point = {x: e.x, y: e.y};
+			redraw();
+			perf.end("mousemove");
+		});
 		addEventListener("click", function(e) {
-			points.push({x: e.x, y: e.y});
 			redraw();
 		});
 		function redraw() {
+			perf.start("redraw");
 			bmp.ctx.clearRect(0, 0, sw, sh);
-			drawInset(points, offset);
+			// drawInset(points, offset);
+			if (point) {
+				perf.start("geom.pointInPolygon");
+				var inside = geom.pointInPolygon(points, point);
+				perf.end("geom.pointInPolygon");
+
+				perf.start("drawPolygon");
+				// drawPolygon(points, {fillStyle: inside ? "green" : "red"});
+				perf.end("drawPolygon");
+				bmp.ctx.beginPath();
+				bmp.ctx.fillStyle = "yellow";
+				bmp.ctx.drawCircle(point.x, point.y, 5);
+				bmp.ctx.fill();
+			}
+			perf.end("redraw");
 		}
-*/
+		redraw();
+
 		// drawNext({colour: colours.getNextColour()});
 		// con.log(iterations);
 		// iterations =0;

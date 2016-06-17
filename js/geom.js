@@ -1,3 +1,4 @@
+var con = con || console;
 var geom = (function() {
 
   // most of these functions have been copied / ported
@@ -85,8 +86,37 @@ var geom = (function() {
         y: intersectionY
       };
     }
-}
+  }
 
+  // from https://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+  // also implemented [here](https://github.com/substack/point-in-polygon/blob/master/index.js), but i require points as {x,y}
+  // tests show polygon with 10,000,000 points takes < 200ms, 1e6 < 20ms
+  function pointInPolygon(polygon, point) {
+    var nvert = polygon.length;
+    if (nvert && nvert >= 3 && point.x !== undefined && point.y !== undefined) {
+      var testx = point.x;
+      var testy = point.y;
+      var i, j, c = false;
+      for (i = 0, j = nvert-1; i < nvert; j = i++) {
+        var vxi = polygon[i].x;
+        var vyi = polygon[i].y;
+        var vxj = polygon[j].x;
+        var vyj = polygon[j].y;
+        if (((vyi>testy) != (vyj>testy)) && (testx < (vxj-vxi) * (testy-vyi) / (vyj-vyi) + vxi)) {
+          c = !c;
+        }
+      }
+      return c;
+    } else {
+      if (nvert < 3) {
+        con.warn("pointInPolygon error - polygon has less than 3 points", polygon);
+      } else {
+        con.warn("pointInPolygon error - invalid data vertices:", nvert, "polygon:", polygon, "point:", point);
+      }
+      return null
+    }
+
+  }
 
 
 
@@ -96,6 +126,7 @@ var geom = (function() {
 
 
   return {
+    pointInPolygon: pointInPolygon,
     linearEquationFromPoints: linearEquationFromPoints,
     intersectionAnywhere: intersectionAnywhere,
     intersectionBetweenPoints: intersectionBetweenPoints
