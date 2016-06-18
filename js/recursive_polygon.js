@@ -64,14 +64,40 @@ var recursive_polygon = function() {
 				// con.log("drawNext", iterations, "parent:", len, slicerStart, slicerEnd, "split to", pointsA.length, pointsB.length);
 			} else {
 				if (len == 3) {
+
+					var edge = rand.getInteger(0, 3); // pick which edge to split
+					var splitRatio = 0.5; //rand.getNumber(0.1, 0.9));
+					var newPoint;
+					switch (edge) {
+						case 0:
+							newPoint = lerp(copied[0], copied[1], splitRatio);
+							copied.splice(1, 0, newPoint);
+							slicerStart = 1;
+							slicerEnd = 3;
+							break;
+						case 1:
+							newPoint = lerp(copied[1], copied[2], splitRatio);
+							copied.splice(2, 0, newPoint);
+							slicerStart = 0;
+							slicerEnd = 2;
+							break;
+						case 2:
+							newPoint = lerp(copied[2], copied[0], splitRatio);
+							copied.push(newPoint);
+							slicerStart = 1;
+							slicerEnd = 3;
+					}
+
+					// drawPoint(copied[0], {fillStyle: "red"});
+					// drawPoint(copied[1], {fillStyle: "green"});
+					// drawPoint(copied[2], {fillStyle: "blue"});
+					// drawPoint(newPoint, {fillStyle: "orange"});
 					// con.log("drawNext", iterations, "parent:", len, "triangle");
-					var newPont = lerp(copied[0], copied[2], rand.getNumber(0.5, 0.6));
-					copied.push(newPont);
-					// con.log(newPont, copied[1], copied[2]);
+
+
+					// con.log(newPoint, copied[1], copied[2]);
 					// drawNext({points: copied, colour: parent.colour});
 					// drawPolygon(copied, parent.colour, true);
-					slicerStart = 1;
-					slicerEnd = 3;
 				} else {
 					con.log("drawNext", iterations, "parent:", len, "fail");
 				}
@@ -89,28 +115,20 @@ var recursive_polygon = function() {
 		// var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
 		var colour = rand.random() < 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
 		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
-		var inset = rand.random() > 0.5;
+		var inset = true;//rand.random() > 0.5;
 		if (inset) {
 			var insetPoints = drawInset(points, 5);
 			if (insetPoints) {
-				drawPolygon(points, {fillStyle: colour});
+				drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
 				drawPolygon(insetPoints, {fillStyle: "black"});
 				drawNext({points: points, colour: colour, depth: depth});
 			}
 		} else {
-			drawPolygon(points, {fillStyle: colour});
+			drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
 		}
 	}
 
-
-
-	function drawPolygon(points, options) {
-		bmp.ctx.beginPath();
-		for (var i = 0; i < points.length; i++) {
-			var p = points[i];
-			bmp.ctx[i == 0 ? "moveTo" : "lineTo"](p.x, p.y);
-		};
-		bmp.ctx.closePath();
+	function fillAndStroke(options) {
 		if (options.lineWidth && options.strokeStyle) {
 			bmp.ctx.strokeStyle = options.strokeStyle;
 			bmp.ctx.lineWidth = options.lineWidth;
@@ -120,6 +138,16 @@ var recursive_polygon = function() {
 			bmp.ctx.fillStyle = options.fillStyle;
 			bmp.ctx.fill();
 		}
+	}
+
+	function drawPolygon(points, options) {
+		bmp.ctx.beginPath();
+		for (var i = 0; i < points.length; i++) {
+			var p = points[i];
+			bmp.ctx[i == 0 ? "moveTo" : "lineTo"](p.x, p.y);
+		};
+		bmp.ctx.closePath();
+		fillAndStroke(options);
 		// for (i = 0; i < points.length; i++) {
 		// 	var p = points[i];
 		// 	bmp.ctx.fillStyle = "#FFF";
@@ -143,7 +171,7 @@ var recursive_polygon = function() {
 		var i = 0;
 		var cx = 0.5;//rand.random();
 		var cy = 0.5;//rand.random();
-		var sides = rand.getInteger(3, 8);
+		var sides = 3;//rand.getInteger(3, 8);
 		var points = [];
 		var angles = [];
 		while(angles.length < sides) {
@@ -215,7 +243,7 @@ var recursive_polygon = function() {
 			// con.log(i, pp0, pp1);
 			parallels.push(getParallelPoints(pp0, pp1, offset));
 		};
-		con.log(parallels.length);
+		// con.log(parallels.length);
 		for (i = 0, il = parallels.length; i < il; i++) {
 			var parallel0 = parallels[i]; // start of line
 			var parallel1 = parallels[(i + 1) % il]; // end of line
@@ -225,8 +253,7 @@ var recursive_polygon = function() {
 				parallel1[0],
 				parallel1[1]
 			);
-			con.log(intersection);
-
+			// con.log(intersection);
 			var inside = geom.pointInPolygon(points, intersection);
 			if (inside) {
 				insetPoints.push(intersection);
@@ -241,12 +268,11 @@ var recursive_polygon = function() {
 		return insetPoints;
 	}
 
-	function drawPoint(p) {
+	function drawPoint(p, options) {
 		// con.log("drawPoint", p);
 		bmp.ctx.beginPath();
-		bmp.ctx.fillStyle = "yellow";
 		bmp.ctx.drawCircle(p.x, p.y, 5);
-		bmp.ctx.fill();
+		fillAndStroke(options);
 	}
 
 	function init() {
