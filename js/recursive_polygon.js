@@ -37,9 +37,12 @@ var recursive_polygon = function() {
 
 	var sw = 800, sh = 800;
 	var bmp = dom.canvas(sw, sh);
+	var insetDistance;
 	// addEventListener("click", function() {
 	// 	if (stack[0]) stack[0]();
 	// });
+
+
 	var stack = [];
 	var iterations = 0;
 	function drawNext(parent) {
@@ -48,7 +51,7 @@ var recursive_polygon = function() {
 			// bmp.ctx.clearRect(0, 0, sw, sh);
 			stack.shift();
 			var depth = parent.depth + 1;
-			if (depth > 5) return;
+			if (depth > 7) return;
 			iterations ++;
 			if (iterations > 4000) return;
 			var copied = parent.points.slice();
@@ -65,7 +68,10 @@ var recursive_polygon = function() {
 			} else {
 				if (len == 3) {
 
-					var edge = rand.getInteger(0, 3); // pick which edge to split
+					// var edge = 1;//rand.getInteger(0, 2); // pick which edge to split
+					var edge = getLongest(copied);
+
+					// con.log(edge);
 					var splitRatio = 0.5; //rand.getNumber(0.1, 0.9));
 					var newPoint;
 					switch (edge) {
@@ -113,11 +119,11 @@ var recursive_polygon = function() {
 
 	function drawSplit(parent, points, depth) {
 		// var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
-		var colour = rand.random() < 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
+		var colour = rand.random() > 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
 		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
 		var inset = true;//rand.random() > 0.5;
 		if (inset) {
-			var insetPoints = drawInset(points, 5);
+			var insetPoints = drawInset(points, insetDistance);
 			if (insetPoints) {
 				drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
 				drawPolygon(insetPoints, {fillStyle: "black"});
@@ -171,7 +177,7 @@ var recursive_polygon = function() {
 		var i = 0;
 		var cx = 0.5;//rand.random();
 		var cy = 0.5;//rand.random();
-		var sides = 3;//rand.getInteger(3, 8);
+		var sides = rand.getInteger(3, 8);
 		var points = [];
 		var angles = [];
 		while(angles.length < sides) {
@@ -191,6 +197,24 @@ var recursive_polygon = function() {
 		drawNext({points: points, colour: colour, depth: 0});
 	}
 
+	function getLongest(points) {
+		function getLength(p0, p1) {
+			var dx = p0.x - p1.x, dy = p0.y - p1.y;
+			return Math.sqrt(dx * dx + dy * dy);
+		}
+		var len = 0, edgeIndex = null;
+		for (var i = 0, il = points.length; i < il; i++) {
+			var p0 = points[i];
+			var p1 = points[(i + 1) % il];
+			var p0p1Len = getLength(p0, p1);
+			if (p0p1Len > len) {
+				len = p0p1Len;
+				edgeIndex = i;
+			}
+		};
+		con.log(edgeIndex);
+		return edgeIndex;
+	}
 
 	// http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
 	function perp(a, b, distance){
@@ -276,6 +300,7 @@ var recursive_polygon = function() {
 	}
 
 	function init() {
+		insetDistance = rand.getNumber(2, 25);
 		colours.getRandomPalette();
 		generateParent();
 		progress("render:complete", bmp.canvas);
