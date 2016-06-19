@@ -22,38 +22,70 @@ function splitPolygon(array, start, end) {
 	];
 }
 
-function lerp(a, b, ratio) {
-	return {
-		x: a.x + (b.x - a.x) * ratio,
-		y: a.y + (b.y - a.y) * ratio
-	};
-}
 
 
 
 var recursive_polygon = function() {
 
-	// rand.setSeed(3152156569);
+	// rand.setSeed(3807252327);
 
-	var sw = 800, sh = 800;
+	var sw = 700, sh = 700;
 	var bmp = dom.canvas(sw, sh);
 	var insetDistance;
+	var mutateThreshold;
+	var mutateAmount;
+	var maxDepth;
+	var sides;
+	var splitLongest;
+	var splitEdgeRatioLocked;
+	var insetLocked, insetLockedValue, insetThreshold;
+	var wonky;
+	//rand.random();
 	// addEventListener("click", function() {
 	// 	if (stack[0]) stack[0]();
 	// });
 
+	function generateParent() {
+		var colour = colours.getNextColour()
+		// con.log("generateParent");
+		var i = 0;
+		var cx = 0.5;
+		var cy = 0.5;
+		var points = [];
+		var angles = [];
+		while(angles.length < sides) {
+			if (false && wonky) {
+				angles.push(rand.random());
+			} else {
+				angles.push(i / sides);
+			}
+			i++;
+		};
+		angles.sort();
+		for (i = 0; i < angles.length; i++) {
+			var angle = angles[i] * Math.PI * 2;
+			var radius = 0.45;//rand.getNumber(0.4, 0.5);
+			var x = cx + Math.sin(angle) * radius;
+			var y = cy + Math.cos(angle) * radius;
+			// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
+			points.push({x: x * sw, y: y * sh});
+		};
+		// drawPolygon(points, {strokeStyle: colour, lineWidth: 4});
+		drawNext({points: points, colour: colour, depth: 0});
+	}
 
-	var stack = [];
+	// var stack = [];
 	var iterations = 0;
 	function drawNext(parent) {
-		setTimeout(delayedDraw, 10);
+		// setTimeout(delayedDraw, 10);
+		delayedDraw();
 		function delayedDraw() {
 			// bmp.ctx.clearRect(0, 0, sw, sh);
-			stack.shift();
+			// stack.shift();
 			var depth = parent.depth + 1;
-			if (depth > 7) return;
+			if (depth > maxDepth) return;
 			iterations ++;
-			if (iterations > 4000) return;
+			if (iterations > 10000) return;
 			var copied = parent.points.slice();
 			var len = copied.length;
 			var slicerStart, slicerEnd;
@@ -65,48 +97,39 @@ var recursive_polygon = function() {
 				slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
 				slicerEnd = rand.getInteger(2, len - 2);
 				// con.log("drawNext", iterations, "parent:", len, slicerStart, slicerEnd, "split to", pointsA.length, pointsB.length);
-			} else {
-				if (len == 3) {
-
-					// var edge = 1;//rand.getInteger(0, 2); // pick which edge to split
-					var edge = getLongest(copied);
-
-					// con.log(edge);
-					var splitRatio = 0.5; //rand.getNumber(0.1, 0.9));
-					var newPoint;
-					switch (edge) {
-						case 0:
-							newPoint = lerp(copied[0], copied[1], splitRatio);
-							copied.splice(1, 0, newPoint);
-							slicerStart = 1;
-							slicerEnd = 3;
-							break;
-						case 1:
-							newPoint = lerp(copied[1], copied[2], splitRatio);
-							copied.splice(2, 0, newPoint);
-							slicerStart = 0;
-							slicerEnd = 2;
-							break;
-						case 2:
-							newPoint = lerp(copied[2], copied[0], splitRatio);
-							copied.push(newPoint);
-							slicerStart = 1;
-							slicerEnd = 3;
-					}
-
-					// drawPoint(copied[0], {fillStyle: "red"});
-					// drawPoint(copied[1], {fillStyle: "green"});
-					// drawPoint(copied[2], {fillStyle: "blue"});
-					// drawPoint(newPoint, {fillStyle: "orange"});
-					// con.log("drawNext", iterations, "parent:", len, "triangle");
-
-
-					// con.log(newPoint, copied[1], copied[2]);
-					// drawNext({points: copied, colour: parent.colour});
-					// drawPolygon(copied, parent.colour, true);
-				} else {
-					con.log("drawNext", iterations, "parent:", len, "fail");
+			} else { // len is 3 
+				var edge = splitLongest ? getLongest(copied) : rand.getInteger(0, 2); // pick which edge to split
+				// con.log(edge);
+				var splitRatio = splitEdgeRatioLocked ? splitEdgeRatioLocked : rand.getNumber(0.1, 0.9);
+				var newPoint;
+				switch (edge) {
+					case 0:
+						newPoint = geom.lerp(copied[0], copied[1], splitRatio);
+						copied.splice(1, 0, newPoint);
+						slicerStart = 1;
+						slicerEnd = 3;
+						break;
+					case 1:
+						newPoint = geom.lerp(copied[1], copied[2], splitRatio);
+						copied.splice(2, 0, newPoint);
+						slicerStart = 0;
+						slicerEnd = 2;
+						break;
+					case 2:
+						newPoint = geom.lerp(copied[2], copied[0], splitRatio);
+						copied.push(newPoint);
+						slicerStart = 1;
+						slicerEnd = 3;
 				}
+
+				// drawPoint(copied[0], {fillStyle: "red"});
+				// drawPoint(copied[1], {fillStyle: "green"});
+				// drawPoint(copied[2], {fillStyle: "blue"});
+				// drawPoint(newPoint, {fillStyle: "orange"});
+				// con.log("drawNext", iterations, "parent:", len, "triangle");
+				// con.log(newPoint, copied[1], copied[2]);
+				// drawNext({points: copied, colour: parent.colour});
+				// drawPolygon(copied, parent.colour, true);
 			}
 
 			var newArrays = splitPolygon(copied, slicerStart, slicerEnd);
@@ -114,14 +137,15 @@ var recursive_polygon = function() {
 			drawSplit(parent, newArrays[1], depth);
 			// drawPolygon(parent.points, "rgba(0,255,255,0.3)", false, 7);
 		}
-		stack.push(delayedDraw);
+		// stack.push(delayedDraw);
 	}
 
 	function drawSplit(parent, points, depth) {
 		// var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
-		var colour = rand.random() > 0.95 ? colours.mutateColour(parent.colour, 10) : colours.getNextColour();
+		var colour = (mutateThreshold && rand.random() < mutateThreshold) ?
+			colours.mutateColour(parent.colour, mutateAmount) : colours.getNextColour();
 		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
-		var inset = true;//rand.random() > 0.5;
+		var inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
 		if (inset) {
 			var insetPoints = drawInset(points, insetDistance);
 			if (insetPoints) {
@@ -171,32 +195,6 @@ var recursive_polygon = function() {
 		bmp.ctx.stroke();
 	}
 
-	function generateParent() {
-		var colour = colours.getNextColour()
-		// con.log("generateParent");
-		var i = 0;
-		var cx = 0.5;//rand.random();
-		var cy = 0.5;//rand.random();
-		var sides = rand.getInteger(3, 8);
-		var points = [];
-		var angles = [];
-		while(angles.length < sides) {
-			// angles.push(rand.random());
-			angles.push(i / sides);
-			i++;
-		};
-		angles.sort();
-		for (i = 0; i < angles.length; i++) {
-			var angle = angles[i] * Math.PI * 2;
-			var x = cx + Math.sin(angle) * rand.getNumber(0.4, 0.4);
-			var y = cy + Math.cos(angle) * rand.getNumber(0.4, 0.4);
-			// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
-			points.push({x: x * sw, y: y * sh});
-		};
-		// drawPolygon(points, {strokeStyle: colour, lineWidth: 4});
-		drawNext({points: points, colour: colour, depth: 0});
-	}
-
 	function getLongest(points) {
 		function getLength(p0, p1) {
 			var dx = p0.x - p1.x, dy = p0.y - p1.y;
@@ -212,7 +210,7 @@ var recursive_polygon = function() {
 				edgeIndex = i;
 			}
 		};
-		con.log(edgeIndex);
+		// con.log(edgeIndex);
 		return edgeIndex;
 	}
 
@@ -283,12 +281,11 @@ var recursive_polygon = function() {
 				insetPoints.push(intersection);
 			} else {
 				// drawPolygon(points, {lineWidth: 1, strokeStyle: "blue"});
-				con.warn("fail");
-				// return null; // bail, we can't inset this shape!
+				// con.warn("fail");
+				return null; // bail, we can't inset this shape!
 			}
 			// drawPoint(intersection);
 		}
-
 		return insetPoints;
 	}
 
@@ -300,7 +297,24 @@ var recursive_polygon = function() {
 	}
 
 	function init() {
+		sides = rand.getInteger(3, 28);
+		if (sides < 5) {
+			wonky = rand.random() > 0.8;
+		}
 		insetDistance = rand.getNumber(2, 25);
+		mutateThreshold = rand.getNumber(0, 1);
+		mutateAmount = rand.getNumber(5, 30);
+		maxDepth = rand.getInteger(1, 10);
+		splitLongest = rand.random() > 0.5;
+		splitEdgeRatioLocked = rand.random() > 0.5 ? 0.5 : false;
+		insetLocked = rand.random() > 0.5;
+		if (insetLocked) {
+			insetLockedValue = rand.random() > 0.5;
+		} else {
+			insetThreshold = rand.random();
+		}
+
+
 		colours.getRandomPalette();
 		generateParent();
 		progress("render:complete", bmp.canvas);
