@@ -40,9 +40,6 @@ var geom = (function() {
     return null; // No collision
   }
 
-  var INFINITY = "INFINITY";
-
-
   // get the equation of a line that goes through two points, ie slope and intercept.
   // doesn't currently deal with divide by zero!
   function linearEquationFromPoints(p0, p1) {
@@ -139,6 +136,12 @@ var geom = (function() {
   }
 
 
+  function linearInterpolate(a, b, ratio) {
+    return {
+      x: a.x + (b.x - a.x) * ratio,
+      y: a.y + (b.y - a.y) * ratio
+    };
+  }
 
 
 
@@ -146,6 +149,7 @@ var geom = (function() {
 
 
   return {
+    lerp: linearInterpolate,
     pointInPolygon: pointInPolygon,
     linearEquationFromPoints: linearEquationFromPoints,
     intersectionAnywhere: intersectionAnywhere,
