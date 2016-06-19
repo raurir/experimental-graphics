@@ -40,10 +40,6 @@ var recursive_polygon = function() {
 	var splitEdgeRatioLocked;
 	var insetLocked, insetLockedValue, insetThreshold;
 	var wonky;
-	//rand.random();
-	// addEventListener("click", function() {
-	// 	if (stack[0]) stack[0]();
-	// });
 
 	function generateParent() {
 		var colour = colours.getNextColour()
@@ -54,17 +50,14 @@ var recursive_polygon = function() {
 		var points = [];
 		var angles = [];
 		while(angles.length < sides) {
-			if (false && wonky) {
-				angles.push(rand.random());
-			} else {
-				angles.push(i / sides);
-			}
+			// angles.push(rand.random());
+			angles.push(i / sides);
 			i++;
 		};
 		angles.sort();
 		for (i = 0; i < angles.length; i++) {
 			var angle = angles[i] * Math.PI * 2;
-			var radius = 0.45;//rand.getNumber(0.4, 0.5);
+			var radius = wonky ? rand.getNumber(0.4, 0.45) : 0.45;
 			var x = cx + Math.sin(angle) * radius;
 			var y = cy + Math.cos(angle) * radius;
 			// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
@@ -74,15 +67,14 @@ var recursive_polygon = function() {
 		drawNext({points: points, colour: colour, depth: 0});
 	}
 
-	// var stack = [];
 	var iterations = 0;
 	function drawNext(parent) {
 		// setTimeout(delayedDraw, 10);
 		delayedDraw();
 		function delayedDraw() {
 			// bmp.ctx.clearRect(0, 0, sw, sh);
-			// stack.shift();
 			var depth = parent.depth + 1;
+			// con.log("drawNext", depth, depth > maxDepth, iterations);
 			if (depth > maxDepth) return;
 			iterations ++;
 			if (iterations > 10000) return;
@@ -97,7 +89,7 @@ var recursive_polygon = function() {
 				slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
 				slicerEnd = rand.getInteger(2, len - 2);
 				// con.log("drawNext", iterations, "parent:", len, slicerStart, slicerEnd, "split to", pointsA.length, pointsB.length);
-			} else { // len is 3 
+			} else { // len is 3
 				var edge = splitLongest ? getLongest(copied) : rand.getInteger(0, 2); // pick which edge to split
 				// con.log(edge);
 				var splitRatio = splitEdgeRatioLocked ? splitEdgeRatioLocked : rand.getNumber(0.1, 0.9);
@@ -137,7 +129,6 @@ var recursive_polygon = function() {
 			drawSplit(parent, newArrays[1], depth);
 			// drawPolygon(parent.points, "rgba(0,255,255,0.3)", false, 7);
 		}
-		// stack.push(delayedDraw);
 	}
 
 	function drawSplit(parent, points, depth) {
@@ -150,11 +141,16 @@ var recursive_polygon = function() {
 			var insetPoints = drawInset(points, insetDistance);
 			if (insetPoints) {
 				drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
+				bmp.ctx.globalCompositeOperation = "destination-out";
 				drawPolygon(insetPoints, {fillStyle: "black"});
+				bmp.ctx.globalCompositeOperation = "source-over";
 				drawNext({points: points, colour: colour, depth: depth});
 			}
 		} else {
 			drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
+			if (rand.random() > 0.5) { // if it's filled, maybe not continue
+				drawNext({points: points, colour: colour, depth: depth});
+			}
 		}
 	}
 
@@ -215,7 +211,7 @@ var recursive_polygon = function() {
 	}
 
 	// http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
-	function perp(a, b, distance){
+	function getPerpendincular(a, b, distance){
 		var p = {
 			x: a.x - b.x,
 			y: a.y - b.y
@@ -233,10 +229,9 @@ var recursive_polygon = function() {
 		};
 	}
 
-
 	function getParallelPoints(p0, p1, offset) {
 		// drawLine(p0, p1, 'red', 4);
-		var per = perp(p0, p1, offset);
+		var per = getPerpendincular(p0, p1, offset);
 		var parrallel0 = {
 			x: p0.x + per.x,
 			y: p0.y + per.y
@@ -255,7 +250,6 @@ var recursive_polygon = function() {
 		// bmp.ctx.fill();
 		return [parrallel0, parrallel1];
 	}
-
 
 	function drawInset(points, offset) {
 		var parallels = [], insetPoints = [];
@@ -297,7 +291,8 @@ var recursive_polygon = function() {
 	}
 
 	function init() {
-		sides = rand.getInteger(3, 28);
+		// sides = rand.getInteger(3, 28);
+		sides = 3 + Math.round(rand.random() * rand.random() * rand.random() * 28); // want to bias this towards low polys.
 		if (sides < 5) {
 			wonky = rand.random() > 0.8;
 		}
@@ -311,9 +306,20 @@ var recursive_polygon = function() {
 		if (insetLocked) {
 			insetLockedValue = rand.random() > 0.5;
 		} else {
-			insetThreshold = rand.random();
+			insetThreshold = rand.random() * 0.5;
 		}
 
+		con.log("sides", sides);
+		con.log("wonky", wonky);
+		con.log("insetDistance", insetDistance);
+		con.log("mutateThreshold", mutateThreshold);
+		con.log("mutateAmount", mutateAmount);
+		con.log("maxDepth", maxDepth);
+		con.log("splitLongest", splitLongest);
+		con.log("splitEdgeRatioLocked", splitEdgeRatioLocked);
+		con.log("insetLocked", insetLocked);
+		con.log("insetLockedValue", insetLockedValue);
+		con.log("insetThreshold", insetThreshold);
 
 		colours.getRandomPalette();
 		generateParent();
