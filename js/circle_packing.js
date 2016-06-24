@@ -2,7 +2,7 @@ var isNode = (typeof module !== 'undefined');
 
 var circle_packing = function() {
 
-	var sw = 900, sh = 900;
+	var sw = 1200, sh = 1200;
 	var cx = 0.5, cy = 0.5;
 
 	var bmp = dom.canvas(sw, sh);
@@ -27,7 +27,7 @@ var circle_packing = function() {
 	document.body.appendChild(output);
 
 	function init() {
-		rand.setSeed(4);
+		// rand.setSeed(4);
 		bmp.ctx.clearRect(0, 0, sw, sh);
 
 		var iterations = 0;
@@ -46,18 +46,18 @@ var circle_packing = function() {
 		}
 
 		function drawCircle(parent, attempt) {
-
 			threads++;
 
-			var gap = 0.01;
+			var gap = 0.001;
 
 			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
 			if (parent){
 				angle = rand.random() * Math.PI * 2;
 
 				// distance from centre of parent
-				// distance = rand.random() * parent.r;
-				distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+				distance = rand.random() * parent.r;
+				// banding
+				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
 
 				x = parent.x + Math.sin(angle) * distance;
 				y = parent.y + Math.cos(angle) * distance;
@@ -66,14 +66,18 @@ var circle_packing = function() {
 				dy = y - cy;
 				d = Math.sqrt(dx * dx + dy * dy);
 				// maxRadius = Math.pow(0.6 - d, 3) * 4;
-				// maxRadius = (0.7 - d) * 0.2;
+				maxRadius = (0.7 - d) * 0.2;
 				// maxRadius = (d + 0.1) * 0.2;
-				maxRadius = 0.07;
+				// maxRadius = 0.07;
+				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
+				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
+				if (maxRadius > 1 ) con.log(maxRadius);
 
-				r = rand.random() * maxRadius * (parent.r - distance - gap);
+				// r = maxRadius;
+				r = 0.005;// rand.random() * maxRadius * (parent.r - distance - gap);
 				// r = parent.r - distance - gap;
 
-				if (r < 0.004) {
+				if (r < 0.005) {
 					threads--;
 					attemptNextCircle(parent, attempt);
 					return;
@@ -106,8 +110,8 @@ var circle_packing = function() {
 			} else {
 				x = cx;//rand.random();
 				y = cy;//rand.random();
-				r = 0.5;//rand.random() / 2;
-				colour = "rgba(0, 0, 0, 0.2)";
+				r = 0.45;//rand.random() / 2;
+				colour = "rgba(0, 0, 0, 0)";
 				depth = 0;
 			}
 
