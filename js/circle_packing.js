@@ -2,7 +2,8 @@ var isNode = (typeof module !== 'undefined');
 
 var circle_packing = function() {
 
-	var sw = 600, sh = 600;
+	var sw = 900, sh = 900;
+	var cx = 0.5, cy = 0.5;
 
 	var bmp = dom.canvas(sw, sh);
 
@@ -22,28 +23,59 @@ var circle_packing = function() {
 		bmp.ctx.stroke();
 	}
 
+	var output = dom.element("div");
+	document.body.appendChild(output);
+
 	function init() {
+		rand.setSeed(4);
 		bmp.ctx.clearRect(0, 0, sw, sh);
 
 		var iterations = 0;
 		var circles = 0;
+		var threads = 0;
+
+		function attemptNextCircle(parent, attempt) {
+			attempt++;
+			// con.log("attemptNextCircle", attempt);
+			output.innerHTML = [circles, attempt, threads];
+			if (attempt < 1250) {
+				setTimeout(function() {
+					drawCircle(parent, attempt);
+				}, 1);
+			}
+		}
+
 		function drawCircle(parent, attempt) {
+
+			threads++;
 
 			var gap = 0.01;
 
-			var x, y, r, depth, colour;
+			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
 			if (parent){
-				var angle = rand.random() * Math.PI * 2;
-				var distance = rand.random() * parent.r; // distance from centre of parent
+				angle = rand.random() * Math.PI * 2;
+
+				// distance from centre of parent
+				// distance = rand.random() * parent.r;
+				distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+
 				x = parent.x + Math.sin(angle) * distance;
 				y = parent.y + Math.cos(angle) * distance;
-				r = rand.random() * (parent.r - distance - gap);
+
+				dx = x - cx;
+				dy = y - cy;
+				d = Math.sqrt(dx * dx + dy * dy);
+				// maxRadius = Math.pow(0.6 - d, 3) * 4;
+				// maxRadius = (0.7 - d) * 0.2;
+				// maxRadius = (d + 0.1) * 0.2;
+				maxRadius = 0.07;
+
+				r = rand.random() * maxRadius * (parent.r - distance - gap);
 				// r = parent.r - distance - gap;
 
-				if (r < 0.001) {
-					if (attempt < 1000) {
-						drawCircle(parent, attempt + 1);
-					}
+				if (r < 0.004) {
+					threads--;
+					attemptNextCircle(parent, attempt);
 					return;
 				}
 
@@ -51,38 +83,34 @@ var circle_packing = function() {
 
 				var ok = true;
 				for (var i = 0, il = parent.children.length; i < il && ok; i++) {
-					var other = parent.children[i]
-					var dx = x - other.x,
-						dy = y - other.y,
-						d = Math.sqrt(dx * dx + dy * dy), // minimum required distance between centres
-						dR = r + other.r + gap; // actual distance
-						// con.log(parent.children, dR, d);
-
+					other = parent.children[i];
+					dx = x - other.x;
+					dy = y - other.y;
+					d = Math.sqrt(dx * dx + dy * dy); // minimum required distance between centres
+					var dR = r + other.r + gap; // actual distance
 						// drawLine({x: other.x * sw, y: other.y * sw}, {x:x*sw, y:y*sw}, "red", 2);
-
 					if (dR > d) {
 						ok = false;
 					}
 				}
 				if (ok === false) {
-					// con.log("red");
-					colour = "rgba(255, 0, 0, 0.5)";
-					if (attempt < 1000) {
-						drawCircle(parent, attempt + 1);
-					}
+					threads--;
+					attemptNextCircle(parent, attempt);
 					return;
 				} else {
 					// colour = depth % 2 == 0 ? "rgba(0, 0, 255, 0.5)" : "rgba(0, 255, 0, 0.5)";
-					colour = depth % 2 == 0 ? "black" : "white";
+					// colour = depth % 2 == 0 ? "black" : "white";
+					colour = colours.getNextColour();
 				}
 
 			} else {
-				x = 0.5;//rand.random();
-				y = 0.5;//rand.random();
+				x = cx;//rand.random();
+				y = cy;//rand.random();
 				r = 0.5;//rand.random() / 2;
-				colour = "transparent";
+				colour = "rgba(0, 0, 0, 0.2)";
 				depth = 0;
 			}
+
 
 			bmp.ctx.beginPath();
 			bmp.ctx.fillStyle = colour;
@@ -90,11 +118,7 @@ var circle_packing = function() {
 			bmp.ctx.closePath();
 			bmp.ctx.fill();
 
-
-			if (ok === false) {
-				return;
-			}
-
+			// con.log('drawOne', x, y, colour);
 
 			// con.log("iterations", iterations, x, y, r, bmp.ctx.fillStyle, depth, depth % 2);
 
@@ -108,33 +132,28 @@ var circle_packing = function() {
 			}
 
 			circles++;
-			if (parent && parent.children) parent.children.push(circle);
+			if (parent && parent.children) {
+				parent.children.push(circle);
+			}
 
 			// if (iterations < 4) {//500) {
-			setTimeout(function () {
-				if (depth < 2) {
-					var num = 500;//rand.random() * 6;
-					for (var i = 0; i < num; i++) {
-						drawCircle(circle, 0);
-					}
-					// setTimeout(function () {
-					// 	drawCircle(circle, 0);
-					// }, 1);
+			if (depth < 1) {
+				var num = 500;//rand.random() * 6;
+				for (var i = 0; i < num; i++) {
+					attemptNextCircle(circle, 0);
 				}
-			}, 1);
-
-			if (parent && attempt < 1500) {
-				con.log("doing", attempt, circles);
-				setTimeout(function () {
-					drawCircle(parent, attempt + 1);
-				}, 1);
 			}
 
 
+			if (parent) {
+				attemptNextCircle(parent, attempt);
+			}
+			threads--;
 			return circle;
 		}
 
-		drawCircle(0, 0);
+		var parent = drawCircle(0, 0);
+		// drawCircle(parent, 0);
 
 		progress("render:complete", bmp.canvas);
 	}
