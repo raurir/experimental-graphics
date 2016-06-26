@@ -38,7 +38,7 @@ var circle_packing = function() {
 			attempt++;
 			// con.log("attemptNextCircle", attempt);
 			output.innerHTML = [circles, attempt, threads, iterations];
-			if (attempt < 1250) {
+			if (attempt < 125000) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
 				}, 1);
@@ -49,10 +49,10 @@ var circle_packing = function() {
 			threads++;
 			iterations++;
 
-			var gap = 0.001;
+			var gap = 0.01;
 
 			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
-			if (parent){
+			if (parent) {
 				angle = rand.random() * Math.PI * 2;
 				// angle = iterations * Math.PI * 2;
 
@@ -61,8 +61,26 @@ var circle_packing = function() {
 				// banding
 				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
 
+				var thresh = iterations > 5;
+
+				if (thresh) {
+					// con.log("ok");
+					parent.incrementor.distance += 0.01;
+					if (parent.incrementor.distance > parent.r) {
+						parent.incrementor.distance = 0;
+						parent.incrementor.angle += 0.01;
+					}
+					distance = parent.incrementor.distance;
+					angle = parent.incrementor.angle;
+				}
+
+
 				x = parent.x + Math.sin(angle) * distance;
 				y = parent.y + Math.cos(angle) * distance;
+
+				if (thresh) {
+					// drawLine({x: parent.x * sw, y: parent.y * sw}, {x: x * sw, y: y * sw}, "red", 2);
+				}
 
 				dx = x - cx;
 				dy = y - cy;
@@ -96,13 +114,13 @@ var circle_packing = function() {
 					var dR = r + other.r + gap; // actual distance
 						// drawLine({x: other.x * sw, y: other.y * sw}, {x:x*sw, y:y*sw}, "red", 2);
 					if (dR > d) {
-						ok = false;
-						// r = d - other.r - gap;
-						// if (r < 0.002) {
-						// 	threads--;
-						// 	attemptNextCircle(parent, attempt);
-						// 	return;
-						// }
+						// ok = false;
+						r = d - other.r - gap;
+						if (r < 0.002) {
+							threads--;
+							attemptNextCircle(parent, attempt);
+							return;
+						}
 					}
 				}
 				if (ok === false) {
@@ -139,7 +157,11 @@ var circle_packing = function() {
 				x: x,
 				y: y,
 				r: r,
-				children: []
+				children: [],
+				incrementor: {
+					angle: 0,
+					distance: 0
+				}
 			}
 
 			circles++;
@@ -149,7 +171,7 @@ var circle_packing = function() {
 
 			// if (iterations < 4) {//500) {
 			if (depth < 1) {
-				var num = 500;//rand.random() * 6;
+				var num = 100;//500;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
 					attemptNextCircle(circle, 0);
 				}
