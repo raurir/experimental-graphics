@@ -1,5 +1,5 @@
 (function() {
-  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, getMaze, harden, init, iterations, iterativeDraw, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
+  var borderIndex, borderLength, branchrate, can, carve, check, con, ctx, d, draw, e, exits, field, frontier, getExits, getMaze, harden, init, iterations, iterativeDraw, keepDrawing, maze, ran, random, row, time, unit, x, xwide, y, yhigh, _i, _j, _k, _l;
 
   con = console;
 
@@ -11,9 +11,11 @@
 
   time = 0;
 
-  xwide = 30;
+  xwide = 12;
 
-  yhigh = 30;
+  yhigh = 12;
+
+  unit = 16;
 
   ran = Math.random();
 
@@ -186,19 +188,56 @@
     }
   };
 
-  xchoice = random.randint(0, xwide - 1);
+  getExits = (function(_this) {
+    return function(num) {
+      var exits;
+      if (num == null) {
+        num = 2;
+      }
+      exits = [];
+      exits[0] = Math.floor(Math.random() * borderLength);
+      exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength;
+      return exits;
+    };
+  })(this);
 
-  ychoice = random.randint(0, yhigh - 1);
+  borderIndex = 0;
 
-  carve(ychoice, xchoice);
+  borderLength = xwide * 2 + yhigh * 2 - 4;
+
+  exits = [xwide / 2, xwide + yhigh * 2 - 4 + xwide / 2];
+
+
+  /*
+  for i in [0..10000]
+    exits = getExits(2)
+     * make sure they are not the same
+    con.warn("exits are the same", exits) if exits[0] is exits[1]
+     * make sure they are within the acceptable range
+    con.warn("ecits outside range", exits) if exits[0] > borderLength or exits[1] > borderLength
+     * and make sure they are not beside each other.
+    con.warn("exits beside each other", exits[0], exits[1]) if Math.abs(exits[0] - exits[1]) < 2
+  con.log("test worked", exits)
+   */
+
+  for (y = _k = 0; 0 <= yhigh ? _k < yhigh : _k > yhigh; y = 0 <= yhigh ? ++_k : --_k) {
+    for (x = _l = 0; 0 <= xwide ? _l < xwide : _l > xwide; x = 0 <= xwide ? ++_l : --_l) {
+      if (x === 0 || y === 0 || x === xwide - 1 || y === yhigh - 1) {
+        if (exits.indexOf(borderIndex) === -1) {
+          field[y][x] = "#";
+        } else {
+          carve(y, x);
+        }
+        borderIndex++;
+      }
+    }
+  }
 
   e = Math.E;
 
-  branchrate = 20;
+  branchrate = 10;
 
   iterations = 0;
-
-  unit = 4;
 
   init = function(cb, _xwide, _yhigh) {
     can.width = xwide * unit;
@@ -207,9 +246,15 @@
     return draw(cb);
   };
 
+  keepDrawing = (function(_this) {
+    return function() {
+      return frontier.length > 2 && iterations < 1e10;
+    };
+  })(this);
+
   iterativeDraw = function() {
     var choice, index, pos;
-    if (frontier.length && iterations < 1e10) {
+    if (keepDrawing()) {
       pos = Math.random();
       pos = Math.pow(pos, Math.pow(e, -branchrate));
       if (pos >= 1 || pos < 0) {
@@ -228,25 +273,41 @@
   };
 
   draw = function(cb) {
-    var rgb, _k, _l, _m;
+    var f, rgb, _m, _n, _o, _p, _results;
     time += 0.5;
-    for (d = _k = 0; _k < 1000; d = ++_k) {
+    for (d = _m = 0; _m < 10; d = ++_m) {
       iterativeDraw();
     }
-    for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {
-      for (x = _m = 0; 0 <= xwide ? _m < xwide : _m > xwide; x = 0 <= xwide ? ++_m : --_m) {
-        if (field[y][x] === "#") {
-          rgb = 20;
-          ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
-          ctx.fillRect(x * unit, y * unit, unit, unit);
-        }
+    for (y = _n = 0; 0 <= yhigh ? _n < yhigh : _n > yhigh; y = 0 <= yhigh ? ++_n : --_n) {
+      for (x = _o = 0; 0 <= xwide ? _o < xwide : _o > xwide; x = 0 <= xwide ? ++_o : --_o) {
+        f = field[y][x];
+        rgb = f === '#' ? 50 : 150;
+        ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
+        ctx.fillRect(x * unit, y * unit, unit, unit);
       }
     }
-    if (frontier.length) {
+    if (keepDrawing()) {
+      console.log("drawing");
       return requestAnimationFrame(draw);
     } else {
       console.log("done");
-      return typeof cb === "function" ? cb() : void 0;
+      console.log(field);
+      _results = [];
+      for (y = _p = 0; 0 <= yhigh ? _p < yhigh : _p > yhigh; y = 0 <= yhigh ? ++_p : --_p) {
+        _results.push((function() {
+          var _q, _results1;
+          _results1 = [];
+          for (x = _q = 0; 0 <= xwide ? _q < xwide : _q > xwide; x = 0 <= xwide ? ++_q : --_q) {
+            if (field[y][x] === '?') {
+              _results1.push(field[y][x] = '#');
+            } else {
+              _results1.push(void 0);
+            }
+          }
+          return _results1;
+        })());
+      }
+      return _results;
     }
   };
 

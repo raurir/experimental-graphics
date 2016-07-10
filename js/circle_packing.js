@@ -38,7 +38,7 @@ var circle_packing = function() {
 			attempt++;
 			// con.log("attemptNextCircle", attempt);
 			output.innerHTML = [circles, attempt, threads, iterations];
-			if (attempt < 125000) {
+			if (attempt < 125000 && parent.r > 0.1) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
 				}, 1);
@@ -63,15 +63,17 @@ var circle_packing = function() {
 
 				var thresh = iterations > 5;
 
+				var angleIncrement = 0.01;
+
 				if (thresh) {
 					// con.log("ok");
-					parent.incrementor.distance += 0.01;
+					parent.incrementor.distance += rand.random() * 0.04;
 					if (parent.incrementor.distance > parent.r) {
 						parent.incrementor.distance = 0;
-						parent.incrementor.angle += 0.01;
+						parent.incrementor.angle += angleIncrement;
 					}
 					distance = parent.incrementor.distance;
-					angle = parent.incrementor.angle;
+					angle = parent.incrementor.angle + rand.getInteger(-angleIncrement, angleIncrement);
 				}
 
 
@@ -170,7 +172,7 @@ var circle_packing = function() {
 			}
 
 			// if (iterations < 4) {//500) {
-			if (depth < 1) {
+			if (depth < 2) {
 				var num = 100;//500;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
 					attemptNextCircle(circle, 0);

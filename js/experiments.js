@@ -37,6 +37,7 @@ var experiments = (function() {
     ["hexagon_tile"],
     ["isometric_cubes"],
     ["maze"],
+    ["maze_cube", "THREE"],
     ["meandering_polygons"],
     ["mining_branches"],
     ["oscillate_curtain"],
