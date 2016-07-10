@@ -7,9 +7,9 @@ d = document
 ctx = null
 can = d.createElement("canvas")
 time = 0 # Math.random() * 1e10
-xwide = 12
-yhigh = 12
-unit = 16
+xwide = 32
+yhigh = 32
+unit = 8
 
 ran = Math.random()
 
@@ -26,6 +26,16 @@ random = {
       array[i] = t
     return array
 }
+
+logShape = () =>
+  s = ''
+  for y in [0...yhigh]
+    for x in [0...xwide]
+      s += field[y][x]
+    s += "\n"
+  con.log s
+
+
 
 #the grid of the maze
 #each cell of the maze is one of the following:
@@ -166,17 +176,14 @@ check = (y, x, nodiagonals = true) ->
 #   y = Math.round(Math.cos(a) * r + yhigh / 2)
 #   if y < yhigh and x < xwide and y >= 0 and x >= 0
 #     carve(y, x)
-#     field[y][x] = "."
 
 # draw border around edge
-getExits = (num = 2) => # guess what, only 2 supported!
-  exits = []
-  exits[0] = Math.floor(Math.random() * borderLength)
-  exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength
-  return exits
 borderIndex = 0
-borderLength = xwide * 2 + yhigh * 2 - 4
-# exits = getExits(2)
+borderLength = xwide * 2 + yhigh * 2 - 4 # perimeter, in blocks
+exits = []
+exits[0] = Math.floor(Math.random() * borderLength)
+exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength
+# exits = getExits()
 exits = [xwide / 2, xwide + yhigh * 2 - 4 + xwide / 2]
 
 ###
@@ -194,13 +201,20 @@ for y in [0...yhigh]
   for x in [0...xwide]
     if x is 0 or y is 0 or x is xwide - 1 or y is yhigh - 1
       if exits.indexOf(borderIndex) is -1
-        field[y][x] = "#"
+        harden(y, x)
       else
+        # draw an exit
         carve(y, x)
-        # field[y][x] = "."
+        d = if y is 0 then 1 else -1
+        for entry in [1..4]
+          y1 = y + entry * d
+          harden(y1, x - 1)
+          # carve(y1, x)
+          harden(y1, x + 1)
+
       borderIndex++
 
-
+logShape()
 
 
 #parameter branchrate:
@@ -250,39 +264,50 @@ iterativeDraw = () ->
 
   iterations++
 
+fill = () =>
+  for y in [0...yhigh]
+    for x in [0...xwide]
+      f = field[y][x]
+      rgb = {"#": 50, ".": 150, "?": 200, ",": 200}[f]
+      ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
+      ctx.fillRect(x * unit, y * unit, unit, unit)
+
 draw = (cb) ->
   # can.width = can.width
   time += 0.5
 
-  for d in [0...10]
+  for d in [0...1000]
     iterativeDraw()
-
-  for y in [0...yhigh]
-    for x in [0...xwide]
-      f = field[y][x]
-      rgb = if f is '#' then 50 else 150
-      ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
-      ctx.fillRect(x * unit, y * unit, unit, unit)
 
   if keepDrawing()
     console.log "drawing"
     requestAnimationFrame(draw)
   else
     console.log "done"
-    console.log field
     # print the maze
 
     # set unexposed cells to be walls
     for y in [0...yhigh]
       for x in [0...xwide]
-        if field[y][x] is '?'
+        f = field[y][x]
+        if f is '?' or f is ","
           field[y][x] = '#'
 
-    # for y in [0...yhigh]
-    #   s = ''
-    #   for x in [0...xwide]
-    #     s += field[y][x]
-    #   con.log s
+    # dodgy hack to draw top line down.
+    drawn = false
+    y = 1
+    while field[y][x] isnt "#" and drawn is false
+      x = exits[0]
+      f = field[y][x]
+      con.log(x, y, f)
+      if f is "#"
+        carve(y, x)
+        drawn = true
+      else
+        continue
+
+    # logShape()
+  fill()
 
 
 getMaze = () =>
