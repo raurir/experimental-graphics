@@ -1,5 +1,5 @@
 (function() {
-  var branchrate, can, carve, check, con, ctx, d, draw, e, field, frontier, getMaze, harden, init, iterations, iterativeDraw, maze, ran, random, row, time, unit, x, xchoice, xwide, y, ychoice, yhigh, _i, _j;
+  var borderIndex, borderLength, branchrate, can, carve, check, con, ctx, d, draw, e, entry, exits, field, fill, frontier, getMaze, harden, init, iterations, iterativeDraw, keepDrawing, logShape, maze, ran, random, row, time, unit, x, xwide, y, y1, yhigh, _i, _j, _k, _l, _m;
 
   con = console;
 
@@ -11,9 +11,11 @@
 
   time = 0;
 
-  xwide = 30;
+  xwide = 32;
 
-  yhigh = 30;
+  yhigh = 32;
+
+  unit = 8;
 
   ran = Math.random();
 
@@ -33,6 +35,20 @@
       return array;
     }
   };
+
+  logShape = (function(_this) {
+    return function() {
+      var s, x, y, _i, _j;
+      s = '';
+      for (y = _i = 0; 0 <= yhigh ? _i < yhigh : _i > yhigh; y = 0 <= yhigh ? ++_i : --_i) {
+        for (x = _j = 0; 0 <= xwide ? _j < xwide : _j > xwide; x = 0 <= xwide ? ++_j : --_j) {
+          s += field[y][x];
+        }
+        s += "\n";
+      }
+      return con.log(s);
+    };
+  })(this);
 
   field = [];
 
@@ -186,19 +202,57 @@
     }
   };
 
-  xchoice = random.randint(0, xwide - 1);
+  borderIndex = 0;
 
-  ychoice = random.randint(0, yhigh - 1);
+  borderLength = xwide * 2 + yhigh * 2 - 4;
 
-  carve(ychoice, xchoice);
+  exits = [];
+
+  exits[0] = Math.floor(Math.random() * borderLength);
+
+  exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength;
+
+  exits = [xwide / 2, xwide + yhigh * 2 - 4 + xwide / 2];
+
+
+  /*
+  for i in [0..10000]
+    exits = getExits(2)
+     * make sure they are not the same
+    con.warn("exits are the same", exits) if exits[0] is exits[1]
+     * make sure they are within the acceptable range
+    con.warn("ecits outside range", exits) if exits[0] > borderLength or exits[1] > borderLength
+     * and make sure they are not beside each other.
+    con.warn("exits beside each other", exits[0], exits[1]) if Math.abs(exits[0] - exits[1]) < 2
+  con.log("test worked", exits)
+   */
+
+  for (y = _k = 0; 0 <= yhigh ? _k < yhigh : _k > yhigh; y = 0 <= yhigh ? ++_k : --_k) {
+    for (x = _l = 0; 0 <= xwide ? _l < xwide : _l > xwide; x = 0 <= xwide ? ++_l : --_l) {
+      if (x === 0 || y === 0 || x === xwide - 1 || y === yhigh - 1) {
+        if (exits.indexOf(borderIndex) === -1) {
+          harden(y, x);
+        } else {
+          carve(y, x);
+          d = y === 0 ? 1 : -1;
+          for (entry = _m = 1; _m <= 4; entry = ++_m) {
+            y1 = y + entry * d;
+            harden(y1, x - 1);
+            harden(y1, x + 1);
+          }
+        }
+        borderIndex++;
+      }
+    }
+  }
+
+  logShape();
 
   e = Math.E;
 
-  branchrate = 20;
+  branchrate = 10;
 
   iterations = 0;
-
-  unit = 4;
 
   init = function(cb, _xwide, _yhigh) {
     can.width = xwide * unit;
@@ -207,9 +261,15 @@
     return draw(cb);
   };
 
+  keepDrawing = (function(_this) {
+    return function() {
+      return frontier.length > 2 && iterations < 1e10;
+    };
+  })(this);
+
   iterativeDraw = function() {
     var choice, index, pos;
-    if (frontier.length && iterations < 1e10) {
+    if (keepDrawing()) {
       pos = Math.random();
       pos = Math.pow(pos, Math.pow(e, -branchrate));
       if (pos >= 1 || pos < 0) {
@@ -227,27 +287,66 @@
     return iterations++;
   };
 
+  fill = (function(_this) {
+    return function() {
+      var f, rgb, _n, _results;
+      _results = [];
+      for (y = _n = 0; 0 <= yhigh ? _n < yhigh : _n > yhigh; y = 0 <= yhigh ? ++_n : --_n) {
+        _results.push((function() {
+          var _o, _results1;
+          _results1 = [];
+          for (x = _o = 0; 0 <= xwide ? _o < xwide : _o > xwide; x = 0 <= xwide ? ++_o : --_o) {
+            f = field[y][x];
+            rgb = {
+              "#": 50,
+              ".": 150,
+              "?": 200,
+              ",": 200
+            }[f];
+            ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
+            _results1.push(ctx.fillRect(x * unit, y * unit, unit, unit));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    };
+  })(this);
+
   draw = function(cb) {
-    var rgb, _k, _l, _m;
+    var drawn, f, _n, _o, _p;
     time += 0.5;
-    for (d = _k = 0; _k < 1000; d = ++_k) {
+    for (d = _n = 0; _n < 1000; d = ++_n) {
       iterativeDraw();
     }
-    for (y = _l = 0; 0 <= yhigh ? _l < yhigh : _l > yhigh; y = 0 <= yhigh ? ++_l : --_l) {
-      for (x = _m = 0; 0 <= xwide ? _m < xwide : _m > xwide; x = 0 <= xwide ? ++_m : --_m) {
-        if (field[y][x] === "#") {
-          rgb = 20;
-          ctx.fillStyle = "rgba(" + rgb + "," + rgb + "," + rgb + ",1)";
-          ctx.fillRect(x * unit, y * unit, unit, unit);
+    if (keepDrawing()) {
+      console.log("drawing");
+      requestAnimationFrame(draw);
+    } else {
+      console.log("done");
+      for (y = _o = 0; 0 <= yhigh ? _o < yhigh : _o > yhigh; y = 0 <= yhigh ? ++_o : --_o) {
+        for (x = _p = 0; 0 <= xwide ? _p < xwide : _p > xwide; x = 0 <= xwide ? ++_p : --_p) {
+          f = field[y][x];
+          if (f === '?' || f === ",") {
+            field[y][x] = '#';
+          }
+        }
+      }
+      drawn = false;
+      y = 1;
+      while (field[y][x] !== "#" && drawn === false) {
+        x = exits[0];
+        f = field[y][x];
+        con.log(x, y, f);
+        if (f === "#") {
+          carve(y, x);
+          drawn = true;
+        } else {
+          continue;
         }
       }
     }
-    if (frontier.length) {
-      return requestAnimationFrame(draw);
-    } else {
-      console.log("done");
-      return typeof cb === "function" ? cb() : void 0;
-    }
+    return fill();
   };
 
   getMaze = (function(_this) {

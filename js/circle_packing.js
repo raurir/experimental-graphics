@@ -2,7 +2,7 @@ var isNode = (typeof module !== 'undefined');
 
 var circle_packing = function() {
 
-	var sw = 900, sh = 900;
+	var sw = 1200, sh = 1200;
 	var cx = 0.5, cy = 0.5;
 
 	var bmp = dom.canvas(sw, sh);
@@ -27,6 +27,7 @@ var circle_packing = function() {
 	document.body.appendChild(output);
 
 	function init() {
+
 		rand.setSeed(4);
 		colours.getRandomPalette();
 		bmp.ctx.clearRect(0, 0, sw, sh);
@@ -38,42 +39,75 @@ var circle_packing = function() {
 		function attemptNextCircle(parent, attempt) {
 			attempt++;
 			// con.log("attemptNextCircle", attempt);
-			output.innerHTML = [circles, attempt, threads];
-			if (attempt < 1250) {
+			output.innerHTML = [circles, attempt, threads, iterations];
+			if (attempt < 125000 && parent.r > 0.1) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
 				}, 1);
 			}
 		}
 
+
 		function drawCircle(parent, attempt, options) {
 
 			threads++;
+			iterations++;
 
 			var gap = 0.01;
 
 			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
-			if (parent){
+			if (parent) {
 				angle = rand.random() * Math.PI * 2;
+				// angle = iterations * Math.PI * 2;
 
 				// distance from centre of parent
+
+				distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+
 				distance = rand.random() * parent.r;
+				// banding
 				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+
+				var thresh = iterations > 5;
+
+				var angleIncrement = 0.01;
+
+				if (thresh) {
+					// con.log("ok");
+					parent.incrementor.distance += rand.random() * 0.04;
+					if (parent.incrementor.distance > parent.r) {
+						parent.incrementor.distance = 0;
+						parent.incrementor.angle += angleIncrement;
+					}
+					distance = parent.incrementor.distance;
+					angle = parent.incrementor.angle + rand.getInteger(-angleIncrement, angleIncrement);
+				}
+
+
 
 				x = parent.x + Math.sin(angle) * distance;
 				y = parent.y + Math.cos(angle) * distance;
+
+				if (thresh) {
+					// drawLine({x: parent.x * sw, y: parent.y * sw}, {x: x * sw, y: y * sw}, "red", 2);
+				}
 
 				dx = x - cx;
 				dy = y - cy;
 				d = Math.sqrt(dx * dx + dy * dy);
 				// maxRadius = Math.pow(0.6 - d, 3) * 4;
-				// maxRadius = (0.7 - d) * 0.2;
+				maxRadius = (0.7 - d) * 0.2;
 				// maxRadius = (d + 0.1) * 0.2;
-				maxRadius = 0.07;
+				// maxRadius = 0.07;
+				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
+				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
+				if (maxRadius > 1 ) con.log(maxRadius);
 
 				// r = rand.random() * maxRadius * (parent.r - distance - gap);
 				r = rand.random() * maxRadius * (parent.r - distance - gap);
 				// r = parent.r - distance - gap;
+				// r = maxRadius;
+				// r = 0.005;// rand.random() * maxRadius * (parent.r - distance - gap);
 
 				if (options) {
 					if (options.r) { con.log("overriding r"); r = options.r; }
@@ -98,7 +132,13 @@ var circle_packing = function() {
 					var dR = r + other.r + gap; // actual distance
 						// drawLine({x: other.x * sw, y: other.y * sw}, {x:x*sw, y:y*sw}, "red", 2);
 					if (dR > d) {
-						ok = false;
+						// ok = false;
+						r = d - other.r - gap;
+						if (r < 0.002) {
+							threads--;
+							attemptNextCircle(parent, attempt);
+							return;
+						}
 					}
 				}
 				if (ok === false) {
@@ -114,7 +154,8 @@ var circle_packing = function() {
 			} else {
 				x = cx;//rand.random();
 				y = cy;//rand.random();
-				r = 0.5;//rand.random() / 2;
+
+				r = 0.45;//rand.random() / 2;
 				colour = "rgba(0, 0, 0, 0)";
 				depth = 0;
 			}
@@ -135,13 +176,16 @@ var circle_packing = function() {
 
 			// con.log("iterations", iterations, x, y, r, bmp.ctx.fillStyle, depth, depth % 2);
 
-			iterations++;
 			var circle = {
 				depth: depth,
 				x: x,
 				y: y,
 				r: r,
-				children: []
+				children: [],
+				incrementor: {
+					angle: 0,
+					distance: 0
+				}
 			}
 
 			circles++;
@@ -150,8 +194,8 @@ var circle_packing = function() {
 			}
 
 			// if (iterations < 4) {//500) {
-			if (depth < 1) {
-				var num = 500;//rand.random() * 6;
+			if (depth < 2) {
+				var num = 100;//500;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
 					attemptNextCircle(circle, 0);
 				}
