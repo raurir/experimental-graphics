@@ -28,6 +28,7 @@ var circle_packing = function() {
 
 	function init() {
 		rand.setSeed(4);
+		colours.getRandomPalette();
 		bmp.ctx.clearRect(0, 0, sw, sh);
 
 		var iterations = 0;
@@ -45,7 +46,7 @@ var circle_packing = function() {
 			}
 		}
 
-		function drawCircle(parent, attempt) {
+		function drawCircle(parent, attempt, options) {
 
 			threads++;
 
@@ -56,8 +57,8 @@ var circle_packing = function() {
 				angle = rand.random() * Math.PI * 2;
 
 				// distance from centre of parent
-				// distance = rand.random() * parent.r;
-				distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+				distance = rand.random() * parent.r;
+				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
 
 				x = parent.x + Math.sin(angle) * distance;
 				y = parent.y + Math.cos(angle) * distance;
@@ -70,8 +71,15 @@ var circle_packing = function() {
 				// maxRadius = (d + 0.1) * 0.2;
 				maxRadius = 0.07;
 
+				// r = rand.random() * maxRadius * (parent.r - distance - gap);
 				r = rand.random() * maxRadius * (parent.r - distance - gap);
 				// r = parent.r - distance - gap;
+
+				if (options) {
+					if (options.r) { con.log("overriding r"); r = options.r; }
+					if (options.x) { con.log("overriding x"); x = options.x; }
+					if (options.y) { con.log("overriding y"); y = options.y; }
+				}
 
 				if (r < 0.004) {
 					threads--;
@@ -107,8 +115,13 @@ var circle_packing = function() {
 				x = cx;//rand.random();
 				y = cy;//rand.random();
 				r = 0.5;//rand.random() / 2;
-				colour = "rgba(0, 0, 0, 0.2)";
+				colour = "rgba(0, 0, 0, 0)";
 				depth = 0;
+			}
+
+
+			if (options) {
+				if (options.colour) { con.log("overriding colour", colour); colour = options.colour; }
 			}
 
 
@@ -153,7 +166,8 @@ var circle_packing = function() {
 		}
 
 		var parent = drawCircle(0, 0);
-		// drawCircle(parent, 0);
+		var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
+		var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
 
 		progress("render:complete", bmp.canvas);
 	}
