@@ -7,9 +7,9 @@ d = document
 ctx = null
 can = d.createElement("canvas")
 time = 0 # Math.random() * 1e10
-xwide = 32
-yhigh = 32
-unit = 8
+xwide = 16
+yhigh = 16
+unit = 16
 
 ran = Math.random()
 
@@ -163,11 +163,6 @@ check = (y, x, nodiagonals = true) ->
     return false
 
 
-#choose a original point at random and carve it out.
-# xchoice = random.randint(0, xwide-1)
-# ychoice = random.randint(0, yhigh-1)
-# carve(ychoice, xchoice)
-
 # draw a circle
 # for i in [0..100]
 #   r = xwide / 2 - 4 # 30 + i * 1 + (Math.random() - 0.5) * 2
@@ -181,10 +176,13 @@ check = (y, x, nodiagonals = true) ->
 borderIndex = 0
 borderLength = xwide * 2 + yhigh * 2 - 4 # perimeter, in blocks
 exits = []
-exits[0] = Math.floor(Math.random() * borderLength)
-exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength
+# exits[0] = Math.floor(Math.random() * borderLength)
+# exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength
 # exits = getExits()
 exits = [xwide / 2, xwide + yhigh * 2 - 4 + xwide / 2]
+# exits = [xwide + yhigh * 2 - 4 + xwide / 2]
+
+
 
 ###
 for i in [0..10000]
@@ -197,22 +195,38 @@ for i in [0..10000]
   con.warn("exits beside each other", exits[0], exits[1]) if Math.abs(exits[0] - exits[1]) < 2
 con.log("test worked", exits)
 ###
+exitNum = 0
 for y in [0...yhigh]
   for x in [0...xwide]
     if x is 0 or y is 0 or x is xwide - 1 or y is yhigh - 1
       if exits.indexOf(borderIndex) is -1
         harden(y, x)
       else
+        exitNum++
         # draw an exit
-        carve(y, x)
+        if exitNum is 1
+          carve(y, x)
+        else
+          # field[y][x] = "."
+          carve(y, x)
         d = if y is 0 then 1 else -1
         for entry in [1..4]
           y1 = y + entry * d
+          harden(y1, x - 2)
           harden(y1, x - 1)
           # carve(y1, x)
+          # field[y1][x] = "."
           harden(y1, x + 1)
+          harden(y1, x + 2)
 
       borderIndex++
+
+#choose a original point at random and carve it out.
+# xchoice = random.randint(0, xwide-1)
+# ychoice = random.randint(0, yhigh-1)
+# carve(ychoice, xchoice)
+
+
 
 logShape()
 
@@ -276,7 +290,7 @@ draw = (cb) ->
   # can.width = can.width
   time += 0.5
 
-  for d in [0...1000]
+  for d in [0...1]
     iterativeDraw()
 
   if keepDrawing()
@@ -294,17 +308,17 @@ draw = (cb) ->
           field[y][x] = '#'
 
     # dodgy hack to draw top line down.
-    drawn = false
-    y = 1
-    while field[y][x] isnt "#" and drawn is false
-      x = exits[0]
-      f = field[y][x]
-      con.log(x, y, f)
-      if f is "#"
-        carve(y, x)
-        drawn = true
-      else
-        continue
+    # drawn = false
+    # y = 1
+    # while field[y][x] isnt "#" and drawn is false
+    #   x = exits[0]
+    #   f = field[y][x]
+    #   con.log(x, y, f)
+    #   if f is "#"
+    #     carve(y, x)
+    #     drawn = true
+    #   else
+    #     continue
 
     # logShape()
   fill()

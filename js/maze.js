@@ -1,5 +1,5 @@
 (function() {
-  var borderIndex, borderLength, branchrate, can, carve, check, con, ctx, d, draw, e, entry, exits, field, fill, frontier, getMaze, harden, init, iterations, iterativeDraw, keepDrawing, logShape, maze, ran, random, row, time, unit, x, xwide, y, y1, yhigh, _i, _j, _k, _l, _m;
+  var borderIndex, borderLength, branchrate, can, carve, check, con, ctx, d, draw, e, entry, exitNum, exits, field, fill, frontier, getMaze, harden, init, iterations, iterativeDraw, keepDrawing, logShape, maze, ran, random, row, time, unit, x, xwide, y, y1, yhigh, _i, _j, _k, _l, _m;
 
   con = console;
 
@@ -11,11 +11,11 @@
 
   time = 0;
 
-  xwide = 32;
+  xwide = 16;
 
-  yhigh = 32;
+  yhigh = 16;
 
-  unit = 8;
+  unit = 16;
 
   ran = Math.random();
 
@@ -208,10 +208,6 @@
 
   exits = [];
 
-  exits[0] = Math.floor(Math.random() * borderLength);
-
-  exits[1] = (exits[0] + Math.floor(2 + Math.random() * (borderLength - 3))) % borderLength;
-
   exits = [xwide / 2, xwide + yhigh * 2 - 4 + xwide / 2];
 
 
@@ -227,18 +223,27 @@
   con.log("test worked", exits)
    */
 
+  exitNum = 0;
+
   for (y = _k = 0; 0 <= yhigh ? _k < yhigh : _k > yhigh; y = 0 <= yhigh ? ++_k : --_k) {
     for (x = _l = 0; 0 <= xwide ? _l < xwide : _l > xwide; x = 0 <= xwide ? ++_l : --_l) {
       if (x === 0 || y === 0 || x === xwide - 1 || y === yhigh - 1) {
         if (exits.indexOf(borderIndex) === -1) {
           harden(y, x);
         } else {
-          carve(y, x);
+          exitNum++;
+          if (exitNum === 1) {
+            carve(y, x);
+          } else {
+            carve(y, x);
+          }
           d = y === 0 ? 1 : -1;
           for (entry = _m = 1; _m <= 4; entry = ++_m) {
             y1 = y + entry * d;
+            harden(y1, x - 2);
             harden(y1, x - 1);
             harden(y1, x + 1);
+            harden(y1, x + 2);
           }
         }
         borderIndex++;
@@ -314,9 +319,9 @@
   })(this);
 
   draw = function(cb) {
-    var drawn, f, _n, _o, _p;
+    var f, _n, _o, _p;
     time += 0.5;
-    for (d = _n = 0; _n < 1000; d = ++_n) {
+    for (d = _n = 0; _n < 1; d = ++_n) {
       iterativeDraw();
     }
     if (keepDrawing()) {
@@ -330,19 +335,6 @@
           if (f === '?' || f === ",") {
             field[y][x] = '#';
           }
-        }
-      }
-      drawn = false;
-      y = 1;
-      while (field[y][x] !== "#" && drawn === false) {
-        x = exits[0];
-        f = field[y][x];
-        con.log(x, y, f);
-        if (f === "#") {
-          carve(y, x);
-          drawn = true;
-        } else {
-          continue;
         }
       }
     }
