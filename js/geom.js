@@ -4,6 +4,8 @@ var geom = (function() {
   // most of these functions have been copied / ported
 
   // alternative
+  // compared algorithm: https://flupe.github.io/blog/2016/07/29/intersection-of-two-segments/
+  // is the same as below including peformance.
   function intersectionBetweenPoints(p0, p1, p2, p3) {
 
     var p0_x = p0.x,
