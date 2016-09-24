@@ -80,7 +80,7 @@ var rand = (function() {
     },
 
     getInteger: function(min,max) {
-      return Math.round(this.getNumber(min, max));
+      return Math.floor(this.getNumber(min, max + 1));
     }
 
   };

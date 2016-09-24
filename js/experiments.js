@@ -36,6 +36,7 @@ var experiments = (function() {
     ["fool", "css/fool"],
     ["hexagon_tile"],
     ["isometric_cubes"],
+    ["linked_line"],
     ["maze"],
     ["maze_cube", "THREE"],
     ["meandering_polygons"],

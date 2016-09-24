@@ -38,9 +38,20 @@ var typography = function() {
   var rows = 4;
   var cols = 4;
 
-  var numerals = [], numeralsLength = rand.getInteger(1, 5), n = 0;
+
+  /*
+  there was a bug in rand.js...
+  rand.getInteger returned non uniform results, giving 50% less results of min and max compared to numbers between min and max.
+  so hold on to the dodgy implementation here for backwards compatibility with bot generated/published images.
+  */
+  function typoInteger(min,max) {
+    return Math.round(rand.getNumber(min, max));
+  }
+
+
+  var numerals = [], numeralsLength = typoInteger(1, 5), n = 0;
   while (n++ < numeralsLength) {
-    numerals.push(rand.getInteger(0, 9));
+    numerals.push(typoInteger(0, 9));
   }
   numerals = numerals.join("");
   function getString() {
@@ -65,8 +76,8 @@ var typography = function() {
     ctx.save();
     ctx.translate(x * block, y * block);
     if (rand.random() > 0.6) {
-      var w = rand.getInteger(1, 3);
-      var h = rand.getInteger(1, 3);
+      var w = typoInteger(1, 3);
+      var h = typoInteger(1, 3);
       ctx.fillStyle = colours.getRandomColour();
       ctx.fillRect(0, 0, block * w, block * h);
     }
@@ -100,9 +111,9 @@ var typography = function() {
     ctx.save();
     var angle = Math.floor(rand.random() * 4) / 4;
     ctx.rotate(angle * Math.PI * 2);
-    var majors = Math.pow(2, rand.getInteger(1, 4));
-    var minors = rand.getInteger(1, 4);
-    var majorSize = rand.getInteger(5, 10) * size / 400;
+    var majors = Math.pow(2, typoInteger(1, 4));
+    var minors = typoInteger(1, 4);
+    var majorSize = typoInteger(5, 10) * size / 400;
     var minorSize = majorSize * rand.getNumber(0.2, 0.8);
     ctx.fillStyle = colours.getRandomColour();
     var width = 1 * size / 300;
