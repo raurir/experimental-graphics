@@ -1,16 +1,6 @@
 const linked_line = function() {
 
-	var tests = 1e4;
-	var test = 0;
-	var bucket = [];
-	while (test++ < tests) {
-		var r = rand.getInteger(0, 4);
-		if (bucket[r]) { bucket[r]++; } else { bucket[r] = 1; }
-	}
-	console.log(bucket);
-
-
-	const wid = 40, hei = 40, block = 10;
+	const wid = 20, hei = 20, block = 20;
 	const sw = wid * block;
 	const sh = hei * block;
 	const bmp = dom.canvas(sw, sh);
@@ -19,17 +9,21 @@ const linked_line = function() {
 	var occupied = {
 		array: [],
 		// twoD: [],
-		oneD: []
+		oneD: [],
+		neighbourless: []
+
 	};
 	var backup = {};
 	const store = () => {
 		backup.array = occupied.array.slice();
 		backup.oneD = occupied.oneD.slice();
+		backup.neighbourless = occupied.neighbourless.slice();
 		// backup.twoD = occupied.twoD.slice();
 	}
 	const restore = () => {
 		occupied.array = backup.array.slice();
 		occupied.oneD = backup.oneD.slice();
+		occupied.neighbourless = backup.neighbourless.slice();
 		// occupied.twoD = backup.twoD.slice();
 	}
 
@@ -39,6 +33,7 @@ const linked_line = function() {
 		let item = {
 			x,
 			y,
+			surrounded: false,
 			prev: options.prev,
 			next: options.next
 		}
@@ -46,6 +41,7 @@ const linked_line = function() {
 		// occupied.twoD[y][x] = item;
 		occupied.oneD[y * wid + x] = item;
 		occupied.array.push(item);
+		occupied.neighbourless.push(item);
 
 		return item;
 	}
@@ -53,10 +49,11 @@ const linked_line = function() {
 	var first, last;
 
 	const getIndex = (x, y) => y * wid + x;
+	const getXY = (index) => {
+		return {x: index % wid, y: Math.floor(index / wid)};
+	}
 
 	const init = () => {
-
-
 		for (var y = 0; y < hei; y++) {
 			for (var x = 0; x < wid; x++) {
 				occupied.oneD.push(-1);
@@ -84,20 +81,26 @@ const linked_line = function() {
 			lastItem = newItem;
 		}
 		last = newItem;
-		con.log(occupied.oneD);
+		// con.log(occupied.oneD);
 		// con.log(occupied.twoD);
 		render(0);
 	}
 
-	const insertItemAnywhere = () => {
-		var index = rand.getInteger(0, occupied.array.length - 1);
-		var item = occupied.array[index];
-		// con.log("item", item)
-		if (item && item.next && item.prev) {
-			insertItemAfter(item);
-		} else {
-			// console.log("null", item);
+	const checkSurrounded = (item) => {
+		for (var i = -1; i < 2; i++) {
+			for (var j = -1; j < 2; j++) {
+				//if (i == 0 && j == 0) continue; // same as item.
+				var x = item.x + i, y = item.y + j;
+				if (x >= 0 && x < wid && y >= 0 && y < hei) {
+					var index = getIndex(x, y);
+					// con.log(occupied.oneD[index])
+					if (occupied.oneD[index] === -1) return false;
+				}
+			}
 		}
+		// con.log("surrounded")x`x``
+		item.surrounded = true;
+		return true;
 	}
 
 
@@ -129,11 +132,31 @@ const linked_line = function() {
 			}
 		}
 
-		if (points[0].x === points[1].x && points[1].x === points[2].x && points[2].x === points[3].x) return false;
-		if (points[0].y === points[1].y && points[1].y === points[2].y && points[2].y === points[3].y) return false;
+		if (points[0].x === points[1].x && points[1].x === points[2].x ) return false ;//&& points[2].x === points[3].x) return false;
+		if (points[0].y === points[1].y && points[1].y === points[2].y ) return false ;//&& points[2].y === points[3].y) return false;
 
 		return true;
 	}
+
+
+	const insertItemAnywhere = () => {
+		var index = rand.getInteger(0, occupied.array.length - 1);
+		var item = occupied.array[index];
+		// con.log("item", occupied.array.length);
+
+		var surrounded = checkSurrounded(item);
+		if (surrounded) {
+			occupied.array.splice(index, 1);
+			return;
+		}
+
+		if (item && item.next && item.prev) {
+			insertItemAfter(item);
+		} else {
+			// console.log("null", item);
+		}
+	}
+
 
 	const insertItemAfter = afterItem => {
 
@@ -169,6 +192,11 @@ const linked_line = function() {
 
 			next.prev = newItem1;
 
+			// checkSurrounded(prev);
+			// checkSurrounded(newItem0);
+			// checkSurrounded(newItem1);
+			// checkSurrounded(next);
+
 		} else {
 			restore();
 		}
@@ -183,7 +211,7 @@ const linked_line = function() {
 		ctx.fillStyle = "#ddd";
 		ctx.fillRect(0, 0, sw, sh);
 
-		for (var i = 0; i < 100; i++) insertItemAnywhere();
+		for (var i = 0; i < 40; i++) insertItemAnywhere();
 
 		ctx.fillStyle = "#bbb";
 		for (var y = 0; y < hei; y++) {
@@ -197,6 +225,10 @@ const linked_line = function() {
 		while(item) {
 			var x = item.x * block + block / 2,
 				y = item.y * block + block / 2;
+
+			ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
+			ctx.fillRect(x - 2, y - 2, 4, 4);
+
 			if (item == first) {
 				ctx.moveTo(x, y);
 			} else {

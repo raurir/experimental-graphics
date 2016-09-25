@@ -18,14 +18,17 @@ var perf = (function() {
 	}
 })();
 
+require.config({
+	baseUrl: "js",
+	urlArgs: "bust=" + (new Date()).getTime(),
+	paths: {
+	  "THREE": "../lib/three/three.min",
+	  "TweenMax": "../lib/greensock/TweenMax.min",
+	  "creature": "creature_creator/creature",
+	  "box": "games/box"
+	},
+});
 
-require([
-	"js/dom.js",
-	"js/rand.js",
-	"js/geom.js",
-	"js/colours.js",
-	"js/experiments.js"
-	// "js/experiments_progress.js"
-], function() {
-		// console.log("experiments main ready dom", dom);
+require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
+	console.log("experiments main ready dom", d,r,g,c,e, arguments);
 });

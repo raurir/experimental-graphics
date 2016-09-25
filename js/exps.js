@@ -1,21 +1,20 @@
 function progress() {/*con.log("experiments progress", arguments);*/}
 
-
-var experiments = (function() {
+function exps() {
 
   var holder = dom.element("div");
   document.body.appendChild(holder);
 
-  require.config({
-    baseUrl: "js",
-    urlArgs: "bust=" + (new Date()).getTime(),
-    paths: {
-      "THREE": "../lib/three/three.min",
-      "TweenMax": "../lib/greensock/TweenMax.min",
-      "creature": "creature_creator/creature",
-      "box": "games/box"
-    },
-  });
+  // require.config({
+  //   baseUrl: "js",
+  //   urlArgs: "bust=" + (new Date()).getTime(),
+  //   paths: {
+  //     "THREE": "../lib/three/three.min",
+  //     "TweenMax": "../lib/greensock/TweenMax.min",
+  //     "creature": "creature_creator/creature",
+  //     "box": "games/box"
+  //   },
+  // });
 
   var experiments = [
     ["molecular_three", "THREE"],
@@ -166,9 +165,14 @@ var experiments = (function() {
 
   // document.body.appendChild(colours.showPalette());
 
+  con.log("executed");
+
   return {
    load: loadExperiment,
    experiments: experiments
   };
-})();
 
+
+};
+
+define("exps", exps);
