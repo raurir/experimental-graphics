@@ -1,6 +1,6 @@
 const linked_line = function() {
 
-	const size = 7; // has to be odd, want the maze to start and end in the middle of a bouding wall.
+	const size = 15; // has to be odd, want the maze to start and end in the middle of a bouding wall.
 	const wid = size;
 	const hei = size;
 	const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
@@ -18,8 +18,8 @@ const linked_line = function() {
 	const ctxW = bmpW.ctx;
 	const ctxR = bmpR.ctx;
 
-	document.body.appendChild(bmpW.canvas);
 	document.body.appendChild(bmpZ.canvas);
+	document.body.appendChild(bmpW.canvas);
 	document.body.appendChild(bmpR.canvas);
 
 	const debug = dom.element("div");
@@ -223,23 +223,22 @@ const linked_line = function() {
 	}
 
 	const extractWalls = () => {
+		// discover a more efficient method of drawing walls rather than block by block
+		// let's use rectangles.
+
 		var pixels = ctx.getImageData(0, 0, sw, sh).data;
 
 		ctxW.fillStyle = "#fff";
 		ctxW.fillRect(0, 0, sw, sh);
 
 		var walls = [];
-
+		// get pixels to discover what is to be drawn
 		for (var i = 0, j = 0, il = pixels.length; i < il; i += 4, j++) {
 			var xy = getXY(j);
-			var r = pixels[i];
-			// var g = pixels[i + 1];
-			// var b = pixels[i + 2];
-			// var a = pixels[i + 3];
+			var r = pixels[i]; // var g = pixels[i + 1], b = pixels[i + 2], a = pixels[i + 3];
 			if (r == 255) {
-				ctxW.fillStyle = "#f00";// (r == 255) ? "red" : "Green";
+				ctxW.fillStyle = "#f00";
 				ctxW.fillRect(xy.x, xy.y, 1, 1);
-
 				walls.push(xy);
 			}
 		}
@@ -249,31 +248,47 @@ const linked_line = function() {
 		for (i = 0, il = walls.length; i < il; i++) {
 			w = walls[i];
 
-			if (row != w.y) {
+			if (row != w.y) { // new row - add a block
 				row = w.y;
 				wallrects.push({x: w.x, y: w.y, w:1, h: 1});
-			}
-
-			if (w.x > 0) {
-				if (walls[i - 1 ].x == w.x - 1) {
+			} else { // check if the previous x is the same...
+				if (walls[i - 1].x == w.x - 1) { // if it's the same block widen it.
 					wallrects[wallrects.length - 1].w ++;
 				} else {
-					wallrects.push({x: w.x, y: w.y, w:1, h: 1});
+					wallrects.push({x: w.x, y: w.y, w: 1, h: 1}); // add a new one.
 				}
 			}
 
-			// if (wallrects)
-			// var x = w.x;
-
 		}
+
+		//
+		for (i = 0, il = wallrects.length; i < il; i++) {
+			var w0 = wallrects[i];
+			for (var j = i + 1; j < il; j++) {
+				var w1 = wallrects[j];
+				if (w0 && w1) {
+					if (w0.x == w1.x && w0.w == w1.w && w0.y + w0.h == w1.y) {
+						wallrects[i].h++;
+						wallrects[j] = null;
+					}
+				}
+			}
+		}
+		wallrects = wallrects.filter((item) => item);
 
 		ctxR.fillStyle = "#fff";
 		ctxR.fillRect(0, 0, swZ, shZ);
 
 		for (i = 0, il = wallrects.length; i < il; i++) {
 			w = wallrects[i];
-			ctxR.fillStyle = "#f0f";// (r == 255) ? "red" : "Green";
-			ctxR.fillRect((w.x * blockZoom) + 1, (w.y * blockZoom) + 1, (w.w * blockZoom) - 2, (w.h * blockZoom) - 2);
+			if (w) {
+				ctxR.beginPath();
+				ctxR.rect((w.x * blockZoom) + 2, (w.y * blockZoom) + 2, (w.w * blockZoom) - 4, (w.h * blockZoom) - 4);
+				ctxR.lineWidth = 1;
+				ctxR.lineStyle = "rgba(0,0,0,0.02)";
+				ctxR.closePath();
+				ctxR.stroke();
+			}
 		}
 
 		window.walls = walls;
@@ -287,9 +302,10 @@ const linked_line = function() {
 	ctxZ.imageSmoothingEnabled = false;
 	ctxW.scale(blockZoom, blockZoom);
 	ctxW.imageSmoothingEnabled = false;
+
+	var arrLen = 0, done = 0;
+
 	const render = (time) => {
-		requestAnimationFrame(render);
-		// setTimeout(render, 1000);
 
 		ctx.fillStyle = "#fff";
 		ctx.fillRect(0, 0, sw, sh);
@@ -315,8 +331,6 @@ const linked_line = function() {
 			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
 			// ctx.fillRect(x - 1, y - 1, 2, 2);
 
-
-
 			// console.log(item);
 			item = item.next;
 		}
@@ -331,9 +345,15 @@ const linked_line = function() {
 		// 	ctxZ.fillRect(xy.x, xy.y, 1, 1);
 		// }
 
+		if (arrLen === occupied.array.length) { done++; } else { arrLen = occupied.array.length; done = 0; }
 
+		if (done < 100) {
+			requestAnimationFrame(render);
+			// setTimeout(render, 1000);
+		} else {
+			extractWalls();
+		}
 
-		extractWalls();
 
 
 	}
