@@ -1,10 +1,19 @@
 const linked_line = function() {
 
-	const wid = 16, hei = 16, block = 10;
+	const wid = 16;
+	const hei = 16;
+	const block = 2;
+	const blockZoom = 16;
 	const sw = (wid + 0.5) * block;
 	const sh = (hei + 0.5) * block;
+	const swZ = (wid + 0.5) * block * blockZoom;
+	const shZ = (hei + 0.5) * block * blockZoom;
 	const bmp = dom.canvas(sw, sh);
+	const bmpZ = dom.canvas(swZ, shZ);
 	const ctx = bmp.ctx;
+	const ctxZ = bmpZ.ctx;
+
+	document.body.appendChild(bmpZ.canvas);
 
 	const debug = dom.element("div");
 	document.body.appendChild(debug);
@@ -134,7 +143,7 @@ const linked_line = function() {
 				return false;
 			}
 		}
-
+		// TODO this condition!
 		if (points[0].x === points[1].x && points[1].x === points[2].x ) return false ;//&& points[2].x === points[3].x) return false;
 		if (points[0].y === points[1].y && points[1].y === points[2].y ) return false ;//&& points[2].y === points[3].y) return false;
 
@@ -207,10 +216,13 @@ const linked_line = function() {
 
 	}
 
+	ctxZ.scale(blockZoom, blockZoom);
+	ctxZ.imageSmoothingEnabled = false;
 	const render = (time) => {
 		requestAnimationFrame(render);
 		// setTimeout(render, 1000);
 
+		ctxZ.drawImage(bmp.canvas, 0, 0);
 
 		ctx.fillStyle = "#ddd";
 		ctx.fillRect(0, 0, sw, sh);
@@ -227,8 +239,8 @@ const linked_line = function() {
 		ctx.lineWidth = block / 2;
 		var item = first;
 		while(item) {
-			var x = item.x * block + block * 3 / 4,
-				y = item.y * block + block * 3 / 4;
+			var x = item.x * block + 1.5;// + block * 3 / 4;
+			var y = item.y * block + 1.5;// + block * 3 / 4;
 
 			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
 			// ctx.fillRect(x - 2, y - 2, 4, 4);
