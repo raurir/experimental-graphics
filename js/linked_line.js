@@ -1,10 +1,13 @@
 const linked_line = function() {
 
-	const wid = 20, hei = 20, block = 20;
-	const sw = wid * block;
-	const sh = hei * block;
+	const wid = 16, hei = 16, block = 10;
+	const sw = (wid + 0.5) * block;
+	const sh = (hei + 0.5) * block;
 	const bmp = dom.canvas(sw, sh);
 	const ctx = bmp.ctx;
+
+	const debug = dom.element("div");
+	document.body.appendChild(debug);
 
 	var occupied = {
 		array: [],
@@ -142,7 +145,8 @@ const linked_line = function() {
 	const insertItemAnywhere = () => {
 		var index = rand.getInteger(0, occupied.array.length - 1);
 		var item = occupied.array[index];
-		// con.log("item", occupied.array.length);
+		if (!item) return;
+		debug.innerHTML = `item ${index} ${item} ${occupied.array.length}`;
 
 		var surrounded = checkSurrounded(item);
 		if (surrounded) {
@@ -213,21 +217,21 @@ const linked_line = function() {
 
 		for (var i = 0; i < 40; i++) insertItemAnywhere();
 
-		ctx.fillStyle = "#bbb";
-		for (var y = 0; y < hei; y++) {
-			for (var x = 0; x < wid; x++) {
-				ctx.fillRect(x * block - 2 + block / 2, y * block - 2 + block / 2, 4, 4);
-			}
-		}
+		// ctx.fillStyle = "#bbb";
+		// for (var i = 0; i < wid * hei; i++) {
+		// 	var xy = getXY(i);
+		// 	ctx.fillRect(xy.x * block + 1, xy.y * block + 1, block - 2, block - 2);
+		// }
 
 		ctx.beginPath();
+		ctx.lineWidth = block / 2;
 		var item = first;
 		while(item) {
-			var x = item.x * block + block / 2,
-				y = item.y * block + block / 2;
+			var x = item.x * block + block * 3 / 4,
+				y = item.y * block + block * 3 / 4;
 
-			ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
-			ctx.fillRect(x - 2, y - 2, 4, 4);
+			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
+			// ctx.fillRect(x - 2, y - 2, 4, 4);
 
 			if (item == first) {
 				ctx.moveTo(x, y);
