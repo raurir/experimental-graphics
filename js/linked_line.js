@@ -12,12 +12,15 @@ const linked_line = function() {
 	const bmp = dom.canvas(sw, sh);
 	const bmpZ = dom.canvas(swZ, shZ);
 	const bmpW = dom.canvas(swZ, shZ);
+	const bmpR = dom.canvas(swZ, shZ);
 	const ctx = bmp.ctx;
 	const ctxZ = bmpZ.ctx;
 	const ctxW = bmpW.ctx;
+	const ctxR = bmpR.ctx;
 
 	document.body.appendChild(bmpW.canvas);
 	document.body.appendChild(bmpZ.canvas);
+	document.body.appendChild(bmpR.canvas);
 
 	const debug = dom.element("div");
 	document.body.appendChild(debug);
@@ -90,9 +93,8 @@ const linked_line = function() {
 				newItem = makeItem({x, y});
 				first = newItem;
 			} else{
-				var n = makeItem({x, y, prev: lastItem});
-				lastItem.next = n;
-				newItem = n;
+				newItem = makeItem({x, y, prev: lastItem});
+				lastItem.next = newItem;
 			}
 			lastItem = newItem;
 		}
@@ -241,7 +243,41 @@ const linked_line = function() {
 				walls.push(xy);
 			}
 		}
-		// window.walls = walls;
+		var wallrects = [];
+		var row = -1;
+		var w;
+		for (i = 0, il = walls.length; i < il; i++) {
+			w = walls[i];
+
+			if (row != w.y) {
+				row = w.y;
+				wallrects.push({x: w.x, y: w.y, w:1, h: 1});
+			}
+
+			if (w.x > 0) {
+				if (walls[i - 1 ].x == w.x - 1) {
+					wallrects[wallrects.length - 1].w ++;
+				} else {
+					wallrects.push({x: w.x, y: w.y, w:1, h: 1});
+				}
+			}
+
+			// if (wallrects)
+			// var x = w.x;
+
+		}
+
+		ctxR.fillStyle = "#fff";
+		ctxR.fillRect(0, 0, swZ, shZ);
+
+		for (i = 0, il = wallrects.length; i < il; i++) {
+			w = wallrects[i];
+			ctxR.fillStyle = "#f0f";// (r == 255) ? "red" : "Green";
+			ctxR.fillRect((w.x * blockZoom) + 1, (w.y * blockZoom) + 1, (w.w * blockZoom) - 2, (w.h * blockZoom) - 2);
+		}
+
+		window.walls = walls;
+		window.wallrects = wallrects;
 		// JSON.stringify(walls)
 
 	}
@@ -276,8 +312,8 @@ const linked_line = function() {
 				ctx.lineTo(x, y);
 			}
 
-			ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
-			ctx.fillRect(x - 1, y - 1, 2, 2);
+			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
+			// ctx.fillRect(x - 1, y - 1, 2, 2);
 
 
 
