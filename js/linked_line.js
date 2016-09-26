@@ -1,6 +1,6 @@
 const linked_line = function() {
 
-	const size = 15; // has to be odd, want the maze to start and end in the middle of a bouding wall.
+	const size = 7; // has to be odd, want the maze to start and end in the middle of a bouding wall.
 	const wid = size;
 	const hei = size;
 	const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
@@ -232,7 +232,7 @@ const linked_line = function() {
 		ctxW.fillRect(0, 0, sw, sh);
 
 		var walls = [];
-		// get pixels to discover what is to be drawn
+		// get pixels to discover what is to be drawn, make an array of blocks.
 		for (var i = 0, j = 0, il = pixels.length; i < il; i += 4, j++) {
 			var xy = getXY(j);
 			var r = pixels[i]; // var g = pixels[i + 1], b = pixels[i + 2], a = pixels[i + 3];
@@ -242,12 +242,13 @@ const linked_line = function() {
 				walls.push(xy);
 			}
 		}
+
+		// find rows within array.
 		var wallrects = [];
 		var row = -1;
 		var w;
 		for (i = 0, il = walls.length; i < il; i++) {
 			w = walls[i];
-
 			if (row != w.y) { // new row - add a block
 				row = w.y;
 				wallrects.push({x: w.x, y: w.y, w:1, h: 1});
@@ -258,10 +259,9 @@ const linked_line = function() {
 					wallrects.push({x: w.x, y: w.y, w: 1, h: 1}); // add a new one.
 				}
 			}
-
 		}
 
-		//
+		// find columns within array
 		for (i = 0, il = wallrects.length; i < il; i++) {
 			var w0 = wallrects[i];
 			for (var j = i + 1; j < il; j++) {
@@ -274,8 +274,10 @@ const linked_line = function() {
 				}
 			}
 		}
+		// remove nulls. didn't splice above
 		wallrects = wallrects.filter((item) => item);
 
+		// debug render
 		ctxR.fillStyle = "#fff";
 		ctxR.fillRect(0, 0, swZ, shZ);
 
@@ -338,13 +340,7 @@ const linked_line = function() {
 
 		ctxZ.drawImage(bmp.canvas, 0, 0);
 
-
-		// ctxZ.fillStyle = "#0f0";
-		// for (var i = 0; i < wid * hei; i++) {
-		// 	var xy = getXY(i);
-		// 	ctxZ.fillRect(xy.x, xy.y, 1, 1);
-		// }
-
+		// some dodgy logic to know if we're done yet.
 		if (arrLen === occupied.array.length) { done++; } else { arrLen = occupied.array.length; done = 0; }
 
 		if (done < 100) {
