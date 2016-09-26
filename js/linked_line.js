@@ -3,16 +3,19 @@ const linked_line = function() {
 	const wid = 16;
 	const hei = 16;
 	const block = 2;
-	const blockZoom = 16;
+	const blockZoom = 8;
 	const sw = (wid + 0.5) * block;
 	const sh = (hei + 0.5) * block;
 	const swZ = (wid + 0.5) * block * blockZoom;
 	const shZ = (hei + 0.5) * block * blockZoom;
 	const bmp = dom.canvas(sw, sh);
 	const bmpZ = dom.canvas(swZ, shZ);
+	const bmpW = dom.canvas(sw, sh);
 	const ctx = bmp.ctx;
 	const ctxZ = bmpZ.ctx;
+	const ctxW = bmpW.ctx;
 
+	document.body.appendChild(bmpW.canvas);
 	document.body.appendChild(bmpZ.canvas);
 
 	const debug = dom.element("div");
@@ -62,7 +65,7 @@ const linked_line = function() {
 
 	const getIndex = (x, y) => y * wid + x;
 	const getXY = (index) => {
-		return {x: index % wid, y: Math.floor(index / wid)};
+		return {x: index % sw, y: Math.floor(index / sw)};
 	}
 
 	const init = () => {
@@ -216,15 +219,39 @@ const linked_line = function() {
 
 	}
 
+	const extractWalls = () => {
+		var pixels = ctx.getImageData(0, 0, sw, sh).data;
+
+		ctxW.fillStyle = "#fff";
+		ctxW.fillRect(0, 0, sw, sh);
+
+		var walls = [];
+
+		for (var i = 0, j = 0, il = pixels.length; i < il; i += 4, j++) {
+			var xy = getXY(j);
+			var r = pixels[i];
+			// var g = pixels[i + 1];
+			// var b = pixels[i + 2];
+			// var a = pixels[i + 3];
+			if (r == 255) {
+				ctxW.fillRect(xy.x, xy.y, 1, 1);
+				ctxW.fillStyle = "#f00";// (r == 255) ? "red" : "Green";
+
+				walls.push(xy);
+			}
+		}
+		window.walls = walls;
+
+	}
+
+
 	ctxZ.scale(blockZoom, blockZoom);
 	ctxZ.imageSmoothingEnabled = false;
 	const render = (time) => {
 		requestAnimationFrame(render);
 		// setTimeout(render, 1000);
 
-		ctxZ.drawImage(bmp.canvas, 0, 0);
-
-		ctx.fillStyle = "#ddd";
+		ctx.fillStyle = "#fff";
 		ctx.fillRect(0, 0, sw, sh);
 
 		for (var i = 0; i < 40; i++) insertItemAnywhere();
@@ -239,14 +266,17 @@ const linked_line = function() {
 		ctx.lineWidth = block / 2;
 		var item = first;
 		while(item) {
-			var x = item.x * block + 1.5;// + block * 3 / 4;
-			var y = item.y * block + 1.5;// + block * 3 / 4;
+			var x = (item.x + 3 / 4) * block;
+			var y = (item.y + 3 / 4) * block;
 
 			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
 			// ctx.fillRect(x - 2, y - 2, 4, 4);
 
 			if (item == first) {
-				ctx.moveTo(x, y);
+				ctx.moveTo(x - block, y); // hack to draw off screen.
+			} else if (!item.next) { // hack last one
+				ctx.lineTo(x, y);
+				ctx.lineTo(x, y + block);
 			} else {
 				ctx.lineTo(x, y);
 			}
@@ -254,6 +284,11 @@ const linked_line = function() {
 			item = item.next;
 		}
 		ctx.stroke();
+
+		ctxZ.drawImage(bmp.canvas, 0, 0);
+		extractWalls();
+
+
 	}
 
 	return {

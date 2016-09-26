@@ -22,13 +22,12 @@ require.config({
 	baseUrl: "js",
 	urlArgs: "bust=" + (new Date()).getTime(),
 	paths: {
-	  "THREE": "../lib/three/three.min",
-	  "TweenMax": "../lib/greensock/TweenMax.min",
-	  "creature": "creature_creator/creature",
-	  "box": "games/box"
+		"THREE": "../lib/three/three.min",
+		"TweenMax": "../lib/greensock/TweenMax.min",
+		"creature": "creature_creator/creature",
+		"box": "games/box"
 	},
 });
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
-	console.log("experiments main ready dom", d,r,g,c,e, arguments);
 });
