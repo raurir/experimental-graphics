@@ -1,16 +1,17 @@
 const linked_line = function() {
 
-	const wid = 16;
-	const hei = 16;
-	const block = 2;
-	const blockZoom = 8;
+	const size = 7; // has to be odd, want the maze to start and end in the middle of a bouding wall.
+	const wid = size;
+	const hei = size;
+	const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
+	const blockZoom = 16;
 	const sw = (wid + 0.5) * block;
 	const sh = (hei + 0.5) * block;
 	const swZ = (wid + 0.5) * block * blockZoom;
 	const shZ = (hei + 0.5) * block * blockZoom;
 	const bmp = dom.canvas(sw, sh);
 	const bmpZ = dom.canvas(swZ, shZ);
-	const bmpW = dom.canvas(sw, sh);
+	const bmpW = dom.canvas(swZ, shZ);
 	const ctx = bmp.ctx;
 	const ctxZ = bmpZ.ctx;
 	const ctxW = bmpW.ctx;
@@ -80,9 +81,9 @@ const linked_line = function() {
 		for (var i = 0; i < hei; i++) {
 			if (i < hei / 2) {
 				x = i;
-				y = hei / 2;//rand.getInteger(0, wid - 1);
+				y = hei / 2 - 0.5;//rand.getInteger(0, wid - 1);
 			} else {
-				x = wid / 2;
+				x = wid / 2 - 0.5;
 				y = i;
 			}
 			if (i == 0) { // first
@@ -158,7 +159,7 @@ const linked_line = function() {
 		var index = rand.getInteger(0, occupied.array.length - 1);
 		var item = occupied.array[index];
 		if (!item) return;
-		debug.innerHTML = `item ${index} ${item} ${occupied.array.length}`;
+		debug.innerHTML = `item ${occupied.array.length}`;
 
 		var surrounded = checkSurrounded(item);
 		if (surrounded) {
@@ -234,19 +235,22 @@ const linked_line = function() {
 			// var b = pixels[i + 2];
 			// var a = pixels[i + 3];
 			if (r == 255) {
-				ctxW.fillRect(xy.x, xy.y, 1, 1);
 				ctxW.fillStyle = "#f00";// (r == 255) ? "red" : "Green";
+				ctxW.fillRect(xy.x, xy.y, 1, 1);
 
 				walls.push(xy);
 			}
 		}
-		window.walls = walls;
+		// window.walls = walls;
+		// JSON.stringify(walls)
 
 	}
 
 
 	ctxZ.scale(blockZoom, blockZoom);
 	ctxZ.imageSmoothingEnabled = false;
+	ctxW.scale(blockZoom, blockZoom);
+	ctxW.imageSmoothingEnabled = false;
 	const render = (time) => {
 		requestAnimationFrame(render);
 		// setTimeout(render, 1000);
@@ -256,21 +260,12 @@ const linked_line = function() {
 
 		for (var i = 0; i < 40; i++) insertItemAnywhere();
 
-		// ctx.fillStyle = "#bbb";
-		// for (var i = 0; i < wid * hei; i++) {
-		// 	var xy = getXY(i);
-		// 	ctx.fillRect(xy.x * block + 1, xy.y * block + 1, block - 2, block - 2);
-		// }
-
 		ctx.beginPath();
 		ctx.lineWidth = block / 2;
 		var item = first;
 		while(item) {
 			var x = (item.x + 3 / 4) * block;
 			var y = (item.y + 3 / 4) * block;
-
-			// ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
-			// ctx.fillRect(x - 2, y - 2, 4, 4);
 
 			if (item == first) {
 				ctx.moveTo(x - block, y); // hack to draw off screen.
@@ -280,12 +275,28 @@ const linked_line = function() {
 			} else {
 				ctx.lineTo(x, y);
 			}
+
+			ctx.fillStyle = item.surrounded ? "#f77" : "#7f7";
+			ctx.fillRect(x - 1, y - 1, 2, 2);
+
+
+
 			// console.log(item);
 			item = item.next;
 		}
 		ctx.stroke();
 
 		ctxZ.drawImage(bmp.canvas, 0, 0);
+
+
+		// ctxZ.fillStyle = "#0f0";
+		// for (var i = 0; i < wid * hei; i++) {
+		// 	var xy = getXY(i);
+		// 	ctxZ.fillRect(xy.x, xy.y, 1, 1);
+		// }
+
+
+
 		extractWalls();
 
 

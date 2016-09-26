@@ -37,7 +37,7 @@ function exps() {
     ["isometric_cubes"],
     ["linked_line"],
     ["maze"],
-    ["maze_cube", "THREE"],
+    ["maze_cube", "THREE", "https://threejs.org/examples/js/exporters/OBJExporter.js"],
     ["meandering_polygons"],
     ["mining_branches"],
     ["oscillate_curtain"],

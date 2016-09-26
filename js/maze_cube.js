@@ -105,6 +105,20 @@ var maze_cube = function() {
 		document.body.appendChild(renderer.domElement);
 		render(0);
 
+		function exportToObj() {
+			con.log("exportToObj");
+			var exporter = new THREE.OBJExporter();
+			var result = exporter.parse( scene );
+			var floatingDiv = document.createElement("div");
+			floatingDiv.style.display = 'block';
+			floatingDiv.style.background = "white";
+			floatingDiv.style.color = "black";
+			floatingDiv.innerHTML = result.split( '\n' ).join ( '<br />' );
+			con.log("result.length", result.length);
+		}
+		window.addEventListener("click", exportToObj);
+
+
 	}
 
 
@@ -116,7 +130,7 @@ var maze_cube = function() {
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
-		requestAnimationFrame( render );
+		// requestAnimationFrame( render );
 	}
 
 	return {
