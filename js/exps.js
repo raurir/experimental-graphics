@@ -87,7 +87,7 @@ function exps() {
   }
   function showButtons() {
     for(var e in experiments) {
-      var button = dom.element("button");
+      var button = dom.element("button", {className: "exp"});
       button.addEventListener("click", function(event){
         window.location = "?" + event.target.key;
       });
