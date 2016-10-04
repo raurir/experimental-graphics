@@ -46,7 +46,7 @@ var maze_cube = function() {
 		scene.add(holder);
 
 		var c = cube(cubeSize, cubeSize, cubeSize, 0xffffff);
-		// holder.add(c);
+		holder.add(c);
 
 		var grid = [{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":1,"h":5},{"x":14,"y":1,"w":1,"h":3},{"x":2,"y":2,"w":11,"h":1},{"x":2,"y":3,"w":1,"h":2},{"x":6,"y":3,"w":1,"h":7},{"x":4,"y":4,"w":1,"h":2},{"x":8,"y":4,"w":7,"h":1},{"x":8,"y":5,"w":1,"h":4},{"x":14,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":10,"y":6,"w":3,"h":1},{"x":4,"y":7,"w":1,"h":2},{"x":10,"y":7,"w":1,"h":3},{"x":0,"y":8,"w":3,"h":2},{"x":12,"y":8,"w":3,"h":1},{"x":14,"y":9,"w":1,"h":3},{"x":0,"y":10,"w":13,"h":1},{"x":0,"y":11,"w":1,"h":3},{"x":10,"y":11,"w":1,"h":2},{"x":2,"y":12,"w":7,"h":1},{"x":12,"y":12,"w":3,"h":2},{"x":8,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}];
 
@@ -92,9 +92,10 @@ var maze_cube = function() {
 			floatingDiv.style.color = "black";
 			floatingDiv.innerHTML = result.split( '\n' ).join ( '<br />' );
 			con.log("result.length", result.length);
+			document.body.appendChild(floatingDiv);
 		}
-		// window.addEventListener("click", exportToObj);
-		window.addEventListener("click", function() { mouse.toggle = !mouse.toggle; });
+		window.addEventListener("click", exportToObj);
+		// window.addEventListener("click", function() { mouse.toggle = !mouse.toggle; });
 
 
 	}
