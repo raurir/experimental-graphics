@@ -37,7 +37,7 @@ var maze_cube = function() {
 		lightLeft.position.set(-100, 0, 100);
 		scene.add(lightLeft);
 
-		renderer = new THREE.WebGLRenderer({antialias: true});
+		renderer = new THREE.WebGLRenderer();
 		renderer.setSize(sw, sh);
 
 		// controls = new THREE.OrbitControls( camera, renderer.domElement );
