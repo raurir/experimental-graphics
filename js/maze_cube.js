@@ -29,12 +29,12 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		const mazeGenerator = () => {
 			const size = 23;
 			perf.start('gen');
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
+			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
 			perf.end('gen');
 		};
 		mazeGenerator();
