@@ -27,7 +27,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 
 	function init() {
 		const mazeGenerator = () => {
-			const size = 17;
+			const size = 23;
 			perf.start('gen');
 			linkedLine.generate(size);
 			linkedLine.generate(size);

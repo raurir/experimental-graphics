@@ -2,14 +2,16 @@ const linked_line = () => {
 	con.log('linked_line');
 
 	const generate = (size) => {
-
+		if (Math.round(size / 2) === size / 2 || Math.round(size) !== size) {
+			return con.warn("linked_line - invalid size, needs to be odd integer - you supplied:", size);
+		}
+		// size has to be odd, want the maze to start and end in the middle of a bouding wall.
 		con.log('linked_line generate', size);
 
-		// const size = 7; // has to be odd, want the maze to start and end in the middle of a bouding wall.
 		const wid = size;
 		const hei = size;
 		const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
-		const blockZoom = 16;
+		const blockZoom = 4;
 		const sw = (wid + 0.5) * block;
 		const sh = (hei + 0.5) * block;
 		const swZ = (wid + 0.5) * block * blockZoom;
