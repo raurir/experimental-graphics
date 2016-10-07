@@ -1,5 +1,8 @@
+// con.log('linked_line window');
+var con = con || console;
+
 const linked_line = () => {
-	con.log('linked_line');
+	con.log('linked_line func');
 
 	const generate = (size) => {
 		if (Math.round(size / 2) === size / 2 || Math.round(size) !== size) {
@@ -366,10 +369,18 @@ const linked_line = () => {
 
 		// return {init};
 
-		init();
+		// init();
 	}
 
 	return {generate};
 };
 
-define("linked_line", linked_line);
+// define("linked_line", linked_line);
+
+onmessage = function(e) {
+  console.log('Message received from main script');
+  var workerResult = 'Result: ' + e.data;
+  console.log('Posting message back to main script');
+  postMessage(workerResult);
+}
+

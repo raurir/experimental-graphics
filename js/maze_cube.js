@@ -1,8 +1,8 @@
 // const linked_line = require('linked_line');
 
-define("maze_cube", ["linked_line"], function(linkedLine) {
+define("maze_cube", [], function() {
 
-	con.log(linkedLine);
+	// con.log(linkedLine);
 
 	var camera, scene, renderer;
 	var mouse = {x: 0, y: 0, toggle: false};
@@ -29,12 +29,32 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		const mazeGenerator = () => {
 			const size = 23;
 			perf.start('gen');
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
-			linkedLine.generate(size);
+
+			var w = new Worker("./js/linked_line.js");
+			w.onmessage = (event) => {
+				console.log("maze_cube worker", event);
+				// document.getElementById("result").innerHTML = event.data;
+			};
+			w.onerror = (event) => {
+				console.log("worker error", event);
+				for (var k in event) {
+					console.log("worker error", k, event[k]);
+				}
+				console.log("worker error", event.message);
+				console.log("worker error", event.filename);
+				console.log("worker error", event.lineno);
+				// document.getElementById("result").innerHTML = event.data;
+			};
+			// con.log(w);
+
+			w.postMessage(2);
+
+			// linkedLine.generate(size);
+			// linkedLine.generate(size);
+			// linkedLine.generate(size);
+			// linkedLine.generate(size);
+			// linkedLine.generate(size);
+			// linkedLine.generate(size);
 			perf.end('gen');
 		};
 		mazeGenerator();
