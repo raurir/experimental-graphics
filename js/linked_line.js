@@ -1,7 +1,11 @@
 const linked_line = () => {
 	con.log('linked_line');
 
-	const generate = (size) => {
+	const generate = (size, preoccupied) => {
+		/*
+		param `preoccupied` hahahaha!
+		array of masked out coordinates
+		*/
 		return new Promise((resolve, reject) => {
 			if (Math.round(size / 2) === size / 2 || Math.round(size) !== size) {
 				return con.warn("linked_line - invalid size, needs to be odd integer - you supplied:", size);
@@ -12,9 +16,10 @@ const linked_line = () => {
 			const wid = size;
 			const hei = size;
 			const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
-			const blockZoom = 4;
+			const blockZoom = 16;
 			const sw = (wid + 0.5) * block;
 			const sh = (hei + 0.5) * block;
+			con.log(sw,sh);
 			const swZ = (wid + 0.5) * block * blockZoom;
 			const shZ = (hei + 0.5) * block * blockZoom;
 			const bmp = dom.canvas(sw, sh);
@@ -27,8 +32,8 @@ const linked_line = () => {
 			const ctxR = bmpR.ctx;
 
 			document.body.appendChild(bmpZ.canvas);
-			// document.body.appendChild(bmpW.canvas);
-			// document.body.appendChild(bmpR.canvas);
+			document.body.appendChild(bmpW.canvas);
+			document.body.appendChild(bmpR.canvas);
 
 			const debug = dom.element("div");
 			// document.body.appendChild(debug);
@@ -37,21 +42,31 @@ const linked_line = () => {
 				array: [],
 				// twoD: [],
 				oneD: [],
-				neighbourless: []
-
+				// neighbourless: []
+				monkeys: []
 			};
 			var backup = {};
 			const store = () => {
 				backup.array = occupied.array.slice();
 				backup.oneD = occupied.oneD.slice();
-				backup.neighbourless = occupied.neighbourless.slice();
+				// backup.neighbourless = occupied.neighbourless.slice();
 				// backup.twoD = occupied.twoD.slice();
 			}
 			const restore = () => {
 				occupied.array = backup.array.slice();
 				occupied.oneD = backup.oneD.slice();
-				occupied.neighbourless = backup.neighbourless.slice();
+				// occupied.neighbourless = backup.neighbourless.slice();
 				// occupied.twoD = backup.twoD.slice();
+			}
+
+			const preoccupy = (options) => {
+				const item = {
+					x: options.x,
+					y: options.y,
+					type: "NULL"
+				};
+				occupied.oneD[getIndex(item.x, item.y)] = item;
+				occupied.array.push(item);
 			}
 
 			const makeItem = (options) => {
@@ -60,15 +75,16 @@ const linked_line = () => {
 				let item = {
 					x,
 					y,
+					type: "TUNNEL",
 					surrounded: false,
 					prev: options.prev,
 					next: options.next
 				}
 
 				// occupied.twoD[y][x] = item;
-				occupied.oneD[y * wid + x] = item;
+				occupied.oneD[getIndex(x, y)] = item;
 				occupied.array.push(item);
-				occupied.neighbourless.push(item);
+				// occupied.neighbourless.push(item);
 
 				return item;
 			}
@@ -81,6 +97,7 @@ const linked_line = () => {
 			}
 
 			const init = () => {
+
 				con.log("linked_line init");
 				for (var y = 0; y < hei; y++) {
 					for (var x = 0; x < wid; x++) {
@@ -89,8 +106,15 @@ const linked_line = () => {
 					}
 				}
 
+				if (preoccupied) {
+					con.log("preoccupied", preoccupied);
+					preoccupied.forEach(preoccupy);
+				}
+
+
 				var newItem, lastItem;
 				for (var i = 0; i < hei; i++) {
+					// right angle
 					if (i < hei / 2) {
 						x = i;
 						y = hei / 2 - 0.5;//rand.getInteger(0, wid - 1);
@@ -98,6 +122,11 @@ const linked_line = () => {
 						x = wid / 2 - 0.5;
 						y = i;
 					}
+					// straigh down
+					// x = wid / 2 - 0.5;
+					// y = i;
+
+
 					if (i == 0) { // first
 						newItem = makeItem({x, y});
 						first = newItem;
@@ -296,7 +325,7 @@ const linked_line = () => {
 						ctxR.beginPath();
 						ctxR.rect((w.x * blockZoom) + 2, (w.y * blockZoom) + 2, (w.w * blockZoom) - 4, (w.h * blockZoom) - 4);
 						ctxR.lineWidth = 1;
-						ctxR.lineStyle = "rgba(0,0,0,0.02)";
+						ctxR.lineStyle = "rgba(0,0,0,0.00)";
 						ctxR.closePath();
 						ctxR.stroke();
 					}
@@ -326,14 +355,15 @@ const linked_line = () => {
 				for (var i = 0; i < 40; i++) insertItemAnywhere();
 
 				ctx.beginPath();
-				ctx.lineWidth = block / 2;
+				ctx.lineWidth = block / 2 * 0.25;
 				var item = first;
 				while(item) {
 					var x = (item.x + 3 / 4) * block;
 					var y = (item.y + 3 / 4) * block;
 
 					if (item == first) {
-						ctx.moveTo(x - block, y); // hack to draw off screen.
+						ctx.moveTo(x - block, y); // hack to draw off screen - right angle
+						// ctx.moveTo(x, y - block); // hack to draw off screen - straight down
 					} else if (!item.next) { // hack last one
 						ctx.lineTo(x, y);
 						ctx.lineTo(x, y + block);
@@ -349,19 +379,29 @@ const linked_line = () => {
 				}
 				ctx.stroke();
 
+
+				for (var i = 0; i < occupied.array.length; i++) {
+					var item = occupied.array[i];
+					ctx.fillStyle = item.type == "NULL" ? "#f00" : "#00ff00";
+					ctx.fillRect(item.x * 2 + 1, item.y * 2 + 1, 1, 1);
+				};
+
+
+
+
 				ctxZ.drawImage(bmp.canvas, 0, 0);
 
 				// some dodgy logic to know if we're done yet.
 				if (arrLen === occupied.array.length) { done++; } else { arrLen = occupied.array.length; done = 0; }
 
-				if (done < 100) {
+				if (done < 30) {
 					// requestAnimationFrame(render);
 					// setTimeout(render, 1000);
 					render();
 				} else {
 					extractWalls();
 				}
-
+				// extractWalls();
 
 			};
 

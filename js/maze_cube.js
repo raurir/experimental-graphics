@@ -27,15 +27,27 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 
 	function init() {
 		const mazeGenerator = () => {
-			const size = 23;
+			const size = 11;
+
+			let face = (preoccupied) => linkedLine.generate(size, preoccupied);
+
 			perf.start('gen');
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			linkedLine.generate(size).then((walls) => {con.log("success", walls);}).catch((err) => {con.warn("fail", err)});
-			perf.end('gen');
+
+			// face()
+			face([{x: 1, y: 2}, {x: 1, y: 3}, {x: 3, y:3}])//, ])
+				// .then(() => {
+				// 	return face([{x: 20, y: 5}, {x: 21, y: 5}]);
+				// })
+				// .then(() => face())
+				// .then(() => face())
+				// .then(() => face())
+				// .then(() => face())
+				.then((walls) => {
+					con.log("success", walls);
+					perf.end('gen');
+				})
+				.catch((err) => {con.warn("fail", err)});
+
 		};
 		mazeGenerator();
 	}
