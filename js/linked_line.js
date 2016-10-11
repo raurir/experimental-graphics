@@ -8,6 +8,7 @@ const linked_line = () => {
 		*/
 		return new Promise((resolve, reject) => {
 			if (Math.round(size / 2) === size / 2 || Math.round(size) !== size) {
+				alert("linked_line - invalid size, needs to be odd integer - you supplied: " + size);
 				return con.warn("linked_line - invalid size, needs to be odd integer - you supplied:", size);
 			}
 			// size has to be odd, want the maze to start and end in the middle of a bouding wall.

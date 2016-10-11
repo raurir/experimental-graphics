@@ -1,6 +1,9 @@
 define("maze_cube", ["linked_line"], function(linkedLine) {
 
-	const blocks = 7;
+	const progress = dom.element("div", {id: "progress", style: {height: "10px", width: 0, background: "#904040"}});
+	document.body.appendChild(progress);
+
+	const blocks = 11;
 	const cubeSize = 1512;
 	const size = cubeSize / blocks;
 
@@ -34,6 +37,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		let add = (maze) => {
 			con.log("adding walls:", mazes.length, maze.wallrects.length);
 			mazes.push(maze.wallrects);
+			progress.style.width = `${mazes.length / 6 * 100}%`;
 		}
 
 		perf.start('gen');
@@ -50,6 +54,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 			.then(() => {
 				con.log("success");
 				perf.end('gen');
+				progress.style.height = 0;
 				init3D(mazes);
 			})
 			.catch((err) => {con.warn("fail", err)});
@@ -63,7 +68,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		scene = new THREE.Scene();
 		scene.fog = new THREE.FogExp2(0x000000, 0.0002);
 
-		camera = new THREE.PerspectiveCamera( 110, sw / sh, 1, 20000 );
+		camera = new THREE.PerspectiveCamera(90, sw / sh, 1, 20000);
 		scene.add(camera);
 
 		var lightAbove = new THREE.DirectionalLight(0x909090, 1.5);
@@ -145,7 +150,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 			// 	// mouse.toggle = false
 			// }
 		}
-		camPos.z = 6000;
+		camPos.z = 5000;
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
