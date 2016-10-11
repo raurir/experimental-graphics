@@ -1,70 +1,76 @@
-// const linked_line = require('linked_line');
-
 define("maze_cube", ["linked_line"], function(linkedLine) {
 
-	con.log(linkedLine);
+	const blocks = 7;
+	const cubeSize = 1512;
+	const size = cubeSize / blocks;
 
 	var camera, scene, renderer;
-	var mouse = {x: 0, y: 0, toggle: false};
+	var mouse = {x: 0, y: 0, toggle: true};
 	var camPos = {x: 0, y: 0, z: 0};
 	var sw = window.innerWidth, sh = window.innerHeight;
 	var holder;
-	var cubeSize = 512;
 	var controls;
 
 	function cube(w, h, d, colour) {
-		// con.log(w,h,d);
-		var group = new THREE.Group();
-		var material = new THREE.MeshBasicMaterial({
-			color: 0xff8080, //colour,
-			// map: texture ? texture : null
+		const group = new THREE.Group();
+		const material = new THREE.MeshPhongMaterial({
+			color: 0x909090,
+			emissive: 0x803000,
+			specular: 0xa08080,
+			shininess: 40
+			// color: colour,
 		});
-		var geometry = new THREE.BoxGeometry(w, h, d);
-		var object = new THREE.Mesh(geometry, material);
+
+		const geometry = new THREE.BoxGeometry(w, h, d);
+		const object = new THREE.Mesh(geometry, material);
 		group.add(object);
 		return group;
 	}
 
 	function init() {
-		const mazeGenerator = () => {
-			const size = 11;
+		const mazes = [];
 
-			let face = (preoccupied) => linkedLine.generate(size, preoccupied);
+		let face = (preoccupied) => linkedLine.generate(blocks, preoccupied);
+		let add = (maze) => {
+			con.log("adding walls:", mazes.length, maze.wallrects.length);
+			mazes.push(maze.wallrects);
+		}
 
-			perf.start('gen');
+		perf.start('gen');
 
-			// face()
-			face([{x: 1, y: 2}, {x: 1, y: 3}, {x: 3, y:3}])//, ])
-				// .then(() => {
-				// 	return face([{x: 20, y: 5}, {x: 21, y: 5}]);
-				// })
-				// .then(() => face())
-				// .then(() => face())
-				// .then(() => face())
-				// .then(() => face())
-				.then((walls) => {
-					con.log("success", walls);
-					perf.end('gen');
-				})
-				.catch((err) => {con.warn("fail", err)});
+		face().then(add)
+			.then(() => {
+				// add a custom face with a block little piece cut out... 
+				return face([{x: 1, y: 2}, {x: 1, y: 3}, {x: 3, y:3}]);
+			}).then(add)
+			.then(face).then(add)
+			.then(face).then(add)
+			.then(face).then(add)
+			.then(face).then(add)
+			.then(() => {
+				con.log("success");
+				perf.end('gen');
+				init3D(mazes);
+			})
+			.catch((err) => {con.warn("fail", err)});
 
-		};
-		mazeGenerator();
 	}
 
-	function init3D() {
+	function init3D(mazes) {
+
+		// con.log(mazes);
 
 		scene = new THREE.Scene();
-		scene.fog = new THREE.FogExp2(0x000000, 0.0015);
+		scene.fog = new THREE.FogExp2(0x000000, 0.0002);
 
-		camera = new THREE.PerspectiveCamera( 80, sw / sh, 1, 10000 );
+		camera = new THREE.PerspectiveCamera( 110, sw / sh, 1, 20000 );
 		scene.add(camera);
 
-		var lightAbove = new THREE.DirectionalLight(0xffffff, 1.5);
-		lightAbove.position.set(0, 200, 100);
+		var lightAbove = new THREE.DirectionalLight(0x909090, 1.5);
+		lightAbove.position.set(0, 200, 0);
 		scene.add(lightAbove);
 
-		var lightLeft = new THREE.DirectionalLight(0xffffff, 4);
+		var lightLeft = new THREE.DirectionalLight(0xffffff, 1.5);
 		lightLeft.position.set(-100, 0, 100);
 		scene.add(lightLeft);
 
@@ -76,34 +82,17 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		holder = new THREE.Group();
 		scene.add(holder);
 
-		var c = cube(cubeSize, cubeSize, cubeSize, 0xffffff);
+		var c = cube(cubeSize * 2 - size, cubeSize * 2 - size, cubeSize * 2 - size, 0xffffff);
 		holder.add(c);
-		/*
-		var mazes = [
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":1,"h":5},{"x":14,"y":1,"w":1,"h":3},{"x":2,"y":2,"w":11,"h":1},{"x":2,"y":3,"w":1,"h":2},{"x":6,"y":3,"w":1,"h":7},{"x":4,"y":4,"w":1,"h":2},{"x":8,"y":4,"w":7,"h":1},{"x":8,"y":5,"w":1,"h":4},{"x":14,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":10,"y":6,"w":3,"h":1},{"x":4,"y":7,"w":1,"h":2},{"x":10,"y":7,"w":1,"h":3},{"x":0,"y":8,"w":3,"h":2},{"x":12,"y":8,"w":3,"h":1},{"x":14,"y":9,"w":1,"h":3},{"x":0,"y":10,"w":13,"h":1},{"x":0,"y":11,"w":1,"h":3},{"x":10,"y":11,"w":1,"h":2},{"x":2,"y":12,"w":7,"h":1},{"x":12,"y":12,"w":3,"h":2},{"x":8,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			,
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":3,"h":2},{"x":6,"y":1,"w":1,"h":3},{"x":12,"y":1,"w":3,"h":2},{"x":4,"y":2,"w":1,"h":2},{"x":8,"y":2,"w":3,"h":1},{"x":0,"y":3,"w":1,"h":3},{"x":10,"y":3,"w":1,"h":1},{"x":14,"y":3,"w":1,"h":3},{"x":2,"y":4,"w":3,"h":1},{"x":6,"y":4,"w":3,"h":3},{"x":10,"y":4,"w":3,"h":1},{"x":4,"y":5,"w":1,"h":3},{"x":10,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":3,"h":1},{"x":12,"y":6,"w":3,"h":3},{"x":0,"y":8,"w":11,"h":1},{"x":0,"y":9,"w":3,"h":2},{"x":6,"y":9,"w":1,"h":2},{"x":10,"y":9,"w":1,"h":1},{"x":14,"y":9,"w":1,"h":3},{"x":4,"y":10,"w":1,"h":2},{"x":8,"y":10,"w":1,"h":2},{"x":10,"y":10,"w":3,"h":1},{"x":0,"y":11,"w":1,"h":3},{"x":10,"y":11,"w":1,"h":2},{"x":2,"y":12,"w":7,"h":1},{"x":12,"y":12,"w":3,"h":2},{"x":8,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			,
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":1,"h":5},{"x":4,"y":1,"w":1,"h":2},{"x":8,"y":1,"w":1,"h":2},{"x":12,"y":1,"w":3,"h":2},{"x":2,"y":2,"w":1,"h":2},{"x":6,"y":2,"w":1,"h":2},{"x":10,"y":2,"w":1,"h":2},{"x":14,"y":3,"w":1,"h":3},{"x":2,"y":4,"w":11,"h":1},{"x":6,"y":5,"w":1,"h":3},{"x":10,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":8,"y":6,"w":1,"h":4},{"x":12,"y":6,"w":3,"h":1},{"x":14,"y":7,"w":1,"h":3},{"x":0,"y":8,"w":7,"h":1},{"x":10,"y":8,"w":3,"h":1},{"x":0,"y":9,"w":1,"h":3},{"x":2,"y":10,"w":13,"h":1},{"x":4,"y":11,"w":1,"h":2},{"x":14,"y":11,"w":1,"h":3},{"x":0,"y":12,"w":3,"h":2},{"x":6,"y":12,"w":7,"h":1},{"x":6,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			,
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":1,"h":5},{"x":14,"y":1,"w":1,"h":3},{"x":2,"y":2,"w":11,"h":1},{"x":2,"y":3,"w":1,"h":2},{"x":6,"y":3,"w":1,"h":3},{"x":4,"y":4,"w":1,"h":2},{"x":8,"y":4,"w":7,"h":1},{"x":14,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":6,"y":6,"w":7,"h":1},{"x":4,"y":7,"w":1,"h":3},{"x":6,"y":7,"w":1,"h":3},{"x":0,"y":8,"w":3,"h":1},{"x":8,"y":8,"w":7,"h":1},{"x":0,"y":9,"w":1,"h":5},{"x":14,"y":9,"w":1,"h":3},{"x":2,"y":10,"w":3,"h":1},{"x":6,"y":10,"w":7,"h":1},{"x":2,"y":11,"w":1,"h":2},{"x":6,"y":11,"w":1,"h":1},{"x":10,"y":11,"w":1,"h":2},{"x":4,"y":12,"w":3,"h":2},{"x":8,"y":12,"w":1,"h":2},{"x":12,"y":12,"w":3,"h":2},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			,
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":3,"h":2},{"x":6,"y":1,"w":1,"h":2},{"x":14,"y":1,"w":1,"h":5},{"x":4,"y":2,"w":1,"h":2},{"x":8,"y":2,"w":5,"h":1},{"x":0,"y":3,"w":1,"h":3},{"x":8,"y":3,"w":1,"h":1},{"x":12,"y":3,"w":1,"h":2},{"x":2,"y":4,"w":7,"h":1},{"x":10,"y":4,"w":1,"h":2},{"x":6,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":8,"y":6,"w":7,"h":1},{"x":10,"y":7,"w":1,"h":3},{"x":14,"y":7,"w":1,"h":7},{"x":0,"y":8,"w":9,"h":1},{"x":12,"y":8,"w":1,"h":4},{"x":0,"y":9,"w":1,"h":3},{"x":2,"y":10,"w":9,"h":1},{"x":4,"y":11,"w":1,"h":2},{"x":0,"y":12,"w":3,"h":2},{"x":6,"y":12,"w":7,"h":1},{"x":6,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			,
-			[{"x":0,"y":0,"w":15,"h":1},{"x":0,"y":1,"w":1,"h":5},{"x":4,"y":1,"w":1,"h":2},{"x":12,"y":1,"w":3,"h":2},{"x":2,"y":2,"w":1,"h":2},{"x":6,"y":2,"w":5,"h":1},{"x":6,"y":3,"w":1,"h":1},{"x":10,"y":3,"w":1,"h":1},{"x":14,"y":3,"w":1,"h":3},{"x":2,"y":4,"w":5,"h":1},{"x":8,"y":4,"w":1,"h":2},{"x":10,"y":4,"w":3,"h":1},{"x":6,"y":5,"w":1,"h":3},{"x":0,"y":6,"w":5,"h":1},{"x":8,"y":6,"w":7,"h":1},{"x":10,"y":7,"w":1,"h":3},{"x":14,"y":7,"w":1,"h":7},{"x":0,"y":8,"w":9,"h":1},{"x":12,"y":8,"w":1,"h":4},{"x":0,"y":9,"w":3,"h":2},{"x":4,"y":10,"w":7,"h":1},{"x":0,"y":11,"w":1,"h":3},{"x":4,"y":11,"w":1,"h":1},{"x":2,"y":12,"w":3,"h":1},{"x":6,"y":12,"w":7,"h":1},{"x":6,"y":13,"w":1,"h":1},{"x":0,"y":14,"w":7,"h":1},{"x":8,"y":14,"w":7,"h":1}]
-			];
-		*/
 
 		let makeFace = (options) => {
 			var face = new THREE.Group();
 			holder.add(face);
 
-			const items = 15;
-			const size = cubeSize / (items - 1);
 			options.maze.forEach((item) => {
-				var x = (item.x + item.w / 2 - items / 2) * size;
-				var y = (item.y + item.h / 2 - items / 2) * size;
-				var z = (cubeSize / 2); //size / 2;
+				var x = (item.x + item.w / 2 - blocks - 0.5) * size;
+				var y = (item.y + item.h / 2 - blocks - 0.5) * size;
+				var z = cubeSize + 1;
 				var c = cube(item.w * size, item.h * size, size, options.colour);
 				c.position.set(x, y, z);
 				face.add(c);
@@ -126,7 +115,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		render(0);
 
 		function exportToObj() {
-			con.log("exportToObj");
+			con.log("exportToObj"); // for printing.
 			var exporter = new THREE.OBJExporter();
 			var result = exporter.parse( scene );
 			var floatingDiv = document.createElement("div");
@@ -137,8 +126,10 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 			con.log("result.length", result.length);
 			document.body.appendChild(floatingDiv);
 		}
-		window.addEventListener("click", exportToObj);
-		// window.addEventListener("click", function() { mouse.toggle = !mouse.toggle; });
+		// window.addEventListener("click", exportToObj);
+		function toggle() { mouse.toggle = !mouse.toggle; }
+		window.addEventListener("click", toggle);
+		window.addEventListener("touchstart", toggle);
 
 
 	}
@@ -147,11 +138,14 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 
 	function render(time) {
 		if (mouse.toggle) {
-			holder.rotation.x += 0.01;
+			holder.rotation.x += Math.PI * 0.005;
 			// holder.rotation.y -= 0.01;
-			holder.rotation.z -= 0.01;
+			holder.rotation.z -= Math.PI * 0.002;
+			// if (holder.rotation.x >= Math.PI * 2) {
+			// 	// mouse.toggle = false
+			// }
 		}
-		camPos.z = 1000;
+		camPos.z = 6000;
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );

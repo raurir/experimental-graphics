@@ -1,5 +1,5 @@
 const linked_line = () => {
-	con.log('linked_line');
+	// con.log('linked_line');
 
 	const generate = (size, preoccupied) => {
 		/*
@@ -11,15 +11,16 @@ const linked_line = () => {
 				return con.warn("linked_line - invalid size, needs to be odd integer - you supplied:", size);
 			}
 			// size has to be odd, want the maze to start and end in the middle of a bouding wall.
-			con.log('linked_line generate', size);
+			// con.log('linked_line generate', size);
+
+			let attempts = 0;
 
 			const wid = size;
 			const hei = size;
 			const block = 2; // this has to be 2, since we're drawing a maze with lines between points rather than filling/carving.
-			const blockZoom = 16;
+			const blockZoom = 4;
 			const sw = (wid + 0.5) * block;
 			const sh = (hei + 0.5) * block;
-			con.log(sw,sh);
 			const swZ = (wid + 0.5) * block * blockZoom;
 			const shZ = (hei + 0.5) * block * blockZoom;
 			const bmp = dom.canvas(sw, sh);
@@ -31,9 +32,9 @@ const linked_line = () => {
 			const ctxW = bmpW.ctx;
 			const ctxR = bmpR.ctx;
 
-			document.body.appendChild(bmpZ.canvas);
-			document.body.appendChild(bmpW.canvas);
-			document.body.appendChild(bmpR.canvas);
+			// document.body.appendChild(bmpZ.canvas);
+			// document.body.appendChild(bmpW.canvas);
+			// document.body.appendChild(bmpR.canvas);
 
 			const debug = dom.element("div");
 			// document.body.appendChild(debug);
@@ -98,7 +99,7 @@ const linked_line = () => {
 
 			const init = () => {
 
-				con.log("linked_line init");
+				// con.log("linked_line init");
 				for (var y = 0; y < hei; y++) {
 					for (var x = 0; x < wid; x++) {
 						occupied.oneD.push(-1);
@@ -107,7 +108,7 @@ const linked_line = () => {
 				}
 
 				if (preoccupied) {
-					con.log("preoccupied", preoccupied);
+					// con.log("preoccupied", preoccupied);
 					preoccupied.forEach(preoccupy);
 				}
 
@@ -331,11 +332,7 @@ const linked_line = () => {
 					}
 				}
 
-				// window.walls = walls;
-				// window.wallrects = wallrects;
-				// JSON.stringify(walls)
-
-				con.log("extractWalls");
+				// con.log("extractWalls");
 				resolve({walls, wallrects});
 			}
 
@@ -348,6 +345,8 @@ const linked_line = () => {
 			var arrLen = 0, done = 0;
 
 			const render = (time) => {
+
+				attempts++;
 
 				ctx.fillStyle = "#fff";
 				ctx.fillRect(0, 0, sw, sh);
@@ -394,14 +393,18 @@ const linked_line = () => {
 				// some dodgy logic to know if we're done yet.
 				if (arrLen === occupied.array.length) { done++; } else { arrLen = occupied.array.length; done = 0; }
 
-				if (done < 30) {
+				if (done < 300) {
 					// requestAnimationFrame(render);
-					// setTimeout(render, 1000);
-					render();
+					if (attempts % 50 == 0) {
+						con.log("having a breather... ", done);
+						setTimeout(render, 20);
+					} else {
+						render();
+					}
+
 				} else {
 					extractWalls();
 				}
-				// extractWalls();
 
 			};
 
