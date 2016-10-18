@@ -1,6 +1,6 @@
 define("maze_cube", ["linked_line"], function(linkedLine) {
 
-	const progress = dom.element("div", {id: "progress", style: {height: "10px", width: 0, background: "#904040"}});
+	const progress = dom.element("div", {id: "progress", style: {height: "20px", width: 0, background: "#ddd"}});
 	document.body.appendChild(progress);
 
 	const blocks = 11;
@@ -17,7 +17,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 	function cube(w, h, d, colour) {
 		const group = new THREE.Group();
 		const material = new THREE.MeshPhongMaterial({
-			color: 0x909090,
+			color: colour,
 			emissive: 0x803000,
 			specular: 0xa08080,
 			shininess: 40
@@ -26,6 +26,8 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 
 		const geometry = new THREE.BoxGeometry(w, h, d);
 		const object = new THREE.Mesh(geometry, material);
+		object.castShadow = true;
+		object.receiveShadow = true;
 		group.add(object);
 		return group;
 	}
@@ -72,22 +74,44 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		scene.add(camera);
 
 		var lightAbove = new THREE.DirectionalLight(0x909090, 1.5);
+		lightAbove.castShadow = true;
 		lightAbove.position.set(0, 200, 0);
+
+		// lightAbove.shadow = {
+		// 	bias: 0.00002,
+		// 	mapSize: {
+		// 		width: 1024,
+		// 		height: 1024
+		// 	},
+		// 	camera: {
+		// 		near: 1,
+		// 		far: 85,
+		// 		fov: 110
+		// 	}
+		// }
+		// lightAbove.distance = 130;
+		// lightAbove.angle = Math.PI/3;
+
+
 		scene.add(lightAbove);
 
-		var lightLeft = new THREE.DirectionalLight(0xffffff, 1.5);
-		lightLeft.position.set(-100, 0, 100);
-		scene.add(lightLeft);
+		// var lightLeft = new THREE.DirectionalLight(0xffffff, 1.5);
+		// lightLeft.position.set(-100, 0, 100);
+		// scene.add(lightLeft);
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize(sw, sh);
+		renderer.shadowMap = {
+			type: THREE.BasicShadowMap,
+			enabled: true
+		};
 
 		// controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 		holder = new THREE.Group();
 		scene.add(holder);
 
-		var c = cube(cubeSize * 2 - size, cubeSize * 2 - size, cubeSize * 2 - size, 0xffffff);
+		var c = cube(cubeSize * 2 - size, cubeSize * 2 - size, cubeSize * 2 - size, 0x403020);
 		holder.add(c);
 
 		let makeFace = (options) => {
@@ -98,7 +122,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 				var x = (item.x + item.w / 2 - blocks - 0.5) * size;
 				var y = (item.y + item.h / 2 - blocks - 0.5) * size;
 				var z = cubeSize + 1;
-				var c = cube(item.w * size, item.h * size, size, options.colour);
+				var c = cube(item.w * size, item.h * size, size, 0x909090); // options.colour);
 				c.position.set(x, y, z);
 				face.add(c);
 			});

@@ -30,4 +30,5 @@ require.config({
 });
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
+	console.log("ready");
 });
