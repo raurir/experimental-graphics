@@ -44,6 +44,10 @@ var rand = (function() {
       return seed;
     },
     random : function() {
+      if (z === undefined) {
+        console.warn("no seed set");
+        return null
+      };
       // define the recurrence relationship
       z = (a * z + c) % m;
       // return a float in [0, 1)
@@ -59,9 +63,11 @@ var rand = (function() {
       return min + this.random() * (max - min);
     },
 
-    getInteger: function(min,max) {
+    getInteger: function(min, max) {
       return Math.floor(this.getNumber(min, max + 1));
-    }
+    },
+
+    alphaToInteger: alphaToInteger // for testability
 
   };
 }());
