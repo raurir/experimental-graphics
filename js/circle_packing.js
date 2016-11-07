@@ -2,10 +2,10 @@ var isNode = (typeof module !== 'undefined');
 
 var circle_packing = function() {
 
-	var sw = 1200, sh = 1200;
+	var sw, sh;
 	var cx = 0.5, cy = 0.5;
 
-	var bmp = dom.canvas(sw, sh);
+	var bmp = dom.canvas(1, 1);
 
 	var experiment = {
 		stage: bmp.canvas,
@@ -23,11 +23,15 @@ var circle_packing = function() {
 		bmp.ctx.stroke();
 	}
 
-	var output = dom.element("div");
-	document.body.appendChild(output);
+	// var output = dom.element("div");
+	// document.body.appendChild(output);
 
-	function init() {
+	function init(options) {
 
+		var size = options.size;
+		sw = size;
+		sh = size;
+		bmp.setSize(sw, sh);
 		// rand.setSeed(4);
 		colours.getRandomPalette();
 		bmp.ctx.clearRect(0, 0, sw, sh);
@@ -39,7 +43,7 @@ var circle_packing = function() {
 		function attemptNextCircle(parent, attempt) {
 			attempt++;
 			// con.log("attemptNextCircle", attempt);
-			output.innerHTML = [circles, attempt, threads, iterations];
+			// output.innerHTML = [circles, attempt, threads, iterations];
 			if (attempt < 125000 && parent.r > 0.1) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
@@ -61,17 +65,17 @@ var circle_packing = function() {
 				// angle = iterations * Math.PI * 2;
 
 				// distance from centre of parent
-
-				distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
 
 				distance = rand.random() * parent.r;
 				// banding
 				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
 
-				var thresh = iterations > 5;
 
 				var angleIncrement = 0.01;
 
+				// start filling in the rest by drawing circles in a sweeping fashion
+				var thresh = true;//iterations > 5;
 				if (thresh) {
 					// con.log("ok");
 					parent.incrementor.distance += rand.random() * 0.04;
@@ -96,18 +100,18 @@ var circle_packing = function() {
 				dy = y - cy;
 				d = Math.sqrt(dx * dx + dy * dy);
 				// maxRadius = Math.pow(0.6 - d, 3) * 4;
-				maxRadius = (0.7 - d) * 0.2;
+				// maxRadius = (0.7 - d) * 0.2;
 				// maxRadius = (d + 0.1) * 0.2;
 				// maxRadius = 0.07;
 				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
-				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
+				maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
 				if (maxRadius > 1 ) con.log(maxRadius);
 
 				// r = rand.random() * maxRadius * (parent.r - distance - gap);
-				r = rand.random() * maxRadius * (parent.r - distance - gap);
+				// r = rand.random() * maxRadius * (parent.r - distance - gap);
 				// r = parent.r - distance - gap;
 				// r = maxRadius;
-				// r = 0.005;// rand.random() * maxRadius * (parent.r - distance - gap);
+				r = 0.005;
 
 				if (options) {
 					if (options.r) { con.log("overriding r"); r = options.r; }
@@ -209,9 +213,9 @@ var circle_packing = function() {
 			return circle;
 		}
 
-		var parent = drawCircle(0, 0);
-		var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
-		var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
+		var parent = drawCircle(null, 0);//, {colour: 'red'});
+		// var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
+		// var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
 
 		progress("render:complete", bmp.canvas);
 	}
@@ -220,7 +224,7 @@ var circle_packing = function() {
 };
 
 if (isNode) {
-  module.exports = circle_packing();
+	module.exports = circle_packing();
 } else {
-  define("circle_packing", circle_packing);
+	define("circle_packing", circle_packing);
 }
