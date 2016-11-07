@@ -28,7 +28,7 @@ var circle_packing = function() {
 
 	function init() {
 
-		rand.setSeed(4);
+		// rand.setSeed(4);
 		colours.getRandomPalette();
 		bmp.ctx.clearRect(0, 0, sw, sh);
 

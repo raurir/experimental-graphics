@@ -29,5 +29,9 @@ require.config({
 	},
 });
 
+console.log("v1.1");
+
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
+	console.log("ready");
+	e();
 });
