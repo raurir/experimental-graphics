@@ -5,11 +5,16 @@ makeTransition(transition)
   transition transition
 
 body
-  overflow hidden
+  background #666
+  // background #000
+  // background rgba(0,0,0,1)
+  // overflow hidden
   font-family verdana
   margin 0
   padding 0
-  // background rgba(0,0,0,1)
+
+// canvas
+//   border 1px solid #444
 
 .experiments-loader
   position: absolute
@@ -36,3 +41,17 @@ body
       height 10px
       border-radius 2px
       makeTransition(width 0.2s ease-out)
+
+#progress
+  transition width .3s ease
+.exp
+  line-height 20px
+  margin 4px
+  background white
+  border none
+  color #000
+
+  @media (min-width:500px)
+    line-height 40px
+    font-size 15px
+

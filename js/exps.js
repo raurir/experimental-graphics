@@ -58,6 +58,7 @@ function exps() {
       ["spiral_even"],
       ["squaretracer"],
       ["tea"],
+      ["text_grid"],
       ["tunnel_tour_three","THREE", "TweenMax"],
       ["typography"],
       ["voronoi_stripes", "voronoi"],

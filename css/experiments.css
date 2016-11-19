@@ -1,5 +1,5 @@
 body {
-  overflow: hidden;
+  background: #666;
   font-family: verdana;
   margin: 0;
   padding: 0;
@@ -38,4 +38,20 @@ body {
   -moz-transition: width 0.2s ease-out;
   -o-transition: width 0.2s ease-out;
   transition: width 0.2s ease-out;
+}
+#progress {
+  transition: width 0.3s ease;
+}
+.exp {
+  line-height: 20px;
+  margin: 4px;
+  background: #fff;
+  border: none;
+  color: #000;
+}
+@media (min-width: 500px) {
+  .exp {
+    line-height: 40px;
+    font-size: 15px;
+  }
 }
