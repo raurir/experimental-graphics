@@ -39,7 +39,8 @@ var text_grid = function() {
 
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
-  var size, sw, sh, block;
+  var widthOnHeight = 0.6;
+  var size, sw, sh, blockW, blockH;
   var rows;
   var cols;
   var phrase;
@@ -47,9 +48,16 @@ var text_grid = function() {
   function drawBlock(index, x, y) {
     var w = 1, h = 1;
     ctx.save();
-    ctx.translate(x * block, y * block);
-    // ctx.fillStyle = colours.getRandomColour();
-    // ctx.fillRect(0, 0, block * w, block * h);
+    ctx.translate(x * blockW, y * blockH);
+
+
+    // var gradient = ctx.createLinearGradient(blockW / 2, 0, blockW / 2, blockH);
+    // gradient.addColorStop(0, colours.getRandomColour());
+    // gradient.addColorStop(1, colours.getRandomColour());
+    // ctx.fillStyle = gradient;
+    // // ctx.fillStyle = colours.getRandomColour();
+    // ctx.fillRect(0, 0, blockW * w, blockH * h);
+
     try { drawText(index); } catch(err) { con.log("err drawText", err); }
     ctx.restore();
   }
@@ -57,15 +65,26 @@ var text_grid = function() {
   function drawText(index) {
     var str = phrase[index];
     // var angle = 0;//Math.floor(rand.random() * 4) / 4;
-    var xo = 0.5 * block;
-    var yo = 0.5 * block;
-    var fontSize = 0.1 * size;
+    var xo = 0;
+    var yo = 0.8 * blockH;
+    var fontSize = 0.2 * size;
     // con.log(fontSize);
     var font = "Helvetica";
     // ctx.rotate(angle * Math.PI * 2);
-    ctx.translate(xo, yo);
+
+
     ctx.font = fontSize + 'px ' + font;
-    ctx.fillStyle = colours.getRandomColour();
+    // ctx.fillStyle = colours.getRandomColour();
+
+    var gradient = ctx.createLinearGradient(0, -blockH, 0, 0);
+    gradient.addColorStop(0, colours.getRandomColour());
+    gradient.addColorStop(1, colours.getRandomColour());
+    ctx.fillStyle = gradient;
+
+    var textDimensions = ctx.measureText(str).width;
+    // con.log(textDimensions, blockW);
+    xo = (blockW - textDimensions) / 2;
+    ctx.translate(xo, yo);
     ctx.fillText(str, 0, 0);
   }
 
@@ -86,7 +105,8 @@ var text_grid = function() {
     cols = settings.boxes.cur;
     rows = Math.floor(phrase.length / cols);
 
-    block = Math.ceil(1 / cols * size);
+    blockW = Math.ceil(1 / cols * size);
+    blockH = Math.ceil(blockW / widthOnHeight);
     bmp.setSize(sw, sh);
     ctx.clearRect(0, 0, sw, sh);
     colours.getRandomPalette();
@@ -108,7 +128,7 @@ var text_grid = function() {
     var x = batch % cols;
     var y = Math.floor(batch / cols);
     drawBlock(batch, x, y);
-    if (batch < total) {
+    if (batch < total - 1) {
       progress("render:progress", batch / total);
       setTimeout(function () {
         renderBatch(batch + 1);
