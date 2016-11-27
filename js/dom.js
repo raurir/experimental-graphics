@@ -94,6 +94,10 @@ var dom = (function() {
       el.setAttribute("width", w);
       el.setAttribute("height", h);
     };
+    el.clearRect = function() { /* a clear rectangle? literally nothing in vector! */ };
+    el.fillRect = function() {
+      con.warn("svg.fillRect not implemented");
+    }
     return el;
   }
 

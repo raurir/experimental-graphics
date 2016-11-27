@@ -9,6 +9,8 @@ if (isNode) {
 
 var corona_sine = function() {
 
+  var vector = false;
+
   var settings = {
     layers: {
       label: "Layers",
@@ -31,15 +33,25 @@ var corona_sine = function() {
     }
   };
 
-  var size, sw, sh;
+  var size, sw, sh, stage, ctx, inner, bmp;
 
   if (typeof window != "undefined") {
     sw = window.innerWidth;
     sh = window.innerHeight;
   }
 
-  var bmp = dom.canvas(100, 100);
-  var ctx = bmp.ctx;
+  if (vector) {
+    stage = dom.svg("svg", {width:sw, height:sh});
+    inner = dom.svg("g");
+    stage.appendChild(inner);
+    ctx = stage;
+    bmp = stage;
+  } else {
+    var bmp = dom.canvas(100, 100);
+    stage = bmp.canvas;
+    ctx = bmp.ctx;
+  }
+
   var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
   function init(options) {
@@ -73,25 +85,48 @@ var corona_sine = function() {
 
     // con.log("rotation, start, end, width, colour", rotation, start, end, width, colour);
 
-    ctx.save();
+    if (vector) {
 
-    ctx.translate(sw / 2, sh / 2);
-    ctx.rotate(rotation);
+      var curve = 1.6; // aprox hack to make a bezier like a circle
+      var d = [
+        "M", start, ",", -width,
+        " L", end, -width,
+        " C", end + width * curve, ",", -width, " ", end + width * curve, ",", width, " ", end, ",", width,
+        // gave up with arc method, wtf?
+        // " A", width, ",", width, " 0 0,0 ", width * 2, ",", width * 2,   // ctx.arc(end, 0, width, -Math.PI / 2, Math.PI / 2, false); // draw cap
+        " L", end, ",", width,
+        " L", start, ",", width,
+        " C", start - width * curve, ",", width, " ", start - width * curve, ",", -width, " ", start, ",", -width,
+      ].join("");
+      var path = dom.svg("path", {
+        d: d,
+        fill: colour,
+        // stroke: "red", "stroke-width": 1,
+        transform: "translate(" + [sw / 2, sh / 2] + ") rotate(" + rotation * 180 / Math.PI + ")"
+      });
+      inner.appendChild(path);
 
-    ctx.beginPath();
-    ctx.fillStyle = colour;
+    } else {
+      ctx.save();
 
-    ctx.moveTo(start, -width);
-    ctx.lineTo(end, -width);
-    ctx.arc(end, 0, width, -Math.PI / 2, Math.PI / 2, false); // draw cap
-    ctx.lineTo(end, width);
-    ctx.lineTo(start, width);
-    ctx.arc(start, 0, width, Math.PI / 2, -Math.PI / 2, false); // draw cap
+      ctx.translate(sw / 2, sh / 2);
+      ctx.rotate(rotation);
 
-    ctx.fill();
-    ctx.closePath();
+      ctx.beginPath();
+      ctx.fillStyle = colour;
 
-    ctx.restore();
+      ctx.moveTo(start, -width);
+      ctx.lineTo(end, -width);
+      ctx.arc(end, 0, width, -Math.PI / 2, Math.PI / 2, false); // draw cap
+      ctx.lineTo(end, width);
+      ctx.lineTo(start, width);
+      ctx.arc(start, 0, width, Math.PI / 2, -Math.PI / 2, false); // draw cap
+
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.restore();
+    }
   }
 
   function renderRay(frac, time, innerRadius, maxRadius, lineWidth) {
@@ -181,38 +216,20 @@ var corona_sine = function() {
           renderBatch(batch + 1);
         }, 100);
       } else {
-        progress("render:complete", bmp.canvas);
+        progress("render:complete", stage);
       }
     }
     renderBatch(0);
 
   }
 
-  // bmp.canvas.addEventListener("click", init);
-
-  // window.addEventListener("resize", );
-
-  // function resize(w, h) {
-  //   con.log("resize args", arguments);
-  //   // bmp.canvas.width = sw = window.innerWidth;
-  //   // bmp.canvas.height = sh = window.innerHeight;
-  //   // render(0);
-  //   bmp.setSize(w, h, true);
-  // }
-
-  // init();
-  // animate(0);
-
   function animate(time) {
     requestAnimationFrame(animate);
-    // if (Math.random() > 0.99 && new Date().getTime() - lastGenerate > 3000) {
-    //   init();
-    // }
     render(time);
   }
 
   var experiment = {
-    stage: bmp.canvas,
+    stage: stage,
     render: render,
     init: init,
     settings: settings,
