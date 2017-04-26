@@ -196,7 +196,7 @@ var perlin_grid = function(noise) {
 
 		camPos.x -= (camPos.x - mouse.x * 1) * 0.02;
 		camPos.y -= (camPos.y - mouse.y * 1000) * 0.05;
-		var rotY = time * camPos.x * 0.001;
+		var rotY = time * 0.001 + camPos.x;
 		camera.position.set(Math.sin(rotY) * 1200, camPos.y, Math.cos(rotY) * 1200);
 
 		camera.lookAt( scene.position );
