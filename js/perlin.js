@@ -1,7 +1,7 @@
 /*
 can't remember where this simplex / perlin noise algorithm came from...
 ported a few years ago for a js1k compo, the idea never worked.
-but the noise did. thanks to "anonymous soldier" who make the original!
+but the noise did. thanks to "anonymous soldier" who made the original!
 */
 
 var perlin = function() {

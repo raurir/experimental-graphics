@@ -22,14 +22,15 @@ require.config({
 	baseUrl: "js",
 	urlArgs: "bust=" + (new Date()).getTime(),
 	paths: {
+		"box": "games/box",
+		"creature": "creature_creator/creature",
+		"noise": "../lib/josephg/noisejs",
 		"THREE": "../lib/three/three.min",
 		"TweenMax": "../lib/greensock/TweenMax.min",
-		"creature": "creature_creator/creature",
-		"box": "games/box"
 	},
 });
 
-console.log("v1.1");
+console.log("v1.2");
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
 	console.log("ready");

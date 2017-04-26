@@ -45,6 +45,7 @@ function exps() {
       ["oscillate_curtain"],
       ["pattern_check", "css/pattern_check"],
       ["pattern_circles"],
+      ["perlin_grid", "THREE"],
       ["perlin_leaves"],
       ["perlin_noise"],
       ["polyhedra","3d"], // 3d is not moduled!
