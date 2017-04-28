@@ -1,3 +1,39 @@
+
+var vertexShader = `varying vec2 vUv;
+void main()
+{
+  vUv = uv;
+  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+  gl_Position = projectionMatrix * mvPosition;
+}`;
+
+var fragmentShader = `uniform float r;
+uniform float g;
+uniform float b;
+uniform float distanceZ;
+uniform float distanceX;
+uniform float pulse;
+uniform float speed;
+varying vec2 vUv;
+float checkerRows = 22.0;
+float checkerCols = 28.0;
+void main( void ) {
+  vec2 position = abs(-1.0 + 2.0 * vUv);
+  float edging = abs((pow(position.y, 5.0) + pow(position.x, 5.0)) / 2.0);
+  float perc = distanceX * distanceZ * edging;
+  vec2 checkPosition = vUv;
+  float checkerX = ceil(mod(checkPosition.x, 1.0 / checkerCols) - 1.0 / checkerCols / 2.0);
+  float checkerY = ceil(mod(checkPosition.y, 1.0 / checkerRows) - 1.0 / checkerRows / 2.0);
+  float checker = ceil(checkerX * checkerY);
+  float r = checker;
+  float g = 0.0;
+  float b = checker;
+  float red = r * perc + pulse;
+  float green = g * perc + pulse;
+  float blue = b * perc + pulse;
+  gl_FragColor = vec4(red, green, blue, 1.0);
+}`;
+
 var perlin_grid = function(noise) {
 
 	var stage = document.createElement("div");
@@ -19,42 +55,44 @@ var perlin_grid = function(noise) {
 	var gridBelow = [];
 	var seed = Math.random();
 
+	function num(min, max) { return Math.random() * (max - min) + min; }
+
  	function cube(props) {
 
  		// too late at night to start shader code
 
-		// var colours = {
-		// 	slow: {
-		// 		r : num(0, 0.2),
-		// 		g : num(0.5, 0.9),
-		// 		b : num(0.3, 0.7) 
-		// 	},
-		// 	fast: {
-		// 		r: num(0.9, 1.0),
-		// 		g: num(0.1, 0.7),
-		// 		b: num(0.2, 0.5)
-		// 	}
-		// }
+		var colours = {
+			slow: {
+				r : num(0, 0.2),
+				g : num(0.5, 0.9),
+				b : num(0.3, 0.7)
+			},
+			fast: {
+				r: 0,
+				g: 0,
+				b: 1
+			}
+		}
 
-		// var uniforms = {
-		// 	r: { type: "f", value: colours.slow.r},
-		// 	g: { type: "f", value: colours.slow.g},
-		// 	b: { type: "f", value: colours.slow.b},
-		// 	distanceX: { type: "f", value: 1.0},
-		// 	distanceZ: { type: "f", value: 1.0},
-		// 	pulse: { type: "f", value: 0},
-		// 	speed: { type: "f", value: speed},
-		// };
+		var uniforms = {
+			r: { type: "f", value: colours.fast.r},
+			g: { type: "f", value: colours.fast.g},
+			b: { type: "f", value: colours.fast.b},
+			distanceX: { type: "f", value: 1.0},
+			distanceZ: { type: "f", value: 1.0},
+			pulse: { type: "f", value: 0},
+			speed: { type: "f", value: speed},
+		};
 
-		// var material = new THREE.ShaderMaterial( {
-		// 	uniforms: uniforms,
-		// 	vertexShader: vertexShader,
-		// 	fragmentShader: fragmentShader
-		// });
-		const material = new THREE.MeshPhongMaterial({
-			color: props.colour,
-			emissive: 0x803000,
+		var material = new THREE.ShaderMaterial( {
+			uniforms: uniforms,
+			vertexShader: vertexShader,
+			fragmentShader: fragmentShader
 		});
+		// const material = new THREE.MeshPhongMaterial({
+		// 	color: props.colour,
+		// 	emissive: 0x803000,
+		// });
 
 		var geometry = new THREE.BoxGeometry(props.width, props.height, props.depth);
 		var object = new THREE.Mesh(geometry, material);
@@ -94,10 +132,10 @@ var perlin_grid = function(noise) {
 			colour
 		}
 		var horizontalEdgeF = cube(horizProps);
-		horizontalEdgeF.position.set(0, size.height - edgeSize, -distance)
+		horizontalEdgeF.position.set(0, size.height - edgeSize * 0, -distance)
 		holder.add(horizontalEdgeF);
 		var horizontalEdgeB = cube(horizProps);
-		horizontalEdgeB.position.set(0, size.height - edgeSize, distance)
+		horizontalEdgeB.position.set(0, size.height - edgeSize * 0, distance)
 		holder.add(horizontalEdgeB);
 
 		return holder;
@@ -120,7 +158,7 @@ var perlin_grid = function(noise) {
 		light.position.set( -1, 0, 0 ).normalize();
 		scene.add( light );
 
-		renderer = new THREE.WebGLRenderer();
+		renderer = new THREE.WebGLRenderer({antialias: true});
 		// renderer.sortObjects = false;
 		renderer.setSize( sw, sh );
 
@@ -178,25 +216,38 @@ var perlin_grid = function(noise) {
 
 		for (var y = 0; y < gridUnits * 2; y++) { // using double high grid, first half is top, 2nd half is bottom
 			for (var x = 0; x < gridUnits; x++) {
-			
+
 				var value = (noise.perlin3(x / gridUnits, y / gridUnits, seed) + 1) / 2;
 				value = value * value * value * value; // power the fuck
 
 				var gridIndex = (x + y * gridUnits);
 				var scale = 1 + value * 50;
 
+				var holder;
 				if (y < gridUnits) {
-					gridAbove[gridIndex].position.y = scale * size.height / 2;
+					holder = gridAbove[gridIndex];
+					holder.position.y = scale * size.height / 2;
 				} else {
-					gridBelow[gridIndex - gridUnits * gridUnits].position.y = -scale * size.height / 2;
+					holder = gridBelow[gridIndex - gridUnits * gridUnits]
+					holder.position.y = -scale * size.height / 2;
 				}
+
+				// con.log("holder", holder)
+				for (var m = 0; m < holder.children.length; m++) {
+					var mesh = holder.children[m];
+					if (Math.random() > 0.99) {
+						mesh.material.uniforms.pulse.value = 1;
+					}
+					mesh.material.uniforms.pulse.value -= mesh.material.uniforms.pulse.value * 0.1 / (1 + 1);
+				}
+
 			}
 		}
 		seed += 0.01;
 
 		camPos.x -= (camPos.x - mouse.x * 1) * 0.02;
 		camPos.y -= (camPos.y - mouse.y * 1000) * 0.05;
-		var rotY = time * 0.001 + camPos.x;
+		var rotY = 0;//time * 0.001 + camPos.x;
 		camera.position.set(Math.sin(rotY) * 1200, camPos.y, Math.cos(rotY) * 1200);
 
 		camera.lookAt( scene.position );
