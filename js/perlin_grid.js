@@ -13,10 +13,8 @@ uniform float g;
 uniform float b;
 uniform float distance;
 uniform float pulse;
-uniform float speed;
 uniform float rows;
 uniform float cols;
-uniform float depth;
 varying vec2 vUv;
 float checkerRows = 1.5;
 float checkerCols = 2.0;
@@ -61,7 +59,6 @@ var perlin_grid = function(noise) {
 	var camPos = {x: 0, y: 0, z: 10};
 	var sw = window.innerWidth, sh = window.innerHeight;
 
-	var speed = 4;
 	var size = {
 		width: 300,
 		height: 100,
@@ -92,7 +89,6 @@ var perlin_grid = function(noise) {
 			// distanceX: { type: "f", value: 1.0},
 			distance: { type: "f", value: distance},
 			pulse: { type: "f", value: 0},
-			// speed: { type: "f", value: speed},
 			rows: { type: "f", value: rows},
 			cols: { type: "f", value: cols},
 		};
@@ -320,17 +316,17 @@ var perlin_grid = function(noise) {
 				}
 
 				// con.log("holder", holder)
-				for (var m = 0; m < holder.children.length; m++) {
-					var mesh = holder.children[m];
-					for (var n = 0; n < mesh.material.materials.length; n++) {
-						var material = mesh.material.materials[n];
-						if (Math.random() > 0.99) {
-							material.uniforms.pulse.value = 1;
-						}
-						material.uniforms.pulse.value -= material.uniforms.pulse.value * 0.1 / (1 + 1);
+				// for (var m = 0; m < holder.children.length; m++) {
+				// 	var mesh = holder.children[m];
+				// 	for (var n = 0; n < mesh.material.materials.length; n++) {
+				// 		var material = mesh.material.materials[n];
+				// 		if (Math.random() > 0.99) {
+				// 			material.uniforms.pulse.value = 1;
+				// 		}
+				// 		material.uniforms.pulse.value -= material.uniforms.pulse.value * 0.1 / (1 + 1);
 
-					}
-				}
+				// 	}
+				// }
 
 			}
 		}
@@ -354,8 +350,9 @@ var perlin_grid = function(noise) {
 		requestAnimationFrame( animate );
 		if (Math.random() > 0.99) {
 			var holder = Math.random() > 0.5 ? holderAbove : holderBelow;
-			TweenMax.to(holder.rotation, 0.5, {
-				y: Math.PI / 2 * Math.round(num(-2, 2))
+			TweenMax.to(holder.rotation, 0.75, {
+				y: Math.PI / 2 * Math.round(num(-2, 2)),
+				eade: Quad.easeInOut
 			})
 		}
 		render(time);
