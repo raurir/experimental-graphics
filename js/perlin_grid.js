@@ -211,6 +211,7 @@ var perlin_grid = function(noise) {
 
 
 	function init() {
+		return;
 
 		scene = new THREE.Scene();
 
@@ -366,3 +367,183 @@ var perlin_grid = function(noise) {
 };
 
 define("perlin_grid", ["noise"], perlin_grid);
+
+
+
+
+
+
+
+
+
+
+// hack of https://github.com/hughsk/web-audio-analyser
+
+var AudioContext = window.AudioContext || window.webkitAudioContext
+
+// module.exports = WebAudioAnalyser
+
+var fftSize = 128
+
+function WebAudioAnalyser(audio, ctx, opts) {
+  if (!(this instanceof WebAudioAnalyser)) return new WebAudioAnalyser(audio, ctx, opts)
+  if (!(ctx instanceof AudioContext)) (opts = ctx), (ctx = null)
+
+  opts = opts || {}
+  this.ctx = ctx = ctx || new AudioContext
+
+  if (!(audio instanceof AudioNode)) {
+	audio = (audio instanceof Audio || audio instanceof HTMLAudioElement)
+	  ? ctx.createMediaElementSource(audio)
+	  : ctx.createMediaStreamSource(audio)
+  }
+
+  this.analyser = ctx.createAnalyser()
+
+  this.analyser.fftSize = fftSize
+
+  this.stereo   = !!opts.stereo
+  this.audible  = opts.audible !== false
+  this.wavedata = null
+  this.freqdata = null
+  this.splitter = null
+  this.merger   = null
+  this.source   = audio
+
+  if (!this.stereo) {
+	this.output = this.source
+	this.source.connect(this.analyser)
+	if (this.audible)
+	  this.analyser.connect(ctx.destination)
+  } else {
+	this.analyser = [this.analyser]
+	this.analyser.push(ctx.createAnalyser())
+
+	this.splitter = ctx.createChannelSplitter(2)
+	this.merger   = ctx.createChannelMerger(2)
+	this.output   = this.merger
+
+	this.source.connect(this.splitter)
+
+	for (var i = 0; i < 2; i++) {
+	  this.splitter.connect(this.analyser[i], i, 0)
+	  this.analyser[i].connect(this.merger, 0, i)
+	}
+
+	if (this.audible)
+	  this.merger.connect(ctx.destination)
+  }
+}
+
+WebAudioAnalyser.prototype.waveform = function(output, channel) {
+  if (!output) output = this.wavedata || (
+	this.wavedata = new Uint8Array((this.analyser[0] || this.analyser).frequencyBinCount)
+  )
+
+  var analyser = this.stereo
+	? this.analyser[channel || 0]
+	: this.analyser
+
+  analyser.getByteTimeDomainData(output)
+
+  return output
+}
+
+WebAudioAnalyser.prototype.frequencies = function(output, channel) {
+  if (!output) output = this.freqdata || (
+	this.freqdata = new Uint8Array((this.analyser[0] || this.analyser).frequencyBinCount)
+  )
+
+  var analyser = this.stereo
+	? this.analyser[channel || 0]
+	: this.analyser
+
+  analyser.getByteFrequencyData(output)
+
+  return output
+}
+
+analyse = WebAudioAnalyser
+
+var analyser;
+var bars = new Array(fftSize / 2)
+var lastBars = new Array(fftSize / 2)
+var d = document.createElement("div");
+document.body.appendChild(d);
+function createFreqBar(index) { 
+	var div = document.createElement("div");
+	div.style.width = "100%"
+	div.style.height = "100px"
+	div.style.position = "absolute"
+	div.style.top = index * 100 + "px";
+	document.body.appendChild(div);
+	return div;
+}
+var low = createFreqBar(0);
+var high = createFreqBar(1);
+
+
+
+var audio  = new Audio
+audio.crossOrigin = 'Anonymous'
+audio.src = 'tribal.mp3'
+audio.loop = true
+audio.addEventListener('canplay', function() {
+	console.log('playing!')
+	analyser = analyse(audio, { audible: true, stereo: false, fftSize: 16 })
+
+		// var bufferLength = analyser.frequencyBinCount;
+
+	audio.play()
+	audio.currentTime = 50
+	render()
+})
+audio.addEventListener('error', function(e) {
+	  switch (e.target.error.code) {
+	 case e.target.error.MEDIA_ERR_ABORTED:
+	   alert('You aborted the video playback.');
+	   break;
+	 case e.target.error.MEDIA_ERR_NETWORK:
+	   alert('A network error caused the audio download to fail.');
+	   break;
+	 case e.target.error.MEDIA_ERR_DECODE:
+	   alert('The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.');
+	   break;
+	 case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+	   alert('The video audio not be loaded, either because the server or network failed or because the format is not supported.');
+	   break;
+	 default:
+	   alert('An unknown error occurred.');
+	   break;
+   }
+});
+
+
+
+function render() {
+  if (analyser) {
+	requestAnimationFrame(render)
+	var waveform = analyser.waveform()
+	var size = waveform.length
+	var frequencies = analyser.frequencies()
+	// con.log(size, frequencies.length)
+
+	low.style.background = Math.floor(frequencies[0] / 10) > Math.floor(lastBars[0] / 10) ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.5)"
+	high.style.background = Math.floor(frequencies[16] / 10) > Math.floor(lastBars[16] / 10) ? "rgba(255,255,128,0.7)" : "rgba(255,255,128,0.5)"
+
+	for (var i = 0, n = 0; i < size; i += 1, n += 3) {
+	  var freq = Math.floor(frequencies[i] / 10);
+	  bars[i] = freq;
+	  lastBars[i] = frequencies[i];
+	}
+	d.innerHTML = bars.map((freq) => {
+		var f = 0, bar = "";
+		while (f++ < freq) {
+			bar += "#";
+		}
+		return bar;
+	}).join("<br>");
+  }
+}
+
+
