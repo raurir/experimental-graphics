@@ -466,8 +466,7 @@ WebAudioAnalyser.prototype.frequencies = function(output, channel) {
 analyse = WebAudioAnalyser
 
 var analyser;
-var bars = new Array(fftSize / 2)
-var lastBars = new Array(fftSize / 2)
+var lastBars = new Uint8Array(fftSize / 2)
 var d = document.createElement("div");
 document.body.appendChild(d);
 function createFreqBar(index) { 
@@ -479,14 +478,19 @@ function createFreqBar(index) {
 	document.body.appendChild(div);
 	return div;
 }
-var low = createFreqBar(0);
-var high = createFreqBar(1);
+var lastPeak = [];
+var numBands = 8;
+var bands = [];
+for (var i = 0; i < numBands; i++) {
+	bands[i] = createFreqBar(i);
+	lastPeak[i] = 0;
+}
 
 
 
 var audio  = new Audio
 audio.crossOrigin = 'Anonymous'
-audio.src = 'tribal.mp3'
+audio.src = 'exebeche.mp3';//'tribal.mp3'
 audio.loop = true
 audio.addEventListener('canplay', function() {
 	console.log('playing!')
@@ -495,8 +499,8 @@ audio.addEventListener('canplay', function() {
 		// var bufferLength = analyser.frequencyBinCount;
 
 	audio.play()
-	audio.currentTime = 50
-	render()
+	audio.currentTime = 150
+	render(0)
 })
 audio.addEventListener('error', function(e) {
 	  switch (e.target.error.code) {
@@ -519,30 +523,58 @@ audio.addEventListener('error', function(e) {
 });
 
 
-
-function render() {
-  if (analyser) {
-	requestAnimationFrame(render)
-	var waveform = analyser.waveform()
-	var size = waveform.length
-	var frequencies = analyser.frequencies()
-	// con.log(size, frequencies.length)
-
-	low.style.background = Math.floor(frequencies[0] / 10) > Math.floor(lastBars[0] / 10) ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.5)"
-	high.style.background = Math.floor(frequencies[16] / 10) > Math.floor(lastBars[16] / 10) ? "rgba(255,255,128,0.7)" : "rgba(255,255,128,0.5)"
-
-	for (var i = 0, n = 0; i < size; i += 1, n += 3) {
-	  var freq = Math.floor(frequencies[i] / 10);
-	  bars[i] = freq;
-	  lastBars[i] = frequencies[i];
+function getBand(frequencies, band) {
+	var total = 0;
+	var bandWidth = fftSize / 2 / numBands;
+	var startBand = band * bandWidth;
+	var endBand = band * bandWidth + bandWidth;
+	for (var i = startBand; i < endBand; i++) {
+		total += frequencies[i];
+		// con.log("frequencies[i]", i, frequencies[i])
 	}
-	d.innerHTML = bars.map((freq) => {
+	total /= bandWidth;
+	return total;//Math.floor(frequencies[band] / 10);
+}
+
+
+function render(time) {
+  if (analyser) {
+	// var waveform = analyser.waveform()
+	var frequencies = analyser.frequencies()
+	var size = frequencies.length
+
+	//  	if (time < 4000) 
+	requestAnimationFrame(render)
+	// else
+	// 	con.log("fail", frequencies)
+	// // con.log(size, frequencies.length)
+
+	for (var i = 0; i < numBands; i++) {
+		var now = getBand(frequencies, i);
+		var last = getBand(lastBars, i);
+		var peak = now > last && time - lastPeak[i] > 200;
+		bands[i].style.background = peak ? 
+			"rgba(255,255,255,0.7)" : 
+			"rgba(255,255,255,0.5)";
+		bands[i].style.width = now;
+		if (peak) {
+			lastPeak[i] = time;
+		}
+		// con.log('now, last', now, last)
+	}
+
+	for (var i = 0; i < size; i++) {
+		lastBars[i] = frequencies[i];
+	}
+	var b2 = []
+	frequencies.forEach((freq) => {
 		var f = 0, bar = "";
-		while (f++ < freq) {
+		while (f++ < freq / 32) {
 			bar += "#";
 		}
-		return bar;
-	}).join("<br>");
+		b2.push(bar);
+	});
+	d.innerHTML = b2.join("<br>");
   }
 }
 
