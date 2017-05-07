@@ -219,6 +219,7 @@ var perlin_grid = function(noise) {
 
 
 	function init() {
+		return;
 
 		scene = new THREE.Scene();
 
