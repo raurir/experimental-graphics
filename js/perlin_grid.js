@@ -34,6 +34,14 @@ void main( void ) {
   checkerY = abs(checkerY - 0.5) * 2.0;
   checkerY = pow(checkerY, 3.0);
 
+  float checkerMod = 0.0;
+  if (rows > 1.0 && floor(checkPosition.x * rows) == checkerMod) {
+    perc = 2.0;
+  }
+  if (cols > 1.0 && floor(checkPosition.y * cols) == checkerMod) {
+    perc = 2.0;
+  }
+
   // float checker = (checkerX * checkerY) * 2.0;
   float checker = (checkerX + checkerY) * 0.5;
   float r1 = r * checker + 0.1;
