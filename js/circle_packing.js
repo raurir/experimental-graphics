@@ -23,8 +23,8 @@ var circle_packing = function() {
 		bmp.ctx.stroke();
 	}
 
-	// var output = dom.element("div");
-	// document.body.appendChild(output);
+	var output = dom.element("div");
+	document.body.appendChild(output);
 
 	function init(options) {
 
@@ -42,9 +42,10 @@ var circle_packing = function() {
 
 		function attemptNextCircle(parent, attempt) {
 			attempt++;
+			parent.attempts++;
 			// con.log("attemptNextCircle", attempt);
-			// output.innerHTML = [circles, attempt, threads, iterations];
-			if (attempt < 125000 && parent.r > 0.1) {
+			output.innerHTML = [circles, attempt, threads, iterations];
+			if (attempt < 125000 && parent.r > 0.01) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
 				}, 1);
@@ -53,9 +54,21 @@ var circle_packing = function() {
 
 
 		function drawCircle(parent, attempt, options) {
-
 			threads++;
 			iterations++;
+
+			if (parent) {
+				if (parent.children.length > parent.childrenMax) {
+					threads--;
+					// con.log("bailing too may children");
+					return;
+				}
+				if (parent.attempts > 5000) {
+					threads--;
+					con.log("bailing too may attempts");
+					return;
+				}
+			}
 
 			var gap = 0.01;
 
@@ -75,7 +88,8 @@ var circle_packing = function() {
 				var angleIncrement = 0.01;
 
 				// start filling in the rest by drawing circles in a sweeping fashion
-				var thresh = true;//iterations > 5;
+				var thresh = false;//true;//iterations > 5;
+				// var thresh = parent.children.length > 10;
 				if (thresh) {
 					// con.log("ok");
 					parent.incrementor.distance += rand.random() * 0.04;
@@ -99,19 +113,22 @@ var circle_packing = function() {
 				dx = x - cx;
 				dy = y - cy;
 				d = Math.sqrt(dx * dx + dy * dy);
+				maxRadius = parent.r - distance - gap;// < parent.2 / 2
 				// maxRadius = Math.pow(0.6 - d, 3) * 4;
 				// maxRadius = (0.7 - d) * 0.2;
 				// maxRadius = (d + 0.1) * 0.2;
 				// maxRadius = 0.07;
 				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
-				maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
-				if (maxRadius > 1 ) con.log(maxRadius);
+				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
+				// if (maxRadius > 1 ) con.log(maxRadius);
 
 				// r = rand.random() * maxRadius * (parent.r - distance - gap);
-				// r = rand.random() * maxRadius * (parent.r - distance - gap);
+				r = rand.random() * maxRadius * 0.4;
 				// r = parent.r - distance - gap;
 				// r = maxRadius;
-				r = 0.005;
+				// r = 0.005;
+				// r = 0.05;
+
 
 				if (options) {
 					if (options.r) { con.log("overriding r"); r = options.r; }
@@ -120,6 +137,7 @@ var circle_packing = function() {
 				}
 
 				if (r < 0.004) {
+					// con.log("less thatn 0.004")
 					threads--;
 					attemptNextCircle(parent, attempt);
 					return;
@@ -139,6 +157,7 @@ var circle_packing = function() {
 						// ok = false;
 						r = d - other.r - gap;
 						if (r < 0.002) {
+							// con.log("less thatn 0.002")
 							threads--;
 							attemptNextCircle(parent, attempt);
 							return;
@@ -151,22 +170,25 @@ var circle_packing = function() {
 					return;
 				} else {
 					// colour = depth % 2 == 0 ? "rgba(0, 0, 255, 0.5)" : "rgba(0, 255, 0, 0.5)";
-					// colour = depth % 2 == 0 ? "black" : "white";
-					colour = colours.getNextColour();
+					colour = depth % 2 == 0 ? "black" : "white";
+					// colour = colours.getNextColour();x
 				}
 
 			} else {
 				x = cx;//rand.random();
 				y = cy;//rand.random();
 
-				r = 0.45;//rand.random() / 2;
+				r = 0.5;//0.45;//rand.random() / 2;
 				colour = "rgba(0, 0, 0, 0)";
 				depth = 0;
 			}
 
 
 			if (options) {
+				// con.log("options?")
 				if (options.colour) { con.log("overriding colour", colour); colour = options.colour; }
+			} else {
+				// con.log("noptions?")
 			}
 
 
@@ -181,16 +203,19 @@ var circle_packing = function() {
 			// con.log("iterations", iterations, x, y, r, bmp.ctx.fillStyle, depth, depth % 2);
 
 			var circle = {
+				attempts: 0,
 				depth: depth,
 				x: x,
 				y: y,
 				r: r,
 				children: [],
+				childrenMax: Math.floor(r * r * 500),
 				incrementor: {
 					angle: 0,
 					distance: 0
 				}
 			}
+			// con.log(circle.depth);
 
 			circles++;
 			if (parent && parent.children) {
@@ -198,22 +223,23 @@ var circle_packing = function() {
 			}
 
 			// if (iterations < 4) {//500) {
-			if (depth < 2) {
-				var num = 100;//500;//rand.random() * 6;
+			if (depth < 5) {
+				var num = 500;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
 					attemptNextCircle(circle, 0);
 				}
 			}
 
 
-			if (parent) {
-				attemptNextCircle(parent, attempt);
-			}
+			// if (parent) {
+			// 	attemptNextCircle(parent, attempt);
+			// }
 			threads--;
 			return circle;
 		}
 
-		var parent = drawCircle(null, 0);//, {colour: 'red'});
+		var container = drawCircle(null, 0);//, {colour: '#111'});
+		window.container = container;
 		// var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
 		// var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
 
