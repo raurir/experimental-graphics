@@ -39,6 +39,21 @@ var circle_packing = function() {
 		var iterations = 0;
 		var circles = 0;
 		var threads = 0;
+		var gap = rand.getNumber(0.0001, 0.05);
+		var minRadius = 0.002;//rand.getNumber(0.001, 0.01);
+		var maxRadiusMod = rand.getNumber(0.01, 0.1);
+		var maxDepth = rand.getInteger(1, 10);
+
+
+		var worker = new Worker('js/circle_packing_worker.js');
+
+		worker.addEventListener('message', function(e) {
+		  console.log('Worker said: ', e.data);
+		}, false);
+
+		worker.postMessage('Hello World');
+
+
 
 		function attemptNextCircle(parent, attempt) {
 			attempt++;
@@ -48,7 +63,7 @@ var circle_packing = function() {
 			if (attempt < 125000 && parent.r > 0.01) {
 				setTimeout(function() {
 					drawCircle(parent, attempt);
-				}, 1);
+				}, iterations % 1000 ? 1 : 2000);
 			}
 		}
 
@@ -63,14 +78,12 @@ var circle_packing = function() {
 					// con.log("bailing too may children");
 					return;
 				}
-				if (parent.attempts > 5000) {
+				if (parent.attempts > 500000) {
 					threads--;
 					con.log("bailing too may attempts");
 					return;
 				}
 			}
-
-			var gap = 0.01;
 
 			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
 			if (parent) {
@@ -88,8 +101,8 @@ var circle_packing = function() {
 				var angleIncrement = 0.01;
 
 				// start filling in the rest by drawing circles in a sweeping fashion
-				var thresh = false;//true;//iterations > 5;
-				// var thresh = parent.children.length > 10;
+				// var thresh = false;//true;//iterations > 5;
+				var thresh = parent.children.length > parent.childrenMax / 2;
 				if (thresh) {
 					// con.log("ok");
 					parent.incrementor.distance += rand.random() * 0.04;
@@ -123,7 +136,7 @@ var circle_packing = function() {
 				// if (maxRadius > 1 ) con.log(maxRadius);
 
 				// r = rand.random() * maxRadius * (parent.r - distance - gap);
-				r = rand.random() * maxRadius * 0.4;
+				r = rand.random() * maxRadius;// * maxRadiusMod;
 				// r = parent.r - distance - gap;
 				// r = maxRadius;
 				// r = 0.005;
@@ -136,7 +149,7 @@ var circle_packing = function() {
 					if (options.y) { con.log("overriding y"); y = options.y; }
 				}
 
-				if (r < 0.004) {
+				if (r < minRadius) {
 					// con.log("less thatn 0.004")
 					threads--;
 					attemptNextCircle(parent, attempt);
@@ -154,9 +167,9 @@ var circle_packing = function() {
 					var dR = r + other.r + gap; // actual distance
 						// drawLine({x: other.x * sw, y: other.y * sw}, {x:x*sw, y:y*sw}, "red", 2);
 					if (dR > d) {
-						// ok = false;
+						ok = false;
 						r = d - other.r - gap;
-						if (r < 0.002) {
+						if (r < minRadius) {
 							// con.log("less thatn 0.002")
 							threads--;
 							attemptNextCircle(parent, attempt);
@@ -170,8 +183,8 @@ var circle_packing = function() {
 					return;
 				} else {
 					// colour = depth % 2 == 0 ? "rgba(0, 0, 255, 0.5)" : "rgba(0, 255, 0, 0.5)";
-					colour = depth % 2 == 0 ? "black" : "white";
-					// colour = colours.getNextColour();x
+					// colour = depth % 2 == 0 ? "black" : "white";
+					colour = colours.getNextColour();
 				}
 
 			} else {
@@ -209,13 +222,13 @@ var circle_packing = function() {
 				y: y,
 				r: r,
 				children: [],
-				childrenMax: Math.floor(r * r * 500),
+				childrenMax: Math.ceil(Math.pow((r * 20), 2) * 100),
 				incrementor: {
 					angle: 0,
 					distance: 0
 				}
 			}
-			// con.log(circle.depth);
+			// con.log(r, circle.childrenMax);
 
 			circles++;
 			if (parent && parent.children) {
@@ -223,8 +236,8 @@ var circle_packing = function() {
 			}
 
 			// if (iterations < 4) {//500) {
-			if (depth < 5) {
-				var num = 500;//rand.random() * 6;
+			if (depth < maxDepth) {
+				var num = 5000;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
 					attemptNextCircle(circle, 0);
 				}
@@ -238,7 +251,7 @@ var circle_packing = function() {
 			return circle;
 		}
 
-		var container = drawCircle(null, 0);//, {colour: '#111'});
+		var container = drawCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
 		window.container = container;
 		// var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
 		// var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
