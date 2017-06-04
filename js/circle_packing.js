@@ -3,7 +3,7 @@ var isNode = (typeof module !== 'undefined');
 var circle_packing = function() {
 
 	var sw, sh;
-	var cx = 0.5, cy = 0.5;
+	
 
 	var bmp = dom.canvas(1, 1);
 
@@ -14,6 +14,15 @@ var circle_packing = function() {
 	}
 
 
+	function drawCircle(params) {
+		var x = params.x, y = params.y, r = params.r,
+			colour = params.colour == "COLOUR_NEXT" ? colours.getNextColour() : params.colour;
+		bmp.ctx.beginPath();
+		bmp.ctx.fillStyle = colour;
+		bmp.ctx.drawCircle(x * sw, y * sh, r * sw);
+		bmp.ctx.closePath();
+		bmp.ctx.fill();
+	}
 	function drawLine(p0, p1, colour, lineWidth) {
 		bmp.ctx.strokeStyle = colour;
 		bmp.ctx.lineWidth = lineWidth;
@@ -44,215 +53,66 @@ var circle_packing = function() {
 		var maxRadiusMod = rand.getNumber(0.01, 0.1);
 		var maxDepth = rand.getInteger(1, 10);
 
-
 		var worker = new Worker('js/circle_packing_worker.js');
 
 		worker.addEventListener('message', function(e) {
-		  console.log('Worker said: ', e.data);
+			// con.log('Worker status:', e.data.status);
+			switch (e.data.status) {
+				case "success" : 
+					// con.log('Worker success:', e.data.circle);
+					circles ++;
+					var parent = circles === 1
+						? e.data.circle // if it's the first circle, there is no parent!
+						: e.data.parent;
+					drawCircle(e.data.circle);
+					attemptNextCircle(parent, e.data.attempt);
+					break;
+				case "fail" :
+					// con.log('Worker fail...');
+					attemptNextCircle(e.data.parent, e.data.attempt);
+					break;
+			}
 		}, false);
-
-		worker.postMessage('Hello World');
-
 
 
 		function attemptNextCircle(parent, attempt) {
 			attempt++;
-			parent.attempts++;
+			parent.attempts = 0;
 			// con.log("attemptNextCircle", attempt);
 			output.innerHTML = [circles, attempt, threads, iterations];
-			if (attempt < 125000 && parent.r > 0.01) {
+			if (attempt < 10000) { // && parent.r > 0.01) {
 				setTimeout(function() {
-					drawCircle(parent, attempt);
-				}, iterations % 1000 ? 1 : 2000);
+					requestNextCircle(parent, attempt);
+				}, 1);//iterations % 1000 ? 1 : 20);
 			}
 		}
 
-
-		function drawCircle(parent, attempt, options) {
-			threads++;
-			iterations++;
-
-			if (parent) {
-				if (parent.children.length > parent.childrenMax) {
-					threads--;
-					// con.log("bailing too may children");
-					return;
+		function requestNextCircle(parent, attempt, options) {
+			worker.postMessage({
+				attempt: attempt,
+				options: options,
+				parent: parent,
+				type: "requestCircle",
+				constants: { // madness ensues...
+					gap: gap,
+					maxDepth: maxDepth,
+					maxRadiusMod: maxRadiusMod,
+					minRadius: minRadius
+				},
+				randoms: { // this is fucking. crazy.
+					angle: rand.random(),
+					distance: rand.random(),
+					incrementorDistance: rand.random(),
+					incrementorAngle: rand.getNumber(-1, 1),
+					radius: rand.random(),
 				}
-				if (parent.attempts > 500000) {
-					threads--;
-					con.log("bailing too may attempts");
-					return;
-				}
-			}
-
-			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
-			if (parent) {
-				angle = rand.random() * Math.PI * 2;
-				// angle = iterations * Math.PI * 2;
-
-				// distance from centre of parent
-				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
-
-				distance = rand.random() * parent.r;
-				// banding
-				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
-
-
-				var angleIncrement = 0.01;
-
-				// start filling in the rest by drawing circles in a sweeping fashion
-				// var thresh = false;//true;//iterations > 5;
-				var thresh = parent.children.length > parent.childrenMax / 2;
-				if (thresh) {
-					// con.log("ok");
-					parent.incrementor.distance += rand.random() * 0.04;
-					if (parent.incrementor.distance > parent.r) {
-						parent.incrementor.distance = 0;
-						parent.incrementor.angle += angleIncrement;
-					}
-					distance = parent.incrementor.distance;
-					angle = parent.incrementor.angle + rand.getInteger(-angleIncrement, angleIncrement);
-				}
-
-
-
-				x = parent.x + Math.sin(angle) * distance;
-				y = parent.y + Math.cos(angle) * distance;
-
-				if (thresh) {
-					// drawLine({x: parent.x * sw, y: parent.y * sw}, {x: x * sw, y: y * sw}, "red", 2);
-				}
-
-				dx = x - cx;
-				dy = y - cy;
-				d = Math.sqrt(dx * dx + dy * dy);
-				maxRadius = parent.r - distance - gap;// < parent.2 / 2
-				// maxRadius = Math.pow(0.6 - d, 3) * 4;
-				// maxRadius = (0.7 - d) * 0.2;
-				// maxRadius = (d + 0.1) * 0.2;
-				// maxRadius = 0.07;
-				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
-				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
-				// if (maxRadius > 1 ) con.log(maxRadius);
-
-				// r = rand.random() * maxRadius * (parent.r - distance - gap);
-				r = rand.random() * maxRadius;// * maxRadiusMod;
-				// r = parent.r - distance - gap;
-				// r = maxRadius;
-				// r = 0.005;
-				// r = 0.05;
-
-
-				if (options) {
-					if (options.r) { con.log("overriding r"); r = options.r; }
-					if (options.x) { con.log("overriding x"); x = options.x; }
-					if (options.y) { con.log("overriding y"); y = options.y; }
-				}
-
-				if (r < minRadius) {
-					// con.log("less thatn 0.004")
-					threads--;
-					attemptNextCircle(parent, attempt);
-					return;
-				}
-
-				depth = parent.depth + 1;
-
-				var ok = true;
-				for (var i = 0, il = parent.children.length; i < il && ok; i++) {
-					other = parent.children[i];
-					dx = x - other.x;
-					dy = y - other.y;
-					d = Math.sqrt(dx * dx + dy * dy); // minimum required distance between centres
-					var dR = r + other.r + gap; // actual distance
-						// drawLine({x: other.x * sw, y: other.y * sw}, {x:x*sw, y:y*sw}, "red", 2);
-					if (dR > d) {
-						ok = false;
-						r = d - other.r - gap;
-						if (r < minRadius) {
-							// con.log("less thatn 0.002")
-							threads--;
-							attemptNextCircle(parent, attempt);
-							return;
-						}
-					}
-				}
-				if (ok === false) {
-					threads--;
-					attemptNextCircle(parent, attempt);
-					return;
-				} else {
-					// colour = depth % 2 == 0 ? "rgba(0, 0, 255, 0.5)" : "rgba(0, 255, 0, 0.5)";
-					// colour = depth % 2 == 0 ? "black" : "white";
-					colour = colours.getNextColour();
-				}
-
-			} else {
-				x = cx;//rand.random();
-				y = cy;//rand.random();
-
-				r = 0.5;//0.45;//rand.random() / 2;
-				colour = "rgba(0, 0, 0, 0)";
-				depth = 0;
-			}
-
-
-			if (options) {
-				// con.log("options?")
-				if (options.colour) { con.log("overriding colour", colour); colour = options.colour; }
-			} else {
-				// con.log("noptions?")
-			}
-
-
-			bmp.ctx.beginPath();
-			bmp.ctx.fillStyle = colour;
-			bmp.ctx.drawCircle(x * sw, y * sh, r * sw);
-			bmp.ctx.closePath();
-			bmp.ctx.fill();
-
-			// con.log('drawOne', x, y, colour);
-
-			// con.log("iterations", iterations, x, y, r, bmp.ctx.fillStyle, depth, depth % 2);
-
-			var circle = {
-				attempts: 0,
-				depth: depth,
-				x: x,
-				y: y,
-				r: r,
-				children: [],
-				childrenMax: Math.ceil(Math.pow((r * 20), 2) * 100),
-				incrementor: {
-					angle: 0,
-					distance: 0
-				}
-			}
-			// con.log(r, circle.childrenMax);
-
-			circles++;
-			if (parent && parent.children) {
-				parent.children.push(circle);
-			}
-
-			// if (iterations < 4) {//500) {
-			if (depth < maxDepth) {
-				var num = 5000;//rand.random() * 6;
-				for (var i = 0; i < num; i++) {
-					attemptNextCircle(circle, 0);
-				}
-			}
-
-
-			// if (parent) {
-			// 	attemptNextCircle(parent, attempt);
-			// }
-			threads--;
-			return circle;
+			});
 		}
 
-		var container = drawCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
-		window.container = container;
+		// var container = drawCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
+		requestNextCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
+
+		// window.container = container;
 		// var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
 		// var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
 
