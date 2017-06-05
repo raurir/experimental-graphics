@@ -15,6 +15,7 @@ var circle_packing = function() {
 
 
 	function drawCircle(params) {
+		// con.log("drawCircle", params);
 		var x = params.x, y = params.y, r = params.r,
 			colour = params.colour == "COLOUR_NEXT" ? colours.getNextColour() : params.colour;
 		bmp.ctx.beginPath();
@@ -57,15 +58,18 @@ var circle_packing = function() {
 
 		worker.addEventListener('message', function(e) {
 			// con.log('Worker status:', e.data.status);
+
+			// output.innerHTML = [circles, attempt, threads, iterations];
+			output.innerHTML = [circles, e.data.successRatio];
 			switch (e.data.status) {
 				case "success" : 
 					// con.log('Worker success:', e.data.circle);
 					circles ++;
-					var parent = circles === 1
-						? e.data.circle // if it's the first circle, there is no parent!
-						: e.data.parent;
-					drawCircle(e.data.circle);
-					attemptNextCircle(parent, e.data.attempt);
+					var parent = e.data.circle || e.data.parent.circle || e.data.parent;
+					// con.log("/// parent", parent);
+					// con.log("e.data", e.data);
+					e.data.circles.forEach((c) => drawCircle(c.circle));
+					if (circles < 2000) attemptNextCircle(parent, e.data.attempt);
 					break;
 				case "fail" :
 					// con.log('Worker fail...');
@@ -76,10 +80,10 @@ var circle_packing = function() {
 
 
 		function attemptNextCircle(parent, attempt) {
+			// con.log("attemptNextCircle parent", parent);
 			attempt++;
 			parent.attempts = 0;
-			// con.log("attemptNextCircle", attempt);
-			output.innerHTML = [circles, attempt, threads, iterations];
+			// output.innerHTML = [circles, attempt, threads, iterations];
 			if (attempt < 10000) { // && parent.r > 0.01) {
 				setTimeout(function() {
 					requestNextCircle(parent, attempt);
@@ -88,24 +92,32 @@ var circle_packing = function() {
 		}
 
 		function requestNextCircle(parent, attempt, options) {
+			// need to create an array of random generators since webworker cannot access rand.
+			var randoms = [];
+			var iterations = 100, i = 0;
+			while(i++ < iterations) {
+				randoms.push({ // this is fucking. crazy.
+					angle: rand.random(),
+					distance: rand.random(),
+					incrementorDistance: rand.random(),
+					incrementorAngle: rand.getNumber(-1, 1),
+					radius: rand.random(),
+				});
+			}
+
 			worker.postMessage({
 				attempt: attempt,
-				options: options,
-				parent: parent,
-				type: "requestCircle",
 				constants: { // madness ensues...
 					gap: gap,
 					maxDepth: maxDepth,
 					maxRadiusMod: maxRadiusMod,
 					minRadius: minRadius
 				},
-				randoms: { // this is fucking. crazy.
-					angle: rand.random(),
-					distance: rand.random(),
-					incrementorDistance: rand.random(),
-					incrementorAngle: rand.getNumber(-1, 1),
-					radius: rand.random(),
-				}
+				iterations: iterations,
+				options: options,
+				parent: parent,
+				type: "requestCircle",
+				randoms: randoms,
 			});
 		}
 

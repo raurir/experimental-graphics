@@ -1,14 +1,33 @@
-var rand, colours;
 var con = console;
 var cx = 0.5, cy = 0.5;
 
 var threads = 0;
-function calcCircle(params) {
+
+function calcCircles(params) {
+	var circles = [];
+	var iterations = params.parent ? params.iterations : 1;
+	for (var i = 0; i < iterations; i++) {
+		var circle = calcCircle(i, params);
+		if (circle.status == "success") {
+			circles.push(circle);
+		}
+	}
+	// con.log("calcCircles iterations:", iterations, "result", circles.length);
+	return {
+		attempt: 0,
+		circles: circles,
+		parent: params.parent || circles[0],
+		status: circles.length ? "success" : "fail",
+		successRatio: circles.length / iterations * 100,
+	};
+}
+
+function calcCircle(index, params) {
 	// con.log("calcCircle!!!!!!")
 	var parent = params.parent,
 		attempt = params.attempt, 
 		options = params.options, 
-		randoms = params.randoms,
+		randoms = params.randoms[index],
 
 		gap = params.constants.gap,
 		maxDepth = params.constants.maxDepth,
@@ -90,9 +109,9 @@ function calcCircle(params) {
 
 
 		if (options) {
-			if (options.r) { con.log("overriding r"); r = options.r; }
-			if (options.x) { con.log("overriding x"); x = options.x; }
-			if (options.y) { con.log("overriding y"); y = options.y; }
+			if (options.r) { /* con.log("overriding r"); */ r = options.r; }
+			if (options.x) { /* con.log("overriding x"); */ x = options.x; }
+			if (options.y) { /* con.log("overriding y"); */ y = options.y; }
 		}
 
 		if (r < minRadius) {
@@ -115,7 +134,7 @@ function calcCircle(params) {
 				ok = false;
 				r = d - other.r - gap;
 				if (r < minRadius) {
-					// con.log("less thatn 0.002")
+					// con.log("less thatn 0.002", r)
 					threads--;
 					return attemptNextCircle(parent, attempt);
 				}
@@ -206,7 +225,7 @@ self.addEventListener('message', function(e) {
 	// con.log("e", e);
 	switch (e.data.type) {
 		case "requestCircle" :
-			var outcome = calcCircle(e.data);
+			var outcome = calcCircles(e.data);
 			self.postMessage(outcome);
 			break;
 	}
