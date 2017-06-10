@@ -28,6 +28,8 @@ var circle_packing = function() {
 
 	function init(options) {
 
+		console.time("init");
+
 		var size = options.size;
 		sw = size;
 		sh = size;
@@ -37,53 +39,97 @@ var circle_packing = function() {
 		bmp.ctx.clearRect(0, 0, sw, sh);
 
 		var iterations = 0;
-		var circles = 0;
-		var threads = 0;
-		var gap = rand.getNumber(0.0001, 0.05);
+		var circles = 0, circlesLast = 0, circlesSame = 0;
+		var threads = 0, threadsLast = 0, threadsSame = 0;
+		var gap = 0.00;//5;//rand.getNumber(0.0001, 0.02);
 		var minRadius = 0.002;//rand.getNumber(0.001, 0.01);
-		var maxRadiusMod = rand.getNumber(0.01, 0.1);
-		var maxDepth = rand.getInteger(1, 10);
+		var maxRadiusMod = 1;//0.05;//rand.getNumber(0.01, 0.1);
+		var maxDepth = 2;//rand.getInteger(1, 10);
 
+		con.log('maxDepth', maxDepth);
 
-		var worker = new Worker('js/circle_packing_worker.js');
+		var bailed = false;
 
-		worker.addEventListener('message', function(e) {
-		  console.log('Worker said: ', e.data);
-		}, false);
+		var progressChecker = () => {
+			if (threadsLast === threads) {
+				threadsSame++;
+			} else {
+				threadsSame = 0;
+			}
+			threadsLast = threads;
 
-		worker.postMessage('Hello World');
+			if (circlesLast === circles) {
+				circlesSame++;
+			} else {
+				circlesSame = 0;
+			}
+			circlesLast = circles;
 
-
+			if (threadsSame > 10) {
+				con.timeEnd("init");
+				con.log("bailed threads!")
+				bailed = true;
+			}
+			if (circlesSame > 300) {
+				con.timeEnd("init");
+				con.log("bailed circles!")
+				bailed = true;
+			}
+			// setTimeout(progressChecker, 50);
+		}
+		// progressChecker();
 
 		function attemptNextCircle(parent, attempt) {
+			if (bailed) return;
+			// threads++;
 			attempt++;
-			parent.attempts++;
-			// con.log("attemptNextCircle", attempt);
-			output.innerHTML = [circles, attempt, threads, iterations];
-			if (attempt < 125000 && parent.r > 0.01) {
-				setTimeout(function() {
-					drawCircle(parent, attempt);
-				}, iterations % 1000 ? 1 : 2000);
+
+			if (iterations % 5000 === 0) {
+				progressChecker();
+			}
+
+			// parent.attempts++;
+			// con.log("attemptNextCircle");
+			output.innerHTML = [circles, threads, iterations];
+			
+			try {
+				if (attempt < 1700 && parent.r > 0.005) {
+					var delay = iterations % 50 ? 0 : 20;
+					threads++;
+					if (delay) {
+						setTimeout(function() {
+							attemptCircle(parent, attempt);
+						}, delay);
+					} else {
+						attemptCircle(parent, attempt);
+					}
+				} else {
+					// con.log("too many attempt");
+				}
+			} catch (err) {
+				con.log("CALL STACK! err '" + attempt + "'");
 			}
 		}
 
 
-		function drawCircle(parent, attempt, options) {
-			threads++;
+		function attemptCircle(parent, attempt, options) {
+			// con.log("attemptCircle")
+			
+
 			iterations++;
 
-			if (parent) {
-				if (parent.children.length > parent.childrenMax) {
-					threads--;
-					// con.log("bailing too may children");
-					return;
-				}
-				if (parent.attempts > 500000) {
-					threads--;
-					con.log("bailing too may attempts");
-					return;
-				}
-			}
+			// if (parent) {
+			// 	if (parent.children.length > parent.childrenMax) {
+			// 		threads--;
+			// 		con.log("bailing too may children");
+			// 		return parent;
+			// 	}
+			// 	// if (parent.attempts > 500000) {
+			// 	// 	threads--;
+			// 	// 	con.log("bailing too may attempts");
+			// 	// 	return parent;
+			// 	// }
+			// }
 
 			var x, y, r, dx, dy, d, depth, colour, angle, distance, other;
 			if (parent) {
@@ -102,7 +148,7 @@ var circle_packing = function() {
 
 				// start filling in the rest by drawing circles in a sweeping fashion
 				// var thresh = false;//true;//iterations > 5;
-				var thresh = parent.children.length > parent.childrenMax / 2;
+				var thresh = false;//parent.children.length > parent.childrenMax / 2;
 				if (thresh) {
 					// con.log("ok");
 					parent.incrementor.distance += rand.random() * 0.04;
@@ -133,10 +179,15 @@ var circle_packing = function() {
 				// maxRadius = 0.07;
 				// maxRadius = (Math.sin((0.25 + d) * Math.PI * 2 * 2.5) + 1.5) / 80;
 				// maxRadius = (Math.sin((d) * Math.PI * 2 * 2.5) + 1.3) / 70;
-				// if (maxRadius > 1 ) con.log(maxRadius);
+				if (maxRadius < minRadius) {
+					// con.log("fail initial radius too small");
+					threads--;
+					return attemptNextCircle(parent, attempt);
+				}
+
 
 				// r = rand.random() * maxRadius * (parent.r - distance - gap);
-				r = rand.random() * maxRadius;// * maxRadiusMod;
+				r = rand.random() * maxRadius * maxRadiusMod;
 				// r = parent.r - distance - gap;
 				// r = maxRadius;
 				// r = 0.005;
@@ -144,16 +195,15 @@ var circle_packing = function() {
 
 
 				if (options) {
-					if (options.r) { con.log("overriding r"); r = options.r; }
-					if (options.x) { con.log("overriding x"); x = options.x; }
-					if (options.y) { con.log("overriding y"); y = options.y; }
+					if (options.r) { /* con.log("overriding r"); */ r = options.r; }
+					if (options.x) { /* con.log("overriding x"); */ x = options.x; }
+					if (options.y) { /* con.log("overriding y"); */ y = options.y; }
 				}
 
-				if (r < minRadius) {
-					// con.log("less thatn 0.004")
+				if (r - gap < minRadius) {
+					// con.log("fail initial radius too small");
 					threads--;
-					attemptNextCircle(parent, attempt);
-					return;
+					return attemptNextCircle(parent, attempt);
 				}
 
 				depth = parent.depth + 1;
@@ -172,19 +222,20 @@ var circle_packing = function() {
 						if (r < minRadius) {
 							// con.log("less thatn 0.002")
 							threads--;
-							attemptNextCircle(parent, attempt);
+							// attemptNextCircle(parent, attempt);
+
 							return;
 						}
 					}
 				}
 				if (ok === false) {
 					threads--;
-					attemptNextCircle(parent, attempt);
-					return;
+					// con.log("fail can't find suitable radius")
+					return attemptNextCircle(parent, attempt);
 				} else {
 					// colour = depth % 2 == 0 ? "rgba(0, 0, 255, 0.5)" : "rgba(0, 255, 0, 0.5)";
-					// colour = depth % 2 == 0 ? "black" : "white";
-					colour = colours.getNextColour();
+					colour = depth % 2 == 0 ? "black" : "white";
+					// colour = colours.getNextColour();
 				}
 
 			} else {
@@ -199,7 +250,7 @@ var circle_packing = function() {
 
 			if (options) {
 				// con.log("options?")
-				if (options.colour) { con.log("overriding colour", colour); colour = options.colour; }
+				if (options.colour) { /* con.log("overriding colour", colour); */ colour = options.colour; }
 			} else {
 				// con.log("noptions?")
 			}
@@ -222,7 +273,8 @@ var circle_packing = function() {
 				y: y,
 				r: r,
 				children: [],
-				childrenMax: Math.ceil(Math.pow((r * 20), 2) * 100),
+				// childrenMax: (5 + Math.ceil(Math.pow((r * 20), 2) * 100)) * 1,
+				childrenMax: (1 + Math.pow(r, 2) * Math.PI * 400),
 				incrementor: {
 					angle: 0,
 					distance: 0
@@ -237,24 +289,26 @@ var circle_packing = function() {
 
 			// if (iterations < 4) {//500) {
 			if (depth < maxDepth) {
-				var num = 5000;//rand.random() * 6;
+				// con.log("circle.childrenMax", circle.childrenMax)
+				var num = circle.childrenMax * 50;//rand.random() * 6;
 				for (var i = 0; i < num; i++) {
+					// threads++;
 					attemptNextCircle(circle, 0);
 				}
+				// attemptNextCircle(circle, 0);
 			}
-
 
 			// if (parent) {
 			// 	attemptNextCircle(parent, attempt);
 			// }
 			threads--;
-			return circle;
-		}
 
-		var container = drawCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
-		window.container = container;
-		// var inner = drawCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
-		// var inner2 = drawCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
+ 		}
+
+		var container = attemptCircle(null, 0, {colour: 'rgba(0,0,0,0.1)'});
+		// window.container = container;
+		// var inner = attemptCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
+		// var inner2 = attemptCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
 
 		progress("render:complete", bmp.canvas);
 	}
