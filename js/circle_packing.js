@@ -28,8 +28,10 @@ var circle_packing = function() {
 		settings: {} // or null
 	}
 
-	// var output = dom.element("div");
-	// document.body.appendChild(output);
+	var output = dom.element("div");
+	document.body.appendChild(output);
+	var threadOutput = dom.canvas(800, 300);
+	document.body.appendChild(threadOutput.canvas);
 
 	function init(options) {
 
@@ -71,9 +73,11 @@ var circle_packing = function() {
 
 		// brutal seeds: 454163889, 3575304202
 		var bailed = false;
-
+		var progressTicker = 0;
 		var progressChecker = () => {
-			// con.log("progressChecker")
+			// con.log("progressChecker", threads)
+			// output.innerHTML = [circles, iterations, threads];
+			
 			if (circlesLast === circles) {
 				circlesSame++;
 			} else {
@@ -81,13 +85,13 @@ var circle_packing = function() {
 			}
 			circlesLast = circles;
 			if (circlesSame > 3) {
-				con.log("bailed with circles:", circles);
+				con.log("bailed with circles:", circles, threads);
 				con.timeEnd("process time");
 				progress("render:complete", bmp.canvas);
 				bailed = true;
 			}
 			if (bailed == false) {
-				setTimeout(progressChecker, 100);
+				setTimeout(progressChecker, 1);
 			}
 		}
 		progressChecker();
@@ -97,13 +101,19 @@ var circle_packing = function() {
 			threads++;
 			attempt++;
 
-			// if (circles > 50) return;
+			progressTicker++;
+			threadOutput.ctx.fillRect(progressTicker / 50, 0, 1, threads / 50);
 
-			// con.log("attemptNextCircle");
-			// output.innerHTML = [circles, iterations, threads];
+			if (threads < 10) {
+				// return;
+				con.log(threads, circles);
+			}
+
+			// con.log("attemptNextCircle", progressTicker / 1000, threads / 1000);
+			
 			
 			if (attempt < 5000) {
-				var delay = iterations % 1000 ? 0 : 200;
+				var delay = iterations % 10 ? 0 : 200;
 				// return attemptCircle(parent, attempt);
 				if (delay) {
 					setTimeout(function() {
