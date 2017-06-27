@@ -32,6 +32,8 @@ function exps() {
       ["bezier_flow"],
       ["box", "maze"],
       ["circle_packing"],
+      ["circle_packing_zoom_loop"],
+      ["circle_sectors"],
       ["corona_sine"],
       ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
       ["fool", "css/fool"],
