@@ -62,7 +62,7 @@ var nested_rotating_polygon = function() {
 
 		ctx.fillStyle = depth % 2 ? BLACK : WHITE;
 		ctx.strokeStyle = ctx.fillStyle;
-		ctx.lineWidth = depth;
+		ctx.lineWidth = depth * 2;
 		ctx.beginPath();
 		ctx.strokeStyle = "0"
 		for(var i = 0; i < sides; i++) {
