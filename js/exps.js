@@ -44,6 +44,7 @@ function exps() {
       ["maze_cube", "linked_line", "THREE"],//, "https://threejs.org/examples/js/exporters/OBJExporter.js"],//  "lib/three/OBJExporter.js", "lib/three/OrbitControls.js"],
       ["meandering_polygons"],
       ["mining_branches"],
+      ["nested_rotating_polygon"],
       ["oscillate_curtain"],
       ["pattern_check", "css/pattern_check"],
       ["pattern_circles"],
