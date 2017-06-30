@@ -1,41 +1,49 @@
 var isNode = (typeof module !== 'undefined');
 
 var nested_rotating_polygon = function() {
-
+	var TAU = Math.PI * 2;
 	var bmp = dom.canvas(1,1);
 	var ctx = bmp.ctx;
-	var size;
-	var sides = 3;
-	var depthMax = 4;
+	var size, sides, depthMax;
+	var pos = 0;
+	var half = 0;
+	var BLACK = "#000", WHITE = "#fff";
 
 	function init(options) {
 		size = options.size;
 		bmp.setSize(size, size);
-
+		sides = rand.getInteger(3, 6);
+		depthMax = rand.getInteger(3, 16);
+		progress("render:complete", bmp.canvas);
+		render();
 	}
 
-	var pos = 0;
 	function render() {
-		requestAnimationFrame(render);
-		ctx.clearRect(0, 0, size, size);
+		if (pos < 2) requestAnimationFrame(render);
+		ctx.fillStyle = depthMax % 2 ? BLACK : WHITE;
+		ctx.fillRect(0, 0, size, size);
 		create({depth:0});
-		pos++;
+		pos += 0.005;
+		if (pos >= 1) {
+			pos = 0;
+			half ++;
+			half %= 2;
+		}
 	}
-	render();
 
 	function create(parent) {
+		var i;
 		var depth = parent.depth + 1;
 		var points = [];
-		geom.lerp;
 		if (parent.points) {
-			// con.log("par")
-			for(var i = 0; i < sides; i++) {
+			var progress = Ease.easeInOutQuart(pos, 0, 1, 1) + half;
+			for(i = 0; i < sides; i++) {
 				var point0 = parent.points[i];
 				var point1 = parent.points[(i + 1) % sides];
 				var p = geom.lerp(
 					{x: point0.x, y: point0.y},
 					{x: point1.x, y: point1.y},
-					pos * 0.001
+					progress / 2
 				);
 				var xp = p.x,
 					yp = p.y;
@@ -44,16 +52,18 @@ var nested_rotating_polygon = function() {
 			}
 		} else {
 			// con.log("none")
-			for(var i = 0; i < sides; i++) {
-				var angle = i / sides * Math.PI * 2 ;
+			for(i = 0; i < sides; i++) {
+				var angle = i / sides * TAU;
 				var xp = size / 2 + size / 2 * 0.8 * Math.cos(angle),
 					yp = size / 2 + size / 2 * 0.8 * Math.sin(angle);
 				points.push({x:xp, y:yp});
 			}
 		}
 
+		ctx.fillStyle = depth % 2 ? BLACK : WHITE;
+		ctx.strokeStyle = ctx.fillStyle;
+		ctx.lineWidth = depth;
 		ctx.beginPath();
-		ctx.lineWidth = 2;
 		ctx.strokeStyle = "0"
 		for(var i = 0; i < sides; i++) {
 			var xp = points[i].x, yp = points[i].y;
@@ -65,11 +75,11 @@ var nested_rotating_polygon = function() {
 		}
 		ctx.closePath();
 		ctx.stroke();
+		ctx.fill();
 		if (depth < depthMax) {
 			// con.log("ok");
 			create({depth, points});
 		}
-		progress("render:complete", bmp.canvas);
 	}
 
 	var experiment = {

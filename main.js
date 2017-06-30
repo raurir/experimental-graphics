@@ -24,6 +24,7 @@ require.config({
 	paths: {
 		"box": "games/box",
 		"creature": "creature_creator/creature",
+		"ease": "../lib/robertpenner/ease",
 		"noise": "../lib/josephg/noisejs",
 		"THREE": "../lib/three/three.min",
 		"TweenMax": "../lib/greensock/TweenMax.min",
