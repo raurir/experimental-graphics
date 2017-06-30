@@ -165,7 +165,7 @@ function exps() {
       // initRenderProgress(); // experiments_progress
       // con.log("inittted!!!!!!");
       initWindowListener();
-      currentExperiment.init({size: 700});
+      currentExperiment.init({size: 800});
       resize();
     }
 

@@ -24,9 +24,10 @@ var circle_sectors = function() {
 
 		var rings = rand.getInteger(4, 24);
 		var ringStart = rand.getInteger(0, rings - 1);
+		var sectorsStart = rand.getInteger(2, 16);
+		var sectorsPower = rand.getInteger(2, 3);
 		var padding = rand.getNumber(0, 0.01);
-		var minSector = rand.getNumber(0.02, 0.2);
-		var power = rand.getInteger(2, 3);
+		var sectorsMin = rand.getNumber(0.02, 0.2);
 		var dotty = rand.getNumber(0, 1) > 0.8;
 		var howDotty = rand.getNumber(0.1, 0.8);
 
@@ -62,9 +63,9 @@ var circle_sectors = function() {
 			var ringRadiusInner = i / rings * centre;
 			var ringRadiusOuter = (i + 1) / rings * centre;
 			var perimeter = TAU * ringRadiusInner;
-			var sectors = 8;
-			while(perimeter / sectors > minSector) {
-				sectors *= power;
+			var sectors = sectorsStart;
+			while(perimeter / sectors > sectorsMin) {
+				sectors *= sectorsPower;
 			}
 			for (var j = 0; j < sectors; j++) {
 				if (dotty && rand.getNumber(0, 1) > howDotty) continue;

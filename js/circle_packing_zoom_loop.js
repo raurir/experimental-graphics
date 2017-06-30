@@ -2,10 +2,10 @@ var isNode = (typeof module !== 'undefined');
 
 if (isNode) {
 	var con = console;
-	var rand = require('./rand.js');
 	var dom = require('./dom.js');
+	var geom = require('./geom.js');
+	var rand = require('./rand.js');
 }
-
 
 var circle_packing_zoom_loop = function() {
 
@@ -42,37 +42,42 @@ var circle_packing_zoom_loop = function() {
 	var maxTime = 10000;
 	function updateZoom(time) {
 		// if (time < maxTime) requestAnimationFrame(updateZoom);
-		// zoom.amount += 1;//0.1;
-		zoom.amount *= 1.01;
+		// zoom.amount += 0.01;
+		// zoom.amount *= 1.01;
 		// if (zoom.amount < 4) {
 		if (zoom.amount < zoom.max) {
-			requestAnimationFrame(updateZoom);
+			// requestAnimationFrame(updateZoom);
 			// setTimeout(updateZoom, 10);
 		} else {
 			// zoom.amount = 4;
 			zoom.amount = zoom.max;
-			con.log("done", zoom);
+			// con.log("done", zoom);
 		}
 		target = zoom.target
 		scale = zoom.amount
 
-		bmp.ctx.save();
 
-		zoomProgress = zoom.amount / zoom.max
-		zoomRemaining = 1 - zoomProgress;
+		var distance = Math.sqrt(Math.pow(zoom.target.x, 2) + Math.pow(zoom.target.y, 2)) * zoom.max;
+		// con.log(distance)
 		scaler = zoom.amount;
+		// zoomProgress = 1 - Math.pow(1 - zoom.amount / zoom.max, distance);
+		zoomProgress = zoom.amount / zoom.max;
+		zoomRemaining = 1 - zoomProgress;
 
-		// con.log(zoomProgress, zoomRemaining)
+		var xo = zoom.target.x / distance * zoom.amount;
 
+		// con.log(xo)
+
+		bmp.ctx.save();
 		bmp.ctx.clearRect(0, 0, size, size);
 
 		for (var i = 0, il = current.circles.length; i < il; i++) {
 			var {x,y,r} = current.circles[i];
-			x = 0.5 + (x - 0.5 * zoomRemaining - zoom.target.x * zoomProgress) * scaler;
-			y = 0.5 + (y - 0.5 * zoomRemaining - zoom.target.y * zoomProgress) * scaler;
-			// x = 0.5 + (x - 0 - zoom.target.x * 1) * scaler;
-			// y = 0.5 + (y - 0 - zoom.target.y * 1) * scaler;
-			r = r * scaler;//Math.pow(scaler, 0.8);
+			// x = 0.5 + (x - target.x) * scaler;
+			// y = 0.5 + (y - target.y) * scaler;
+			x = 0.5 + (x - 0.5) * scaler;
+			y = 0.5 + (y - 0.5) * scaler;
+			r = r * Math.pow(scaler, 1);//0.8);
 			bmp.ctx.fillStyle = i == zoom.targetIndex ? "#f00" : "#000";
 			bmp.ctx.beginPath();
 			bmp.ctx.drawCircle(x * size, y * size, r * size);
@@ -83,8 +88,25 @@ var circle_packing_zoom_loop = function() {
 		bmp.ctx.fillRect(cx * size - 1, 0, 2, size);
 		bmp.ctx.fillRect(0, cy * size - 1, size, 2);
 
+		var xo = 0.5 + (target.x - 0.5) * scaler;
+		var yo = 0.5 + (target.y - 0.5) * scaler;
+
+		bmp.ctx.strokeStyle = "green";
+		bmp.ctx.beginPath();
+		bmp.ctx.moveTo(cx * size, cy * size);
+		bmp.ctx.lineTo(xo * size, yo * size);
+		bmp.ctx.stroke();
+
+		var half = geom.lerp({x: cx * size, y: cy * size}, {x: xo * size, y: yo * size}, zoomProgress);
+ 
+		bmp.ctx.fillRect(half.x, half.y, 10, 10);
+
 	}
 
+	window.addEventListener("mousemove",(e) => {
+		zoom.amount = 1 + e.x / size * zoom.max;
+		updateZoom();
+	})
 
 	function generate() {
 		var planet = dom.canvas(size, size);
