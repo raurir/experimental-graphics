@@ -7,7 +7,7 @@ var tetris_cube = function() {
 	var sw = window.innerWidth, sh = window.innerHeight;
 	// sw = sh = 400;
 	var theta = 0, gamma = 0;
-	var slice = 5;
+	var dim = 3;
 	var size = 40;
 	var cubes = [];
 	var groups = [];
@@ -42,20 +42,20 @@ var tetris_cube = function() {
 		scene.add(holder);
 
 		function p(index) {
-			return (index - slice / 2 + 0.5) * size;
+			return (index - dim / 2 + 0.5) * size;
 		}
 
 		function getPositionFromIndex(index) {
-			var x = index % slice;
-			var y = Math.floor(index / slice) % slice;
-			var z = Math.floor(index / (slice * slice));
+			var x = index % dim;
+			var y = Math.floor(index / dim) % dim;
+			var z = Math.floor(index / (dim * dim));
 			return {x, y, z};
 		}
 		function getIndexFromPosition({x,y,z}) {
-			return x + y * slice + z * slice * slice
+			return x + y * dim + z * dim * dim
 		}
 
-		for (var i = 0; i < slice * slice * slice; i++) {
+		for (var i = 0; i < dim * dim * dim; i++) {
 			var c = cube();
 			var {x, y, z} = getPositionFromIndex(i);
 
@@ -70,71 +70,125 @@ var tetris_cube = function() {
 			holder.add(c);
 		}
 		var globalGroupId = 1;
-		// for (i = 0; i < cubes.length; i += rand.getInteger(2, 5)) {
-		// 	cubes[i].groupId = ++groupId;
-		// }
 
-		function checkNeighbour(sourceIndex, targetPosition) {
-			var groupId = cubes[sourceIndex].groupId;
-			// if (groupId) {
-			// 	return con.log("got an id");
-			// }
-			var targetIndex = getIndexFromPosition(targetPosition);
-			if (cubes[targetIndex].groupId === 0) {
-				// con.log("assigning groupId", cubes[targetIndex].groupId, "to", sourceIndex, "from", targetIndex)
-				setGroup(targetIndex, groupId)
-			} else {
-				con.log("checkNeighbour nop - position", targetPosition, "index", targetIndex)
-			}
-		}
+		var loners = [];
+
+		var MODE_GROUP_EXPAND = "MODE_GROUP_EXPAND"
+		var MODE_LONER_UNITE = "MODE_LONER_UNITE"
+		var checkMode = MODE_GROUP_EXPAND
+
 		function checkNeighbours(sourceIndex) {
+
+			function checkNeighbour(targetPosition) {
+				var targetIndex = getIndexFromPosition(targetPosition);
+				if (checkMode === MODE_GROUP_EXPAND && cubes[targetIndex].groupId === 0) {
+					// con.log("assigning groupId", cubes[targetIndex].groupId, "to", sourceIndex, "from", targetIndex)
+					setGroup(targetIndex, cubes[sourceIndex].groupId)
+					count ++
+				} else if (checkMode === MODE_LONER_UNITE && cubes[targetIndex].groupId > 0) {
+
+					setGroup(sourceIndex, cubes[targetIndex].groupId)
+					count ++
+	
+				} else {
+					// con.log("checkNeighbour nop - position", targetPosition, "index", targetIndex)
+				}
+			}
+
 			var {x, y, z} = getPositionFromIndex(sourceIndex);
+			var count = 0;
+			var queue = [];
+			function queueCheck(pos) {
+				queue.push(pos);
+			}
 			// con.log("checkNeighbours sourceIndex", sourceIndex, x, y, z)
 			if (x === 0) {
 				// don't check x - 1
-				checkNeighbour(sourceIndex, {x: x + 1, y, z})
-			} else if (x === slice - 1) {
+				queueCheck({x: x + 1, y, z})
+			} else if (x === dim - 1) {
 				// don't check x + 1
-				checkNeighbour(sourceIndex, {x: x - 1, y, z})
+				queueCheck({x: x - 1, y, z})
 			} else {
-				checkNeighbour(sourceIndex, {x: x - 1, y, z})
-				checkNeighbour(sourceIndex, {x: x + 1, y, z})
+				queueCheck({x: x - 1, y, z})
+				queueCheck({x: x + 1, y, z})
 			}
 			if (y === 0) {
 				// don't check y - 1
-				checkNeighbour(sourceIndex, {x, y: y + 1, z})
-			} else if (y === slice - 1) {
+				queueCheck({x, y: y + 1, z})
+			} else if (y === dim - 1) {
 				// don't check y + 1
-				checkNeighbour(sourceIndex, {x, y: y - 1, z})
+				queueCheck({x, y: y - 1, z})
 			} else {
-				checkNeighbour(sourceIndex, {x, y: y - 1, z})
-				checkNeighbour(sourceIndex, {x, y: y + 1, z})
+				queueCheck({x, y: y - 1, z})
+				queueCheck({x, y: y + 1, z})
 			}
 			if (z === 0) {
 				// don't check z - 1
-				checkNeighbour(sourceIndex, {x, y, z: z + 1})
-			} else if (z === slice - 1) {
+				queueCheck({x, y, z: z + 1})
+			} else if (z === dim - 1) {
 				// don't check z + 1
-				checkNeighbour(sourceIndex, {x, y, z: z - 1})
+				queueCheck({x, y, z: z - 1})
 			} else {
-				checkNeighbour(sourceIndex, {x, y, z: z - 1})
-				checkNeighbour(sourceIndex, {x, y, z: z + 1})
+				queueCheck({x, y, z: z - 1})
+				queueCheck({x, y, z: z + 1})
 			}
+			for (var q = 0; q < queue.length; q++) {
+				checkNeighbour(queue[q]);
+			}
+			if (count === 0) {
+				// con.log("AAAAaarg! couldn't add any neighbours to group")
+				// cubes[sourceIndex].position.x += 1.5 * size * dim;
+				loners.push(sourceIndex);
+			}
+			if (checkMode === MODE_GROUP_EXPAND) nextGroup();
 		}
 
 		function nextGroup() {
-			con.log("nextGroup")
 			var availableIndex = Math.floor(available.length * Math.random());
-			availableIndex = available[availableIndex];
-			globalGroupId++;
-			setGroup(availableIndex, globalGroupId);
-			checkNeighbours(availableIndex);
+			// con.log("nextGroup", available.length)
+			if (available.length) {
+				availableIndex = available[availableIndex];
+				globalGroupId++;
+				setGroup(availableIndex, globalGroupId);
+				checkNeighbours(availableIndex);
+			} else {
+				con.log("all done...",groups)
+				// var pos = 0;
+				// setInterval(() => {
+				// 	pos++;
+				// 	TweenMax.to(holder.position, 0.5, {x: -pos * size * dim});
+				// }, 700);
+
+				var pos = 0;
+				setTimeout(() => {
+					// pos++;
+					groups.forEach((group, groupIndex) => {
+						var average = group.reduce((sum, mesh) => {
+							return {
+								x: sum.x + mesh.position.x,
+								y: sum.y + mesh.position.y,
+								z: sum.z + mesh.position.z
+							}
+						}, {x: 0, y: 0, z: 0});
+						group.forEach((mesh) => {
+							TweenMax.to(mesh.position, 0.5, {
+								x: mesh.position.x + average.x,
+								y: mesh.position.y + average.y,
+								z: mesh.position.z + average.z,
+								delay: groupIndex * 0.1
+							});
+						})
+						
+					})
+					// 
+				}, 1700);
+			}
 		}
 		function setGroup(targetIndex, groupId) {
+			var maxSize = checkMode === MODE_LONER_UNITE ? 6 : 4;
 			if (!groups[groupId]) groups[groupId] = [];
-			if (groups[groupId].length === 4) {
-				con.log("group too large", groupId, groups[groupId])
-				nextGroup();
+			if (groups[groupId].length === maxSize) {
+				// con.log("group too large", groupId, groups[groupId])/
 				return
 			}
 			var c = cubes[targetIndex];
@@ -143,18 +197,16 @@ var tetris_cube = function() {
 
 			var availableIndex = available.indexOf(targetIndex);
 			available.splice(availableIndex, 1);
-			// con.log("available", available)
-			// con.log("groups[groupId].length", groups[groupId].length)
-
-			if (groups[groupId].length === 4) {
-				con.log("group complete", groupId)
-				nextGroup();
-			}
 		}
 		setGroup(0, globalGroupId);
 		checkNeighbours(0);
 
 
+		checkMode = MODE_LONER_UNITE;
+		for (i = 0; i < loners.length; i++) {
+			// con.log(loners)
+			checkNeighbours(loners[i])
+		}
 
 		for (i = 0; i < cubes.length; i++) {
 			var c = cubes[i];
@@ -164,7 +216,7 @@ var tetris_cube = function() {
 			var b = 100;//Math.round(100 + Math.random() * 15);
 			var col = r << 16 | g << 8 | b;
 			c.material.color.setHex(col);
-			// c.position.x += c.groupId * size * slice;
+			// c.position.x += c.groupId * size * dim;
 		}
 
 
@@ -187,7 +239,7 @@ var tetris_cube = function() {
 
 		var camRadius = 500;
 
-		theta += mouse.x * 4;
+		// theta += mouse.x * 4;
 		gamma += mouse.y * 4;
 
 		// camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
