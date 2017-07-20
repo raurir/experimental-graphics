@@ -58,3 +58,35 @@ describe("test rand", function() {
 	});
 
 });
+
+
+var arrayShort = [];
+while (arrayShort.length < 6) {
+	arrayShort.push(Math.random())
+}
+var methods = ["shuffleColours", "shuffleMaze", "shuffleHexagon"]
+var results = {};
+var test = 0, tests = 3;
+while (test++ < tests) {
+	for (var methodIndex in methods) {
+		var methodName = methods[methodIndex];
+		rand.setSeed(3);
+		let fn = rand[methodName];
+		let a = arrayShort.slice()
+		let log = `${methodName}-${a.length}`;
+		console.log(log);
+		console.time(log);
+		results[methodName] = fn(a)
+		console.timeEnd(log);
+	}
+	console.log(results)
+
+	for (var i = arrayShort.length - 1; i >= 0; i--) {
+		var ok = results.shuffleColours[i] === results.shuffleMaze[i] &&
+			results.shuffleMaze[i] === results.shuffleHexagon[i]
+		if (!ok) {
+			console.log("fuck");
+		}
+	}
+
+}
