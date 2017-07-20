@@ -7,19 +7,6 @@ if (isNode) {
 var colours = (function() {
 
 	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
-
-	function shuffleArray(array) {
-		for (var i = array.length - 1; i > 0; i--) {
-			var j = Math.floor(random() * (i + 1));
-			var temp = array[i];
-			array[i] = array[j];
-			array[j] = temp;
-		}
-		return array;
-	}
-
-
-
 	var paletteIndex = -1, currentPalette = null;
 	var colourIndex = 0;
 	var previewCSSAdded = false;
@@ -38,7 +25,7 @@ var colours = (function() {
 
 	function setPaletteRange(range) {
 		if (range > currentPalette.length) return con.warn("setPaletteRange - current palette has less than", range, "colours!");
-		var palette = shuffleArray(currentPalette.slice());
+		var palette = rand.shuffle(currentPalette.slice());
 		currentPalette = palette.splice(0, range);
 		return currentPalette;
 	}

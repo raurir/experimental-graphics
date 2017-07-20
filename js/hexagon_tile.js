@@ -243,19 +243,13 @@ var hexagon_tile = function() {
       };
 
     }
-    randomHexes = shuffle(hexs.slice());
+    randomHexes = rand.shuffle(hexs.slice());
 
     // con.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
     // con.log('randomHexes', randomHexes.length, hexs.length);
 
     render();
   }
-
-  // shuffle lifted from somewhere
-  function shuffle(o){
-    for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-    return o;
-  };
 
   function batch() {
     var shouldRender = settings.spread.cur / settings.spread.max * 10;

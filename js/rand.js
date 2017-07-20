@@ -69,7 +69,7 @@ var rand = (function() {
 
     alphaToInteger: alphaToInteger, // for testability
 
-    shuffleColours: function(array) {
+    shuffle: function(array) {
       for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(rand.random() * (i + 1));
         var temp = array[i];
@@ -77,23 +77,7 @@ var rand = (function() {
         array[j] = temp;
       }
       return array;
-    },
-    shuffleMaze: function(array) {
-      var i, m, t;
-      m = array.length;
-      while (m) {
-        i = Math.floor(rand.random() * m--);
-        t = array[m];
-        array[m] = array[i];
-        array[i] = t;
-      }
-      return array;
-    },
-    shuffleHexagon: function(o){
-      for(var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-      return o;
     }
-
 
   };
 }());
