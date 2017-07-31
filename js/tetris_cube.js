@@ -132,6 +132,7 @@ var tetris_cube = function() {
 				queueCheck({x, y, z: z - 1})
 				queueCheck({x, y, z: z + 1})
 			}
+			rand.shuffle(queue);
 			for (var q = 0; q < queue.length; q++) {
 				checkNeighbour(queue[q]);
 			}
@@ -163,13 +164,19 @@ var tetris_cube = function() {
 				setTimeout(() => {
 					// pos++;
 					groups.forEach((group, groupIndex) => {
-						var average = group.reduce((sum, mesh) => {
-							return {
-								x: sum.x + mesh.position.x,
-								y: sum.y + mesh.position.y,
-								z: sum.z + mesh.position.z
-							}
-						}, {x: 0, y: 0, z: 0});
+						// var average = group.reduce((sum, mesh) => {
+						// 	return {
+						// 		x: sum.x + mesh.position.x,
+						// 		y: sum.y + mesh.position.y,
+						// 		z: sum.z + mesh.position.z
+						// 	}
+						// }, {x: 0, y: 0, z: 0});
+						var cols = 4;
+						var average = {
+							x: (-cols / 2 + groupIndex % cols) * size * 4,
+							y: Math.floor(-1 + groupIndex / cols) * size * 4,
+							z: 0
+						}
 						group.forEach((mesh) => {
 							TweenMax.to(mesh.position, 0.5, {
 								x: mesh.position.x + average.x,
@@ -201,7 +208,9 @@ var tetris_cube = function() {
 		setGroup(0, globalGroupId);
 		checkNeighbours(0);
 
-
+		con.log(loners)
+		rand.shuffle(loners)
+		con.log(loners)
 		checkMode = MODE_LONER_UNITE;
 		for (i = 0; i < loners.length; i++) {
 			// con.log(loners)

@@ -74,24 +74,34 @@ var circle_packing = function() {
 		// brutal seeds: 454163889, 3575304202
 		var bailed = false;
 		var progressTicker = 0;
+		var fakeProgress = 0.1;
 		var progressChecker = () => {
-			// con.log("progressChecker", threads)
-			// output.innerHTML = [circles, iterations, threads];
-			
-			if (circlesLast === circles) {
-				circlesSame++;
-			} else {
-				circlesSame = 0;
-			}
-			circlesLast = circles;
-			if (circlesSame > 3) {
-				con.log("bailed with circles:", circles, threads);
-				con.timeEnd("process time");
+			if (threads == -1) {
+				// threads
+				con.log("progressChecker", threads)
 				progress("render:complete", bmp.canvas);
 				bailed = true;
+			} else {
+				fakeProgress -= (fakeProgress - 1) * 0.05;
+				progress("render:progress", fakeProgress);
+				setTimeout(progressChecker, 250);
 			}
+			output.innerHTML = [circles, iterations, threads];
+			
+			// if (circlesLast === circles) {
+			// 	circlesSame++;
+			// } else {
+			// 	circlesSame = 0;
+			// }
+			// circlesLast = circles;
+			// if (circlesSame > 300) {
+			// 	con.log("bailed with circles:", circles, threads);
+			// 	con.timeEnd("process time");
+			// 	progress("render:complete", bmp.canvas);
+			// 	bailed = true;
+			// }
 			if (bailed == false) {
-				setTimeout(progressChecker, 1);
+				// setTimeout(progressChecker, 250);
 			}
 		}
 		progressChecker();
@@ -102,20 +112,21 @@ var circle_packing = function() {
 			attempt++;
 
 			progressTicker++;
-			threadOutput.ctx.fillRect(progressTicker / 50, 0, 1, threads / 50);
+			threadOutput.ctx.fillRect(progressTicker / 500, 0, 1, threads / 50);
 
 			if (threads < 10) {
 				// return;
-				con.log(threads, circles);
+				// con.log("t c", threads, circles);
 			}
 
 			// con.log("attemptNextCircle", progressTicker / 1000, threads / 1000);
 			
 			
 			if (attempt < 5000) {
-				var delay = iterations % 10 ? 0 : 200;
+				var delay = iterations % 100 ? 0 : 200;
 				// return attemptCircle(parent, attempt);
 				if (delay) {
+					// con.log("ok")
 					setTimeout(function() {
 						attemptCircle(parent, attempt);
 					}, delay);
