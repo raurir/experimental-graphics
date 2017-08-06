@@ -48,7 +48,7 @@ var circle_packing = function() {
 		var threads = 0;
 		var iterations = 0;
 		var circles = 0, circlesLast = 0, circlesSame = 0;
-		var gap = rand.getNumber(0.0001, 0.02);
+		var gap = rand.getNumber(0.001, 0.02);
 		// var gap = 0.0005;
 		con.log("gap", gap);
 		var minRadius = rand.getNumber(0.001, 0.01);
@@ -82,27 +82,11 @@ var circle_packing = function() {
 				progress("render:complete", bmp.canvas);
 				bailed = true;
 			} else {
-				fakeProgress -= (fakeProgress - 1) * 0.05;
-				progress("render:progress", fakeProgress);
+				// fakeProgress -= (fakeProgress - 1) * 0.05;
+				// progress("render:progress", fakeProgress);
 				setTimeout(progressChecker, 250);
 			}
-			output.innerHTML = [circles, iterations, threads];
-			
-			// if (circlesLast === circles) {
-			// 	circlesSame++;
-			// } else {
-			// 	circlesSame = 0;
-			// }
-			// circlesLast = circles;
-			// if (circlesSame > 300) {
-			// 	con.log("bailed with circles:", circles, threads);
-			// 	con.timeEnd("process time");
-			// 	progress("render:complete", bmp.canvas);
-			// 	bailed = true;
-			// }
-			if (bailed == false) {
-				// setTimeout(progressChecker, 250);
-			}
+			// output.innerHTML = [circles, iterations, threads];
 		}
 		progressChecker();
 
@@ -114,10 +98,11 @@ var circle_packing = function() {
 			progressTicker++;
 			threadOutput.ctx.fillRect(progressTicker / 500, 0, 1, threads / 50);
 
-			if (threads < 10) {
-				// return;
-				// con.log("t c", threads, circles);
+			if (circles % 100 == 0) {
+				fakeProgress -= (fakeProgress - 1) * 0.02;
+				progress("render:progress", fakeProgress);
 			}
+
 
 			// con.log("attemptNextCircle", progressTicker / 1000, threads / 1000);
 			

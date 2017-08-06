@@ -1,33 +1,32 @@
 var isNode = (typeof module !== 'undefined');
 
 var experiment_template = function() {
+	var TAU = Math.PI * 2;
+	var sw, sw, cx, cy;
+	var stage = dom.canvas(1, 1);
+	var ctx = stage.ctx;
 
-	var sw = 600, sh = 600;
-
-	var bmp = dom.canvas(sw,sh);
-
-	var cx = sw / 2;
-	var cy = sh / 2;
-
-	bmp.ctx.clearRect(0, 0, sw, sh);
-	bmp.ctx.fillStyle = "#0f0";
-	bmp.ctx.fillRect(cx - 2, cy - 2, 4, 4);
-
+ 	function init(options) {
+		size = options.size;
+		sw = options.sw || size;
+		sh = options.sh || size;
+		stage.setSize(sw, sh);
+		cx = sw / 2;
+		cy = sh / 2;
+		ctx.clearRect(0, 0, sw, sh);
+		ctx.fillStyle = "#0f0";
+		ctx.fillRect(cx - 20, cy - 20, 40, 40);
+	}
 	var experiment = {
-		stage: bmp.canvas,
-		inner: null,
-		resize: function() {},
-		init: function() {},
-		kill: function() {},
-		settings: {} // or null
+		stage: stage.canvas,
+		init: init,
 	}
 
-	progress("render:complete", bmp.canvas);
+	progress("render:complete", stage.canvas);
 
 	return experiment;
 
 };
-
 if (isNode) {
   module.exports = experiment_template();
 } else {

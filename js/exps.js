@@ -40,6 +40,7 @@ function exps() {
       ["hexagon_tile"],
       ["isometric_cubes"],
       ["linked_line"],
+      ["mandala"],
       ["maze"],
       ["maze_cube", "linked_line", "THREE"],//, "https://threejs.org/examples/js/exporters/OBJExporter.js"],//  "lib/three/OBJExporter.js", "lib/three/OrbitControls.js"],
       ["meandering_polygons"],
