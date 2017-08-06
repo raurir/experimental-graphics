@@ -15,14 +15,14 @@ var mandala = function() {
 		stage.setSize(sw, sh);
 		centre = sh / 2;
 
-		spokes = rand.getInteger(2, 20) * 2;
+		spokes = rand.getInteger(2, 40) * 2;
 
 		var a = 1 / spokes * TAU;
-		var r = centre;
+		var r = Math.sqrt(centre * centre * 2);
 		var bgColour = colours.getNextColour();
 
 		var masker = dom.canvas(sw, sh);
-		var maskBorder = 0; // 2 pixel overlap
+		var maskBorder = 1; // 2 pixel overlap
 		masker.ctx.translate(maskBorder, maskBorder);
 		masker.ctx.lineCap = "flat";
 		masker.ctx.beginPath();
@@ -49,8 +49,10 @@ var mandala = function() {
 		pattern.ctx.stroke();
 		pattern.ctx.fill();
 
-		document.body.appendChild(masker.canvas);
-		document.body.appendChild(pattern.canvas);
+		// document.body.appendChild(masker.canvas);
+		// document.body.appendChild(pattern.canvas);
+
+		function sorter(a,b) { return a < b ? -1 : 1; }
 
 		function drawBands() {
 			var sets = 4;
@@ -78,7 +80,6 @@ var mandala = function() {
 				drawBand(colours.getNextColour(), 1);
 			}
 		}
-		function sorter(a,b) { return a < b ? -1 : 1; }
 
 		function drawRegions() {
 			var regions = 4;
@@ -94,14 +95,14 @@ var mandala = function() {
 			regionSizes.right.sort(sorter);
 			for (i = 0; i < regions - 1; i++) {
 				pattern.ctx.fillStyle = colours.getNextColour();
-				var x0 = Math.sin(0) * regionSizes.left[i];
-				var y0 = Math.cos(0) * regionSizes.left[i];
-				var x1 = Math.sin(a) * regionSizes.right[i];
-				var y1 = Math.cos(a) * regionSizes.right[i];
-				var x2 = Math.sin(a) * regionSizes.right[i + 1];
-				var y2 = Math.cos(a) * regionSizes.right[i + 1];
-				var x3 = Math.sin(0) * regionSizes.left[i + 1];
-				var y3 = Math.cos(0) * regionSizes.left[i + 1];
+				var x0 = Math.sin(-a) * regionSizes.left[i]; // should be 0 > alpha, intentional overdraw
+				var y0 = Math.cos(-a) * regionSizes.left[i];
+				var x1 = Math.sin(2 * a) * regionSizes.right[i];
+				var y1 = Math.cos(2 * a) * regionSizes.right[i];
+				var x2 = Math.sin(2 * a) * regionSizes.right[i + 1];
+				var y2 = Math.cos(2 * a) * regionSizes.right[i + 1];
+				var x3 = Math.sin(-a) * regionSizes.left[i + 1];
+				var y3 = Math.cos(-a) * regionSizes.left[i + 1];
 				pattern.ctx.beginPath();
 				pattern.ctx.moveTo(x0 * r, y0 * r);
 				pattern.ctx.lineTo(x1 * r, y1 * r);
@@ -111,8 +112,28 @@ var mandala = function() {
 			}
 		}
 
+		function drawCircles() {
+			var circles = rand.getNumber(3, 100);
+			for (var i = 0; i < circles; i++) {
+				pattern.ctx.globalCompositeOperation = 
+					rand.random() > 0.5
+					? "destination-out"
+					: "source-over";
+				var angle = rand.getNumber(-a, 2 * a);
+				var distance = rand.getNumber(0, r);
+				var radius = rand.getNumber(0, r/4);
+				var x = Math.sin(angle) * distance;
+				var y = Math.cos(angle) * distance;
+				pattern.ctx.fillStyle = colours.getNextColour();
+				pattern.ctx.beginPath();
+				pattern.ctx.drawCircle(x, y, radius);
+				pattern.ctx.fill();
+			}
+		}
 		drawRegions();
-		drawBands();
+		drawCircles();
+		// drawBands();
+
 
 		// pattern.ctx.fillStyle = colours.getNextColour();
 		// pattern.ctx.rotate(rand.getNumber(0, TAU));
