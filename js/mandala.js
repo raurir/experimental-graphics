@@ -2,27 +2,55 @@ var isNode = (typeof module !== 'undefined');
 
 var mandala = function() {
 
+
+	var settings = {
+		spread: {
+		type: "Number",
+		label: "Spread",
+			min: 1,
+			max: 10,
+			cur: 10
+		}
+	}
+
 	var TAU = Math.PI * 2;
 	var sw, sw, centre, spokes;
 	var stage = dom.canvas(1, 1);
 	var ctx = stage.ctx;
 
  	function init(options) {
- 		colours.getRandomPalette();
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
 		stage.setSize(sw, sh);
 		centre = sh / 2;
 
+ 		var palette = colours.getRandomPalette();
+ 		con.log("Mandala init", palette);
+
+
 		spokes = rand.getInteger(2, 40) * 2;
 
+		settings.spread.cur = 10;
+		// settings.background.cur = true;
+		if (options.settings) {
+			settings = options.settings;
+		}
+		progress('settings:initialised', settings);
+
+		render();
+	}
+
+	function render() {
+		var spread = settings.spread.cur / settings.spread.max;
+		con.log("spread", spread);
 		var a = 1 / spokes * TAU;
-		var r = Math.sqrt(centre * centre * 2);
-		var bgColour = colours.getNextColour();
+		var maxR = Math.sqrt(0.5 * 0.5 * 2);
+		var r = maxR * size;
+		var bgColour = colours.getRandomColour();
 
 		var masker = dom.canvas(sw, sh);
-		var maskBorder = 1; // 2 pixel overlap
+		var maskBorder = 2; // 2 pixel overlap
 		masker.ctx.translate(maskBorder, maskBorder);
 		masker.ctx.lineCap = "flat";
 		masker.ctx.beginPath();
@@ -46,54 +74,59 @@ var mandala = function() {
 		pattern.ctx.fillStyle = bgColour;
 		pattern.ctx.strokeStyle = bgColour;
 		pattern.ctx.lineWidth = maskBorder;
-		pattern.ctx.stroke();
+		pattern.ctx.stroke(); 
 		pattern.ctx.fill();
 
-		// document.body.appendChild(masker.canvas);
-		// document.body.appendChild(pattern.canvas);
+		document.body.appendChild(masker.canvas);
+		document.body.appendChild(pattern.canvas);
 
+		var max = 7;
+		
 		function sorter(a,b) { return a < b ? -1 : 1; }
 
 		function drawBands() {
-			var sets = 4;
-			for (var i = 0; i < sets; i++) {
+			for (var i = 0; i < 1; i++) {
+			// for (var i = 0; i < bandSets; i++) {
 				var bands = rand.getInteger(3, 40);
-				var bandSize = rand.getNumber(0.01, 0.1) * size;
+				var bandSize = rand.getNumber(0.01, 0.1);
 				var stripeSize = rand.getNumber(1, bandSize * 0.6);
-				var bandAngle = 1 + (rand.getNumber(-0.2, 0.2)) * TAU;
-				var bandStart = rand.getNumber(0, centre);
+				var bandAngle = rand.getNumber(0.25, 0.5) * TAU;
+				var bandStart = rand.getNumber(0, 0.5);
 				function drawBand(colour, widthMod) {
-					pattern.ctx.lineWidth = stripeSize * widthMod;
+					pattern.ctx.lineWidth = stripeSize * widthMod * size * 0.01;
 					pattern.ctx.strokeStyle = colour;
 					for (var j = 0; j < bands; j++) {
-						var x0 = -20;
+						var x0 = -0.1;
 						var y0 = bandStart + j * bandSize;
-						var x1 = x0 + Math.sin(bandAngle) * centre * 10; // just a really long distance! off screen please!
-						var y1 = y0 + Math.cos(bandAngle) * centre * 10;
-						pattern.ctx.beginPath();
-						pattern.ctx.moveTo(x0, y0);
-						pattern.ctx.lineTo(x1, y1);
-						pattern.ctx.stroke();
+						con.log(y0, spread)
+						if (y0 * maxR < spread) {
+							var x1 = x0 + Math.sin(bandAngle) * 3; // just a really long distance! off screen please!
+							var y1 = y0 + Math.cos(bandAngle) * 3;
+							// con.log(x0, y0, x1, y1, pattern.ctx.lineWidth, x0 * centre, y0 * centre);
+							pattern.ctx.beginPath();
+							pattern.ctx.moveTo(x0 * centre, y0 * centre);
+							pattern.ctx.lineTo(x1 * centre, y1 * centre);
+							pattern.ctx.stroke();
+						}
 					}
 				}
-				drawBand(bgColour, 2);
+				// drawBand(bgColour, 2);
 				drawBand(colours.getNextColour(), 1);
 			}
 		}
 
 		function drawRegions() {
-			var regions = 4;
 			var regionSizes = {
 				left: [],
 				right: []
 			};
-			for (var i = 0; i < regions; i++) {
+			for (var i = 0; i < regionSets; i++) {
 				regionSizes.left.push(rand.random());
 				regionSizes.right.push(rand.random());
 			}
 			regionSizes.left.sort(sorter);
 			regionSizes.right.sort(sorter);
-			for (i = 0; i < regions - 1; i++) {
+			for (i = 0; i < regionSets - 1; i++) {
 				pattern.ctx.fillStyle = colours.getNextColour();
 				var x0 = Math.sin(-a) * regionSizes.left[i]; // should be 0 > alpha, intentional overdraw
 				var y0 = Math.cos(-a) * regionSizes.left[i];
@@ -113,12 +146,11 @@ var mandala = function() {
 		}
 
 		function drawCircles() {
-			var circles = rand.getNumber(3, 100);
-			for (var i = 0; i < circles; i++) {
-				pattern.ctx.globalCompositeOperation = 
-					rand.random() > 0.5
-					? "destination-out"
-					: "source-over";
+			for (var i = 0; i < circleSets; i++) {
+				// pattern.ctx.globalCompositeOperation = 
+				// 	rand.random() > 0.5
+				// 	? "destination-out"
+				// 	: "source-over";
 				var angle = rand.getNumber(-a, 2 * a);
 				var distance = rand.getNumber(0, r);
 				var radius = rand.getNumber(0, r/4);
@@ -130,8 +162,16 @@ var mandala = function() {
 				pattern.ctx.fill();
 			}
 		}
+
+		var bandSets = rand.getInteger(0, max);
+		max -= bandSets;
+		var regionSets = rand.getInteger(0, max);
+		max -= regionSets;
+		var circleSets = max;
+		con.log(bandSets, regionSets, circleSets);
+
 		drawRegions();
-		drawCircles();
+		// drawCircles();
 		// drawBands();
 
 
@@ -182,9 +222,17 @@ var mandala = function() {
 		}
 		
 	}
+
+	function update(settings) {
+		init({size: size, settings: settings})
+	}
+
 	var experiment = {
-		stage: stage.canvas,
 		init: init,
+		render: render,
+		settings: settings,
+		stage: stage.canvas,
+		update: update,
 	}
 
 	progress("render:complete", stage.canvas);
