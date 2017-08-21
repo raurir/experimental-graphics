@@ -50,7 +50,7 @@ var geom = (function() {
     // occasionally finding an irregularity - turns out dx was 0.0000000000003141611368683772161603
     // which for all intents and purposes is 0.
     if (dx == 0 || dx > -0.000001 && dx < 0.000001) {
-      // con.warn("divide by zero error in geom.linearEquationFromPoints");
+      con.warn("divide by zero error in geom.linearEquationFromPoints");
       // equation is in the form x = number, rather than y = mx + c
       return {
         c: null,
@@ -146,16 +146,83 @@ var geom = (function() {
   }
 
 
+  // http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
+  function perpendincularPoint(a, b, distance){
+    var p = {
+      x: a.x - b.x,
+      y: a.y - b.y
+    };
+    var n = {
+      x: -p.y,
+      y: p.x
+    };
+    var normalisedLength = Math.sqrt((n.x * n.x) + (n.y * n.y));
+    n.x /= normalisedLength;
+    n.y /= normalisedLength;
+    return {
+      x: distance * n.x,
+      y: distance * n.y
+    };
+  }
+
+  function parallelPoints(p0, p1, offset) {
+    var per = perpendincularPoint(p0, p1, offset);
+    var parrallel0 = {
+      x: p0.x + per.x,
+      y: p0.y + per.y
+    };
+    var parrallel1 = {
+      x: p1.x + per.x,
+      y: p1.y + per.y
+    };
+    return [parrallel0, parrallel1];
+  }
+
+
+  function insetPoints(points, offset) {
+    var parallels = [], insets = [];
+    for (var i = 0, il = points.length; i < il; i++) {
+      var pp0 = points[i];
+      var pp1 = points[(i + 1) % il]; // wrap back to 0 at end of loop!
+      // con.log(i, pp0, pp1);
+      parallels.push(parallelPoints(pp0, pp1, offset));
+    };
+    con.log("parallels.length", parallels.length);
+    for (i = 0, il = parallels.length; i < il; i++) {
+      var parallel0 = parallels[i]; // start of line
+      var parallel1 = parallels[(i + 1) % il]; // end of line
+      var intersection = intersectionAnywhere(
+        parallel0[0],
+        parallel0[1],
+        parallel1[0],
+        parallel1[1]
+      );
+      con.log("intersection", intersection);
+      var inside = pointInPolygon(points, intersection);
+      if (inside) {
+        insets.push(intersection);
+      } else {
+        // drawPolygon(points, {lineWidth: 1, strokeStyle: "blue"});
+        con.warn("geom.insetPoints fail, not inside");
+        return null; // bail, we can't inset this shape!
+      }
+      // drawPoint(intersection);
+    }
+    return insets;
+  }
 
 
 
 
   return {
-    lerp: linearInterpolate,
-    pointInPolygon: pointInPolygon,
-    linearEquationFromPoints: linearEquationFromPoints,
+    insetPoints: insetPoints,
     intersectionAnywhere: intersectionAnywhere,
-    intersectionBetweenPoints: intersectionBetweenPoints
+    intersectionBetweenPoints: intersectionBetweenPoints,
+    lerp: linearInterpolate,
+    linearEquationFromPoints: linearEquationFromPoints,
+    parallelPoints: parallelPoints,
+    perpendincularPoint: perpendincularPoint,
+    pointInPolygon: pointInPolygon,
   }
 
 })();

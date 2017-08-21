@@ -62,7 +62,7 @@ var mandala = function() {
 		masker.ctx.strokeStyle = "red";
 		masker.ctx.lineWidth = maskBorder;
 		masker.ctx.stroke();
-		masker.ctx.fill();
+		// masker.ctx.fill();
 
 		var pattern = dom.canvas(sw, sh);
 		pattern.ctx.translate(maskBorder, maskBorder);
@@ -128,20 +128,41 @@ var mandala = function() {
 			regionSizes.right.sort(sorter);
 			for (i = 0; i < regionSets - 1; i++) {
 				pattern.ctx.fillStyle = colours.getNextColour();
-				var x0 = Math.sin(-a) * regionSizes.left[i]; // should be 0 > alpha, intentional overdraw
-				var y0 = Math.cos(-a) * regionSizes.left[i];
-				var x1 = Math.sin(2 * a) * regionSizes.right[i];
-				var y1 = Math.cos(2 * a) * regionSizes.right[i];
-				var x2 = Math.sin(2 * a) * regionSizes.right[i + 1];
-				var y2 = Math.cos(2 * a) * regionSizes.right[i + 1];
-				var x3 = Math.sin(-a) * regionSizes.left[i + 1];
-				var y3 = Math.cos(-a) * regionSizes.left[i + 1];
+				var x0 = Math.sin(0) * regionSizes.left[i]; // should be 0 > alpha, intentional overdraw
+				var y0 = Math.cos(0) * regionSizes.left[i];
+				var x1 = Math.sin(a) * regionSizes.right[i];
+				var y1 = Math.cos(a) * regionSizes.right[i];
+				var x2 = Math.sin(a) * regionSizes.right[i + 1];
+				var y2 = Math.cos(a) * regionSizes.right[i + 1];
+				var x3 = Math.sin(0) * regionSizes.left[i + 1];
+				var y3 = Math.cos(0) * regionSizes.left[i + 1];
 				pattern.ctx.beginPath();
 				pattern.ctx.moveTo(x0 * r, y0 * r);
 				pattern.ctx.lineTo(x1 * r, y1 * r);
 				pattern.ctx.lineTo(x2 * r, y2 * r);
 				pattern.ctx.lineTo(x3 * r, y3 * r);
+				pattern.ctx.closePath();
 				pattern.ctx.fill();
+				pattern.ctx.strokeStyle = "black";
+				pattern.ctx.stroke();
+
+				var points = [
+					{x: x0, y: y0},
+					{x: x1, y: y1},
+					{x: x2, y: y2},
+					{x: x3, y: y3}
+				];
+				var insetPoints = geom.insetPoints(points, -0.01);
+				con.log("duble", points, insetPoints)
+				if (insetPoints) {
+					pattern.ctx.beginPath();
+					pattern.ctx.fillStyle = colours.getNextColour();
+					for (var i = 0; i < insetPoints.length; i++) {
+						var p = insetPoints[i];
+						pattern.ctx[i == 0 ? "moveTo" : "lineTo"](p.x * r, p.y * r);
+					};
+					pattern.ctx.fill();
+				}
 			}
 		}
 
@@ -165,7 +186,7 @@ var mandala = function() {
 
 		var bandSets = rand.getInteger(0, max);
 		max -= bandSets;
-		var regionSets = rand.getInteger(0, max);
+		var regionSets = 2;//rand.getInteger(0, max);
 		max -= regionSets;
 		var circleSets = max;
 		con.log(bandSets, regionSets, circleSets);
@@ -197,8 +218,8 @@ var mandala = function() {
 	
 
 		// mask it out
-		pattern.ctx.globalCompositeOperation = "destination-in";
-		pattern.ctx.drawImage(masker.canvas, -maskBorder, -maskBorder);
+		// pattern.ctx.globalCompositeOperation = "destination-in";
+		// pattern.ctx.drawImage(masker.canvas, -maskBorder, -maskBorder);
 		// pattern.ctx.beginPath();
 		// pattern.ctx.moveTo(0, 0);
 		// pattern.ctx.lineTo(0, r);
@@ -207,7 +228,7 @@ var mandala = function() {
 
 
 		for (var i = 0; i < spokes; i++) {
-		// for (var i = 0; i < 2; i++) {
+		// for (var i = 0; i < 1; i++) {
 			stage.ctx.save();
 			if (i % 2 == 1) {
 				stage.ctx.scale(-1, 1);

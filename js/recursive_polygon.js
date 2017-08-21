@@ -138,7 +138,7 @@ var recursive_polygon = function() {
 		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
 		var inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
 		if (inset) {
-			var insetPoints = drawInset(points, insetDistance);
+			var insetPoints = geom.insetPoints(points, insetDistance);
 			if (insetPoints) {
 				drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
 				bmp.ctx.globalCompositeOperation = "destination-out";
@@ -208,79 +208,6 @@ var recursive_polygon = function() {
 		};
 		// con.log(edgeIndex);
 		return edgeIndex;
-	}
-
-	// http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
-	function getPerpendincular(a, b, distance){
-		var p = {
-			x: a.x - b.x,
-			y: a.y - b.y
-		};
-		var n = {
-			x: -p.y,
-			y: p.x
-		};
-		var normalisedLength = Math.sqrt((n.x * n.x) + (n.y * n.y));
-		n.x /= normalisedLength;
-		n.y /= normalisedLength;
-		return {
-			x: distance * n.x,
-			y: distance * n.y
-		};
-	}
-
-	function getParallelPoints(p0, p1, offset) {
-		// drawLine(p0, p1, 'red', 4);
-		var per = getPerpendincular(p0, p1, offset);
-		var parrallel0 = {
-			x: p0.x + per.x,
-			y: p0.y + per.y
-		};
-		var parrallel1 = {
-			x: p1.x + per.x,
-			y: p1.y + per.y
-		};
-		// drawLine(parrallel0, parrallel1, 'green', 1);
-		// bmp.ctx.fillStyle = "green";
-		// bmp.ctx.beginPath();
-		// bmp.ctx.drawCircle(parrallel0.x, parrallel0.y, 1.5);
-		// bmp.ctx.fill();
-		// bmp.ctx.beginPath();
-		// bmp.ctx.drawCircle(parrallel1.x, parrallel1.y, 1.5);
-		// bmp.ctx.fill();
-		return [parrallel0, parrallel1];
-	}
-
-	function drawInset(points, offset) {
-		var parallels = [], insetPoints = [];
-		for (var i = 0, il = points.length; i < il; i++) {
-			var pp0 = points[i];
-			var pp1 = points[(i + 1) % il]; // wrap back to 0 at end of loop!
-			// con.log(i, pp0, pp1);
-			parallels.push(getParallelPoints(pp0, pp1, offset));
-		};
-		// con.log(parallels.length);
-		for (i = 0, il = parallels.length; i < il; i++) {
-			var parallel0 = parallels[i]; // start of line
-			var parallel1 = parallels[(i + 1) % il]; // end of line
-			var intersection = geom.intersectionAnywhere(
-				parallel0[0],
-				parallel0[1],
-				parallel1[0],
-				parallel1[1]
-			);
-			// con.log(intersection);
-			var inside = geom.pointInPolygon(points, intersection);
-			if (inside) {
-				insetPoints.push(intersection);
-			} else {
-				// drawPolygon(points, {lineWidth: 1, strokeStyle: "blue"});
-				// con.warn("fail");
-				return null; // bail, we can't inset this shape!
-			}
-			// drawPoint(intersection);
-		}
-		return insetPoints;
 	}
 
 	function drawPoint(p, options) {
