@@ -36,7 +36,7 @@ function exps() {
       ["circle_sectors"],
       ["corona_sine"],
       ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
-      ["cube_pixelator", "THREE"],
+      ["cube_pixelator", "THREE", "TweenMax"],
       ["fool", "css/fool"],
       ["hexagon_tile"],
       ["isometric_cubes"],

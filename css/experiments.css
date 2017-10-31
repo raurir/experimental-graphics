@@ -4,9 +4,6 @@ body {
   margin: 0;
   padding: 0;
 }
-canvas {
-  border: 1px solid black;
-}
 .experiments-loader {
   position: absolute;
   background: rgba(50,50,50,0.3);
