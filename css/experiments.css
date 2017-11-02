@@ -11,9 +11,6 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  -webkit-transition: opacity 0.2s ease-in-out;
-  -moz-transition: opacity 0.2s ease-in-out;
-  -o-transition: opacity 0.2s ease-in-out;
   transition: opacity 0.2s ease-in-out;
 }
 .experiments-loader.complete {
@@ -34,13 +31,16 @@ body {
   background: #eee;
   height: 10px;
   border-radius: 2px;
-  -webkit-transition: width 0.2s ease-out;
-  -moz-transition: width 0.2s ease-out;
-  -o-transition: width 0.2s ease-out;
   transition: width 0.2s ease-out;
 }
 #progress {
-  transition: width 0.3s ease;
+  background: #fff;
+  box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.5);
+  height: 10px;
+  position: absolute;
+  transition: width 0.3s ease-out, height 0.5s ease-in;
+  width: 0;
+  z-index: 100;
 }
 .exp {
   line-height: 20px;

@@ -1,11 +1,27 @@
-function progress() {/*con.log("experiments progress", arguments);*/}
+var holder, progressBar;
+function progress(eventName, eventParam) {
+  con.log("experiments progress", eventName, eventParam);
+  switch (eventName) {
+    case "render:progress" :
+      progressBar.style.width = (eventParam * 100) + "%";
+      progressBar.style.height = "10px";
+      break;
+    case "render:complete" :
+      // eventParam is canvas usually...
+      progressBar.style.height = "0px";
+      break;
+  }
+}
 
 function exps() {
 
   return function() {
 
-    var holder = dom.element("div");
+    holder = dom.element("div");
     document.body.appendChild(holder);
+    progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
+    document.body.appendChild(progressBar);
+
 
     // require.config({
     //   baseUrl: "js",

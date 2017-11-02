@@ -18,20 +18,25 @@ define("cube_pixelator", [], function() {
 
 	function cube(w, h, d, colour) {
 		const geometry = new THREE.PlaneGeometry(w, h, 1);
-		const material = new THREE.MeshLambertMaterial({color: colour});//, side: THREE.DoubleSide});
+		const material = new THREE.MeshLambertMaterial({color: colour});
 		// const material = new THREE.MeshLambertMaterial({color: colour});
 		// const geometry = new THREE.BoxGeometry(w, h, d);
 		return new THREE.Mesh(geometry, material);
 	}
 
 	function init() {
+
+		for (var p = 0; p < pixels * pixels; p++) {
+			rotations.push({rotation: Math.random()});
+		}
+
 		// yes i should use promises, thanks!
 		const fn1 = () => createBitmap("cash", fn2);
 		const fn2 = () => createBitmap("marilyn", fn3);
 		const fn3 = () => createBitmap("hicks", fn4);
 		const fn4 = () => {
-			rotations = images[currentImage].slice();
-			createScene();
+			// rotations = images[currentImage].slice();
+			setTimeout(createScene, 200); // createScene is expensive
 		}
 		fn1();
 	}
@@ -56,7 +61,8 @@ define("cube_pixelator", [], function() {
 			}
 			images.push(grayscale);
 			// con.log("grayscale", image, grayscale.length)
-			resolve();
+			progress("render:progress", images.length / 4);
+			setTimeout(resolve, 100);
 		}
 		img.src = `./assets/${image}.jpg`;
 		// document.body.appendChild(img);
@@ -74,13 +80,9 @@ define("cube_pixelator", [], function() {
 		lightAbove.position.set(0, 1, 0.5);
 		scene.add(lightAbove);
 
-		// var lightLeft = new THREE.DirectionalLight(0xff0000, 0.1);
-		// lightLeft.position.set(-1, 0, 0);
-		// scene.add(lightLeft);
-
-		// var lightRight = new THREE.DirectionalLight(0x0000ff, 0.1);
-		// lightRight.position.set(1, 0, 0);
-		// scene.add(lightRight);
+		var lightLeft = new THREE.DirectionalLight(0xf0e5a1, 0.5);
+		lightLeft.position.set(-1, 0.5, 0.5);
+		scene.add(lightLeft);
 
 		var lightBelow = new THREE.DirectionalLight(0x303030, 0.2);
 		lightBelow.position.set(0, -1, 0.25);
@@ -114,11 +116,14 @@ define("cube_pixelator", [], function() {
 		document.body.appendChild(renderer.domElement);
 		render(0);
 		setInterval(toggleImage, 6000);
+
+		progress("render:complete", renderer.domElement);
 	}
 
 	const toggleImage = () => {
 		currentImage ++;
 		currentImage %= images.length;
+		con.log("toggleImage", currentImage)
 		var newRotations = images[currentImage].slice();
 		for (var i = 0; i < pixels * pixels; i++) {
 			TweenMax.to(rotations[i], 3, {
@@ -138,21 +143,19 @@ define("cube_pixelator", [], function() {
 		});
 		// holder.rotation.x += Math.PI * 0.005;
 		// camPos.z = 100; //ortho camera
-		camPos.z = 400 + Math.sin(time * 0.0003) * 300;
-		// camPos.y = -cubeSize * pixels + Math.sin(time * 0.00017) * 200;
-		// camPos.x = 0 + Math.sin(time * 0.00012) * 200;
+		camPos.x = 0 + Math.sin(time * 0.00012) * 50;
+		// camPos.y = -cubeSize * pixels + Math.sin(time * 0.00017) * 50;
+		camPos.y = 0 + Math.sin(time * 0.00017) * 50;
+		camPos.z = 400 + Math.sin(time * 0.0001) * 300;
+
 		camera.position.set(camPos.x, camPos.y, camPos.z);
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
 		requestAnimationFrame(render);
-		// setTimeout(() => render(time+1), 200);
 	}
-
-
 
 	return {
 		init: init
 	}
 
 });
-

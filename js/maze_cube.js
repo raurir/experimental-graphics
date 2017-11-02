@@ -1,8 +1,5 @@
 define("maze_cube", ["linked_line"], function(linkedLine) {
 
-	const progress = dom.element("div", {id: "progress", style: {height: "20px", width: 0, background: "#ddd"}});
-	document.body.appendChild(progress);
-
 	const blocks = 11;
 	const cubeSize = 1512;
 	const size = cubeSize / blocks;
@@ -39,7 +36,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		let add = (maze) => {
 			con.log("adding walls:", mazes.length, maze.wallrects.length);
 			mazes.push(maze.wallrects);
-			progress.style.width = `${mazes.length / 6 * 100}%`;
+			progress("render:progress", mazes.length / 6);
 		}
 
 		perf.start('gen');
@@ -56,7 +53,6 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 			.then(() => {
 				con.log("success");
 				perf.end('gen');
-				progress.style.height = 0;
 				init3D(mazes);
 			})
 			.catch((err) => {con.warn("fail", err)});
@@ -141,6 +137,7 @@ define("maze_cube", ["linked_line"], function(linkedLine) {
 		makeFace({maze: mazes[5], rotation: {y: 1.5, z: 1}, colour: 0x00ffff});
 
 		document.body.appendChild(renderer.domElement);
+		progress("render:complete", renderer.domElement);
 		render(0);
 
 		function exportToObj() {
