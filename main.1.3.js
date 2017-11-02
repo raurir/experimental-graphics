@@ -32,7 +32,7 @@ require.config({
 	},
 });
 
-console.log("v1.2");
+console.log("v1.3");
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
 	console.log("ready");
