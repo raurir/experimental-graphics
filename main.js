@@ -26,6 +26,7 @@ require.config({
 		"creature": "creature_creator/creature",
 		"ease": "../lib/robertpenner/ease",
 		"noise": "../lib/josephg/noisejs",
+		"Tone": "../lib/tonejs/Tone.min",
 		"THREE": "../lib/three/three.min",
 		"TweenMax": "../lib/greensock/TweenMax.min",
 	},

@@ -22,18 +22,6 @@ function exps() {
     progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
     document.body.appendChild(progressBar);
 
-
-    // require.config({
-    //   baseUrl: "js",
-    //   urlArgs: "bust=" + (new Date()).getTime(),
-    //   paths: {
-    //     "THREE": "../lib/three/three.min",
-    //     "TweenMax": "../lib/greensock/TweenMax.min",
-    //     "creature": "creature_creator/creature",
-    //     "box": "games/box"
-    //   },
-    // });
-
     var experiments = [
       ["molecular_three", "THREE"],
 
@@ -80,6 +68,7 @@ function exps() {
       ["recursive_polygon"],
       ["spiral_even"],
       ["squaretracer"],
+      ["synth_ambient", "Tone"],
       ["tea"],
       ["tetris_cube", "THREE", "TweenMax"],
       ["text_grid"],
