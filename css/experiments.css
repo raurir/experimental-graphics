@@ -42,12 +42,34 @@ body {
   width: 0;
   z-index: 100;
 }
+.exps-buttons {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  transition: top 0.2s ease-in, opacity 0.3s linear;
+  opacity: 0;
+}
+.exps-buttons.interacted {
+  top: 0;
+  opacity: 1;
+}
+.exps-buttons .exps-button {
+  background: #fff;
+  box-sizing: border-box;
+  color: #000;
+  display: inline-block;
+  float: right;
+  font-size: 10px;
+  height: 20px;
+  margin-left: 2px;
+  padding: 4px 6px;
+}
 .exp {
-  line-height: 20px;
-  margin: 4px;
   background: #fff;
   border: none;
   color: #000;
+  line-height: 20px;
+  margin: 4px;
 }
 @media (min-width: 500px) {
   .exp {
