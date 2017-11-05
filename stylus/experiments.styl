@@ -1,9 +1,9 @@
+colourWhite = rgba(255,255,255,0.9)
 body
   background #666
-  // background #000
+  font-family sans-serif
   // background rgba(0,0,0,1)
   // overflow hidden
-  font-family verdana
   margin 0
   padding 0
 
@@ -11,7 +11,7 @@ body
 //   border 1px solid #444
 
 .experiments-loader
-  position: absolute
+  position absolute
   background rgba(50,50,50,0.3)
   top 0
   left 0
@@ -46,16 +46,17 @@ body
   z-index 100
 
 .exps-buttons
-  position absolute
-  top -20px
-  right 0
-  transition top 0.2s ease-in, opacity 0.3s linear
+  box-shadow 0px 0px 2px 0px rgba(0,0,0,0.5)
   opacity 0
+  position absolute
+  right 0
+  top -20px
+  transition top 0.2s ease-in, opacity 0.3s linear
   &.interacted
     top 0
     opacity 1
   .exps-button
-    background white
+    background colourWhite
     box-sizing border-box
     color black
     display inline-block
@@ -66,11 +67,35 @@ body
     padding 4px 6px
 
 .exp
-  background white
+  background colourWhite
   border none
   color black
   line-height 20px
   margin 4px
+
+.exps-info
+  background colourWhite
+  box-shadow 0px 0px 2px 0px rgba(0,0,0,0.5)
+  box-sizing border-box
+  height 80%
+  left 10%
+  opacity 0
+  padding 5%
+  position absolute
+  top 100%
+  transition top 0.5s ease-in-out, opacity 0.3s linear
+  width 80%
+  &.displayed
+    opacity 1
+    top 10%
+  h1
+    color #333
+    margin-top 0
+  .exps-info-details
+    overflow-x hidden
+    overflow-y auto
+    color black
+    height 100%
 
 @media (min-width:500px)
   .exp

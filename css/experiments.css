@@ -1,6 +1,6 @@
 body {
   background: #666;
-  font-family: verdana;
+  font-family: sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -43,18 +43,19 @@ body {
   z-index: 100;
 }
 .exps-buttons {
-  position: absolute;
-  top: -20px;
-  right: 0;
-  transition: top 0.2s ease-in, opacity 0.3s linear;
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.5);
   opacity: 0;
+  position: absolute;
+  right: 0;
+  top: -20px;
+  transition: top 0.2s ease-in, opacity 0.3s linear;
 }
 .exps-buttons.interacted {
   top: 0;
   opacity: 1;
 }
 .exps-buttons .exps-button {
-  background: #fff;
+  background: rgba(255,255,255,0.9);
   box-sizing: border-box;
   color: #000;
   display: inline-block;
@@ -65,11 +66,38 @@ body {
   padding: 4px 6px;
 }
 .exp {
-  background: #fff;
+  background: rgba(255,255,255,0.9);
   border: none;
   color: #000;
   line-height: 20px;
   margin: 4px;
+}
+.exps-info {
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.5);
+  box-sizing: border-box;
+  height: 80%;
+  left: 10%;
+  opacity: 0;
+  padding: 5%;
+  position: absolute;
+  top: 100%;
+  transition: top 0.5s ease-in-out, opacity 0.3s linear;
+  width: 80%;
+}
+.exps-info.displayed {
+  opacity: 1;
+  top: 10%;
+}
+.exps-info h1 {
+  color: #333;
+  margin-top: 0;
+}
+.exps-info .exps-info-details {
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: #000;
+  height: 100%;
 }
 @media (min-width: 500px) {
   .exp {

@@ -13,7 +13,9 @@ function progress(eventName, eventParam) {
   }
 }
 
-function exps(experiments, about) {
+function exps(experimentsDetails) {
+
+  var experiments = experimentsDetails.list;
 
   return function() {
 
@@ -27,15 +29,25 @@ function exps(experiments, about) {
 
     var buttonClose = dom.button("X", {className: "exps-button"});
     buttonsNav.appendChild(buttonClose);
-    dom.on(buttonClose, ["click"], function(e) {
+    dom.on(buttonClose, ["click", "touchend"], function(e) {
       window.location = "/";
     });
 
     var buttonInfo = dom.button("?", {className: "exps-button"});
     buttonsNav.appendChild(buttonInfo);
-    dom.on(buttonInfo, ["click"], function(e) {
-      alert(info)
-    });
+    dom.on(buttonInfo, ["click", "touchend"], showInfo);
+
+    var panelInfo = dom.element("div", {className: "exps-info"});
+    var panelInfoDetails = dom.element("div", {className: "exps-info-details"});
+    var panelNav = dom.element("div", {className: "exps-buttons interacted"});
+    var panelButtonClose = dom.button("X", {className: "exps-button"});
+
+    dom.on(panelButtonClose, ["click", "touchend"], hideInfo);
+
+    document.body.appendChild(panelInfo);
+    panelInfo.appendChild(panelNav);
+    panelNav.appendChild(panelButtonClose);
+    panelInfo.appendChild(panelInfoDetails);
 
     var holder = dom.element("div");
     document.body.appendChild(holder);
@@ -77,6 +89,16 @@ function exps(experiments, about) {
       }
     }
 
+    function showInfo() {
+      panelInfo.classList.add("displayed");
+      panelInfoDetails.innerHTML = "<h1>Experimental Graphics - " + info.title + "</h1>"
+        + info.description;
+    }
+
+    function hideInfo() {
+      panelInfo.classList.remove("displayed");
+    }
+
     if (window.location.search) {
       var key = window.location.search.split("?")[1], index = 0, found = false;
       var seed = key.split(",");
@@ -98,10 +120,12 @@ function exps(experiments, about) {
       }
       loadExperiment(index);
 
-      info = about.getDescription(key);
+      info = experimentsDetails.getDetails(key);
+      con.log('info', info);
       if (!info) {
         buttonsNav.removeChild(buttonInfo);
       }
+      // showInfo();
       dom.on(document.body, ["click", "touchstart"], function(e) {
         buttonsNav.classList.add("interacted");
         setTimeout(function() {
@@ -160,11 +184,11 @@ function exps(experiments, about) {
     // document.body.appendChild(colours.showPalette());
 
     return {
-     load: loadExperiment,
-     experiments: experiments
+      load: loadExperiment,
+      experiments: experiments
     };
   }
 
 };
 
-define("exps", ["exps_active", "exps_about"], exps);
+define("exps", ["exps_details"], exps);
