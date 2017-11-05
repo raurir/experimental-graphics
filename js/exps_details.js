@@ -16,7 +16,7 @@ define("exps_details", function() {
     ["circle_packing"],
     ["circle_packing_zoom_loop"],
     ["circle_sectors"],
-    ["codevember", "THREE"],
+    ["codevember", "THREE", "TweenMax"],
     ["corona_sine"],
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
     ["cube_pixelator", "THREE", "TweenMax"],
@@ -76,10 +76,10 @@ define("exps_details", function() {
     getFeature: function(key) {
       var features = {
         "codevember": [
-          {"day": 1, "exp": "synth_ambient"},
-          {"day": 2, "exp": "cube_pixelator"},
-          {"day": 3, "exp": "Refactored Experiments"},
-          {"day": 4, "exp": "Made Codevember"},
+          {"day": 1, "title": details.cube_pixelator.title, "link": "cube_pixelator"},
+          {"day": 2, "title": details.synth_ambient.title, "link": "synth_ambient"},
+          {"day": 3, "title": "Refactored Experiments"}, // not actually an experiment
+          {"day": 4, "title": "Made Codevember"}, // not actually an experiment
         ]
       }
       return features[key] || false;
