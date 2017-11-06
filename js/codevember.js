@@ -32,11 +32,12 @@ define("codevember", ["exps_details"], function(experimentsDetails) {
 		document.body.appendChild(dom.element("style", {
 			innerText: [
 				"a { color: white; }",
+				"a:hover { color: #87d9ff; text-shadow: 0px 0px 16px #fff; }",
 				"div { box-sizing: border-box;}",
 				".holder { color: white; display: block; position: absolute; top: 20%; left: 10%;",
 				" transform: rotate3d(0.3, 0.5, 0.9, 8deg); width: 100%; z-index: 50; }",
 				".item { display: block; clear: both; line-height: 25px; }",
-				".day { display: inline-block; float: left; padding-right: 10px; text-align: right; width: 20%; }",
+				".day { color: #bcd1d6; display: inline-block; float: left; padding-right: 10px; text-align: right; width: 20%; }",
 				".title { display: inline-block; float: left; width: 80%; }",
 			].join(" ")
 		}));

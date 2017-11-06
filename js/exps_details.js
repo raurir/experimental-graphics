@@ -23,6 +23,7 @@ define("exps_details", function() {
     ["fool", "css/fool"],
     ["hexagon_tile"],
     ["isometric_cubes"],
+    ["isometric_words", "THREE", "TweenMax"],
     ["linked_line"],
     ["mandala"],
     ["maze"],
@@ -63,6 +64,10 @@ define("exps_details", function() {
       "title": "Cube pixelator",
       "description": "<p>Should be called 'Plane pixelator' since they are planes, not cubes.</p><p>Planes are distributed through a 2 dimensional grid with each plane representing a pixel.</p><p>Each plane is exactly the same colour and this colour never changes. Instead, each plane rotates accordingly to catch the lighting within the scene and by doing so adapts its apparent shade, and thereby creates an image.</p>"
     },
+    "isometric_words": {
+      "title": "Isometric Words",
+      "description": "<p>Muddling up cubes by using the simplicity of Isometric projection.</p><p>Randomly offset the objects along the same axis the camera is looking down.</p>"
+    },
     "synth_ambient": {
       "title": "Synth Ambient",
       "description": "<h2>This will be loud!</h2><p>A quick trip into audio synthesis in the browser.</p><p>That's the thing about synthesis, you can create out of control waveforms quite easily, hence the volume.</p><p>Using <a href='https://github.com/Tonejs/Tone.js' target='_blank'>Tone.js</a> for all the audio generation, this experiment creates a number of randomised effects, a bunch of randomised synthesizers, and with those creates a randomised drum track, randomised chords and a ranomised arpeggio.</p>"
@@ -80,6 +85,8 @@ define("exps_details", function() {
           {"day": 2, "title": details.synth_ambient.title, "link": "synth_ambient"},
           {"day": 3, "title": "Refactored Experiments"}, // not actually an experiment
           {"day": 4, "title": "Made Codevember"}, // not actually an experiment
+          {"day": 5, "title": "fail :("}, // might back fill this one, probably have some more fails though
+          {"day": 6, "title": details.isometric_words.title, "link": "isometric_words"}
         ]
       }
       return features[key] || false;
