@@ -1,5 +1,7 @@
 define("infinite_scrolling_cogs", function() {
 
+	// this is a port of code from 21-07-2013: https://codepen.io/raurir/details/eknLg/
+
 	var sw = window.innerWidth, sh = window.innerHeight;
 
 	function makeCanvas(w,h) {
@@ -90,7 +92,7 @@ define("infinite_scrolling_cogs", function() {
 			}
 
 
-			if ( size < 50 || size > 300) {
+			if ( size < 50 || size > 400) {
 				// con.log("Too close! Try clicking further away from the last cog..." );
 				return;
 			}
@@ -306,7 +308,7 @@ define("infinite_scrolling_cogs", function() {
 			requestAnimationFrame(onLoop);
 			scrollY--;
 
-			if (scrollY - sh - 100 < -cy ) {
+			if (scrollY - sh - 200 < -cy ) {
 				incrementCog();
 			}
 
@@ -325,8 +327,8 @@ define("infinite_scrolling_cogs", function() {
 		function incrementCog() {
 			// lean towards left or right depending on current trend away from centre
 			var newX = (cx < sw / 2
-				? number(-1, 3)
-				: number(-3, 1)) * 50;
+				? number(0, 3)
+				: number(-3, 0)) * sw / 12;
 			var x = cx + newX;
 			createCog(x, y);
 			y = cy + number(0, 200);
