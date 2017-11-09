@@ -16,13 +16,14 @@ define("exps_details", function() {
     ["circle_packing"],
     ["circle_packing_zoom_loop"],
     ["circle_sectors"],
-    ["cube_fractal_zoom", "THREE", "TweenMax"],
     ["codevember", "THREE", "TweenMax"],
     ["corona_sine"],
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
+    ["cube_fractal_zoom", "THREE", "TweenMax"],
     ["cube_pixelator", "THREE", "TweenMax"],
     ["fool", "css/fool"],
     ["hexagon_tile"],
+    ["infinite_scrolling_cogs"],
     ["isometric_cubes"],
     ["isometric_words", "THREE", "TweenMax"],
     ["linked_line"],
@@ -76,7 +77,11 @@ define("exps_details", function() {
     "cube_fractal_zoom": {
       "title": "Cube Fractal Zoom",
       "description": "<p>Zooming into a cube that subdivides into muliple cubes.</p><p>Envisioned version is for each subdivision to be variable slice amounts rather than 2x2x2. Someday.</p><p>Also would like some kind of infinite shader, potentially perlin noise.</p>"
-    }
+    },
+    "infinite_scrolling_cogs": {
+      "title": "Infinite Scrolling Cogs",
+      "description": "<p>Remake of <a href='https://codepen.io/raurir/pen/eknLg' target='_blank'>an old experiment</a> this time it's scrolling, non ineractive and more of a toon rendering style.</p><p>The thing I liked the best about the original, and this algorithm, is the cogs are very close to mathematically correct; not only do they animate in a life like fashion on screen, I am confident a 3D print of the geometry involved would result in a smoothly running friction free machine.</p><p>This algorithm continually creates canvases with no garbage collection. It will crash the browser eventually, I imagine, but you'd be bored after a minute anyway?</p>"
+    },
   };
   return {
     list: list,
@@ -93,8 +98,8 @@ define("exps_details", function() {
           {"day": 5, "title": "fail :("}, // might back fill this one, probably have some more fails though
           {"day": 6, "title": details.isometric_words.title, "link": "isometric_words"},
           {"day": 7, "title": "fail ..."},
-          {"day": 8, "title": "fail :|"},
-          {"day": 9, "title": details.cube_fractal_zoom.title, "link": "cube_fractal_zoom"},
+          {"day": 8, "title": details.cube_fractal_zoom.title, "link": "cube_fractal_zoom"},
+          {"day": 9, "title": details.infinite_scrolling_cogs.title, "link": "infinite_scrolling_cogs"},
         ]
       }
       return features[key] || false;

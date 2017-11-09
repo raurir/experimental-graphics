@@ -59,6 +59,7 @@ body {
   border-left: 1px solid #000;
   box-sizing: border-box;
   color: #000;
+  cursor: pointer;
   display: inline-block;
   float: right;
   font-size: 10px;
@@ -93,6 +94,15 @@ body {
 .exps-info h1 {
   color: #333;
   margin-top: 0;
+}
+.exps-info h4 {
+  text-transform: uppercase;
+  martin-top: 0;
+  color: #666;
+}
+.exps-info a,
+.exps-info a:visited {
+  color: #000;
 }
 .exps-info .exps-info-details {
   overflow-x: hidden;

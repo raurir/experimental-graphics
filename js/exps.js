@@ -94,7 +94,7 @@ function exps(experimentsDetails) {
     function showInfo() {
       infoShowing = true;
       panelInfo.classList.add("displayed");
-      panelInfoDetails.innerHTML = "<h1>Experimental Graphics - " + info.title + "</h1>"
+      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4><h1>" + info.title + "</h1>"
         + info.description;
     }
 
