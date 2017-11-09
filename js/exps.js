@@ -85,8 +85,14 @@ function exps(experimentsDetails) {
           window.location = "?" + event.target.key;
         });
         var key = experiments[e][0];
+        var title = key;
+        var expDetails = experimentsDetails.getDetails(key);
+        if (expDetails && expDetails.title) {
+          title = expDetails.title;
+        }
         button.key = key
-        button.innerHTML = key;
+        button.innerHTML = title;
+        con.log("experimentsDetails.getDetails(key);", )
         document.body.appendChild(button);
       }
     }
@@ -125,7 +131,6 @@ function exps(experimentsDetails) {
       loadExperiment(index);
 
       info = experimentsDetails.getDetails(key);
-      con.log('info', info);
       if (!info) {
         buttonsNav.removeChild(buttonInfo);
       }
@@ -187,6 +192,7 @@ function exps(experimentsDetails) {
 
     // document.body.appendChild(colours.showPalette());
 
+    // document.body.innerHTML = window.innerWidth;
     return {
       load: loadExperiment,
       experiments: experiments

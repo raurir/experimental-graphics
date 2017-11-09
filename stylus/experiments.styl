@@ -82,7 +82,7 @@ body
   opacity 0
   padding 5%
   position absolute
-  top 0%
+  top -20%
   transition top 0.5s ease-in-out, opacity 0.3s linear, height 0.3s linear
   width 80%
   &.displayed
@@ -105,7 +105,14 @@ body
     color black
     height 100%
 
-@media (min-width:500px)
+@media (max-width:900px)
   .exp
     line-height 40px
     font-size 15px
+
+  .exps-buttons
+    top -40px
+    .exps-button
+      font-size 20px
+      height 40px
+      padding 8px 12px

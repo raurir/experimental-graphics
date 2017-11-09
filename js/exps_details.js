@@ -2,11 +2,8 @@ define("exps_details", function() {
 
   var list = [
 
-    ["molecular_three", "THREE"],
-
-    ["unknown"],
-    ["_test"],
-
+    // ["unknown"],
+    // ["_test"],
 
     ["additive"],
     ["anemone_three", "THREE"],
@@ -32,6 +29,7 @@ define("exps_details", function() {
     ["maze_cube", "linked_line", "THREE"],//, "https://threejs.org/examples/js/exporters/OBJExporter.js"],//  "lib/three/OBJExporter.js", "lib/three/OrbitControls.js"],
     ["meandering_polygons"],
     ["mining_branches"],
+    ["molecular_three", "THREE"],
     ["nested_rotating_polygon", "ease"],
     ["oscillate_curtain"],
     ["overflow"],
