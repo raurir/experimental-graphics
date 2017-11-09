@@ -72,6 +72,10 @@ define("exps_details", function() {
     "synth_ambient": {
       "title": "Synth Ambient",
       "description": "<h2>This will be loud!</h2><p>A quick trip into audio synthesis in the browser.</p><p>That's the thing about synthesis, you can create out of control waveforms quite easily, hence the volume.</p><p>Using <a href='https://github.com/Tonejs/Tone.js' target='_blank'>Tone.js</a> for all the audio generation, this experiment creates a number of randomised effects, a bunch of randomised synthesizers, and with those creates a randomised drum track, randomised chords and a ranomised arpeggio.</p>"
+    },
+    "cube_fractal_zoom": {
+      "title": "Cube Fractal Zoom",
+      "description": ""
     }
   };
   return {
@@ -87,7 +91,10 @@ define("exps_details", function() {
           {"day": 3, "title": "Refactored Experiments"}, // not actually an experiment
           {"day": 4, "title": "Made Codevember"}, // not actually an experiment
           {"day": 5, "title": "fail :("}, // might back fill this one, probably have some more fails though
-          {"day": 6, "title": details.isometric_words.title, "link": "isometric_words"}
+          {"day": 6, "title": details.isometric_words.title, "link": "isometric_words"},
+          {"day": 7, "title": "fail ..."},
+          {"day": 8, "title": "fail :|"},
+          {"day": 9, "title": details.cube_fractal_zoom.title, "link": "cube_fractal_zoom"},
         ]
       }
       return features[key] || false;

@@ -20,6 +20,8 @@ function exps(experimentsDetails) {
   return function() {
 
     var info;
+    var infoShowing = false;
+    var interactedShowing = false;
 
     progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
     document.body.appendChild(progressBar);
@@ -90,6 +92,7 @@ function exps(experimentsDetails) {
     }
 
     function showInfo() {
+      infoShowing = true;
       panelInfo.classList.add("displayed");
       panelInfoDetails.innerHTML = "<h1>Experimental Graphics - " + info.title + "</h1>"
         + info.description;
@@ -97,6 +100,7 @@ function exps(experimentsDetails) {
 
     function hideInfo() {
       panelInfo.classList.remove("displayed");
+      infoShowing = false;
     }
 
     if (window.location.search) {
@@ -127,9 +131,12 @@ function exps(experimentsDetails) {
       }
       // showInfo();
       dom.on(document.body, ["click", "touchstart"], function(e) {
+        if (interactedShowing) return;
+        interactedShowing = true;
         buttonsNav.classList.add("interacted");
         setTimeout(function() {
           buttonsNav.classList.remove("interacted");
+          interactedShowing = false;
         }, 3000);
         // dom.on(document.body, ["mousemove", ], function(e) {
         //   buttonsNav.classList.add('interacted');

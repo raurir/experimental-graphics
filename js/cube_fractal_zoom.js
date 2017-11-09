@@ -44,8 +44,7 @@ define("cube_fractal_zoom", function() {
 			// wireframe: true,
 		});
 		const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-		const mesh = new THREE.Mesh(geometry, material);
-		return mesh;
+		return new THREE.Mesh(geometry, material);
 	}
 
 	function init() {
@@ -61,7 +60,7 @@ define("cube_fractal_zoom", function() {
 		lightA = new THREE.DirectionalLight(0xff0000, 1);
 		scene.add(lightA);
 
-		lightB = new THREE.DirectionalLight(0x80a000, 1);
+		lightB = new THREE.DirectionalLight(0xc0a000, 1);
 		scene.add(lightB);
 
 		lightC = new THREE.DirectionalLight(0xff9900, 1);
@@ -73,7 +72,7 @@ define("cube_fractal_zoom", function() {
 		holder = new THREE.Group();
 		scene.add(holder);
 
-		lightAmbient = new THREE.AmbientLight(0xffffff, 0.2);
+		var lightAmbient = new THREE.AmbientLight(0xffe0e0, 0.2);
 		scene.add(lightAmbient);
 
 		prev = cubes(2);
