@@ -16,6 +16,7 @@ define("exps_details", function() {
     ["circle_packing"],
     ["circle_packing_zoom_loop"],
     ["circle_sectors"],
+    ["cube_fractal_zoom", "THREE", "TweenMax"],
     ["codevember", "THREE", "TweenMax"],
     ["corona_sine"],
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
