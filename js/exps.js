@@ -134,13 +134,10 @@ function exps(experimentsDetails) {
         if (interactedShowing) return;
         interactedShowing = true;
         buttonsNav.classList.add("interacted");
-        setTimeout(function() {
-          buttonsNav.classList.remove("interacted");
-          interactedShowing = false;
-        }, 3000);
-        // dom.on(document.body, ["mousemove", ], function(e) {
-        //   buttonsNav.classList.add('interacted');
-        // });
+        // setTimeout(function() {
+        //   buttonsNav.classList.remove("interacted");
+        //   interactedShowing = false;
+        // }, 3000);
       });
 
     } else {

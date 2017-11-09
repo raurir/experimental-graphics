@@ -75,7 +75,7 @@ define("exps_details", function() {
     },
     "cube_fractal_zoom": {
       "title": "Cube Fractal Zoom",
-      "description": ""
+      "description": "<p>Zooming into a cube that subdivides into muliple cubes.</p><p>Envisioned version is for each subdivision to be variable slice amounts rather than 2x2x2. Someday.</p><p>Also would like some kind of infinite shader, potentially perlin noise.</p>"
     }
   };
   return {
