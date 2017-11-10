@@ -92,7 +92,6 @@ function exps(experimentsDetails) {
         }
         button.key = key
         button.innerHTML = title;
-        con.log("experimentsDetails.getDetails(key);", )
         document.body.appendChild(button);
       }
     }
