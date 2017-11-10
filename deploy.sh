@@ -20,6 +20,9 @@ do
   fi
 done
 
+echo "Happy with no errors? About to deploy"
+read input_variable
+
 cd ../raurir.github.io/
 
 git add .
