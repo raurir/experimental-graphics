@@ -104,7 +104,7 @@ define("exps_details", function() {
           {"day": 8, "title": details.cube_fractal_zoom.title, "link": "cube_fractal_zoom"},
           {"day": 9, "title": details.infinite_scrolling_cogs.title, "link": "infinite_scrolling_cogs"},
           {"day": 10, "title": "nope :|"},
-          {"day": 11, "title": deails.infinite_stairs.title, "link" : "infinite_stairs"},
+          {"day": 11, "title": details.infinite_stairs.title, "link" : "infinite_stairs"},
         ]
       }
       return features[key] || false;
