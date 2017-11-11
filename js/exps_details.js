@@ -21,6 +21,7 @@ define("exps_details", function() {
     ["fool", "css/fool"],
     ["hexagon_tile"],
     ["infinite_scrolling_cogs"],
+    ["infinite_stairs", "THREE"],
     ["isometric_cubes"],
     ["isometric_words", "THREE", "TweenMax"],
     ["linked_line"],
