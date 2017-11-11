@@ -81,6 +81,10 @@ define("exps_details", function() {
       "title": "Infinite Scrolling Cogs",
       "description": "<p>Remake of <a href='https://codepen.io/raurir/pen/eknLg' target='_blank'>an old experiment</a> this time it's scrolling, non ineractive and more of a toon rendering style.</p><p>The thing I liked the best about the original, and this algorithm, is the cogs are very close to mathematically correct; not only do they animate in a life like fashion on screen, I am confident a 3D print of the geometry involved would result in a smoothly running friction free machine.</p><p>This algorithm continually creates canvases with no garbage collection. It will crash the browser eventually, I imagine, but you'd be bored after a minute anyway?</p>"
     },
+    "infinite_stairs": {
+      "title": "Infinite Stairs",
+      "description": "<p>Work in progress</p><p>Trying to make an infinite staircase, potentially spooky.</p>"
+    },
   };
   return {
     list: list,
@@ -99,6 +103,8 @@ define("exps_details", function() {
           {"day": 7, "title": "fail ..."},
           {"day": 8, "title": details.cube_fractal_zoom.title, "link": "cube_fractal_zoom"},
           {"day": 9, "title": details.infinite_scrolling_cogs.title, "link": "infinite_scrolling_cogs"},
+          {"day": 10, "title": "nope :|"},
+          {"day": 11, "title": deails.infinite_stairs.title, "link" : "infinite_stairs"},
         ]
       }
       return features[key] || false;
