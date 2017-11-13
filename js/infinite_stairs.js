@@ -20,11 +20,13 @@ define("infinite_stairs", function() {
 		var numSteps = 6;//rand.getInteger(10, 20);
 		var treadHeight = stepHeight / 4;
 		var treadDepth = stepDepth * 1.25;
+		var numLandingSteps = Math.floor(flightWidth / treadDepth);
+
 		var flight = new THREE.Group();
 		holder.add(flight);
 
 		var materialWood = new THREE.MeshPhongMaterial({map: textures["wood-dark.jpg"]});
-		var materialWall = new THREE.MeshPhongMaterial({map: textures["mouldy-white-paint.png"]});
+		// var materialWall = new THREE.MeshPhongMaterial({map: textures["mouldy-white-paint.png"]});
 		// materialWood = new THREE.MeshPhongMaterial({wireframe: true});
 		// materialWall = new THREE.MeshPhongMaterial({wireframe: true});
 
@@ -46,7 +48,7 @@ define("infinite_stairs", function() {
 			}
 			return geometry;
 		}
-
+		/*
 		for (var i = 0; i < numSteps; i++) {
 			var riserGeom = randUV(new THREE.BoxGeometry(flightWidth, stepHeight - treadHeight, 1));
 			var riser = new THREE.Mesh(riserGeom, materialWood);
@@ -65,7 +67,6 @@ define("infinite_stairs", function() {
 			}
 		}
 
-		var numLandingSteps = Math.floor(flightWidth / treadDepth);
 		for (var i = 0; i < numLandingSteps; i++) {
 			var treadGeom = randUV(new THREE.BoxGeometry(flightWidth, treadHeight, treadDepth));
 			var tread = new THREE.Mesh(treadGeom, materialWood);
@@ -76,16 +77,44 @@ define("infinite_stairs", function() {
 			tread.receiveShadow = true;
 			flight.add(tread);
 		}
+		*/
+
+		var wallHeight = numSteps * stepHeight * 2     * 4; // HACK
+		var wallWidth = numSteps * stepDepth * 2.3     * 4; // HACK
+		var wallPanelWidth = 100;
+		var wallPanelDepth = 5;
+		var wallPanelHeight = wallHeight;
+		var wallPanelSpacing = 105;
+
+		var numWallPanels = Math.floor(wallWidth / wallPanelWidth);
+
 
 		function createWall(xFlip) {
-			var wallHeight = numSteps * stepHeight * 2     * 4; // HACK
-			var wallDepth = numSteps * stepDepth * 2.3     * 4; // HACK
-			var wallGeom = randUV(new THREE.BoxGeometry(1, wallHeight, wallDepth));
-			var wall = new THREE.Mesh(wallGeom, materialWall);
-			wall.position.set(xFlip * flightWidth / 2, wallHeight / 2 - stepHeight / 2, wallDepth / 2 - stepDepth / 2);
-			wall.castShadow = true;
-			wall.receiveShadow = true;
+
+			var wall = new THREE.Group();
 			flight.add(wall);
+			// wall.position.set(xFlip * flightWidth / 2, wallHeight / 2 - stepHeight / 2, wallWidth / 2 - stepDepth / 2);
+			wall.position.set(xFlip * flightWidth / 2, 0, 0);
+
+			for (var i = 0; i < numWallPanels; i++) {
+
+				var wallGeom = randUV(new THREE.BoxGeometry(wallPanelDepth, wallPanelHeight, wallPanelWidth));
+				var wallPanel = new THREE.Mesh(wallGeom, materialWood);
+				wallPanel.position.set(0, 0, i * wallPanelSpacing);
+				wallPanel.castShadow = true;
+				wallPanel.receiveShadow = true;
+				wall.add(wallPanel);
+
+			}
+
+
+			// var wallGeom = randUV(new THREE.BoxGeometry(1, wallHeight, wallWidth));
+			// // var wall = new THREE.Mesh(wallGeom, materialWall);
+			// var wall = new THREE.Mesh(wallGeom, materialWood);
+			// wall.position.set(xFlip * flightWidth / 2, wallHeight / 2 - stepHeight / 2, wallWidth / 2 - stepDepth / 2);
+			// wall.castShadow = true;
+			// wall.receiveShadow = true;
+			// flight.add(wall);
 			return wall;
 		}
 		if (numFlight == 0) { // HACK
@@ -127,7 +156,7 @@ define("infinite_stairs", function() {
 
 		loadTextures([
 			"wood-dark.jpg",
-			"mouldy-white-paint.png"
+			// "mouldy-white-paint.png"
 		]);
 
 		scene = new THREE.Scene();
@@ -136,7 +165,7 @@ define("infinite_stairs", function() {
 		scene.add(camera);
 
 		camera.position.set(0, 250, -100);
-		// camera.position.set(500, 600, 100);
+		camera.position.set(1500, 1600, -1000); // TEMP
 		// camera.lookAt(scene.position);
 		camera.lookAt(new THREE.Vector3(0, 250, 100));
 
@@ -148,21 +177,21 @@ define("infinite_stairs", function() {
 		// renderer.shadowMap.type = THREE.PCFShadowMap;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-		light = makeLight(0xf2eee3, 3, 400);
-		light.position.set(0, 400, 300);
+		// light = makeLight(0xf2eee3, 3, 400);
+		// light.position.set(0, 400, 300);
 
-		light = makeLight(0xd8cba2, 1, 200);
-		light.position.set(0, 200, 100);
+		// light = makeLight(0xd8cba2, 1, 200);
+		// light.position.set(0, 200, 100);
 
 		holder = new THREE.Group();
 		scene.add(holder);
 
 		var first = createFlight(0);
-		var second = createFlight(1);
-		second.flight.position.set(0, first.end.y, first.end.z);
+		// var second = createFlight(1);
+		// second.flight.position.set(0, first.end.y, first.end.z);
 
-		// var lightAmbient = new THREE.AmbientLight(0xffffff, 0.1);
-		// scene.add(lightAmbient);
+		var lightAmbient = new THREE.AmbientLight(0xffffff, 1);
+		scene.add(lightAmbient);
 
 		document.body.appendChild(renderer.domElement);
 		render(0);
