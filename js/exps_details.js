@@ -5,6 +5,7 @@ define("exps_details", function() {
     // ["unknown"],
     // ["_test"],
 
+    ["747s"],
     ["additive"],
     ["anemone_three", "THREE"],
     ["any_image_url"],
