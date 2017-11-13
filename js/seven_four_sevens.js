@@ -1,4 +1,4 @@
-define("747s", function() {
+define("seven_four_sevens", function() {
 
 	// this is a remake of an old flash experiment
 	// have not done the 'chem trails' yet, maybe one day
@@ -8,6 +8,19 @@ define("747s", function() {
 	var sw = 900, sh = 600;
 	var canvas = dom.canvas(sw, sh);
 	var images = [];
+	var planes = [];
+	var text = dom.element("div", {innerText: "Click to make a new waypoint, shift click to add multiple", style: {color: "white"}});
+	var button = dom.button("Add planes", {className: "button"});
+	document.body.appendChild(text);
+	document.body.appendChild(button);
+
+	dom.on(canvas.canvas, ["click"], function(e) {
+		if (!e.shiftKey) _root.holdingpattern = [];
+		_root.holdingpattern.push({_x: e.x, _y: e.y});
+	});
+	dom.on(button, ["click"], function(e) {
+		planes.push(Plane());
+	});
 
 	var _root = {
 		holdingpattern: [
@@ -15,17 +28,10 @@ define("747s", function() {
 			{_x: rand.getNumber(0, sw), _y: rand.getNumber(0, sh)},
 			{_x: rand.getNumber(0, sw), _y: rand.getNumber(0, sh)},
 		],
-		_xmouse: sw / 2,
-		_ymouse: sh / 2,
 		createSmoke: function() {
 			// this used to draw chem trails
 		}
 	}
-
-	dom.on(canvas.canvas, ["click"], function(e) {
-		_root._xmouse = e.x;
-		_root._ymouse = e.y;
-	});
 
 	function Plane() {
 		var PI = Math.PI;
@@ -50,31 +56,31 @@ define("747s", function() {
 		var _y = Math.random() * sh;
 		var dir = Math.random() * PI2;
 		var speed = Math.random() * 0.4 + 2;
+		var scale = (speed - 1) / 2;// + Math.random() * 0.2;
+		con.log(speed, scale)
 		var turnMax = Math.random() * 0.03 + 0.01;
 		var turnRate = turnMax / 20;
 		// onEnterFrame = moveIt; // RIP :)
 
-		var holdingpatternpos = parseInt(Math.random() * 3);
+		var holdingpatternpos = Math.floor(Math.random() * _root.holdingpattern.length);
 		var targ = _root.holdingpattern[holdingpatternpos];
 
 		function moveIt()
 		{
 			if (!targ) {
-				xdelta = _x - _root._xmouse;
-				ydelta = _y - _root._ymouse;
+				holdingpatternpos = Math.floor(Math.random() * _root.holdingpattern.length);
+				targ = _root.holdingpattern[holdingpatternpos];
 			}
-			else
-			{
-				xdelta = _x - targ._x;
-				ydelta = _y - targ._y;
-			}
+
+			xdelta = _x - targ._x;
+			ydelta = _y - targ._y;
 
 			// calculate distance
 			distance = Math.sqrt( Math.pow( xdelta, 2 ) + Math.pow( ydelta, 2 ) );
 			if (distance < 75)
 			{
 				holdingpatternpos++;
-				if (holdingpatternpos > 2)
+				if (holdingpatternpos >= _root.holdingpattern.length)
 				{
 					holdingpatternpos = 0;
 				}
@@ -162,7 +168,7 @@ define("747s", function() {
 			}
 			var cfImage = images[cfFrame];
 			var img = cfImage.masked.canvas;
-			canvas.ctx.scale(flipX ? -0.5 : 0.5, 0.5);
+			canvas.ctx.scale((flipX ? -1 : 1) * scale, scale);
 			canvas.ctx.translate(-img.width / 2, -img.height / 2);
 			canvas.ctx.drawImage(img, 0, 0);
 			canvas.ctx.restore();
@@ -210,18 +216,24 @@ define("747s", function() {
 		}
 
 		function startAnimation() {
-			var planes = [Plane()];
+			planes = [Plane()];
 			function update() {
 				requestAnimationFrame(update);
 
-				canvas.ctx.clearRect(0, 0, sw, sh);
+				canvas.ctx.fillStyle = "#1a4859";
+				canvas.ctx.fillRect(0, 0, sw, sh);
 
 				for (var i = 0; i < _root.holdingpattern.length; i++) {
 					var waypoint = _root.holdingpattern[i];
 					canvas.ctx.beginPath();
 					canvas.ctx.drawCircle(waypoint._x, waypoint._y, 20);
 					canvas.ctx.closePath();
-					canvas.ctx.fillStyle = "red";
+					canvas.ctx.fillStyle = "#259bc6";
+					canvas.ctx.fill();
+					canvas.ctx.beginPath();
+					canvas.ctx.fillStyle = "white";
+					canvas.ctx.font = '18px Helvetica';
+					canvas.ctx.fillText(i + 1, waypoint._x - 5, waypoint._y + 5);
 					canvas.ctx.fill();
 				}
 				for (i = 0; i < planes.length; i++) {
@@ -236,10 +248,10 @@ define("747s", function() {
 			// in flash these assets were used with one masking the other, so gotta replicate!
 			var plane = new Image();
 			plane.onload = loadComplete
-			plane.src = "/assets/747s/Image " + (i + 1) + " at frame 0.jpg";
+			plane.src = "/assets/seven_four_sevens/Image " + (i + 1) + " at frame 0.jpg";
 			var mask = new Image();
 			mask.onload = loadComplete;
-			mask.src = "/assets/747s/Image " + (i + 1) + " alpha channel at frame 0.png";
+			mask.src = "/assets/seven_four_sevens/Image " + (i + 1) + " alpha channel at frame 0.png";
 			images[i] = {
 				plane: plane,
 				mask: mask,

@@ -5,7 +5,6 @@ define("exps_details", function() {
     // ["unknown"],
     // ["_test"],
 
-    ["747s"],
     ["additive"],
     ["anemone_three", "THREE"],
     ["any_image_url"],
@@ -48,6 +47,7 @@ define("exps_details", function() {
     ["rectangular_fill"],
     ["recursive"],
     ["recursive_polygon"],
+    ["seven_four_sevens"],
     ["spiral_even"],
     ["squaretracer"],
     ["synth_ambient", "Tone"],
@@ -86,6 +86,10 @@ define("exps_details", function() {
       "title": "Infinite Stairs",
       "description": "<p>Work in progress</p><p>Trying to make an infinite staircase, potentially spooky.</p>"
     },
+    "seven_four_sevens": {
+      "title": "seven_four_sevens",
+      "description": "<p>An old flash experiment remade in javascript.</p><p>Thanks to the demise of flash I will lose heaps of graphical experiments, some irretrievably lost due to inability to open .FLAs - luckily this one had the source in a .as file.</p>"
+    },
   };
   return {
     list: list,
@@ -106,6 +110,8 @@ define("exps_details", function() {
           {"day": 9, "title": details.infinite_scrolling_cogs.title, "link": "infinite_scrolling_cogs"},
           {"day": 10, "title": "nope :|"},
           {"day": 11, "title": details.infinite_stairs.title, "link" : "infinite_stairs"},
+          {"day": 12, "title": "much fails."},
+          {"day": 13, "title": details.seven_four_sevens.title, "link": "seven_four_sevens"},
         ]
       }
       return features[key] || false;
