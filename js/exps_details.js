@@ -54,7 +54,7 @@ define("exps_details", function() {
     ["tea"],
     ["tetris_cube", "THREE", "TweenMax"],
     ["text_grid"],
-    ["triangles", "THREE"],
+    ["triangles", "THREE", "TweenMax"],
     ["tunnel_tour_three", "THREE", "TweenMax"],
     ["typography"],
     ["voronoi_stripes", "voronoi"],
@@ -88,8 +88,12 @@ define("exps_details", function() {
       "description": "<p>Work in progress</p><p>Trying to make an infinite staircase, potentially spooky.</p>"
     },
     "seven_four_sevens": {
-      "title": "seven_four_sevens",
+      "title": "Seven Four Sevens",
       "description": "<p>An old flash experiment remade in javascript.</p><p>Thanks to the demise of flash I will lose heaps of graphical experiments, some irretrievably lost due to inability to open .FLAs - luckily this one had the source in a .as file.</p>"
+    },
+    "triangles": {
+      "title": "Triangles",
+      "description": "<p>A plane of triangles fall away as they zoom towards the screen</p>"
     },
   };
   return {
@@ -113,6 +117,7 @@ define("exps_details", function() {
           {"day": 11, "title": details.infinite_stairs.title, "link" : "infinite_stairs"},
           {"day": 12, "title": "much fails."},
           {"day": 13, "title": details.seven_four_sevens.title, "link": "seven_four_sevens"},
+          {"day": 14, "title": details.triangles.title, "link": "triangles"},
         ]
       }
       return features[key] || false;

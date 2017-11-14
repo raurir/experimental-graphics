@@ -2,69 +2,75 @@ define("triangles", function() {
 
 	var camera, scene, renderer;
 	var sw = window.innerWidth, sh = window.innerHeight;
-	var holder, grid = [];
+	var holder, grid = [], lightA, lightB, lightC;
 
 	var TAU = Math.PI * 2;
-	var ps = 10;
-	var pixels = ps;
-	var gridSize = 20;
+	var triangles = 48; // 48 x 48 x 3 = 6912 vertices
+	var triSize = 130;
 	var triangleShape;
-	var theta = 1 / 6 * Math.PI;
-	var radius = gridSize / Math.cos(theta);
-	var some = radius * Math.sin(theta);
-	var weird = (radius + some) / 2;
+	var theta = 1 / 6 * Math.PI; // half of a corner of an equilateral
+	var lenA = triSize / Math.cos(theta);
+	var lenB = lenA * Math.sin(theta);
+	var lenC = (lenA + lenB) / 2;
 
 	function generateShape() {
 		var shape = new THREE.Shape();
-		var first = null, points = 3;
-		var triRadius = 0.8 * radius;
-		for (var i = 0; i < points; i++) {
+		var points = 3;
+		var triRadius = 0.99 * lenA;
+		for (var i = 0; i < points + 1; i++) {
 			var a = i / points * TAU;
 			var point = {
 				x: Math.sin(a) * triRadius,
 				y: Math.cos(a) * triRadius
 			}
 			if (i == 0) {
-				first = point;
 				shape.moveTo(point.x, point.y);
 			} else {
 				shape.lineTo(point.x, point.y);
 			}
 		}
-		shape.lineTo(first.x, first.y);
 		return shape;
 	}
 	function triangle() {
 		triangleShape = triangleShape || generateShape();
+		var colour = Math.random() > 0.98
+			? 0x14ffef
+			: Math.random() > 0.99
+			? 0xff1485
+			: 0x413a47;
 		var geometry = new THREE.ShapeGeometry(triangleShape);
-		var material = new THREE.MeshBasicMaterial({
-			color: colours.getRandomColour(),
-			side: THREE.DoubleSide
+		var material = new THREE.MeshPhongMaterial({
+			color: colour,
+			side: THREE.DoubleSide,
+			specular: 0xffffff,
+			shininess: rand.getNumber(40, 60)
 		});
-		var mesh = new THREE.Mesh(geometry, material);
-		return mesh;
+		return {
+			mesh: new THREE.Mesh(geometry, material),
+			falling: false
+		};
 	}
 
 	function init() {
 
 		scene = new THREE.Scene();
+		scene.fog = new THREE.FogExp2(0x000000, 0.0005);
 
-		camera = new THREE.PerspectiveCamera(90, sw / sh, 1, 20000);
+		camera = new THREE.PerspectiveCamera(100, sw / sh, 1, 20000);
+		camera.position.set(0, 1000, 1300);
+		camera.lookAt(scene.position);
 		scene.add(camera);
 
-		var lightAbove = new THREE.DirectionalLight(0xffffff, 1);
-		lightAbove.position.set(0, 1, 0.5);
-		scene.add(lightAbove);
+		lightA = new THREE.DirectionalLight(0xffc0c0, 0.8);
+		scene.add(lightA);
 
-		// var lightLeft = new THREE.DirectionalLight(0xf0e5a1, 0.5);
-		// lightLeft.position.set(-1, 0.5, 0.5);
-		// scene.add(lightLeft);
+		lightB = new THREE.DirectionalLight(0xffc0ff, 0.8);
+		scene.add(lightB);
 
-		// var lightBelow = new THREE.DirectionalLight(0x303030, 0.2);
-		// lightBelow.position.set(0, -1, 0.25);
-		// scene.add(lightBelow);
+		lightC = new THREE.DirectionalLight(0xc0c0ff, 0.8);
+		scene.add(lightC);
 
-		ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+		ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 		scene.add(ambientLight);
 
 		renderer = new THREE.WebGLRenderer({antialias: true});
@@ -73,47 +79,116 @@ define("triangles", function() {
 		holder = new THREE.Group();
 		scene.add(holder);
 
+		for (var p = 0; p < triangles * triangles; p++) {
+			var tri = triangle();
+			holder.add(tri.mesh);
 
-		for (var p = 0; p < pixels * pixels; p++) {
-			var c = triangle();
-			holder.add(c);
-			var xi = p % pixels - pixels / 2 + 0.5;
+			var xi = p % triangles - triangles / 2 + 0.5;
+			var zi = Math.floor(p / triangles);
+			var rowEven = zi % 2;
+			var row4th = Math.floor(zi / 2) % 2;
 
-			var rowIndex = Math.floor(p / pixels);
-			var rowEven = rowIndex % 2;
-			var row4th = Math.floor(rowIndex / 2) % 2;
-
-			var yi = rowIndex - pixels / 2 + 0.5;
-			var x = xi * 2 * gridSize + (rowEven ^ row4th ? - gridSize : 0);
-
-			var y = yi * weird + (rowEven ? 0 : weird - some);
-			var z = 0;
-			c.position.set(x, y, z);
-			c.rotation.set(0, 0, rowEven * Math.PI);
-			grid.push(c);
+			var pos = {
+				x: xi * 2 * triSize + (rowEven ^ row4th ? - triSize : 0),
+				y: 0,
+				z: -5000 + getZ(zi)
+			};
+			var rot = {
+				x: Math.PI / 2,
+				y: 0,
+				z: rowEven * Math.PI
+			}
+			tri.rowIndex = zi;
+			tri.mesh.position.set(pos.x, pos.y, pos.z);
+			tri.mesh.rotation.set(rot.x, rot.y, rot.z);
+			tri.origin = {
+				pos: pos,
+				rot: rot
+			};
+			grid.push(tri);
 		}
 
 		document.body.appendChild(renderer.domElement);
+		dom.on(window, ["resize"], resize);
 		render(0);
 	}
 
+	function resize(e){
+		sw = window.innerWidth;
+		sh = window.innerHeight
+		camera.aspect = sw / sh;
+		camera.updateProjectionMatrix();
+		renderer.setSize(sw, sh);
+	}
+
+	function getZ(zi) {
+		var rowEven = zi % 2;
+		return zi * lenC + (rowEven ? 0 : lenC - lenB);
+	}
+
+	function fall(tri) {
+		tri.falling = true;
+		TweenMax.to(tri.mesh.position, 2.4, {
+			y: -5000,
+			ease: Quint.easeIn
+		});
+		TweenMax.to(tri.mesh.scale, 0.5, {
+			x: 0.1,
+			y: 0.1,
+			z: 0.1,
+			delay: 2,
+			ease: Quint.easeIn
+		});
+		TweenMax.to(tri.mesh.rotation, 2.5, {
+			x: rand.getNumber(-2, 2),
+			y: rand.getNumber(-2, 2),
+			z: rand.getNumber(-2, 2),
+			ease: Quint.easeIn,
+			onComplete: reset(tri)
+		});
+	}
+
+	function reset(tri) {
+		return function() {
+			var pos = tri.origin.pos, rot = tri.origin.rot;
+
+			tri.rowIndex -= triangles;
+			pos.z = tri.mesh.position.z - getZ(triangles) + 45; // not sure what magic 45 is :)
+
+			tri.mesh.scale.set(1, 1, 1);
+			tri.mesh.position.set(pos.x, pos.y, pos.z);
+			tri.mesh.rotation.set(rot.x, rot.y, rot.z);
+			tri.falling = false;
+		}
+	}
+
 	function render(time) {
-		holder.rotation.x += 0.01;
-		// holder.rotation.y -= 0.01;
-		// con.log(holder)
-		// grid.forEach((c, index) => {
-		// 	// c.rotation.y += c.rotateSpeed * 0.01;
-		// 	//c.rotateSpeed -= 0.01;
-		// 	// c.rotation.x = 0 - c.rotateAmount * Math.PI / 4;
-		// 	c.rotation.x = Math.PI / 4 - rotations[index].rotation * Math.PI / 3;
-		// });
-		// camPos.x = 0 + Math.sin(time * 0.00012) * 50;
-		// camPos.y = 0 + Math.sin(time * 0.00017) * 50;
-		// camPos.z = 400 + Math.sin(time * 0.0001) * 300;
-		camera.position.set(0, 0, 100);//camPos.x, camPos.y, camPos.z);
-		camera.lookAt( scene.position );
-		renderer.render( scene, camera );
 		requestAnimationFrame(render);
+		holder.rotation.z = Math.sin(time * 0.0005) * 0.05;
+
+		var fallLimitZ = -1000 - Math.sin(time * 0.0003) * 750;
+
+		grid.forEach((tri, index) => {
+			tri.mesh.position.z += 15;
+			if (tri.mesh.position.z > fallLimitZ && tri.falling == false && Math.random() > 0.9) {
+				fall(tri);
+			}
+		});
+
+		function moveLight(light, x, y, z) {
+			var sc = 0.00003 * (time + 10000);
+			light.position.set(
+				Math.sin(x * sc) * 5,
+				1,
+				Math.sin(z * sc) - 1
+			);
+		}
+
+		moveLight(lightA, 15, 0, 12);
+		moveLight(lightB, 14, 0, 13);
+		moveLight(lightC, 20, 0, 16);
+
+		renderer.render(scene, camera);
 	}
 
 	return {
