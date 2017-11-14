@@ -54,6 +54,7 @@ define("exps_details", function() {
     ["tea"],
     ["tetris_cube", "THREE", "TweenMax"],
     ["text_grid"],
+    ["triangles", "THREE"],
     ["tunnel_tour_three", "THREE", "TweenMax"],
     ["typography"],
     ["voronoi_stripes", "voronoi"],
