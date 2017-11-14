@@ -99,8 +99,11 @@ function exps(experimentsDetails) {
     function showInfo() {
       infoShowing = true;
       panelInfo.classList.add("displayed");
-      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4><h1>" + info.title + "</h1>"
-        + info.description;
+      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4>"
+        + "<h1>" + info.title + "</h1>"
+        + info.description
+        + "<p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/"
+        + info.key + ".js' target='_blank'>SRC on Github</a></p>";
     }
 
     function hideInfo() {
@@ -130,7 +133,9 @@ function exps(experimentsDetails) {
       loadExperiment(index);
 
       info = experimentsDetails.getDetails(key);
-      if (!info) {
+      if (info) {
+        info.key = key;
+      } else {
         buttonsNav.removeChild(buttonInfo);
       }
       // showInfo();
