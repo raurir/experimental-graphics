@@ -93,7 +93,7 @@ define("exps_details", function() {
     },
     "triangles": {
       "title": "Triangles",
-      "description": "<p>A plane of triangles fall away as they zoom towards the screen</p>"
+      "description": "<p>A plane of triangles fall away as they zoom towards the screen.</p><p>Probably a bit heavy for phones.</p>"
     },
   };
   return {
