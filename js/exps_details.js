@@ -58,6 +58,7 @@ define("exps_details", function() {
     ["tunnel_tour_three", "THREE", "TweenMax"],
     ["typography"],
     ["voronoi_stripes", "voronoi"],
+    ["yes_day", "THREE"],
     ["zoned_particles"],
 
   ];
