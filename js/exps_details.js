@@ -8,6 +8,7 @@ define("exps_details", function() {
     ["additive"],
     ["anemone_three", "THREE"],
     ["any_image_url"],
+    ["ball_and_chain", "THREE"],
     ["bezier_flow"],
     ["box", "maze"],
     ["circle_packing"],
@@ -58,7 +59,6 @@ define("exps_details", function() {
     ["tunnel_tour_three", "THREE", "TweenMax"],
     ["typography"],
     ["voronoi_stripes", "voronoi"],
-    ["yes_day", "THREE"],
     ["zoned_particles"],
 
   ];
@@ -96,6 +96,10 @@ define("exps_details", function() {
       "title": "Triangles",
       "description": "<p>A plane of triangles fall away as they zoom towards the screen.</p><p>Probably a bit heavy for phones.</p>"
     },
+    "ball_and_chain": {
+      "title": "Ball and Chain",
+      "description": "<p>In the celebration of the <a href='http://www.abc.net.au/news/2017-11-15/australia-reacts-to-the-same-sex-marriage-survey-results/9151826' target='_blank'>Yes</a> Vote, started making this ball and chain in THREE + Cannon. Took a bit longer than expected, hopefully I can make a rainbow happy one for legalisation day.</p><p>Something along the lines of \"It's raining ball and chains\"</p>"
+    },
   };
   return {
     list: list,
@@ -116,9 +120,12 @@ define("exps_details", function() {
           {"day": 9, "title": details.infinite_scrolling_cogs.title, "link": "infinite_scrolling_cogs"},
           {"day": 10, "title": "nope :|"},
           {"day": 11, "title": details.infinite_stairs.title, "link" : "infinite_stairs"},
-          {"day": 12, "title": "much fails."},
+          {"day": 12, "title": "much fail."},
           {"day": 13, "title": details.seven_four_sevens.title, "link": "seven_four_sevens"},
           {"day": 14, "title": details.triangles.title, "link": "triangles"},
+          {"day": 15, "title": "very..."},
+          {"day": 16, "title": "...lame!"},
+          {"day": 17, "title": details.ball_and_chain.title, "link": "ball_and_chain"},
         ]
       }
       return features[key] || false;

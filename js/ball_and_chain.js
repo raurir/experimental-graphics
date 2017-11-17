@@ -1,7 +1,11 @@
-setTimeout(function(event) {
+define("ball_and_chain", [
+	"lib/schteppe/cannon.0.6.2.min.js",
+	"http://schteppe.github.io/cannon.js/libs/TrackballControls.js",
+	], function() {
 
-CANNON = CANNON || {};
+/* this is 95+% hacked from schteppe's demos */
 
+function go() {
 CANNON.Demo = function(options){
     var that = this;
 
@@ -48,8 +52,12 @@ CANNON.Demo = function(options){
     var particleGeo = this.particleGeo = new THREE.SphereGeometry( 1, 16, 8 );
 
     // Material
-    var materialColor = 0xdddddd;
-    var solidMaterial = new THREE.MeshLambertMaterial( { color: materialColor } );
+    var solidMaterial = new THREE.MeshPhongMaterial({
+      color: 0x302c2a,
+      emissive: 0,
+      specular: 0x513a30,
+      shininess: 80
+    })
     this.wireframeMaterial = new THREE.MeshLambertMaterial( { color: 0xff0000, wireframe: true } );
     this.currentMaterial = solidMaterial;
     var particleMaterial = this.particleMaterial = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
@@ -125,7 +133,8 @@ CANNON.Demo = function(options){
 
         camera.up.set(0, 0, 1);
         camera.position.set(0, 100, 50);
-        camera.position.set(20, 20, 2);
+        // camera.position.set(0, 200, 150);
+        // camera.position.set(20, 20, 2);
 
         // SCENE
         scene = that.scene = new THREE.Scene();
@@ -143,10 +152,10 @@ CANNON.Demo = function(options){
 
         light.shadow.camera.near = 10;
         light.shadow.camera.far = 100;
-        light.shadow.camera.fov = 30;
+        // light.shadow.camera.fov = 30;
 
-        light.shadowMapBias = 0.0039;
-        light.shadowMapDarkness = 0.5;
+        // light.shadowMapBias = 0.0039;
+        // light.shadowMapDarkness = 0.5;
         light.shadow.mapSize.width = SHADOW_MAP_WIDTH;
         light.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
 
@@ -169,8 +178,7 @@ CANNON.Demo = function(options){
         renderer.autoClear = false;
 
         renderer.shadowMap.enabled = true;
-        renderer.shadowMapSoft = true;
-
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         // Trackball controls
         controls = new THREE.TrackballControls( camera, renderer.domElement );
@@ -357,7 +365,9 @@ CANNON.Demo.prototype.shape2mesh = function(body){
             var geometry = new THREE.PlaneGeometry(10, 10, 4, 4);
             mesh = new THREE.Object3D();
             var submesh = new THREE.Object3D();
-            var ground = new THREE.Mesh( geometry, this.currentMaterial );
+            var ground = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({
+              color: 0x909090
+            }));
             ground.scale.set(100, 100, 100);
             submesh.add(ground);
 
@@ -375,7 +385,7 @@ CANNON.Demo.prototype.shape2mesh = function(body){
                 shape.halfExtents.y * 2,
                 shape.halfExtents.z * 2);
             var submeshFrame = new THREE.Mesh( box_geometry, this.wireframeMaterial );
-            mesh.add(submeshFrame);
+            // mesh.add(submeshFrame);
 
             var link = new THREE.Object3D();
 
@@ -411,28 +421,15 @@ CANNON.Demo.prototype.shape2mesh = function(body){
             cylinder1.position.set(-widthHalf, 0, 0);
             link.add(cylinder1);
 
-
             linkEnd0.receiveShadow = true; linkEnd0.castShadow = true;
             linkEnd1.receiveShadow = true; linkEnd1.castShadow = true;
             cylinder0.receiveShadow = true; cylinder0.castShadow = true;
             cylinder1.receiveShadow = true; cylinder1.castShadow = true;
 
-
-
             mesh.add(link);
 
             link.rotation.z = ((hackyMcHack++) % 2) * Math.PI / 2;
 
-            /*
-            mesh = new THREE.Object3D();
-            var torus = new THREE.TorusGeometry( 1.3, 0.2, 8, 16 );
-            if (hackyMcHack == 0) con.log("hackyMcHack", torus);
-
-            var submesh = new THREE.Mesh( torus, this.currentMaterial );
-            submesh.rotation.x = Math.PI / 2;
-            submesh.rotation.y = ((hackyMcHack++) % 2) * Math.PI / 2;
-            mesh.add(submesh);
-            */
             break;
 
         case CANNON.Shape.types.CONVEXPOLYHEDRON:
@@ -544,4 +541,111 @@ CANNON.Demo.prototype.shape2mesh = function(body){
 
 
 
-}, 10);
+var demo = new CANNON.Demo();
+
+demo.addScene("ball-and-chain",function(){
+		var world = setupWorld(demo);
+		world.gravity.set(0, 0, -20);
+		var width = 1;
+		var wireSize = 0.3;
+		var pitch = 1;
+		var chainShape0 = new CANNON.Box(new CANNON.Vec3(width, wireSize, pitch));
+		var chainShape1 = new CANNON.Box(new CANNON.Vec3(wireSize, width, pitch));
+		var mass = 1;
+		var space = 0.3;
+		var N = 10, last;
+
+    function join(body0, body1, offset) {
+      var cnX = width * 0.1, cnY = pitch + space + offset;
+      var c1 = new CANNON.PointToPointConstraint(body0, new CANNON.Vec3(-cnX, 0, cnY), body1, new CANNON.Vec3(-cnX, 0, -cnY));
+      var c2 = new CANNON.PointToPointConstraint(body0, new CANNON.Vec3(cnX, 0, cnY), body1, new CANNON.Vec3(cnX, 0, -cnY));
+      world.addConstraint(c1);
+      world.addConstraint(c2);
+    }
+
+
+
+		for(var i = 0; i < N; i++){
+			var firstBody = i === 0, firstChainLink = i === 1, lastBody = i === N - 1;
+
+			var py = (N-i)*(pitch*2+2*space) + pitch*2+space;
+
+			if (firstBody) { // the ball
+
+        var sphereShape = new CANNON.Sphere(4);
+        var spherebody = new CANNON.Body({mass: 3});
+        spherebody.addShape(sphereShape);
+        spherebody.position.set(0, 0, py);
+
+        last = spherebody;
+
+      } else if (lastBody) { // the cuff
+
+        var L = 3, R = 2;
+        var cylinderShape = new CANNON.Cylinder(R, R, L, 12);
+        var cylinderBody = new CANNON.Body({mass: 0.5});
+        cylinderBody.addShape(cylinderShape);
+        cylinderBody.position.set(0, 0, py );
+
+        join(cylinderBody, last, 0);
+
+        last = cylinderBody;
+
+      } else { // the chain
+
+        var chainLinkBody = new CANNON.Body({mass: 0.1});
+        chainLinkBody.addShape(i % 2 ? chainShape0 : chainShape1);
+        chainLinkBody.position.set(0, 0, py);
+
+        join(chainLinkBody, last, (firstChainLink ? 1.8 : 0));
+
+        last = chainLinkBody;
+			}
+
+      world.add(last);
+      demo.addVisual(last);
+      last.velocity.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+
+      last.linearDamping = 0.1;
+      last.angularDamping = 0.1;
+
+		}
+});
+
+
+function setupWorld(demo){
+	// Create world
+	var world = demo.getWorld();
+	world.gravity.set(0,0,-40);
+	world.broadphase = new CANNON.NaiveBroadphase();
+	world.solver.iterations = 10;
+	// ground plane
+	var groundShape = new CANNON.Plane();
+	var groundBody = new CANNON.Body({ mass: 0 });
+	groundBody.addShape(groundShape);
+	groundBody.position.set(0,0,1);
+	world.addBody(groundBody);
+	demo.addVisual(groundBody);
+	world.quatNormalizeFast = false;
+	world.quatNormalizeSkip = 0;
+	return world;
+};
+
+demo.start();
+
+}
+
+function check() {
+  con.log("check")
+  if (typeof THREE === "undefined") {
+  setTimeout(check, 10);
+  } else {
+    go();
+  }
+}
+check();
+
+
+
+
+});
