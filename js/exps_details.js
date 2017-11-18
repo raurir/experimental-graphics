@@ -20,6 +20,7 @@ define("exps_details", function() {
     ["cube_fractal_zoom", "THREE", "TweenMax"],
     ["cube_pixelator", "THREE", "TweenMax"],
     ["fool", "css/fool"],
+    ["fur"],
     ["hexagon_tile"],
     ["infinite_scrolling_cogs"],
     ["infinite_stairs", "THREE"],
@@ -64,21 +65,21 @@ define("exps_details", function() {
   ];
 
   var details = {
-    "cube_pixelator": {
-      "title": "Cube pixelator",
-      "description": "<p>Should be called 'Plane pixelator' since they are planes, not cubes.</p><p>Planes are distributed through a 2 dimensional grid with each plane representing a pixel.</p><p>Each plane is exactly the same colour and this colour never changes. Instead, each plane rotates accordingly to catch the lighting within the scene and by doing so adapts its apparent shade, and thereby creates an image.</p>"
-    },
-    "isometric_words": {
-      "title": "Isometric Words",
-      "description": "<p>Muddling up cubes by using the simplicity of Isometric projection.</p><p>Randomly offset the objects along the same axis the camera is looking down.</p>"
-    },
-    "synth_ambient": {
-      "title": "Synth Ambient",
-      "description": "<h2>This will be loud!</h2><p>A quick trip into audio synthesis in the browser.</p><p>That's the thing about synthesis, you can create out of control waveforms quite easily, hence the volume.</p><p>Using <a href='https://github.com/Tonejs/Tone.js' target='_blank'>Tone.js</a> for all the audio generation, this experiment creates a number of randomised effects, a bunch of randomised synthesizers, and with those creates a randomised drum track, randomised chords and a ranomised arpeggio.</p>"
+    "ball_and_chain": {
+      "title": "Ball and Chain",
+      "description": "<p>In the celebration of the <a href='http://www.abc.net.au/news/2017-11-15/australia-reacts-to-the-same-sex-marriage-survey-results/9151826' target='_blank'>Yes</a> Vote, started making this ball and chain in THREE + Cannon. Took a bit longer than expected, hopefully I can make a rainbow happy one for legalisation day.</p><p>Something along the lines of \"It's raining ball and chains\"</p>"
     },
     "cube_fractal_zoom": {
       "title": "Cube Fractal Zoom",
       "description": "<p>Zooming into a cube that subdivides into muliple cubes.</p><p>Envisioned version is for each subdivision to be variable slice amounts rather than 2x2x2. Someday.</p><p>Also would like some kind of infinite shader, potentially perlin noise.</p>"
+    },
+    "cube_pixelator": {
+      "title": "Cube pixelator",
+      "description": "<p>Should be called 'Plane pixelator' since they are planes, not cubes.</p><p>Planes are distributed through a 2 dimensional grid with each plane representing a pixel.</p><p>Each plane is exactly the same colour and this colour never changes. Instead, each plane rotates accordingly to catch the lighting within the scene and by doing so adapts its apparent shade, and thereby creates an image.</p>"
+    },
+    "fur": {
+      "title": "Fur",
+      "description": "<p>2 channels of perlin noise affect x and y lean of each hair of fur.</p>"
     },
     "infinite_scrolling_cogs": {
       "title": "Infinite Scrolling Cogs",
@@ -88,17 +89,21 @@ define("exps_details", function() {
       "title": "Infinite Stairs",
       "description": "<p>Work in progress</p><p>Trying to make an infinite staircase, potentially spooky.</p>"
     },
+    "isometric_words": {
+      "title": "Isometric Words",
+      "description": "<p>Muddling up cubes by using the simplicity of Isometric projection.</p><p>Randomly offset the objects along the same axis the camera is looking down.</p>"
+    },
     "seven_four_sevens": {
       "title": "Seven Four Sevens",
       "description": "<p>An old flash experiment remade in javascript.</p><p>Thanks to the demise of flash I will lose heaps of graphical experiments, some irretrievably lost due to inability to open .FLAs - luckily this one had the source in a .as file.</p>"
     },
+    "synth_ambient": {
+      "title": "Synth Ambient",
+      "description": "<h2>This will be loud!</h2><p>A quick trip into audio synthesis in the browser.</p><p>That's the thing about synthesis, you can create out of control waveforms quite easily, hence the volume.</p><p>Using <a href='https://github.com/Tonejs/Tone.js' target='_blank'>Tone.js</a> for all the audio generation, this experiment creates a number of randomised effects, a bunch of randomised synthesizers, and with those creates a randomised drum track, randomised chords and a ranomised arpeggio.</p>"
+    },
     "triangles": {
       "title": "Triangles",
       "description": "<p>A plane of triangles fall away as they zoom towards the screen.</p><p>Probably a bit heavy for phones.</p>"
-    },
-    "ball_and_chain": {
-      "title": "Ball and Chain",
-      "description": "<p>In the celebration of the <a href='http://www.abc.net.au/news/2017-11-15/australia-reacts-to-the-same-sex-marriage-survey-results/9151826' target='_blank'>Yes</a> Vote, started making this ball and chain in THREE + Cannon. Took a bit longer than expected, hopefully I can make a rainbow happy one for legalisation day.</p><p>Something along the lines of \"It's raining ball and chains\"</p>"
     },
   };
   return {
@@ -126,6 +131,7 @@ define("exps_details", function() {
           {"day": 15, "title": "very..."},
           {"day": 16, "title": "...lame!"},
           {"day": 17, "title": details.ball_and_chain.title, "link": "ball_and_chain"},
+          {"day": 18, "title": details.fur.title, "link": "fur"},
         ]
       }
       return features[key] || false;
