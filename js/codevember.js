@@ -38,7 +38,8 @@ define("codevember", ["exps_details"], function(experimentsDetails) {
 				" transform: rotate3d(0.3, 0.5, 0.9, 8deg); width: 80%; z-index: 50; }",
 				".item { display: block; clear: both; line-height: 25px; }",
 				".day { color: #bcd1d6; display: inline-block; float: left; padding-right: 10px; text-align: right; width: 20%; }",
-				".title { display: inline-block; float: left; width: 80%; }",
+				".title { color: #999; display: inline-block; float: left; width: 80%; }",
+				".clickable .title { color: #fff; }",
 			].join(" ")
 		}));
 
@@ -46,12 +47,8 @@ define("codevember", ["exps_details"], function(experimentsDetails) {
 			innerHTML: "<h1>CODEVEMBER</H1>"});
 
 		codevember.forEach(function(exp) {
-			var style = {
-				display: "block",
-				clear: "both"
-			};
 			var codeItem = exp.link
-				? dom.element("a", {className: "item", href: "/?" + exp.link})
+				? dom.element("a", {className: "item clickable", href: "/?" + exp.link})
 				: dom.element("div", {className: "item"});
 			var codeItemDay = dom.element("div", {className: "day", innerHTML: "Day " + exp.day});
 			var codeItemTitle = dom.element("div", {className: "title", innerHTML: exp.title});

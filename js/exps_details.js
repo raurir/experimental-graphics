@@ -48,6 +48,7 @@ define("exps_details", function() {
     ["rainbow_particles"],
     ["rectangular_fill"],
     ["recursive"],
+    ["recursive_circle"],
     ["recursive_polygon"],
     ["seven_four_sevens"],
     ["spiral_even"],
@@ -93,6 +94,10 @@ define("exps_details", function() {
       "title": "Isometric Words",
       "description": "<p>Muddling up cubes by using the simplicity of Isometric projection.</p><p>Randomly offset the objects along the same axis the camera is looking down.</p>"
     },
+    "recursive_circle": {
+      "title": "Recursive Circle",
+      "description": "<p>Recursive rendering. Managed to not crash my browser creating this! Life achievement.</p>"
+    },
     "seven_four_sevens": {
       "title": "Seven Four Sevens",
       "description": "<p>An old flash experiment remade in javascript.</p><p>Thanks to the demise of flash I will lose heaps of graphical experiments, some irretrievably lost due to inability to open .FLAs - luckily this one had the source in a .as file.</p>"
@@ -132,6 +137,7 @@ define("exps_details", function() {
           {"day": 16, "title": "...lame!"},
           {"day": 17, "title": details.ball_and_chain.title, "link": "ball_and_chain"},
           {"day": 18, "title": details.fur.title, "link": "fur"},
+          {"day": 19, "title": details.recursive_circle.title, "link": "recursive_circle"},
         ]
       }
       return features[key] || false;

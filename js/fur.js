@@ -6,9 +6,6 @@ define("fur", ["perlin"], function(perlin) {
   var h = 160;
   var sw = w * pixel, sh = h * pixel;
 
-  var M = Math;
-  var r = M.random;
-
   var c = dom.canvas(sw, sh);
   var d = c.ctx;
 
@@ -54,7 +51,6 @@ define("fur", ["perlin"], function(perlin) {
 
   return {
     resize: function(w, h) {
-      // con.log("argu", arguments)
       c.setSize(w, h, true);
     },
     init: function() {
