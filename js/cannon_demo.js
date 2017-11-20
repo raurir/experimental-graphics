@@ -5,7 +5,7 @@ var Demo = function(options){
 	var that = this;
 
 	// API
-	this.addScene = addScene;
+	this.create = create;
 	this.start = start;
 
 	// Global settings
@@ -42,7 +42,7 @@ var Demo = function(options){
 
 	var bodies = this.bodies = [];
 	var visuals = this.visuals = [];
-	var scenes = [];
+	var demo;
 
 	var particleGeo = this.particleGeo = new THREE.SphereGeometry( 1, 16, 8 );
 
@@ -64,20 +64,8 @@ var Demo = function(options){
 
 	var light, scene, ambient, stats, info;
 
-	/**
-	 * Add a scene to the demo app
-	 * @method addScene
-	 * @param {String} title Title of the scene
-	 * @param {Function} initfunc A function that takes one argument, app, and initializes a physics scene. The function runs app.setWorld(body), app.addVisual(body), app.removeVisual(body) etc.
-	 */
-	function addScene(title,initfunc){
-		if(typeof(title) !== "string"){
-			throw new Error("1st argument of Demo.addScene(title,initfunc) must be a string!");
-		}
-		if(typeof(initfunc)!=="function"){
-			throw new Error("2nd argument of Demo.addScene(title,initfunc) must be a function!");
-		}
-		scenes.push(initfunc);
+	function create(initfunc){
+		demo = initfunc;
 	}
 
 	function makeSureNotZero(vec){
@@ -254,6 +242,7 @@ var Demo = function(options){
 	}
 
 	function buildScene(n){
+		/*
 		// Remove current bodies and visuals
 		var num = visuals.length;
 		for(var i=0; i<num; i++){
@@ -265,10 +254,8 @@ var Demo = function(options){
 		while(world.constraints.length){
 			world.removeConstraint(world.constraints[0]);
 		}
-
-		// Run the user defined "build scene" function
-		scenes[n]();
-
+		*/
+		demo();
 	}
 
 };

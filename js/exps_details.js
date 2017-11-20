@@ -26,6 +26,7 @@ define("exps_details", function() {
     ["infinite_stairs", "THREE"],
     ["isometric_cubes"],
     ["isometric_words", "THREE", "TweenMax"],
+    ["lego_stack", "THREE"],
     ["linked_line"],
     ["mandala"],
     ["maze"],

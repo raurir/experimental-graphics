@@ -1,8 +1,7 @@
-define("ball_and_chain", [
+define("lego_stack", [
 	"lib/schteppe/cannon.0.6.2.min.js",
-	"cannon_demo",
-	// "http://schteppe.github.io/cannon.js/libs/TrackballControls.js",
-	], function(cn, CannonDemo) {
+	"cannon_demo"
+], function(cn, CannonDemo) {
 
 /* this is 95+% hacked from schteppe's demos */
 
