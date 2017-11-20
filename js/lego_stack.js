@@ -44,7 +44,7 @@ function go() {
 			}
 		}
 
-		block.position.set(0, 0, blocks.length * 5);
+		block.position.set(0, 0, 10 + blocks.length * 5);
 
 		var colour = [
 			0xdd0000,
