@@ -2,6 +2,8 @@ define("cannon_demo", function() {
 /* this is 99+% hacked from schteppe's demos */
 
 var Demo = function(options){
+
+	options = options || {};
 	var that = this;
 
 	// API
@@ -108,8 +110,7 @@ var Demo = function(options){
 
 	function init() {
 
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
+		container = document.getElementById("experiment-holder");
 
 		// Camera
 		camera = new THREE.PerspectiveCamera( 24, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR );
@@ -130,7 +131,7 @@ var Demo = function(options){
 		scene.add( ambient );
 
 		light = new THREE.SpotLight( 0xffffff );
-		light.position.set( 30, 30, 40 );
+		light.position.set( 30, -100, 40 );
 		light.target.position.set( 0, 0, 0 );
 
 		light.castShadow = true;
@@ -165,22 +166,23 @@ var Demo = function(options){
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-		/*// Trackball controls
-		controls = new THREE.TrackballControls( camera, renderer.domElement );
-		controls.rotateSpeed = 1.0;
-		controls.zoomSpeed = 1.2;
-		controls.panSpeed = 0.2;
-		controls.noZoom = false;
-		controls.noPan = false;
-		controls.staticMoving = false;
-		controls.dynamicDampingFactor = 0.3;
-		var radius = 100;
-		controls.minDistance = 0.0;
-		controls.maxDistance = radius * 1000;
-		//controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
-		controls.screen.width = SCREEN_WIDTH;
-		controls.screen.height = SCREEN_HEIGHT;
-		*/
+		// Trackball controls
+		if (options.trackballControls) {
+			controls = new THREE.TrackballControls( camera, renderer.domElement );
+			controls.rotateSpeed = 1.0;
+			controls.zoomSpeed = 1.2;
+			controls.panSpeed = 0.2;
+			controls.noZoom = false;
+			controls.noPan = false;
+			controls.staticMoving = false;
+			controls.dynamicDampingFactor = 0.3;
+			var radius = 100;
+			controls.minDistance = 0.0;
+			controls.maxDistance = radius * 1000;
+			//controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+			controls.screen.width = SCREEN_WIDTH;
+			controls.screen.height = SCREEN_HEIGHT;
+		}
 	}
 
 	var t = 0, newTime, delta;
@@ -225,14 +227,15 @@ var Demo = function(options){
 		camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 		camera.updateProjectionMatrix();
 
-		// controls.screen.width = SCREEN_WIDTH;
-		// controls.screen.height = SCREEN_HEIGHT;
-
+		if (controls) {
+			controls.screen.width = SCREEN_WIDTH;
+			controls.screen.height = SCREEN_HEIGHT;
+		}
 		camera.radius = ( SCREEN_WIDTH + SCREEN_HEIGHT ) / 4;
 	}
 
 	function render(){
-		// controls.update();
+		controls && controls.update();
 		renderer.clear();
 		renderer.render( that.scene, camera );
 	}
@@ -268,11 +271,13 @@ Demo.prototype.getWorld = function(){
 	return this.world;
 };
 
-Demo.prototype.addVisual = function(body){
+Demo.prototype.addVisual = function(body, material){
 	// What geometry should be used?
 	var mesh;
 	if(body instanceof CANNON.Body){
-		mesh = this.shape2mesh(body);
+		mesh = this.shape2mesh(body, material);
+	} else {
+		con.log('custom body!!!', body);
 	}
 	if(mesh) {
 		// Add body
@@ -327,19 +332,115 @@ Demo.prototype.removeAllVisuals = function(){
 };
 
 var hackyMcHack = 0;
-Demo.prototype.shape2mesh = function(body){
+Demo.prototype.shape2mesh = function(body, material){
+
+	material = material || this.currentMaterial;
+
 	var wireframe = this.settings.renderMode === "wireframe";
 	var obj = new THREE.Object3D();
+
+	function addMesh(mesh, shapeIndex) {
+		mesh.receiveShadow = true;
+		mesh.castShadow = true;
+		if(mesh.children){
+			for(var i=0; i<mesh.children.length; i++){
+				mesh.children[i].castShadow = true;
+				mesh.children[i].receiveShadow = true;
+				if(mesh.children[i]){
+					for(var j=0; j<mesh.children[i].length; j++){
+						mesh.children[i].children[j].castShadow = true;
+						mesh.children[i].children[j].receiveShadow = true;
+					}
+				}
+			}
+		}
+
+		var o = body.shapeOffsets[shapeIndex];
+		var q = body.shapeOrientations[shapeIndex];
+		mesh.position.set(o.x, o.y, o.z);
+		mesh.quaternion.set(q.x, q.y, q.z, q.w);
+
+		obj.add(mesh);
+	}
+
+
+	if (body.custom) {
+
+		// this hack only allows for one body shape currently.
+		var shape = body.shapes[0];
+		var mesh = new THREE.Object3D();
+
+		// allow for ball_and_chain demo
+		switch (body.customType) {
+
+		case "CHAIN_LINK" :
+			var box_geometry = new THREE.BoxGeometry(shape.halfExtents.x * 2,
+				shape.halfExtents.y * 2,
+				shape.halfExtents.z * 2);
+			var submeshFrame = new THREE.Mesh( box_geometry, this.wireframeMaterial );
+			// mesh.add(submeshFrame);
+
+			var link = new THREE.Object3D();
+
+			var points = [];
+			var divisions = 10;
+			var widthHalf = 0.8;
+			var pitch = shape.halfExtents.z;
+			var wireSizeHalf = 0.3;
+			var segments = 10;
+			for (var i = 0; i <= divisions; i++) {
+				var a = i / divisions * Math.PI * -2;
+				points.push(new THREE.Vector2(widthHalf + Math.sin(a) * wireSizeHalf, Math.cos(a) * wireSizeHalf));
+			}
+			var geometry = new THREE.LatheBufferGeometry(points, segments, 0, Math.PI);
+			var linkEnd0 = new THREE.Mesh(geometry, material);
+			linkEnd0.position.set(0, 0, pitch);
+			linkEnd0.rotation.set(0, -Math.PI / 2, 0);
+			link.add(linkEnd0);
+
+			var linkEnd1 = new THREE.Mesh(geometry, material);
+			linkEnd1.position.set(0, 0, -pitch);
+			linkEnd1.rotation.set(0, -Math.PI / 2, Math.PI);
+			link.add(linkEnd1);
+
+			// CylinderBufferGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments)
+			var geometry = new THREE.CylinderBufferGeometry(wireSizeHalf, wireSizeHalf, pitch * 2, segments);
+			var cylinder0 = new THREE.Mesh(geometry, material);
+			cylinder0.rotation.set(Math.PI / 2, 0, 0);
+			cylinder0.position.set(widthHalf, 0, 0);
+			link.add(cylinder0);
+			var cylinder1 = new THREE.Mesh(geometry, material);
+			cylinder1.rotation.set(Math.PI / 2, 0, 0);
+			cylinder1.position.set(-widthHalf, 0, 0);
+			link.add(cylinder1);
+
+			linkEnd0.receiveShadow = true; linkEnd0.castShadow = true;
+			linkEnd1.receiveShadow = true; linkEnd1.castShadow = true;
+			cylinder0.receiveShadow = true; cylinder0.castShadow = true;
+			cylinder1.receiveShadow = true; cylinder1.castShadow = true;
+
+			mesh.add(link);
+
+			link.rotation.z = ((hackyMcHack++) % 2) * Math.PI / 2;
+			break;
+		default :
+			throw new Error("need to supply customType!");
+		}
+		addMesh(mesh, 0);
+
+		return obj;
+	}
+
+
 	for (var l = 0; l < body.shapes.length; l++) {
 		var shape = body.shapes[l];
-
 		var mesh;
 
 		switch(shape.type){
 
 		case CANNON.Shape.types.SPHERE:
 			var sphere_geometry = new THREE.SphereGeometry( shape.radius, 18, 18);
-			mesh = new THREE.Mesh( sphere_geometry, this.currentMaterial );
+			mesh = new THREE.Mesh( sphere_geometry, material );
 			break;
 
 		case CANNON.Shape.types.PARTICLE:
@@ -364,60 +465,12 @@ Demo.prototype.shape2mesh = function(body){
 			mesh.add(submesh);
 			break;
 
-		case CANNON.Shape.types.BOX:
-
-			mesh = new THREE.Object3D();
-
-			var box_geometry = new THREE.BoxGeometry(shape.halfExtents.x * 2,
-				shape.halfExtents.y * 2,
-				shape.halfExtents.z * 2);
-			var submeshFrame = new THREE.Mesh( box_geometry, this.wireframeMaterial );
-			// mesh.add(submeshFrame);
-
-			var link = new THREE.Object3D();
-
-			var points = [];
-			var divisions = 10;
-			var widthHalf = 0.8;
-			var pitch = shape.halfExtents.z;
-			var wireSizeHalf = 0.3;
-			var segments = 10;
-			for (var i = 0; i <= divisions; i++) {
-				var a = i / divisions * Math.PI * -2;
-				points.push(new THREE.Vector2(widthHalf + Math.sin(a) * wireSizeHalf, Math.cos(a) * wireSizeHalf));
-			}
-			var geometry = new THREE.LatheBufferGeometry(points, segments, 0, Math.PI);
-			var linkEnd0 = new THREE.Mesh(geometry, this.currentMaterial);
-			linkEnd0.position.set(0, 0, pitch);
-			linkEnd0.rotation.set(0, -Math.PI / 2, 0);
-			link.add(linkEnd0);
-
-			var linkEnd1 = new THREE.Mesh(geometry, this.currentMaterial);
-			linkEnd1.position.set(0, 0, -pitch);
-			linkEnd1.rotation.set(0, -Math.PI / 2, Math.PI);
-			link.add(linkEnd1);
-
-			// CylinderBufferGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments)
-			var geometry = new THREE.CylinderBufferGeometry(wireSizeHalf, wireSizeHalf, pitch * 2, segments);
-			var cylinder0 = new THREE.Mesh(geometry, this.currentMaterial);
-			cylinder0.rotation.set(Math.PI / 2, 0, 0);
-			cylinder0.position.set(widthHalf, 0, 0);
-			link.add(cylinder0);
-			var cylinder1 = new THREE.Mesh(geometry, this.currentMaterial);
-			cylinder1.rotation.set(Math.PI / 2, 0, 0);
-			cylinder1.position.set(-widthHalf, 0, 0);
-			link.add(cylinder1);
-
-			linkEnd0.receiveShadow = true; linkEnd0.castShadow = true;
-			linkEnd1.receiveShadow = true; linkEnd1.castShadow = true;
-			cylinder0.receiveShadow = true; cylinder0.castShadow = true;
-			cylinder1.receiveShadow = true; cylinder1.castShadow = true;
-
-			mesh.add(link);
-
-			link.rotation.z = ((hackyMcHack++) % 2) * Math.PI / 2;
-
-			break;
+        case CANNON.Shape.types.BOX:
+            var box_geometry = new THREE.BoxGeometry(  shape.halfExtents.x*2,
+                                                        shape.halfExtents.y*2,
+                                                        shape.halfExtents.z*2 );
+            mesh = new THREE.Mesh( box_geometry, material );
+            break;
 
 		case CANNON.Shape.types.CONVEXPOLYHEDRON:
 			var geo = new THREE.Geometry();
@@ -441,7 +494,7 @@ Demo.prototype.shape2mesh = function(body){
 			}
 			geo.computeBoundingSphere();
 			geo.computeFaceNormals();
-			mesh = new THREE.Mesh( geo, this.currentMaterial );
+			mesh = new THREE.Mesh( geo, material );
 			break;
 
 		case CANNON.Shape.types.HEIGHTFIELD:
@@ -472,7 +525,7 @@ Demo.prototype.shape2mesh = function(body){
 			}
 			geometry.computeBoundingSphere();
 			geometry.computeFaceNormals();
-			mesh = new THREE.Mesh(geometry, this.currentMaterial);
+			mesh = new THREE.Mesh(geometry, material);
 			break;
 
 		case CANNON.Shape.types.TRIMESH:
@@ -493,34 +546,14 @@ Demo.prototype.shape2mesh = function(body){
 			}
 			geometry.computeBoundingSphere();
 			geometry.computeFaceNormals();
-			mesh = new THREE.Mesh(geometry, this.currentMaterial);
+			mesh = new THREE.Mesh(geometry, material);
 			break;
 
 		default:
 			throw "Visual type not recognized: "+shape.type;
 		}
 
-		mesh.receiveShadow = true;
-		mesh.castShadow = true;
-		if(mesh.children){
-			for(var i=0; i<mesh.children.length; i++){
-				mesh.children[i].castShadow = true;
-				mesh.children[i].receiveShadow = true;
-				if(mesh.children[i]){
-					for(var j=0; j<mesh.children[i].length; j++){
-						mesh.children[i].children[j].castShadow = true;
-						mesh.children[i].children[j].receiveShadow = true;
-					}
-				}
-			}
-		}
-
-		var o = body.shapeOffsets[l];
-		var q = body.shapeOrientations[l];
-		mesh.position.set(o.x, o.y, o.z);
-		mesh.quaternion.set(q.x, q.y, q.z, q.w);
-
-		obj.add(mesh);
+		addMesh(mesh, l);
 	}
 
 	return obj;

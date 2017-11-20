@@ -95,6 +95,10 @@ define("exps_details", function() {
       "title": "Isometric Words",
       "description": "<p>Muddling up cubes by using the simplicity of Isometric projection.</p><p>Randomly offset the objects along the same axis the camera is looking down.</p>"
     },
+    "lego_stack": {
+      "title": "Lego Stack",
+      "description": "<p>Important scientifically realistic simulation to study how high lego can be stacked.</p>"
+    },
     "recursive_circle": {
       "title": "Recursive Circle",
       "description": "<p>Recursive rendering. Managed to not crash my browser creating this! Life achievement.</p>"
@@ -139,6 +143,7 @@ define("exps_details", function() {
           {"day": 17, "title": details.ball_and_chain.title, "link": "ball_and_chain"},
           {"day": 18, "title": details.fur.title, "link": "fur"},
           {"day": 19, "title": details.recursive_circle.title, "link": "recursive_circle"},
+          {"day": 20, "title": details.lego_stack.title, "link": "lego_stack"},
         ]
       }
       return features[key] || false;

@@ -49,6 +49,7 @@ body {
   right: 0;
   top: -20px;
   transition: top 0.2s ease-in, opacity 0.3s linear;
+  z-index: 99;
 }
 .exps-buttons.interacted {
   top: 0;

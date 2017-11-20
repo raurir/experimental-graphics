@@ -1,81 +1,90 @@
 define("lego_stack", [
 	"lib/schteppe/cannon.0.6.2.min.js",
-	"cannon_demo"
+	"cannon_demo",
 ], function(cn, CannonDemo) {
 
 /* this is 95+% hacked from schteppe's demos */
 
 function go() {
-	var demo = new CannonDemo();
+	var demo = new CannonDemo({trackballControls: true});
+
+	var world = setupWorld(demo);
+	world.gravity.set(0, 0, -10);
+
+	var blocks = [];
+
+	function createBlock() {
+		var kLength = 0.5, kRadius = 0.5, wallThickness = 0.2;
+
+		var width = 2;
+		var length = rand.getInteger(1, 4) * 2;
+		var height = rand.getInteger(1, 2);
+		var knob = new CANNON.Cylinder(kRadius, kRadius, kLength, 12);
+		var roof = new CANNON.Box(new CANNON.Vec3(width, length, wallThickness));
+		var bodyT = new CANNON.Box(new CANNON.Vec3(width, wallThickness, height));
+		var bodyR = new CANNON.Box(new CANNON.Vec3(wallThickness, length, height));
+		var bodyB = new CANNON.Box(new CANNON.Vec3(width, wallThickness, height));
+		var bodyL = new CANNON.Box(new CANNON.Vec3(wallThickness, length, height));
+
+		var block = new CANNON.Body({mass: 0.1});
+		block.addShape(roof, new CANNON.Vec3(0, 0, height));
+		block.addShape(bodyT, new CANNON.Vec3(0, length - wallThickness, 0));
+		block.addShape(bodyR, new CANNON.Vec3(width - wallThickness, 0, 0));
+		block.addShape(bodyB, new CANNON.Vec3(0, -length + wallThickness, 0));
+		block.addShape(bodyL, new CANNON.Vec3(-width + wallThickness, 0, 0));
+
+		for (var w = 0; w < width; w++) {
+			for (var l = 0; l < length; l++) {
+				var knobPosition = new CANNON.Vec3(
+					(w - width / 2 + 0.5) * 2,
+					(l - length / 2 + 0.5) * 2,
+					height + kLength / 2
+				);
+				block.addShape(knob, knobPosition);
+			}
+		}
+
+		block.position.set(0, 0, blocks.length * 5);
+
+		var colour = [
+			0xdd0000,
+			0x004400,
+			0xffbb00,
+			0x2222ee,
+		][rand.getInteger(0, 3)];
+
+		world.add(block);
+		demo.addVisual(block, new THREE.MeshPhongMaterial({color: colour}));
+		block.linearDamping = 0.1;
+		block.angularDamping = 0.1;
+		// block.stopped = false; // hack var
+
+		blocks.push(block)
+
+	}
+
 
 	demo.create(function(){
-		var world = setupWorld(demo);
-		world.gravity.set(0, 0, -20);
-		var width = 1;
-		var wireSize = 0.3;
-		var pitch = 1;
-		var chainShape0 = new CANNON.Box(new CANNON.Vec3(width, wireSize, pitch));
-		var chainShape1 = new CANNON.Box(new CANNON.Vec3(wireSize, width, pitch));
-		var mass = 1;
-		var space = 0.3;
-		var N = 10, last;
-
-		function join(body0, body1, offset) {
-			var cnX = width * 0.1, cnY = pitch + space + offset;
-			var c1 = new CANNON.PointToPointConstraint(body0, new CANNON.Vec3(-cnX, 0, cnY), body1, new CANNON.Vec3(-cnX, 0, -cnY));
-			var c2 = new CANNON.PointToPointConstraint(body0, new CANNON.Vec3(cnX, 0, cnY), body1, new CANNON.Vec3(cnX, 0, -cnY));
-			world.addConstraint(c1);
-			world.addConstraint(c2);
-		}
-
-
-
-		for(var i = 0; i < N; i++){
-			var firstBody = i === 0, firstChainLink = i === 1, lastBody = i === N - 1;
-
-			var py = (N-i)*(pitch*2+2*space) + pitch*2+space;
-
-			if (firstBody) { // the ball
-
-				var sphereShape = new CANNON.Sphere(4);
-				var spherebody = new CANNON.Body({mass: 3});
-				spherebody.addShape(sphereShape);
-				spherebody.position.set(0, 0, py);
-
-				last = spherebody;
-
-			} else if (lastBody) { // the cuff
-
-				var L = 3, R = 2;
-				var cylinderShape = new CANNON.Cylinder(R, R, L, 12);
-				var cylinderBody = new CANNON.Body({mass: 0.5});
-				cylinderBody.addShape(cylinderShape);
-				cylinderBody.position.set(0, 0, py );
-
-				join(cylinderBody, last, 0);
-
-				last = cylinderBody;
-
-			} else { // the chain
-
-				var chainLinkBody = new CANNON.Body({mass: 0.1});
-				chainLinkBody.addShape(i % 2 ? chainShape0 : chainShape1);
-				chainLinkBody.position.set(0, 0, py);
-
-				join(chainLinkBody, last, (firstChainLink ? 1.8 : 0));
-
-				last = chainLinkBody;
-			}
-
-			world.add(last);
-			demo.addVisual(last);
-			last.velocity.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-
-			last.linearDamping = 0.1;
-			last.angularDamping = 0.1;
-
-		}
+		createBlock();
+		update();
 	});
+
+	function update(time) {
+		requestAnimationFrame(update);
+
+		if (blocks.length < 100 && blocks.length < Math.floor(time / 1000)) {
+			// create 1 every second
+			createBlock();
+		}
+
+		// for (var i = 0; i < blocks.length; i++) {
+		// 	if (!blocks[i].stopped && blocks[i].velocity.norm() < 0.1) {
+		// 		blocks[i].stopped = true;
+		// 		con.log(blocks[i].quaternion)
+		// 		// con.log("stopped", i)
+		// 	};
+		// }
+	}
 
 
 	function setupWorld(demo){

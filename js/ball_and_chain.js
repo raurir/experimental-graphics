@@ -17,6 +17,7 @@ function go() {
 		var pitch = 1;
 		var chainShape0 = new CANNON.Box(new CANNON.Vec3(width, wireSize, pitch));
 		var chainShape1 = new CANNON.Box(new CANNON.Vec3(wireSize, width, pitch));
+
 		var mass = 1;
 		var space = 0.3;
 		var N = 10, last;
@@ -62,6 +63,8 @@ function go() {
 				var chainLinkBody = new CANNON.Body({mass: 0.1});
 				chainLinkBody.addShape(i % 2 ? chainShape0 : chainShape1);
 				chainLinkBody.position.set(0, 0, py);
+				chainLinkBody.custom = true;
+				chainLinkBody.customType = "CHAIN_LINK";
 
 				join(chainLinkBody, last, (firstChainLink ? 1.8 : 0));
 

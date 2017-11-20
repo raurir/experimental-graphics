@@ -26,6 +26,9 @@ function exps(experimentsDetails) {
     progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
     document.body.appendChild(progressBar);
 
+    var holder = dom.element("div", {id: "experiment-holder"});
+    document.body.appendChild(holder);
+
     var buttonsNav = dom.element("div", {className: "exps-buttons"});
     document.body.appendChild(buttonsNav);
 
@@ -51,8 +54,6 @@ function exps(experimentsDetails) {
     panelNav.appendChild(panelButtonClose);
     panelInfo.appendChild(panelInfoDetails);
 
-    var holder = dom.element("div");
-    document.body.appendChild(holder);
 
     function createStyleSheet(s) {
       var link  = dom.element("link");
