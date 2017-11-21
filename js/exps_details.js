@@ -22,6 +22,7 @@ define("exps_details", function() {
     ["fool", "css/fool"],
     ["fur"],
     ["hexagon_tile"],
+    ["hex_rounded", "THREE"],
     ["infinite_scrolling_cogs"],
     ["infinite_stairs", "THREE"],
     ["isometric_cubes"],
@@ -82,6 +83,10 @@ define("exps_details", function() {
     "fur": {
       "title": "Fur",
       "description": "<p>2 channels of perlin noise affect x and y lean of each hair of fur.</p>"
+    },
+    "hex_rounded": {
+      "title": "Hex Rounded",
+      "description": "<p>Hex Rounded? Some title, but that's what it's been dubbed since inception in 2014 or so. Never worked properly, so fixed it up for Codevember 2017.</p>"
     },
     "infinite_scrolling_cogs": {
       "title": "Infinite Scrolling Cogs",
@@ -144,6 +149,7 @@ define("exps_details", function() {
           {"day": 18, "title": details.fur.title, "link": "fur"},
           {"day": 19, "title": details.recursive_circle.title, "link": "recursive_circle"},
           {"day": 20, "title": details.lego_stack.title, "link": "lego_stack"},
+          {"day": 21, "title": details.hex_rounded.title, "link": "hex_rounded"},
         ]
       }
       return features[key] || false;
