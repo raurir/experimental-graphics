@@ -21,6 +21,7 @@ define("exps_details", function() {
     ["cube_pixelator", "THREE", "TweenMax"],
     ["fool", "css/fool"],
     ["fur"],
+    ["frame_inverse"],
     ["hexagon_tile"],
     ["hex_rounded", "THREE"],
     ["infinite_scrolling_cogs"],
@@ -79,6 +80,10 @@ define("exps_details", function() {
     "cube_pixelator": {
       "title": "Cube pixelator",
       "description": "<p>Should be called 'Plane pixelator' since they are planes, not cubes.</p><p>Planes are distributed through a 2 dimensional grid with each plane representing a pixel.</p><p>Each plane is exactly the same colour and this colour never changes. Instead, each plane rotates accordingly to catch the lighting within the scene and by doing so adapts its apparent shade, and thereby creates an image.</p>"
+    },
+    "frame_inverse": {
+      "title": "Frame Inverse",
+      "description": "<p>Drawing rectangles, aye...</p><p>listen to <a href='https://youngerbrothermusic.bandcamp.com/album/the-last-days-of-gravity' target='_blank'>Younger Brother - Last Days of Gravity</a>.</p>"
     },
     "fur": {
       "title": "Fur",
@@ -150,6 +155,8 @@ define("exps_details", function() {
           {"day": 19, "title": details.recursive_circle.title, "link": "recursive_circle"},
           {"day": 20, "title": details.lego_stack.title, "link": "lego_stack"},
           {"day": 21, "title": details.hex_rounded.title, "link": "hex_rounded"},
+          {"day": 22, "title": "faily McFail O'clock"},
+          {"day": 23, "title": details.frame_inverse.title, "link": "frame_inverse"},
         ]
       }
       return features[key] || false;
