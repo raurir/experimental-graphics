@@ -6,6 +6,7 @@ define("exps_details", function() {
     // ["_test"],
 
     ["additive"],
+    ["aegean_sun"],
     ["anemone_three", "THREE"],
     ["any_image_url"],
     ["ball_and_chain", "THREE"],
