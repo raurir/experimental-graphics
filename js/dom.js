@@ -82,7 +82,7 @@ var dom = (function() {
     props = props || {};
     if (props.innerHTML) con.warn("Specify butotn text as 1st param");
     props.innerHTML = txt;
-    var b = element("div", props);
+    var b = element("button", props);
     return b;
   }
 

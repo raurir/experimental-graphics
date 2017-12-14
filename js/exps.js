@@ -26,6 +26,9 @@ function exps(experimentsDetails) {
     progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
     document.body.appendChild(progressBar);
 
+    var holder = dom.element("div", {id: "experiment-holder"});
+    document.body.appendChild(holder);
+
     var buttonsNav = dom.element("div", {className: "exps-buttons"});
     document.body.appendChild(buttonsNav);
 
@@ -51,8 +54,6 @@ function exps(experimentsDetails) {
     panelNav.appendChild(panelButtonClose);
     panelInfo.appendChild(panelInfoDetails);
 
-    var holder = dom.element("div");
-    document.body.appendChild(holder);
 
     function createStyleSheet(s) {
       var link  = dom.element("link");
@@ -99,8 +100,11 @@ function exps(experimentsDetails) {
     function showInfo() {
       infoShowing = true;
       panelInfo.classList.add("displayed");
-      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4><h1>" + info.title + "</h1>"
-        + info.description;
+      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4>"
+        + "<h1>" + info.title + "</h1>"
+        + info.description
+        + "<p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/"
+        + info.key + ".js' target='_blank'>SRC on Github</a></p>";
     }
 
     function hideInfo() {
@@ -130,7 +134,9 @@ function exps(experimentsDetails) {
       loadExperiment(index);
 
       info = experimentsDetails.getDetails(key);
-      if (!info) {
+      if (info) {
+        info.key = key;
+      } else {
         buttonsNav.removeChild(buttonInfo);
       }
       // showInfo();
