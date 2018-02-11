@@ -28,10 +28,10 @@ var circle_packing = function() {
 		settings: {} // or null
 	}
 
-	var output = dom.element("div");
-	document.body.appendChild(output);
+	// var output = dom.element("div");
+	// document.body.appendChild(output);
 	var threadOutput = dom.canvas(800, 300);
-	document.body.appendChild(threadOutput.canvas);
+	// document.body.appendChild(threadOutput.canvas);
 
 	function init(options) {
 
