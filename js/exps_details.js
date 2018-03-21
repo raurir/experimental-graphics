@@ -7,6 +7,7 @@ define("exps_details", function() {
 
     ["additive"],
     ["aegean_sun"],
+    ["alien"],
     ["anemone_three", "THREE"],
     ["any_image_url"],
     ["attractor"],
