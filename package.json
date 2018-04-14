@@ -12,7 +12,9 @@
     "amdefine": "~0.1.0"
   },
   "devDependencies": {
-    "grunt-babel": "^5.0.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "grunt-babel": "^7.0.0",
     "grunt-contrib-jade": "~0.14.0",
     "grunt-contrib-stylus": "^0.20.0",
     "jasmine-node": "^1.14.5",

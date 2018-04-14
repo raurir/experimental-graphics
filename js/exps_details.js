@@ -22,6 +22,7 @@ define("exps_details", function() {
     ["creature"],//, "creature_creator"], //, "creature_creator/creature_creator", "creature_creator/human"],
     ["cube_fractal_zoom", "THREE", "TweenMax"],
     ["cube_pixelator", "THREE", "TweenMax"],
+    ["experiment_template_babel"],
     ["fool", "css/fool"],
     ["fur"],
     ["frame_inverse"],

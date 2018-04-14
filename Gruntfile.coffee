@@ -1,45 +1,51 @@
 con = console
 
-grunt = require('grunt')
-require('load-grunt-tasks')(grunt);
+grunt = require("grunt")
+require("load-grunt-tasks")(grunt);
 
-grunt.loadNpmTasks('grunt-contrib-coffee')
-grunt.loadNpmTasks('grunt-contrib-watch')
-grunt.loadNpmTasks('grunt-contrib-stylus')
-grunt.loadNpmTasks('grunt-contrib-jade')
+grunt.loadNpmTasks("grunt-contrib-coffee")
+grunt.loadNpmTasks("grunt-contrib-watch")
+grunt.loadNpmTasks("grunt-contrib-stylus")
+grunt.loadNpmTasks("grunt-contrib-jade")
 
 grunt.initConfig(
   watch:
     coffee:
       files: ["#{__dirname}/src/*.coffee"]
-      tasks: ['coffee:compile']
+      tasks: ["coffee:compile"]
     stylus:
       files: ["#{__dirname}/stylus/*.styl"]
-      tasks: ['stylus:compile']
+      tasks: ["stylus:compile"]
     jade:
       files: ["#{__dirname}/jade/*.jade"]
-      tasks: ['jade:compile']
+      tasks: ["jade:compile"]
     babel:
-      files: ["#{__dirname}/es6/*.js"]
-      tasks: ['babel']
+      files: ["#{__dirname}/js/*.src"]
+      tasks: ["babel"]
 
 
   babel:
     options:
-      sourceMap: true
+      sourceMap: false
+      presets: ["env"]
     dist:
-      files:
-        'es5/test.js': 'es6/test.js'
-        # 'es5/anotherfile.js': 'es6/anotherfile.js'
+      files: [{
+        expand: true
+        cwd: "js/"
+        src: ["*.src"]
+        dest: "js/"
+        ext: ".js"
+      }]
+
 
   coffee:
     compile:
       expand: true
       flatten: true
       cwd: "#{__dirname}/src/"
-      src: ['*.coffee']
-      dest: 'js/'
-      ext: '.js'
+      src: ["*.coffee"]
+      dest: "js/"
+      ext: ".js"
 
   jade:
     compile:
@@ -53,10 +59,10 @@ grunt.initConfig(
       files: [
         {
           expand: true
-          cwd: 'jade/'
+          cwd: "jade/"
           src: ["**/*.jade"] # , "!**/_**"
-          dest: 'html/'
-          ext: '.html'
+          dest: "html/"
+          ext: ".html"
         }
       ]
 
@@ -76,4 +82,5 @@ grunt.initConfig(
         expand: true
 )
 
-grunt.registerTask('default', ['watch']);
+grunt.registerTask("default", ["watch"]);
+# grunt.registerTask("default", ["babel"]);
