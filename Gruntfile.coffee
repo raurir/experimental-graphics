@@ -32,7 +32,7 @@ grunt.initConfig(
     dist:
       files: [{
         expand: true
-        cwd: "js/" # TODO change to src
+        cwd: "src/" # TODO change to src
         src: ["*.js"]
         dest: "es5/"
       }]
@@ -43,20 +43,17 @@ grunt.initConfig(
       # beautify: true
       mangle: false
       compress: false
-      # compress: false
-      # mangle: false
-        # reserved: ['jQuery', 'Backbone']
+      # reserved: ['jQuery', 'Backbone']
     separate:
       files: [{
         expand: true
         cwd: "es5"
         src: "*.js"
         dest: "jsmin/"
-        # ext: ".min.js"
       }]
     composite:
       src: 'es5/*.js'
-      dest: 'jsmin/composite.min.js'
+      dest: 'jsmin/composite.js'
 
   coffee:
     compile:
@@ -64,7 +61,7 @@ grunt.initConfig(
       flatten: true
       cwd: "#{__dirname}/src/"
       src: ["*.coffee"]
-      dest: "js/"
+      dest: "es5/"
       ext: ".js"
 
   jade:
