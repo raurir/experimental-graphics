@@ -7,6 +7,7 @@ grunt.loadNpmTasks("grunt-contrib-coffee")
 grunt.loadNpmTasks("grunt-contrib-watch")
 grunt.loadNpmTasks("grunt-contrib-stylus")
 grunt.loadNpmTasks("grunt-contrib-jade")
+grunt.loadNpmTasks("grunt-contrib-uglify")
 
 grunt.initConfig(
   watch:
@@ -31,12 +32,31 @@ grunt.initConfig(
     dist:
       files: [{
         expand: true
-        cwd: "js/"
-        src: ["*.src"]
-        dest: "js/"
-        ext: ".js"
+        cwd: "js/" # TODO change to src
+        src: ["*.js"]
+        dest: "es5/"
       }]
 
+
+  uglify:
+    options:
+      # beautify: true
+      mangle: false
+      compress: false
+      # compress: false
+      # mangle: false
+        # reserved: ['jQuery', 'Backbone']
+    separate:
+      files: [{
+        expand: true
+        cwd: "es5"
+        src: "*.js"
+        dest: "jsmin/"
+        # ext: ".min.js"
+      }]
+    composite:
+      src: 'es5/*.js'
+      dest: 'jsmin/composite.min.js'
 
   coffee:
     compile:
@@ -80,7 +100,13 @@ grunt.initConfig(
       options:
         compress: false
         expand: true
+
+
+
 )
 
-grunt.registerTask("default", ["watch"]);
-# grunt.registerTask("default", ["babel"]);
+# grunt.registerTask("default", ["watch"])
+grunt.registerTask("default", [
+  "babel"
+  "uglify:separate"
+])

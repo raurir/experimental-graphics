@@ -1,4 +1,6 @@
-.DS_Store
 *.mp3
-node_modules/*
+.DS_Store
+es5/
 export/
+jsmin/
+node_modules/*

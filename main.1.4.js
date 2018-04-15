@@ -19,7 +19,7 @@ var perf = (function() {
 })();
 
 require.config({
-	baseUrl: "js",
+	baseUrl: "jsmin",
 	urlArgs: "bust=" + (new Date()).getTime(),
 	paths: {
 		"box": "games/box",
@@ -32,9 +32,9 @@ require.config({
 	},
 });
 
-console.log("v1.3");
+console.log("v1.4");
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
-	console.log("ready");
+	console.log("ready", d);
 	e();
 });
