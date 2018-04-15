@@ -20,7 +20,7 @@ var perf = (function() {
 
 require.config({
 	baseUrl: "jsmin",
-	urlArgs: "bust=" + (new Date()).getTime(),
+	urlArgs: "bust={HASH}",
 	paths: {
 		"box": "games/box",
 		"creature": "creature_creator/creature",
