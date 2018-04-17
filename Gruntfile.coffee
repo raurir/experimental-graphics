@@ -1,3 +1,5 @@
+# TODO subfolders in src, es5 & jsmin don't work
+
 version = "1.5"
 buildOptions = {}
 buildOptions["main.#{version}.js"] = "main.js"
@@ -28,7 +30,10 @@ grunt.initConfig(
       tasks: ["newer:jade:compile"]
     babel:
       files: ["#{__dirname}/src/*.js"]
-      tasks: ["newer:babel:compile"] # in turn runs: "newer:uglify:separate"
+      tasks: ["newer:babel:compile"] # in turn runs: newer:uglify:separate
+    es5:
+      files: ["#{__dirname}/es5/*.js"]
+      tasks: ["newer:uglify:separate"]
 
 
   babel:

@@ -7,7 +7,7 @@ var tetris_cube = function() {
 	var sw = window.innerWidth, sh = window.innerHeight;
 	// sw = sh = 400;
 	var theta = 0, gamma = 0;
-	var dim = 3;
+	var dim = 4;
 	var size = 40;
 	var cubes = [];
 	var groups = [];
