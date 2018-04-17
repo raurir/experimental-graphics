@@ -1,4 +1,6 @@
-con = console
+version = "1.5"
+buildOptions = {}
+buildOptions["main.#{version}.js"] = "main.js"
 
 grunt = require("grunt")
 require("load-grunt-tasks")(grunt);
@@ -9,7 +11,9 @@ grunt.loadNpmTasks("grunt-contrib-stylus")
 grunt.loadNpmTasks("grunt-contrib-uglify")
 grunt.loadNpmTasks("grunt-contrib-watch")
 grunt.loadNpmTasks("grunt-newer")
-grunt.loadNpmTasks("grunt-replace")
+grunt.loadNpmTasks("grunt-string-replace")
+
+md5 = require("./md5")
 
 grunt.initConfig(
   watch:
@@ -45,7 +49,7 @@ grunt.initConfig(
       # beautify: true
       mangle: false
       compress: false
-      # reserved: ['jQuery', 'Backbone']
+      # reserved: ["jQuery", "Backbone"]
     separate:
       files: [{
         expand: true
@@ -54,8 +58,11 @@ grunt.initConfig(
         dest: "jsmin/"
       }]
     composite:
-      src: 'es5/*.js'
-      dest: 'jsmin/composite.js'
+      src: "es5/*.js"
+      dest: "jsmin/composite.js"
+    main:
+      src: "main.#{version}.js"
+      dest: "main.#{version}.min.js"
 
   coffee:
     compile:
@@ -100,26 +107,24 @@ grunt.initConfig(
         compress: false
         expand: true
 
-  build:
-    hash:
-      files:
-        'testdone.js': 'test.js'
+  "string-replace":
+    dist:
+      files: [
+        buildOptions
+      ]
       options:
-        replacements: [{
-          # pattern: /<!-- @import (.*?) -->/ig,
-          pattern: /testing/ig,
-          replacement: (match, p1) =>
-            console.log(match, p1)
-            return "hello" # grunt.file.read(__dirname + p1)
-        }]
-      }
-    }
-  }
-
-
+        replacements: [
+          {
+            pattern: "{HASH}"
+            replacement: md5 # (match, p1) => md5()
+          }
+          {
+            pattern: "{VERSION}"
+            replacement: version
+          }
+        ]
 
 )
-
 
 grunt.registerTask("default", ["watch"])
 grunt.registerTask("deploy", [
@@ -128,4 +133,6 @@ grunt.registerTask("deploy", [
   "stylus:compile"
   "uglify:separate"
   "uglify:composite"
+  "string-replace"
+  "uglify:main"
 ])

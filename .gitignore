@@ -3,4 +3,5 @@
 es5/
 export/
 jsmin/
+main.*.js
 node_modules/*
