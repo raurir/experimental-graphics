@@ -1,4 +1,4 @@
-var geom = require("../js/geom.js");
+var geom = require("../src/geom.js");
 
 describe("test geometry", function() {
 	/*

@@ -1,4 +1,4 @@
-var rand = require("../js/rand.js");
+var rand = require("../src/rand.js");
 describe("test rand", function() {
 
 	var random = 0, randoms = 10;
