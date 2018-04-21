@@ -51,10 +51,9 @@ grunt.initConfig(
 
   uglify:
     options:
-      # beautify: true
+      beautify: true
       mangle: false
-      compress: false
-      # reserved: ["jQuery", "Backbone"]
+      minify: false
     separate:
       files: [{
         expand: true
@@ -80,13 +79,12 @@ grunt.initConfig(
 
   jade:
     compile:
-      options: {
+      options:
         client: false,
         pretty: true
         # data: (dest, src) ->
         #   console.log("log", dest,src)
         #   return {data:"hello", path:dest}
-      }
       files: [
         {
           expand: true

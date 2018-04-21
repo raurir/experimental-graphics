@@ -44,8 +44,7 @@ define("infinite_scrolling_cogs", function() {
 			var defaults = { darkest: 0, lightest: 255, alpha: 1 };
 			for (var p in options ) defaults[p] = options[p];
 			var white = defaults.white ? defaults.white : integer(defaults.darkest,defaults.lightest);
-			var r = g = b = white;
-			var a = defaults.alpha;
+			var r = white, g = white, b = white, a = defaults.alpha;
 			return "rgba("+r+","+g+","+b+","+a+")";
 		}
 
@@ -125,6 +124,7 @@ define("infinite_scrolling_cogs", function() {
 				var angle = i - step / 2; // offsets teeth a bit, making sure at angle 0, we are in the middle of a "bottom land" rather than "top land"
 				realX = r * Math.cos(angle);
 				realY = r * Math.sin(angle);
+				let v;
 				if (oddEven%2 == 0) {
 					v = {tb:topBottomLand, ex:realX, ey:realY};
 				} else {

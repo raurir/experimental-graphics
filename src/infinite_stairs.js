@@ -7,6 +7,7 @@ define("infinite_stairs", function() {
 	var stepDepth = 40;
 	var stepHeight = 30;
 	var textures = {};
+	var controls, holder;
 
 	function loadTextures(assets) {
 		var loader = new THREE.TextureLoader();

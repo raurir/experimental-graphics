@@ -2,7 +2,7 @@ define("cube_fractal_zoom", function() {
 
 	var cubeSize = 200;
 	var gridSize = cubeSize * 1.2;
-	var camera, scene, renderer;
+	var camera, scene, renderer, holder;
 	var sw = window.innerWidth, sh = window.innerHeight;
 	var lightA, lightB, lightC;
 	var next, prev;

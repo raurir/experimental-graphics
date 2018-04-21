@@ -4,11 +4,13 @@ define("codevember", ["exps_details"], function(experimentsDetails) {
 	var gridSize = 440;
 	var cubeDepth = 50;
 	var grid = [];
+	var holder;
 	var camera, scene, renderer;
 	var camPos = { x: 0, y: 0, z: 0 };
 	var sw = window.innerWidth,
 		sh = window.innerHeight;
 	var lightA, lightB, lightC;
+	var ambientLight;
 
 	function cube() {
 		const material = new THREE.MeshPhongMaterial({

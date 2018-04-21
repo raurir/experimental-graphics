@@ -10,6 +10,7 @@ define("frame_inverse", function() {
 	var pixels = [];
 	var boxes = 0;
 	var renders = 0;
+	var col;
 
 	var f = rand.getNumber(0, 1);
 	var force = null;

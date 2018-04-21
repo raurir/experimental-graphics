@@ -2,7 +2,7 @@ define("triangles", function() {
 
 	var camera, scene, renderer;
 	var sw = window.innerWidth, sh = window.innerHeight;
-	var holder, grid = [], lightA, lightB, lightC;
+	var holder, grid = [], lightA, lightB, lightC, ambientLight;
 
 	var TAU = Math.PI * 2;
 	var triangles = 48; // 48 x 48 x 3 = 6912 vertices

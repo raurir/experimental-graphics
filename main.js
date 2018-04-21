@@ -20,6 +20,7 @@ var perf = (function() {
 
 require.config({
 	baseUrl: "jsmin",
+	// urlArgs: "bust=" + Math.random(), // for dev hassles
 	urlArgs: "bust={HASH}",
 	paths: {
 		"box": "games/box",
