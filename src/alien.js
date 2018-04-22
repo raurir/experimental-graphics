@@ -10,7 +10,7 @@ if (isNode) {
 var alien = function() {
 	var stage = dom.canvas(1, 1);
 	var ctx = stage.ctx;
-	var centre;
+	var centre, size, sw, sh;
 
 	const numberOfRows = 10;
 	const numberOfColumns = 10;
@@ -31,7 +31,6 @@ var alien = function() {
 
 	function render() {
 		const aliens = manyAliens();
-		con.log(aliens)
 		aliens.x.forEach((x, xi) => {
 			aliens.y.forEach((y) => {
 				const img = oneAlien();
@@ -112,7 +111,7 @@ var alien = function() {
 		function q() {
 			var l = r(11), g = r(5), a = [], i = 0;
 			while ( i < l ) {
-				j = i * g;
+				var j = i * g;
 				a.push( j );
 				if ( i ) a.unshift(-j)
 				i++;

@@ -29,10 +29,10 @@ grunt.initConfig(
       files: ["#{__dirname}/jade/*.jade"]
       tasks: ["newer:jade:compile"]
     babel:
-      files: ["#{__dirname}/src/*.js"]
+      files: ["#{__dirname}/src/**/*.js"]
       tasks: ["newer:babel:compile"] # in turn runs: newer:uglify:separate
     es5:
-      files: ["#{__dirname}/es5/*.js"]
+      files: ["#{__dirname}/es5/**/*.js"]
       tasks: ["newer:uglify:separate"]
 
 
@@ -44,25 +44,25 @@ grunt.initConfig(
       files: [{
         expand: true
         cwd: "src/"
-        src: ["*.js"]
+        src: "./**/*.js"
         dest: "es5/"
       }]
 
 
   uglify:
     options:
-      beautify: true
+      # beautify: true
       mangle: false
-      minify: false
+      minify: true
     separate:
       files: [{
         expand: true
         cwd: "es5"
-        src: "*.js"
+        src: "./**/*.js"
         dest: "jsmin/"
       }]
     composite:
-      src: "es5/*.js"
+      src: "es5/**/*.js"
       dest: "jsmin/composite.js"
     main:
       src: "main.#{version}.js"

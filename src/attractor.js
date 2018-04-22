@@ -47,10 +47,8 @@ define("attractor", function() {
 
 	dom.on(window, ["mousemove", "touchmove"], function(e) {
 		var event = (e.changedTouches && e.changedTouches[0]) || e;
-		event.x = event.x || event.pageX;
-		event.y = event.y || event.pageY;
-		mouse.x = event.x - sw / 2;
-		mouse.y = event.y - sh / 2;
+		mouse.x = (event.x || event.pageX) - sw / 2;
+		mouse.y = (event.y || event.pageY) - sh / 2;
 	});
 
 

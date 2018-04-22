@@ -27,7 +27,7 @@ var bezier_flow = function() {
 
   var bmp = dom.canvas(100, 100);
   var ctx = bmp.ctx;
-  var lines, sections, points, lineStyles, exponential, scalePerLine;
+  var lines, sections, points, lineStyles, exponential, scalePerLine, constantBaseLine;
 
   function getPoint(d) {
     return points[(sections + d) % sections];

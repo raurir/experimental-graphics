@@ -42,8 +42,8 @@ draw = () ->
     # con.log(v)
     y = centre + v * centre / oscs
 
-    rgb = 100 # i * 10
-    ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},0.4)"
+    rgb = 0 # i * 10
+    ctx.fillStyle = "rgba(#{rgb},#{rgb},#{rgb},1)"
     ctx.fillRect(x * gap, y, 10, 10)
 
   requestAnimationFrame(draw)

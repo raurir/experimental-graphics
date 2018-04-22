@@ -18,10 +18,11 @@ var perf = (function() {
 	}
 })();
 
+var isDev = window.location.hostname === 'exp.local';
+
 require.config({
-	baseUrl: "jsmin",
-	// urlArgs: "bust=" + Math.random(), // for dev hassles
-	urlArgs: "bust={HASH}",
+	baseUrl: isDev ? 'es5' : 'jsmin',
+	urlArgs: "bust=" + (isDev ? Math.random() : "{HASH}"),
 	paths: {
 		"box": "games/box",
 		"creature": "creature_creator/creature",
