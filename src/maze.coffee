@@ -254,6 +254,7 @@ init = (cb, _xwide, _yhigh) ->
   # d.body.appendChild(can)
 
   ctx = can.getContext("2d")
+  console.log "maze.coffee init", cb
   draw(cb)
 
 keepDrawing = () => frontier.length > 2 and iterations < 1e10
@@ -287,42 +288,46 @@ fill = () =>
       ctx.fillRect(x * unit, y * unit, unit, unit)
 
 draw = (cb) ->
-  # can.width = can.width
-  time += 0.5
+  again = () =>
+    # can.width = can.width
+    time += 0.5
 
-  for d in [0...1]
-    iterativeDraw()
+    for d in [0..10]
+      iterativeDraw()
 
-  if keepDrawing()
-    console.log "drawing"
-    requestAnimationFrame(draw)
-  else
-    console.log "done"
-    # print the maze
+    if keepDrawing()
+      console.log "drawing"
+      requestAnimationFrame(again)
+    else
+      console.log "done"
+      # print the maze
 
-    # set unexposed cells to be walls
-    for y in [0...yhigh]
-      for x in [0...xwide]
-        f = field[y][x]
-        if f is '?' or f is ","
-          field[y][x] = '#'
+      # set unexposed cells to be walls
+      for y in [0...yhigh]
+        for x in [0...xwide]
+          f = field[y][x]
+          if f is '?' or f is ","
+            field[y][x] = '#'
 
-    # dodgy hack to draw top line down.
-    # drawn = false
-    # y = 1
-    # while field[y][x] isnt "#" and drawn is false
-    #   x = exits[0]
-    #   f = field[y][x]
-    #   con.log(x, y, f)
-    #   if f is "#"
-    #     carve(y, x)
-    #     drawn = true
-    #   else
-    #     continue
+      # dodgy hack to draw top line down.
+      # drawn = false
+      # y = 1
+      # while field[y][x] isnt "#" and drawn is false
+      #   x = exits[0]
+      #   f = field[y][x]
+      #   con.log(x, y, f)
+      #   if f is "#"
+      #     carve(y, x)
+      #     drawn = true
+      #   else
+      #     continue
 
-    # logShape()
-  fill()
+      # logShape()
 
+      cb?()
+
+    fill()
+  again()
 
 getMaze = () =>
   return field

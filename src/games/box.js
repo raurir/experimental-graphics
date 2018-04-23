@@ -1,5 +1,7 @@
 define("box", function() {
 
+  con.log("define box")
+
 
 var keysDown = { up: false, down: false, left: false, right: false};
 
@@ -89,11 +91,11 @@ function render() {
 var field = null
 
 function init() {
-  con.log('init');
+  con.log('maze init', maze);
   maze.init(function() {
     field = maze.getMaze();
 
-    // con.log('maze', field);
+    con.log('maze', field);
 
     if (window.DeviceOrientationEvent) {
       window.addEventListener("deviceorientation", function () {
@@ -150,6 +152,8 @@ function init() {
     container.appendChild(bmp.canvas);
     container.appendChild(output);
 
+
+    con.log('render');
     render();
 
 
