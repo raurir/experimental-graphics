@@ -18,6 +18,10 @@ var creature_creator = function() {
 	var creature = {};
 	var inputs = [];
 
+	var bmp;
+	var ctx;
+	var creatu;
+
 	function createEditor(limbs) {
 
 		var editor = dom.element("div", {id: "editor", style: {color: "white","font-size":"10px", position: "absolute", top: 10, left: sw}});

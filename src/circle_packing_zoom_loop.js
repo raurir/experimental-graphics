@@ -53,16 +53,14 @@ var circle_packing_zoom_loop = function() {
 			zoom.amount = zoom.max;
 			// con.log("done", zoom);
 		}
-		target = zoom.target
-		scale = zoom.amount
+		var {target, scale, scaler} = zoom;
 
 
 		var distance = Math.sqrt(Math.pow(zoom.target.x, 2) + Math.pow(zoom.target.y, 2)) * zoom.max;
 		// con.log(distance)
-		scaler = zoom.amount;
 		// zoomProgress = 1 - Math.pow(1 - zoom.amount / zoom.max, distance);
-		zoomProgress = zoom.amount / zoom.max;
-		zoomRemaining = 1 - zoomProgress;
+		var zoomProgress = zoom.amount / zoom.max;
+		var zoomRemaining = 1 - zoomProgress;
 
 		var xo = zoom.target.x / distance * zoom.amount;
 

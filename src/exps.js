@@ -15,6 +15,8 @@ function progress(eventName, eventParam) {
 
 function exps(experimentsDetails) {
 
+  con.log("experimentsDetails", experimentsDetails);
+
   var experiments = experimentsDetails.list;
 
   return function() {

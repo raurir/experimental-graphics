@@ -8,6 +8,7 @@ var widths;
 var pallete;
 var size;
 var rotation = 0;
+var palette;
 var palettePreview;
 var preview;
 var title;
