@@ -126,7 +126,7 @@ function newLine() {
 
   }
 
-  var gapX = gapY = 0.4 + gap * 0.6;
+  var gapX = 0.4 + gap * 0.6, gapY = gapX;
   for (var i = 0; i < cols; i++) {
     var x = -10 + i * cos * 2 * gapX;
     for (var j = rows - 1; j > -1; j--) {

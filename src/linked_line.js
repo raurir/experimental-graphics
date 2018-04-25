@@ -1,7 +1,8 @@
 const linked_line = () => {
 	// con.log('linked_line');
+	const TAU = Math.PI * 2;
 
-	const generate = (size, preoccupied) => {
+	const generate = (size, preoccupied, debug = false) => {
 		/*
 		param `preoccupied` hahahaha!
 		array of masked out coordinates
@@ -29,23 +30,22 @@ const linked_line = () => {
 			const bmpW = dom.canvas(swZ, shZ);
 			const bmpR = dom.canvas(swZ, shZ);
 			const ctx = bmp.ctx;
-			const ctxZ = bmpZ.ctx;
-			const ctxW = bmpW.ctx;
-			const ctxR = bmpR.ctx;
+			const ctxZ = bmpZ.ctx; // maze detector
+			const ctxW = bmpW.ctx; // red & white filled pixels
+			const ctxR = bmpR.ctx; // grey & white draw rectangle
 
-			// document.body.appendChild(bmpZ.canvas);
-			// document.body.appendChild(bmpW.canvas);
-			// document.body.appendChild(bmpR.canvas);
-
-			const debug = dom.element("div");
-			// document.body.appendChild(debug);
+			if (debug) {
+				document.body.appendChild(bmp.canvas);
+				document.body.appendChild(bmpZ.canvas);
+				document.body.appendChild(bmpW.canvas);
+				document.body.appendChild(bmpR.canvas);
+			}
 
 			var occupied = {
 				array: [],
 				// twoD: [],
 				oneD: [],
 				// neighbourless: []
-				monkeys: []
 			};
 			var backup = {};
 			const store = () => {
@@ -98,7 +98,7 @@ const linked_line = () => {
 				return {x: index % sw, y: Math.floor(index / sw)};
 			}
 
-			const init = () => {
+			const start = () => {
 
 				// con.log("linked_line init");
 				for (var y = 0; y < hei; y++) {
@@ -201,7 +201,6 @@ const linked_line = () => {
 				var index = rand.getInteger(0, occupied.array.length - 1);
 				var item = occupied.array[index];
 				if (!item) return;
-				debug.innerHTML = `item ${occupied.array.length}`;
 
 				var surrounded = checkSurrounded(item);
 				if (surrounded) {
@@ -409,13 +408,67 @@ const linked_line = () => {
 
 			};
 
-			init();
+			start();
 
 		});
 
 	}
 
-	return {generate};
+	const init = (options) => {
+		const size = 39; // options.size passed in is massive stage size...
+		const preoccupied = [];
+		// const fn = (x, y) => x > size / 2;
+
+		const polygon = (cx, cy, r, sides) => {
+			const points = [];
+			for(var i = 0; i < sides; i++) {
+				const angle = i / sides * TAU; // + TAU / 4,
+				points.push({
+					x: size * cx + Math.cos(angle) * size * r,
+					y: size * cy + Math.sin(angle) * size * r
+				});
+			}
+			return (x, y) => geom.pointInPolygon(points, {x, y});
+		}
+
+		const circle = (cx, cy, r) => {
+			cx = size * cx;
+			cy = size * cy;
+			r = size * r;
+			return (x, y) => Math.hypot(x - cx, y - cy) < r;
+		}
+
+		const triangle = polygon(.5, .5, .4, 3);
+		const pentagon = polygon(.5, .5, .25, 5);
+		const hexagon = polygon(.5, .5, .4, 6);
+
+		const circleTR5 = circle(3 / 4, 1 / 4, 1 / 5);// circle top right corner
+		const circleBL6 = circle(1 / 4, 3 / 4, 1 / 6);// circle bottom left corner
+
+		let fn;
+		switch (rand.getInteger(0, 3)) {
+			case 0 : fn = (x, y) => circleTR5(x, y) || circleBL6(x, y); break;
+			case 1 : fn = (x, y) => triangle(x, y); break;
+			case 2 : fn = (x, y) => pentagon(x, y); break;
+			case 3 : fn = (x, y) => hexagon(x, y); break;
+			case 4 : fn = (x, y) => false; break;
+		}
+
+		for (var i = 0; i < size * size; i++) {
+			var x = i % size, y = Math.floor(i / size);
+			if (fn(x, y)) {
+				preoccupied.push({x, y});
+			}
+		}
+		generate(size, preoccupied, true).then(({walls, wallrects}) => {
+			// con.log(walls, wallrects);
+		});
+	}
+
+	return {
+		generate,
+		init
+	};
 };
 
 define("linked_line", linked_line);
