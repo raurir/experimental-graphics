@@ -62,13 +62,23 @@ function exps(experimentsDetails) {
       // link.id = cssId;
       link.rel = "stylesheet";
       link.type = "text/css";
-      link.href = s + ".css";
+      link.href = `css/${s}.css`;
       // link.media = "all";
       document.head.appendChild(link);
     }
 
     function loadExperiment(index) {
-      var src = experiments[index];
+      const flagCSS = "css:";
+      let src = experiments[index];
+      if (src.toString().includes(flagCSS)) {
+        src = src.filter((file) => {
+          const isCSS = file.includes(flagCSS);
+          if (isCSS) {
+            createStyleSheet(file.replace(flagCSS, ""));
+          }
+          return !isCSS; // filter out non css files
+        })
+      }
       require(src, function(experiment) {
         if (experiment) {
           con.log("require loaded...", experiment);
