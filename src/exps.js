@@ -2,11 +2,11 @@ var progressBar;
 function progress(eventName, eventParam) {
   con.log("experiments progress", eventName, eventParam);
   switch (eventName) {
-    case "render:progress" :
-      progressBar.style.width = (eventParam * 100) + "%";
+    case "render:progress":
+      progressBar.style.width = eventParam * 100 + "%";
       progressBar.style.height = "10px";
       break;
-    case "render:complete" :
+    case "render:complete":
       // eventParam is canvas usually...
       progressBar.style.height = "0px";
       break;
@@ -14,40 +14,41 @@ function progress(eventName, eventParam) {
 }
 
 function exps(experimentsDetails) {
-
-  con.log("experimentsDetails", experimentsDetails);
-
   var experiments = experimentsDetails.list;
 
   return function() {
-
     var info;
     var infoShowing = false;
     var interactedShowing = false;
 
-    progressBar = dom.element("div", {id: "progress", style: {width: 0, height: 0}});
+    progressBar = dom.element("div", {
+      id: "progress",
+      style: { width: 0, height: 0 }
+    });
     document.body.appendChild(progressBar);
 
-    var holder = dom.element("div", {id: "experiment-holder"});
+    var holder = dom.element("div", { id: "experiment-holder" });
     document.body.appendChild(holder);
 
-    var buttonsNav = dom.element("div", {className: "exps-buttons"});
+    var buttonsNav = dom.element("div", { className: "exps-buttons" });
     document.body.appendChild(buttonsNav);
 
-    var buttonClose = dom.button("X", {className: "exps-button"});
+    var buttonClose = dom.button("X", { className: "exps-button" });
     buttonsNav.appendChild(buttonClose);
     dom.on(buttonClose, ["click", "touchend"], function(e) {
       window.location = "/";
     });
 
-    var buttonInfo = dom.button("?", {className: "exps-button"});
+    var buttonInfo = dom.button("?", { className: "exps-button" });
     buttonsNav.appendChild(buttonInfo);
     dom.on(buttonInfo, ["click", "touchend"], showInfo);
 
-    var panelInfo = dom.element("div", {className: "exps-info"});
-    var panelInfoDetails = dom.element("div", {className: "exps-info-details"});
-    var panelNav = dom.element("div", {className: "exps-buttons interacted"});
-    var panelButtonClose = dom.button("X", {className: "exps-button"});
+    var panelInfo = dom.element("div", { className: "exps-info" });
+    var panelInfoDetails = dom.element("div", {
+      className: "exps-info-details"
+    });
+    var panelNav = dom.element("div", { className: "exps-buttons interacted" });
+    var panelButtonClose = dom.button("X", { className: "exps-button" });
 
     dom.on(panelButtonClose, ["click", "touchend"], hideInfo);
 
@@ -56,9 +57,8 @@ function exps(experimentsDetails) {
     panelNav.appendChild(panelButtonClose);
     panelInfo.appendChild(panelInfoDetails);
 
-
     function createStyleSheet(s) {
-      var link  = dom.element("link");
+      var link = dom.element("link");
       // link.id = cssId;
       link.rel = "stylesheet";
       link.type = "text/css";
@@ -71,20 +71,23 @@ function exps(experimentsDetails) {
       const flagCSS = "css:";
       let src = experiments[index];
       if (src.toString().includes(flagCSS)) {
-        src = src.filter((file) => {
+        src = src.filter(file => {
           const isCSS = file.includes(flagCSS);
           if (isCSS) {
             createStyleSheet(file.replace(flagCSS, ""));
           }
           return !isCSS; // filter out non css files
-        })
+        });
       }
       require(src, function(experiment) {
         if (experiment) {
-          con.log("require loaded...", experiment);
           experimentLoaded(experiment);
         } else {
-          con.warn("require loaded... but experiment is null", experiment, arguments);
+          con.warn(
+            "require loaded... but experiment is null",
+            experiment,
+            arguments
+          );
         }
       });
     }
@@ -92,9 +95,9 @@ function exps(experimentsDetails) {
     function showButtons() {
       buttonClose.style.display = "none";
       buttonInfo.style.display = "none";
-      for(var e in experiments) {
-        var button = dom.element("button", {className: "exp"});
-        dom.on(button, ["click"], function(event){
+      for (var e in experiments) {
+        var button = dom.element("button", { className: "exp" });
+        dom.on(button, ["click"], function(event) {
           window.location = "?" + event.target.key;
         });
         var key = experiments[e][0];
@@ -103,7 +106,7 @@ function exps(experimentsDetails) {
         if (expDetails && expDetails.title) {
           title = expDetails.title;
         }
-        button.key = key
+        button.key = key;
         button.innerHTML = title;
         document.body.appendChild(button);
       }
@@ -112,11 +115,13 @@ function exps(experimentsDetails) {
     function showInfo() {
       infoShowing = true;
       panelInfo.classList.add("displayed");
-      panelInfoDetails.innerHTML = "<h4>Experimental Graphics</h4>"
-        + "<h1>" + info.title + "</h1>"
-        + info.description
-        + "<p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/"
-        + info.key + ".js' target='_blank'>SRC on Github</a></p>";
+      panelInfoDetails.innerHTML = `
+      <h4>Experimental Graphics</h4>
+      <h1>${info.title}</h1>
+      ${info.description}
+      <p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/${
+        info.key
+      }.js' target='_blank'>SRC on Github</a></p>`;
     }
 
     function hideInfo() {
@@ -125,7 +130,9 @@ function exps(experimentsDetails) {
     }
 
     if (window.location.search) {
-      var key = window.location.search.split("?")[1], index = 0, found = false;
+      var key = window.location.search.split("?")[1],
+        index = 0,
+        found = false;
       var seed = key.split(",");
       if (seed[1]) {
         key = seed[0];
@@ -133,11 +140,10 @@ function exps(experimentsDetails) {
         rand.setSeed(seed);
       } else {
         rand.setSeed();
-        // blah = seed;
       }
 
-      while(index < experiments.length && found == false) {
-        if ( experiments[index][0] == key) {
+      while (index < experiments.length && found == false) {
+        if (experiments[index][0] == key) {
           found = true;
         } else {
           index++;
@@ -161,7 +167,6 @@ function exps(experimentsDetails) {
         //   interactedShowing = false;
         // }, 3000);
       });
-
     } else {
       showButtons();
     }
@@ -170,9 +175,10 @@ function exps(experimentsDetails) {
 
     function resize() {
       // con.log("resize!");
-      var sw = window.innerWidth, sh = window.innerHeight;
+      var sw = window.innerWidth,
+        sh = window.innerHeight;
 
-      if (currentExperiment.resize) currentExperiment.resize(sw,sh);
+      if (currentExperiment.resize) currentExperiment.resize(sw, sh);
 
       // currentExperiment.stage.setSize(sw,sh);
 
@@ -186,7 +192,6 @@ function exps(experimentsDetails) {
       // }
 
       // currentExperiment.inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
-
     }
 
     function initWindowListener() {
@@ -203,7 +208,7 @@ function exps(experimentsDetails) {
       // initRenderProgress(); // experiments_progress
       // con.log("inittted!!!!!!");
       initWindowListener();
-      currentExperiment.init({size: 800});
+      currentExperiment.init({ size: 800 });
       resize();
     }
 
@@ -214,8 +219,7 @@ function exps(experimentsDetails) {
       load: loadExperiment,
       experiments: experiments
     };
-  }
-
-};
+  };
+}
 
 define("exps", ["exps_details"], exps);

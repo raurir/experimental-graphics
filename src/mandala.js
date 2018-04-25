@@ -14,7 +14,7 @@ var mandala = function() {
 	}
 
 	var TAU = Math.PI * 2;
-	var sw, sh, centre, spokes;
+	var size, sw, sh, centre, spokes;
 	var stage = dom.canvas(1, 1);
 	var ctx = stage.ctx;
 

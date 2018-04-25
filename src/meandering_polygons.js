@@ -247,7 +247,7 @@ var meandering_polygons = function() {
 
 
     for (var m = 0, ml = lines.length; m < ml; m++) {
-      var lineM = lines[m];
+      var lineM = lines[m],
         pointsM = lineM.points,
         a = arrDots[ pointsM[0] ],
         b = arrDots[ pointsM[1] ];

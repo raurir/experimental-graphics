@@ -1,16 +1,17 @@
 var mining_branches = function() {
-  var fgColour = colours.getRandomColour();
-  var bgColour = colours.getNextColour();
+  var fgColour;
+  var bgColour;
   var planets = 200;
 
-  var size = 400;
-
+  var size;
+  var sw;
+  var sh;
   var bmp;
 
   function makeCanvas(scale) {
+  sw = size * scale;
+  sh = sw;
 
-  var sw = size * scale;
-  var sh = sw;
   bmp = dom.canvas(sw, sh);
   bmp.canvas.setSize(sw/scale, sh/scale);
   var ctx = bmp.ctx;
@@ -320,10 +321,11 @@ var mining_branches = function() {
 
   }
 
-  function generate() {
+  function generate(options) {
+    size = options.size;
     while(canvases.childNodes.length) canvases.removeChild(canvases.childNodes[0]);
 
-    seed = ~~(rand.random() * 1e9)
+    // seed = ~~(rand.random() * 1e9)
 
     colours.getRandomPalette();
     fgColour = colours.getRandomColour();
