@@ -24,15 +24,6 @@ var generationComplete = false;
 var attempts = 0;
 var bail = 300;
 
-
-var renderMessage = dom.element("div", {innerHTML: "rendering", style:{
-	color:"white",
-	position: "absolute",
-	top: "10px",
-	width: "100%",
-	textAlign: "center",
-}});
-
 function sphere(props) {
 	var widthSegments = 10, heightSegments = 10;
 	var material = new THREE.MeshLambertMaterial({color: props.colour});
@@ -179,6 +170,7 @@ function init() {
 		if (new Date().getTime() - segmentLastCreated > 3000) {
 			con.log("more than 3 seconds... bailing!");
 			generationComplete = true;
+			progress("render:complete", renderer.domElement);
 			clearInterval(segmentCreationInterval);
 		}
 	}, 500);
@@ -191,8 +183,7 @@ function init() {
 
 		if (attempts < bail) {
 
-
-			renderMessage.innerHTML = "Rendering " + Math.round(attempts/bail * 100) + "%";
+			progress("render:progress", attempts / bail);
 
 			// TODO maybe parent can specify it's end point in generation. (drawSection/cylinder returns endpoint)
 			var endPoint = getSectionEnd(parent);
@@ -224,9 +215,7 @@ function init() {
 			};
 		} else {
 			generationComplete = true;
-			// con.log(vectors);
-			if (renderMessage) document.body.removeChild(renderMessage);
-			renderMessage = null;
+			progress("render:complete", renderer.domElement);
 		}
 
 	}
@@ -261,7 +250,6 @@ function init() {
 
 
 	document.body.appendChild(renderer.domElement);
-	document.body.appendChild(renderMessage);
 
 
 	function listen(eventNames, callback) {

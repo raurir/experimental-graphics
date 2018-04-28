@@ -130,10 +130,18 @@ function exps(experimentsDetails) {
     }
 
     if (window.location.search) {
-      var key = window.location.search.split("?")[1],
+      /*
+      expected window.location.search:
+      ?alien
+      ?alien,39343
+      ?alien,39343&src
+      ?alien,39343&src=true
+      */
+      var params = window.location.search.split("?")[1].split("&"),
+        key = params[0],
         index = 0,
-        found = false;
-      var seed = key.split(",");
+        found = false,
+        seed = key.split(",");
       if (seed[1]) {
         key = seed[0];
         seed = seed[1];

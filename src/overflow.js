@@ -2,7 +2,7 @@ var isNode = (typeof module !== 'undefined');
 
 var overflow = function() {
 	var TAU = Math.PI * 2;
-	var sw, sw, cx, cy;
+	var size, sw, sh;
 	var stage = dom.canvas(1, 1);
 	var ctx = stage.ctx;
 

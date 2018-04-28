@@ -1,3 +1,4 @@
+// keep this file es5!
 // performance testing...
 var perf = (function() {
 	var stacks = {};
@@ -18,7 +19,7 @@ var perf = (function() {
 	}
 })();
 
-var isDev = window.location.hostname === 'exp.local';
+var isDev = window.location.hostname === 'exp.local' || window.location.search.includes('src');
 
 require.config({
 	baseUrl: isDev ? 'es5' : 'jsmin',
@@ -35,6 +36,6 @@ require.config({
 });
 
 require(["dom", "rand", "geom", "colours", "exps"], function(d, r, g, c, e) {
-	console.log("v{VERSION} loaded");
+	console.log("v{VERSION} loaded. isDev:" + isDev);
 	e();
 });
