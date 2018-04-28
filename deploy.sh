@@ -19,7 +19,7 @@ git pull
 cd ../experimental-graphics/
 
 echo "Copying files... "
-for file in index.html main.*.min.js assets/* assets/**/* lib/* lib/**/* jsmin/* jsmin/**/* css/*
+for file in index.html main.*.min.js assets/* assets/**/* es5/* es5/**/* lib/* lib/**/* jsmin/* jsmin/**/* css/*
 do
   if [[ -f $file ]]; then
     cp "$file" "../raurir.github.io/$file"

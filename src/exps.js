@@ -1,5 +1,5 @@
 var progressBar;
-function progress(eventName, eventParam) {
+const progress = (eventName, eventParam) => {
   con.log("experiments progress", eventName, eventParam);
   switch (eventName) {
     case "render:progress":
@@ -11,15 +11,17 @@ function progress(eventName, eventParam) {
       progressBar.style.height = "0px";
       break;
   }
-}
+};
 
-function exps(experimentsDetails) {
-  var experiments = experimentsDetails.list;
+const exps = experimentsDetails => {
+  const experiments = experimentsDetails.list;
 
-  return function() {
+  return () => {
     var info;
     var infoShowing = false;
     var interactedShowing = false;
+    var currentExperiment;
+    var viewSource = false;
 
     progressBar = dom.element("div", {
       id: "progress",
@@ -35,8 +37,8 @@ function exps(experimentsDetails) {
 
     var buttonClose = dom.button("X", { className: "exps-button" });
     buttonsNav.appendChild(buttonClose);
-    dom.on(buttonClose, ["click", "touchend"], function(e) {
-      window.location = "/";
+    dom.on(buttonClose, ["click", "touchend"], e => {
+      window.location = `/${viewSource ? "?src" : ""}`;
     });
 
     var buttonInfo = dom.button("?", { className: "exps-button" });
@@ -57,7 +59,7 @@ function exps(experimentsDetails) {
     panelNav.appendChild(panelButtonClose);
     panelInfo.appendChild(panelInfoDetails);
 
-    function createStyleSheet(s) {
+    const createStyleSheet = s => {
       var link = dom.element("link");
       // link.id = cssId;
       link.rel = "stylesheet";
@@ -65,9 +67,9 @@ function exps(experimentsDetails) {
       link.href = `css/${s}.css`;
       // link.media = "all";
       document.head.appendChild(link);
-    }
+    };
 
-    function loadExperiment(index) {
+    const loadExperiment = index => {
       const flagCSS = "css:";
       let src = experiments[index];
       if (src.toString().includes(flagCSS)) {
@@ -79,26 +81,22 @@ function exps(experimentsDetails) {
           return !isCSS; // filter out non css files
         });
       }
-      require(src, function(experiment) {
+      require(src, experiment => {
         if (experiment) {
           experimentLoaded(experiment);
         } else {
-          con.warn(
-            "require loaded... but experiment is null",
-            experiment,
-            arguments
-          );
+          con.warn("require loaded... but experiment is null", experiment);
         }
       });
-    }
+    };
 
-    function showButtons() {
+    const showButtons = () => {
       buttonClose.style.display = "none";
       buttonInfo.style.display = "none";
       for (var e in experiments) {
         var button = dom.element("button", { className: "exp" });
-        dom.on(button, ["click"], function(event) {
-          window.location = "?" + event.target.key;
+        dom.on(button, ["click"], event => {
+          window.location = `?${event.target.key}${viewSource ? "&src" : ""}`;
         });
         var key = experiments[e][0];
         var title = key;
@@ -110,9 +108,9 @@ function exps(experimentsDetails) {
         button.innerHTML = title;
         document.body.appendChild(button);
       }
-    }
+    };
 
-    function showInfo() {
+    const showInfo = () => {
       infoShowing = true;
       panelInfo.classList.add("displayed");
       panelInfoDetails.innerHTML = `
@@ -122,66 +120,74 @@ function exps(experimentsDetails) {
       <p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/${
         info.key
       }.js' target='_blank'>SRC on Github</a></p>`;
-    }
+    };
 
-    function hideInfo() {
+    const hideInfo = () => {
       panelInfo.classList.remove("displayed");
       infoShowing = false;
-    }
+    };
 
-    if (window.location.search) {
-      /*
-      expected window.location.search:
-      ?alien
-      ?alien,39343
-      ?alien,39343&src
-      ?alien,39343&src=true
-      */
-      var params = window.location.search.split("?")[1].split("&"),
-        key = params[0],
-        index = 0,
-        found = false,
-        seed = key.split(",");
-      if (seed[1]) {
-        key = seed[0];
-        seed = seed[1];
-        rand.setSeed(seed);
-      } else {
-        rand.setSeed();
-      }
-
-      while (index < experiments.length && found == false) {
-        if (experiments[index][0] == key) {
-          found = true;
-        } else {
-          index++;
+    const checkURL = () => {
+      if (window.location.search) {
+        /*
+        expected window.location.search:
+        ?alien
+        ?alien,39343
+        ?alien,39343&src
+        ?alien,39343&src=true
+        */
+        var params = window.location.search.split("?")[1].split("&"),
+          key = params[0],
+          index = 0,
+          found = false,
+          seed = key.split(",");
+        viewSource = params.filter(param => param === "src").length;
+        if (viewSource) {
+          con.log("`src` in url: Experimental graphics in SRC mode...");
         }
-      }
-      loadExperiment(index);
+        if (key === "src") {
+          // if first key showbuttons...
+          return showButtons();
+        }
+        if (seed[1]) {
+          key = seed[0];
+          seed = seed[1];
+          rand.setSeed(seed);
+        } else {
+          rand.setSeed();
+        }
 
-      info = experimentsDetails.getDetails(key);
-      if (info) {
-        info.key = key;
+        while (index < experiments.length && found == false) {
+          if (experiments[index][0] == key) {
+            found = true;
+          } else {
+            index++;
+          }
+        }
+        loadExperiment(index);
+
+        info = experimentsDetails.getDetails(key);
+        if (info) {
+          info.key = key;
+        } else {
+          buttonsNav.removeChild(buttonInfo);
+        }
+        // showInfo();
+        dom.on(document.body, ["click", "touchstart"], function(e) {
+          if (interactedShowing) return;
+          interactedShowing = true;
+          buttonsNav.classList.add("interacted");
+          // setTimeout(function() {
+          //   buttonsNav.classList.remove("interacted");
+          //   interactedShowing = false;
+          // }, 3000);
+        });
       } else {
-        buttonsNav.removeChild(buttonInfo);
+        showButtons();
       }
-      // showInfo();
-      dom.on(document.body, ["click", "touchstart"], function(e) {
-        if (interactedShowing) return;
-        interactedShowing = true;
-        buttonsNav.classList.add("interacted");
-        // setTimeout(function() {
-        //   buttonsNav.classList.remove("interacted");
-        //   interactedShowing = false;
-        // }, 3000);
-      });
-    } else {
-      showButtons();
-    }
+    };
 
-    var currentExperiment;
-
-    function resize() {
+    const resize = () => {
       // con.log("resize!");
       var sw = window.innerWidth,
         sh = window.innerHeight;
@@ -200,13 +206,13 @@ function exps(experimentsDetails) {
       // }
 
       // currentExperiment.inner.setAttribute("transform", "translate(" + x + "," + y + ") scale(" + scale + ")");
-    }
+    };
 
-    function initWindowListener() {
+    const initWindowListener = () => {
       dom.on(window, ["resize"], resize);
-    }
+    };
 
-    function experimentLoaded(exp) {
+    const experimentLoaded = exp => {
       currentExperiment = exp;
       if (currentExperiment.stage) {
         holder.appendChild(currentExperiment.stage);
@@ -218,16 +224,18 @@ function exps(experimentsDetails) {
       initWindowListener();
       currentExperiment.init({ size: 800 });
       resize();
-    }
+    };
+
+    checkURL();
 
     // document.body.appendChild(colours.showPalette());
 
     // document.body.innerHTML = window.innerWidth;
     return {
       load: loadExperiment,
-      experiments: experiments
+      experiments
     };
   };
-}
+};
 
 define("exps", ["exps_details"], exps);
