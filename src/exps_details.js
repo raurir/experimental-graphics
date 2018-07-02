@@ -12,7 +12,7 @@ define("exps_details", function() {
     ["any_image_url"],
     ["attractor"],
     ["ball_and_chain", "THREE"],
-    ["bill_stevens", "THREE"],
+    ["bill_stevens", "THREE", "TweenMax"],
     ["bezier_flow"],
     ["box", "maze"],
     ["circle_packing"],

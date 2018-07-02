@@ -12,12 +12,28 @@ define("bill_stevens", () => { // ... and jan
 	var size = 40;
 	var cubes = [];
 
-	const available = [];
-	const occupied = [];
+	const available = Array(Math.pow(dim, 3)).fill(0);
+	const occupied = Array(Math.pow(dim, 3)).fill(0);
+	const positions = [];
 
-	function p(index) {
-		return (index - dim / 2 + 0.5) * size;
-	}
+	const position = (grid) =>
+		(index) => (index - grid / 2 + 0.5) * size;
+
+	const populate = (array) =>
+		(index) => array[index] = 1;
+
+	const getPositionFromIndex = (grid) =>
+		(index) => {
+			var x = index % grid;
+			var y = Math.floor(index / grid) % grid;
+			var z = Math.floor(index / (grid * grid));
+			return {x, y, z};
+		}
+
+	const getIndexFromPosition = ({x,y,z}) =>
+		x + y * dim + z * dim * dim;
+
+
 
 
 	const pieces = [
@@ -40,8 +56,32 @@ define("bill_stevens", () => { // ... and jan
 					[1,0,0],
 				]
 			]
+		}, {
+			id: 3,
+			structure: [
+				[
+					[1,1,1,1],
+				]
+			]
 		}
-	]
+	].map((piece) =>{
+		// calculate dimensions (bounds)
+		const { structure } = piece;
+		var w = 0, h = 0, d = 0;
+		structure.forEach((xLayer, x) => {
+			w = Math.max(w, x + 1);
+			xLayer.forEach((yRow, y) => {
+				h = Math.max(h, y + 1);
+				yRow.forEach((piece, z) => {
+					d = Math.max(d, z + 1);
+				});
+			});
+		});
+		return Object.assign(piece, {
+			dimensions: {w, h, d},
+		});
+	});
+	// console.log(pieces);
 
 	function cube(scale) {
 		const d = scale * size;
@@ -49,31 +89,67 @@ define("bill_stevens", () => { // ... and jan
 		const geometry = new THREE.BoxGeometry(d, d, d);
 		return new THREE.Mesh(geometry, material);
 	}
-
 	function getBlock() {
-		const block = new THREE.Group();
-		holder.add(block);
+
+		const test = occupied.slice();
 		const piece = pieces[Math.floor(Math.random() * pieces.length)];
 		const { structure } = piece;
-		structure.forEach((zLayer, z) => {
-			zLayer.forEach((xRow, x) => {
-				xRow.forEach((piece, y) => {
-					con.log(x, y, z, piece);
+
+		const p = position(dim);
+
+		const colour = Number("0x" + colours.getNextColour().substr(1));
+
+		const block = new THREE.Group();
+		block.x = rand.getInteger(0, dim - piece.dimensions.w);
+		block.y = rand.getInteger(0, dim - piece.dimensions.h);
+		block.z = rand.getInteger(0, dim - piece.dimensions.d);
+
+		const positions = [];
+
+		structure.forEach((xLayer, x) => {
+			xLayer.forEach((yRow, y) => {
+				yRow.forEach((piece, z) => {
 					if (piece) {
 						var c = cube(1);
-						// c.position.set(p(x), p(y), p(z));
-						c.position.set(x * size, y * size, z * size);
-						// cubes.push(c);
-						c.material.color.setHex(0xff8844);
+						c.position.set(p(x), p(y), p(z));
+						c.material.color.setHex(colour);
 						block.add(c);
+
+						const positionIndex = getIndexFromPosition({
+							x: x + block.x,
+							y: y + block.y,
+							z: z + block.z
+						});
+						positions.push(positionIndex);
+						populate(test, positionIndex);
 					}
 				});
 			});
 		});
-		return block;
+
+		if (test.some((item) => item > 1)) {
+			return con.log("invalid!");
+		} else {
+			con.log("cool", test);
+		}
+
+		block.position.set(
+			block.x * size,
+			block.y * size,
+			block.z * size
+		);
+		// return block;
+
+		holder.add(block);
+
+		positions.forEach((positionIndex) => {
+			populate(occupied, positionIndex);
+		});
 	}
 
 	function init() {
+
+		colours.getRandomPalette();
 
 		scene = new THREE.Scene();
 
@@ -95,46 +171,36 @@ define("bill_stevens", () => { // ... and jan
 		holder = new THREE.Group();
 		scene.add(holder);
 
-		function getPositionFromIndex(index) {
-			var x = index % dim;
-			var y = Math.floor(index / dim) % dim;
-			var z = Math.floor(index / (dim * dim));
-			return {x, y, z};
-		}
-		function getIndexFromPosition({x,y,z}) {
-			return x + y * dim + z * dim * dim
-		}
-
-
-		for (var i = 0; i < dim * dim * dim; i++) {
+		let p = position(dim + 1);
+		for (var i = 0; i < Math.pow(dim + 1, 3); i++) {
 			var c = cube(0.1);
-			var {x, y, z} = getPositionFromIndex(i);
+			var {x, y, z} = getPositionFromIndex(dim + 1)(i);
 			c.position.set(p(x), p(y), p(z));
+			c.material.color.setHex(0xff7700);
 			cubes.push(c);
 			holder.add(c);
 		}
 
-
-		getBlock();
-
-		for (i = 0; i < cubes.length; i++) {
-			var c = cubes[i];
-			var r = Math.round(100 + Math.random() * 15);
-			// var b = 100;
-			var b = Math.round(100 + Math.random() * 15);
-			var g = 100;
-			var col = r << 16 | g << 8 | b;
-			c.material.color.setHex(col);
-		}
-
-
 		stage.appendChild(renderer.domElement);
 
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		document.addEventListener( 'keydown', onKeyDown, false );
 
 		render();
 		animate();
+		attemptBlock();
 	}
+
+	let a = 0;
+	const attemptBlock = () => {
+		getBlock();
+		// con.log(available, occupied);
+		a++
+		if (a > 29) return;
+		setTimeout(attemptBlock, 1000);
+	}
+
+
 
 	function onDocumentMouseMove( event ) {
 		event.preventDefault();
@@ -142,12 +208,35 @@ define("bill_stevens", () => { // ... and jan
 		mouse.y = - ( event.clientY / sh ) * 2 + 1;
 	}
 
+	const onKeyDown = ( event ) => {
+		// con.log(event);
+		return;
+
+		switch (event.key) {
+			case "ArrowLeft" : b.x --; break;
+			case "ArrowUp" : b.y --; break;
+			case "ArrowRight" : b.x ++; break;
+			case "ArrowDown" : b.y ++; break;
+		}
+
+
+		const mesh = b;
+
+		TweenMax.to(mesh.position, 0.5, {
+			x: b.x * size,
+			y: b.y * size,
+			z: b.z * size,
+		});
+
+		// event.preventDefault();
+	}
+
 	function render() {
 
 		// var camRadius = 100;
 
-		theta += mouse.x * 4;
-		gamma += mouse.y * 2;
+		theta += 0.03;// mouse.x * 4;
+		gamma += 0.0435;//mouse.y * 2;
 
 		// camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
 		// camera.position.y = mouse.y * 10;
