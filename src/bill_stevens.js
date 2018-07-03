@@ -6,21 +6,20 @@ define("bill_stevens", () => { // ... and jan
 	var camera, scene, projector, renderer, holder;
 	const mouse = { x: 0, y: 0 };
 	const sw = window.innerWidth, sh = window.innerHeight;
-	// sw = sh = 400;
 	var theta = 0, gamma = 0;
-	var dim = 4;
-	var size = 40;
-	var cubes = [];
+	const dim = 4;
+	const size = 30;
+	const cubes = [];
 
 	const available = Array(Math.pow(dim, 3)).fill(0);
 	const occupied = Array(Math.pow(dim, 3)).fill(0);
 	const positions = [];
 
 	const position = (grid) =>
-		(index) => (index - grid / 2 + 0.5) * size;
+		// (index) => (index - grid / 2 + 0.5) * size;
+		(index) => index * size;
 
-	const populate = (array) =>
-		(index) => array[index] = 1;
+	const populate = (array, index) => array[index] ++;
 
 	const getPositionFromIndex = (grid) =>
 		(index) => {
@@ -35,8 +34,8 @@ define("bill_stevens", () => { // ... and jan
 
 
 
-
 	const pieces = [
+		/*
 		{
 			id: 0,
 			structure: [
@@ -56,7 +55,9 @@ define("bill_stevens", () => { // ... and jan
 					[1,0,0],
 				]
 			]
-		}, {
+		},
+		*/
+		{
 			id: 3,
 			structure: [
 				[
@@ -83,28 +84,38 @@ define("bill_stevens", () => { // ... and jan
 	});
 	// console.log(pieces);
 
-	function cube(scale) {
+	const cube = (scale) => {
 		const d = scale * size;
 		const material = new THREE.MeshLambertMaterial({color: 0});
 		const geometry = new THREE.BoxGeometry(d, d, d);
 		return new THREE.Mesh(geometry, material);
 	}
-	function getBlock() {
+
+	const getBlock = () => {
 
 		const test = occupied.slice();
+		// con.log(test);
 		const piece = pieces[Math.floor(Math.random() * pieces.length)];
 		const { structure } = piece;
 
 		const p = position(dim);
 
-		const colour = Number("0x" + colours.getNextColour().substr(1));
+		const hex = colours.getNextColour();
+		const mutated = colours.mutateColour(hex, 30);
+		const colour = Number("0x" + mutated.substr(1));
 
 		const block = new THREE.Group();
 		block.x = rand.getInteger(0, dim - piece.dimensions.w);
 		block.y = rand.getInteger(0, dim - piece.dimensions.h);
 		block.z = rand.getInteger(0, dim - piece.dimensions.d);
 
-		const positions = [];
+		block.rotation.set(
+			rand.getInteger(-1, 1) * Math.PI / 2,
+			rand.getInteger(-1, 1) * Math.PI / 2,
+			rand.getInteger(-1, 1) * Math.PI / 2,
+		)
+
+		const positions = [], vectors = [];
 
 		structure.forEach((xLayer, x) => {
 			xLayer.forEach((yRow, y) => {
@@ -129,8 +140,6 @@ define("bill_stevens", () => { // ... and jan
 
 		if (test.some((item) => item > 1)) {
 			return con.log("invalid!");
-		} else {
-			con.log("cool", test);
 		}
 
 		block.position.set(
@@ -142,12 +151,29 @@ define("bill_stevens", () => { // ... and jan
 
 		holder.add(block);
 
+		block.updateMatrixWorld();
+
+		block.children.forEach((c) => {
+			var vector = new THREE.Vector3();
+			vector.setFromMatrixPosition(c.matrixWorld);
+			var cleansed = {};
+			Object.entries(vector).forEach(([key,value]) => {
+				// remove inifitely small numbers created by matrix rotations.
+				var v = ((value > 0 && value < 0.001) || (value < 0 && value > -0.001)) ? 0 : value;
+				cleansed[key] = v / size;
+			});
+			vectors.push(cleansed);
+		});
+		con.log(vectors);
+
 		positions.forEach((positionIndex) => {
 			populate(occupied, positionIndex);
 		});
+
+		// con.log("occupied", occupied);
 	}
 
-	function init() {
+	const init = () => {
 
 		colours.getRandomPalette();
 
@@ -194,15 +220,20 @@ define("bill_stevens", () => { // ... and jan
 	let a = 0;
 	const attemptBlock = () => {
 		getBlock();
+
+		if (occupied.every((item) => item === 1)) {
+			return con.log("we're done here!!", occupied);
+		}
+
 		// con.log(available, occupied);
 		a++
-		if (a > 29) return;
-		setTimeout(attemptBlock, 1000);
+		if (a > 3) return; //1e3) return;
+		setTimeout(attemptBlock, 1);
 	}
 
 
 
-	function onDocumentMouseMove( event ) {
+	const onDocumentMouseMove = ( event ) => {
 		event.preventDefault();
 		mouse.x = ( event.clientX / sw ) * 2 - 1;
 		mouse.y = - ( event.clientY / sh ) * 2 + 1;
@@ -231,36 +262,24 @@ define("bill_stevens", () => { // ... and jan
 		// event.preventDefault();
 	}
 
-	function render() {
+	const render = () => {
 
-		// var camRadius = 100;
+		const camRadius = 300;
 
-		theta += 0.03;// mouse.x * 4;
-		gamma += 0.0435;//mouse.y * 2;
+		theta += 0.3;// mouse.x * 4;
+		gamma -= 0.435;//mouse.y * 2;
 
-		// camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
-		// camera.position.y = mouse.y * 10;
-		// camera.position.z = camRadius * Math.cos( theta * Math.PI / 360 );
-
-		holder.rotation.x = gamma * 0.1;
-		holder.rotation.y = theta * 0.1;
-
+		camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
+		camera.position.y = mouse.y * 100;
+		camera.position.z = camRadius * Math.cos( theta * Math.PI / 360 );
 		camera.lookAt( scene.position );
-
 		renderer.render( scene, camera );
-
 	}
 
-	function animate() {
+	const animate = () => {
 		requestAnimationFrame( animate );
 		render();
 	}
 
-  var experiment = {
-    stage: stage,
-    init: init,
-  }
-
-  return experiment;
-
+	return {stage, init};
 });
