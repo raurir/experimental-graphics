@@ -59,6 +59,7 @@ define("exps_details", function() {
     ["recursive"],
     ["recursive_circle"],
     ["recursive_polygon"],
+    ["reddit_proc_gen"],
     ["seven_four_sevens"],
     ["spiral_even"],
     ["squaretracer"],
