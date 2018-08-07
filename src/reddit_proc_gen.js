@@ -7,6 +7,7 @@ const reddit_proc_gen = function() {
 	var ctx = stage.ctx;
 	var size;
 
+	// been listening to GOTO80 for most of this: https://www.youtube.com/watch?v=2ZXlofdWtWw
 	//copied from recursive_polygon
 	function drawPolygon(points, options) {
 		ctx.beginPath();
