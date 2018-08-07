@@ -47,7 +47,9 @@ define("bill_stevens", () => { // ... and jan
 					[0,0],
 				]
 			]
-		}, {
+		},
+		*/
+		{
 			id: 1,
 			structure: [
 				[
@@ -56,7 +58,6 @@ define("bill_stevens", () => { // ... and jan
 				]
 			]
 		},
-		*/
 		{
 			id: 3,
 			structure: [
@@ -153,18 +154,36 @@ define("bill_stevens", () => { // ... and jan
 
 		block.updateMatrixWorld();
 
-		block.children.forEach((c) => {
-			var vector = new THREE.Vector3();
+
+		// calculate absolute positions using THREE'S nested bodies calculation.
+		var min = {x: 0, y: 0, z: 0};
+
+		block.children.forEach((c, index) => {
+			const vector = new THREE.Vector3();
 			vector.setFromMatrixPosition(c.matrixWorld);
-			var cleansed = {};
+			const cleansed = {};
 			Object.entries(vector).forEach(([key,value]) => {
 				// remove inifitely small numbers created by matrix rotations.
 				var v = ((value > 0 && value < 0.001) || (value < 0 && value > -0.001)) ? 0 : value;
 				cleansed[key] = v / size;
+				min[key] = Math.min(min[key], cleansed[key]);
 			});
-			vectors.push(cleansed);
+			vectors[index] = cleansed;
 		});
-		con.log(vectors);
+
+		//
+		TweenMax.to(block.rotation, 3.5, {x: 0, y:0, z: 0});
+
+		block.children.forEach((c, index) => {
+			const pos = vectors[index];
+			const newPos = {
+				x: (pos.x - min.x) * size,
+				y: (pos.y - min.y) * size,
+				z: (pos.z - min.z) * size,
+			};
+			TweenMax.to(c.position, 3.5, newPos);
+			con.log(pos, newPos);
+		});
 
 		positions.forEach((positionIndex) => {
 			populate(occupied, positionIndex);
@@ -228,7 +247,7 @@ define("bill_stevens", () => { // ... and jan
 		// con.log(available, occupied);
 		a++
 		if (a > 3) return; //1e3) return;
-		setTimeout(attemptBlock, 1);
+		setTimeout(attemptBlock, 2000);
 	}
 
 
@@ -266,12 +285,12 @@ define("bill_stevens", () => { // ... and jan
 
 		const camRadius = 300;
 
-		theta += 0.3;// mouse.x * 4;
-		gamma -= 0.435;//mouse.y * 2;
+		// theta += 0.3;// mouse.x * 4;
+		// gamma -= 0.435;//mouse.y * 2;
 
-		camera.position.x = camRadius * Math.sin( theta * Math.PI / 360 );
-		camera.position.y = mouse.y * 100;
-		camera.position.z = camRadius * Math.cos( theta * Math.PI / 360 );
+		camera.position.x = 200;//camRadius * Math.sin( theta * Math.PI / 360 );
+		camera.position.y = 300;//mouse.y * 100;
+		camera.position.z = 400;//camRadius * Math.cos( theta * Math.PI / 360 );
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
 	}
