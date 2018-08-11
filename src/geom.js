@@ -136,7 +136,27 @@ var geom = (function() {
     }
 
   }
+  const polygonArea = points => {
+    const len = points.length;
+    const area = points.reduce((sum, point, index) => {
+      const { x, y } = point;
+      const { x: xn, y: yn } = points[(index + 1) % len]; // extract next point x,y
+      return sum + (xn + x) * (yn - y);
+    }, 0);
+    return Math.abs(area) / 2;
+  };
 
+  const polygonPerimeter = points => {
+    return points.reduce((sum, point, index) => {
+      if (index) {
+        const prev = points[index - 1];
+        const dx = point.x - prev.x;
+        const dy = point.y - prev.y;
+        return sum + Math.hypot(dx, dy);
+      }
+      return 0;
+    }, 0);
+  };
 
   function linearInterpolate(a, b, ratio) {
     return {
@@ -187,7 +207,7 @@ var geom = (function() {
       // con.log(i, pp0, pp1);
       parallels.push(parallelPoints(pp0, pp1, offset));
     };
-    con.log("parallels.length", parallels.length);
+    // con.log("parallels.length", parallels.length);
     for (i = 0, il = parallels.length; i < il; i++) {
       var parallel0 = parallels[i]; // start of line
       var parallel1 = parallels[(i + 1) % il]; // end of line
@@ -197,7 +217,7 @@ var geom = (function() {
         parallel1[0],
         parallel1[1]
       );
-      con.log("intersection", intersection);
+      // con.log("intersection", intersection);
       var inside = pointInPolygon(points, intersection);
       if (inside) {
         insets.push(intersection);
@@ -211,18 +231,18 @@ var geom = (function() {
     return insets;
   }
 
-
-
-
   return {
-    insetPoints: insetPoints,
-    intersectionAnywhere: intersectionAnywhere,
-    intersectionBetweenPoints: intersectionBetweenPoints,
+    insetPoints,
+    intersectionAnywhere,
+    intersectionBetweenPoints,
     lerp: linearInterpolate,
-    linearEquationFromPoints: linearEquationFromPoints,
-    parallelPoints: parallelPoints,
-    perpendincularPoint: perpendincularPoint,
-    pointInPolygon: pointInPolygon,
+    linearEquationFromPoints,
+    linearInterpolate,
+    parallelPoints,
+    perpendincularPoint,
+    pointInPolygon,
+    polygonArea,
+    polygonPerimeter,
   }
 
 })();
