@@ -132,21 +132,77 @@ const reddit_proc_gen = function() {
 		return style;
 	};
 
+	function getArea(points) {
+		const len = points.length;
+		const area = points.reduce((sum, point, index) => {
+			const {x, y} = point;
+			const {x: xn, y: yn} = points[(index + 1) % len]; // extract next point x,y
+			return sum + (xn + x) * (yn - y);
+		}, 0);
+		return Math.abs(area) / 2;
+	}
+
+	const getPerimeter = points => {
+		return points.reduce((sum, point, index) => {
+			if (index) {
+				const prev = points[index - 1];
+				const dx = point.x - prev.x;
+				const dy = point.y - prev.y;
+				return sum + Math.hypot(dx, dy);
+			}
+			return 0;
+		}, 0);
+	};
+
+	var id = 0;
 	const drawAndSplit = (points, depth) => {
 		// split the shape
 		const [polyAlpha, polyBeta] = splitPolygon(points);
 
+		// const periA = getPerimeter(polyAlpha);
+		// const periB = getPerimeter(polyBeta);
+
 		// only render on last recursion
 		if (depth === maxDepth - 1) {
-			drawPolygon(geom.insetPoints(polyAlpha, border), getStyle());
-			drawPolygon(geom.insetPoints(polyBeta, border), getStyle());
+			// drawPolygon(geom.insetPoints(polyAlpha, border), getStyle());
+			// drawPolygon(geom.insetPoints(polyBeta, border), getStyle());
+			// drawPolygon(geom.insetPoints(polyAlpha, border), {
+			// 	fillStyle: fillStyleAlpha
+			// });
+			// drawText(polyAlpha[0].x, polyAlpha[0].y, id++)
+			// drawPolygon(geom.insetPoints(polyBeta, border), {
+			// 	fillStyle: fillStyleBeta
+			// });
+			// drawText(polyBeta[0].x, polyBeta[0].y, id++)
+		} else {
+			// drawPolygon(polyAlpha, {lineWidth: 1, strokeStyle: "#f00"});
+			// drawPolygon(polyBeta, {lineWidth: 1, strokeStyle: "#0f0"});
 		}
 
 		// recurse
 		depth++;
-		if (depth < maxDepth) {
-			drawAndSplit(polyAlpha, depth);
-			drawAndSplit(polyBeta, depth);
+		if (depth < 5) {
+			// setTimeout(()=>{
+			const maxLength = 50000;
+			// if (getPerimeter(polyAlpha) > maxLength) {
+			if (getArea(polyAlpha) > maxLength) {
+				drawAndSplit(polyAlpha, depth);
+			} else {
+				drawPolygon(
+					geom.insetPoints(polyAlpha, border),
+					{ fillStyle: "#f00" } /* getStyle() */
+				);
+			}
+			// if (getPerimeter(polyBeta) > maxLength) {
+			if (getArea(polyBeta) > maxLength) {
+				drawAndSplit(polyBeta, depth);
+			} else {
+				drawPolygon(
+					geom.insetPoints(polyBeta, border),
+					{ fillStyle: "#f00" } /* getStyle() */
+				);
+			}
+			// }, 500);
 		}
 	};
 
@@ -158,20 +214,84 @@ const reddit_proc_gen = function() {
 		stage.setSize(sw, sh);
 		cx = sw / 2;
 		cy = sh / 2;
+
+		const test = points => {
+			perf.start('a');
+			const a = getArea(points);
+			perf.end('a');
+			return a;
+		};
+
+		con.log(
+			"area 4:",
+			test([
+				{ x: 2, y: 2 },
+				{ x: 4, y: 2 },
+				{ x: 4, y: 4 },
+				{ x: 2, y: 4 }
+				// {x:2, y:2},
+			])
+		);
+		con.log(
+			"area 16:",
+			test([
+				{ x: -2, y: -2 },
+				{ x: -2, y: 2 },
+				{ x: 2, y: 2 },
+				{ x: 2, y: -2 },
+				{ x: -2, y: -2 }
+			])
+		);
+
+		con.log(
+			"area 4:",
+			test([
+				{ x: 0, y: 0 },
+				{ x: 0, y: -2 },
+				{ x: 2, y: -2 },
+				{ x: 2, y: 0 }
+			])
+		);
+
+		con.log(
+			"area 8:",
+			test([
+				{ x: 1, y: 1 },
+				{ x: 1, y: -4 },
+				{ x: 3, y: -5 },
+				{ x: 3, y: -2 }
+			])
+		);
+
+		var len = 5e6, thing = [];
+		for (var i = 0; i < len; i++) {
+			thing.push({
+				x: rand.getNumber(0,100),
+				y: rand.getNumber(0,100),
+			})
+		}
+
+		con.log(
+			"area x:",
+			test(thing)
+		);
+
+
+		return;
 		ctx.clearRect(0, 0, sw, sh);
 
-		maxDepth = rand.getInteger(2, 4);
+		maxDepth = 34; //rand.getInteger(2, 4);
 		border = -rand.getInteger(2, 8);
-		radius = sh * rand.getNumber(0.3, 0.5);
+		radius = sh * 0.5; // * rand.getNumber(0.3, 0.5);
 		cutHalf = rand.getNumber(0, 1) > 0.2; // cutting in half is nice!
 
 		const points = [];
-		const sides = rand.getInteger(3, 7);
-		const startAngle = rand.getNumber(0, 1);
+		const sides = 4; //rand.getInteger(3, 7);
+		const startAngle = 0; //1 / 12 * TAU;//rand.getNumber(0, 1);
 		for (var i = 0; i < sides; i++) {
-			const a = startAngle + (i / sides) * -TAU,
-				x = cx + Math.sin(a) * radius,
-				y = cy + Math.cos(a) * radius;
+			const a = startAngle + (i / sides) * -TAU;
+			const x = cx + Math.sin(a) * radius; // * 0.6,
+			const y = cy + Math.cos(a) * radius;
 			points.push({ x, y });
 		}
 
@@ -184,6 +304,12 @@ const reddit_proc_gen = function() {
 		drawAndSplit(geom.insetPoints(points, border), 0);
 		progress("render:complete", stage.canvas);
 	};
+
+	function drawText(x, y, txt) {
+		ctx.font = "10px Helvetica";
+		ctx.fillStyle = "#fff";
+		ctx.fillText(txt, x, y);
+	}
 
 	return {
 		stage: stage.canvas,
