@@ -140,21 +140,18 @@ var geom = (function() {
     const len = points.length;
     const area = points.reduce((sum, point, index) => {
       const { x, y } = point;
-      const { x: xn, y: yn } = points[(index + 1) % len]; // extract next point x,y
+      const { x: xn, y: yn } = points[(index + 1) % len];
       return sum + (xn + x) * (yn - y);
     }, 0);
     return Math.abs(area) / 2;
   };
 
   const polygonPerimeter = points => {
+    const len = points.length;
     return points.reduce((sum, point, index) => {
-      if (index) {
-        const prev = points[index - 1];
-        const dx = point.x - prev.x;
-        const dy = point.y - prev.y;
-        return sum + Math.hypot(dx, dy);
-      }
-      return 0;
+      const { x, y } = point;
+      const { x: xn, y: yn } = points[(index + 1) % len];
+      return sum + Math.hypot(x - xn, y - yn);
     }, 0);
   };
 
