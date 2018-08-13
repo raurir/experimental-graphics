@@ -5,6 +5,7 @@ const reddit_proc_gen = function() {
 	const stage = dom.canvas(1, 1);
 	const ctx = stage.ctx;
 	let maxDepth;
+	let minArea;
 	let border;
 	let radius;
 	let size;
@@ -110,9 +111,9 @@ const reddit_proc_gen = function() {
 					height = 0;
 				// pick a gradient direction
 				if (rand.getInteger(0, 1) === 0) {
-					width = radius * 2;
+					width = radius * 2; // horizontal
 				} else {
-					height = radius * 2;
+					height = radius * 2; // vertical
 				}
 				const gradient = ctx.createLinearGradient(
 					sw / 2 - radius,
@@ -132,78 +133,30 @@ const reddit_proc_gen = function() {
 		return style;
 	};
 
-	function getArea(points) {
-		const len = points.length;
-		const area = points.reduce((sum, point, index) => {
-			const {x, y} = point;
-			const {x: xn, y: yn} = points[(index + 1) % len]; // extract next point x,y
-			return sum + (xn + x) * (yn - y);
-		}, 0);
-		return Math.abs(area) / 2;
-	}
-
-	const getPerimeter = points => {
-		return points.reduce((sum, point, index) => {
-			if (index) {
-				const prev = points[index - 1];
-				const dx = point.x - prev.x;
-				const dy = point.y - prev.y;
-				return sum + Math.hypot(dx, dy);
-			}
-			return 0;
-		}, 0);
-	};
-
-	var id = 0;
 	const drawAndSplit = (points, depth) => {
 		// split the shape
-		const [polyAlpha, polyBeta] = splitPolygon(points);
+		const polygons = splitPolygon(points);
 
-		// const periA = getPerimeter(polyAlpha);
-		// const periB = getPerimeter(polyBeta);
-
-		// only render on last recursion
-		if (depth === maxDepth - 1) {
-			// drawPolygon(geom.insetPoints(polyAlpha, border), getStyle());
-			// drawPolygon(geom.insetPoints(polyBeta, border), getStyle());
-			// drawPolygon(geom.insetPoints(polyAlpha, border), {
-			// 	fillStyle: fillStyleAlpha
-			// });
-			// drawText(polyAlpha[0].x, polyAlpha[0].y, id++)
-			// drawPolygon(geom.insetPoints(polyBeta, border), {
-			// 	fillStyle: fillStyleBeta
-			// });
-			// drawText(polyBeta[0].x, polyBeta[0].y, id++)
-		} else {
-			// drawPolygon(polyAlpha, {lineWidth: 1, strokeStyle: "#f00"});
-			// drawPolygon(polyBeta, {lineWidth: 1, strokeStyle: "#0f0"});
-		}
+		// drawText(polyAlpha[0].x, polyAlpha[0].y, id++)
+		// drawPolygon(geom.insetPoints(polyBeta, border), {
+		// 	fillStyle: fillStyleBeta
+		// });
+		// drawText(polyBeta[0].x, polyBeta[0].y, id++)
+		// drawPolygon(polyBeta, {lineWidth: 1, strokeStyle: "#0f0"});
 
 		// recurse
 		depth++;
-		if (depth < 5) {
-			// setTimeout(()=>{
-			const maxLength = 50000;
-			// if (getPerimeter(polyAlpha) > maxLength) {
-			if (getArea(polyAlpha) > maxLength) {
-				drawAndSplit(polyAlpha, depth);
+		polygons.forEach((poly) => {
+			con.log("geom.polygonArea(poly)", geom.polygonArea(poly))
+			if (depth < maxDepth && (minArea === 0 || geom.polygonArea(poly) > minArea)) {
+				drawAndSplit(poly, depth);
 			} else {
 				drawPolygon(
-					geom.insetPoints(polyAlpha, border),
-					{ fillStyle: "#f00" } /* getStyle() */
+					geom.insetPoints(poly, border),
+					getStyle()
 				);
 			}
-			// if (getPerimeter(polyBeta) > maxLength) {
-			if (getArea(polyBeta) > maxLength) {
-				drawAndSplit(polyBeta, depth);
-			} else {
-				drawPolygon(
-					geom.insetPoints(polyBeta, border),
-					{ fillStyle: "#f00" } /* getStyle() */
-				);
-			}
-			// }, 500);
-		}
+		});
 	};
 
 	const init = options => {
@@ -214,74 +167,13 @@ const reddit_proc_gen = function() {
 		stage.setSize(sw, sh);
 		cx = sw / 2;
 		cy = sh / 2;
-
-		const test = points => {
-			perf.start('a');
-			const a = getArea(points);
-			perf.end('a');
-			return a;
-		};
-
-		con.log(
-			"area 4:",
-			test([
-				{ x: 2, y: 2 },
-				{ x: 4, y: 2 },
-				{ x: 4, y: 4 },
-				{ x: 2, y: 4 }
-				// {x:2, y:2},
-			])
-		);
-		con.log(
-			"area 16:",
-			test([
-				{ x: -2, y: -2 },
-				{ x: -2, y: 2 },
-				{ x: 2, y: 2 },
-				{ x: 2, y: -2 },
-				{ x: -2, y: -2 }
-			])
-		);
-
-		con.log(
-			"area 4:",
-			test([
-				{ x: 0, y: 0 },
-				{ x: 0, y: -2 },
-				{ x: 2, y: -2 },
-				{ x: 2, y: 0 }
-			])
-		);
-
-		con.log(
-			"area 8:",
-			test([
-				{ x: 1, y: 1 },
-				{ x: 1, y: -4 },
-				{ x: 3, y: -5 },
-				{ x: 3, y: -2 }
-			])
-		);
-
-		var len = 5e6, thing = [];
-		for (var i = 0; i < len; i++) {
-			thing.push({
-				x: rand.getNumber(0,100),
-				y: rand.getNumber(0,100),
-			})
-		}
-
-		con.log(
-			"area x:",
-			test(thing)
-		);
-
-
-		return;
 		ctx.clearRect(0, 0, sw, sh);
 
-		maxDepth = 34; //rand.getInteger(2, 4);
-		border = -rand.getInteger(2, 8);
+		con.log(size);
+
+		minArea = 160000;
+		maxDepth = 17;//rand.getInteger(2, 7);
+		border = -2;//-rand.getInteger(2, 8);
 		radius = sh * 0.5; // * rand.getNumber(0.3, 0.5);
 		cutHalf = rand.getNumber(0, 1) > 0.2; // cutting in half is nice!
 
