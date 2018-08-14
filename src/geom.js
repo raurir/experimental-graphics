@@ -7,6 +7,7 @@ var geom = (function() {
   // compared algorithm: https://flupe.github.io/blog/2016/07/29/intersection-of-two-segments/
   // is the same as below including peformance.
   function intersectionBetweenPoints(p0, p1, p2, p3) {
+    // compares line p0>p1 with line p2>p3
 
     var p0_x = p0.x,
     p0_y = p0.y,
