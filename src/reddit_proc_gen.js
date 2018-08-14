@@ -2,15 +2,17 @@ const isNode = typeof module !== "undefined";
 
 const reddit_proc_gen = function() {
 	const TAU = Math.PI * 2;
-	const stage = dom.canvas(1, 1);
-	const ctx = stage.ctx;
+	const bmp = dom.canvas(1, 1);
+	const ctx = bmp.ctx;
+
+	let border;
+	let cutHalf;
 	let maxDepth;
 	let minArea;
-	let border;
 	let radius;
+	let sh;
 	let size;
-	let sw, sh, cx, cy;
-	let cutHalf;
+	let sw;
 
 	// been listening to GOTO80 for most of this: https://www.youtube.com/watch?v=2ZXlofdWtWw
 	// followed by tranan + hux flux
@@ -22,15 +24,15 @@ const reddit_proc_gen = function() {
 			return; // con.warn("null array", points)
 		}
 		ctx.beginPath();
-		ctx.lineCap = "round";
-		ctx.lineJoin = "round";
+		// ctx.lineCap = "round";
+		// ctx.lineJoin = "round";
 		points.forEach((p, i) => {
-			ctx[i == 0 ? "moveTo" : "lineTo"](p.x, p.y);
+			ctx[i == 0 ? "moveTo" : "lineTo"](p.x * sw, p.y * sh);
 		});
 		ctx.closePath();
 		if (lineWidth && strokeStyle) {
 			ctx.strokeStyle = strokeStyle;
-			ctx.lineWidth = lineWidth;
+			ctx.lineWidth = lineWidth * size;
 			ctx.stroke();
 		}
 		if (fillStyle) {
@@ -109,14 +111,14 @@ const reddit_proc_gen = function() {
 		switch (colourMode) {
 			// very rare stroke
 			case 0:
-				style.lineWidth = 1;
+				style.lineWidth = 0.001;
 				style.strokeStyle = colours.getRandomColour();
 				break;
 			// rare gradient
 			case 1:
 			case 2:
-				let width = 0,
-					height = 0;
+				let width = 0;
+				let height = 0;
 				// pick a gradient direction
 				if (rand.getInteger(0, 1) === 0) {
 					width = radius * 2; // horizontal
@@ -124,10 +126,10 @@ const reddit_proc_gen = function() {
 					height = radius * 2; // vertical
 				}
 				const gradient = ctx.createLinearGradient(
-					sw / 2 - radius,
-					sh / 2 - radius,
-					width,
-					height
+					0.5 - radius,
+					0.5 - radius,
+					width * sw,
+					height * sh
 				);
 				gradient.addColorStop(0, colours.getRandomColour());
 				gradient.addColorStop(1, colours.getRandomColour());
@@ -143,6 +145,7 @@ const reddit_proc_gen = function() {
 
 	let c = 0;
 	const drawAndSplit = (points, depth) => {
+		// con.log("polygons", points)
 		// split the shape
 		const polygons = splitPolygon(points);
 
@@ -189,17 +192,14 @@ const reddit_proc_gen = function() {
 							pointD
 						);
 						if (intersects) {
-							con.log("fail?");
-							return;
-						} else {
-							// con.log("ok");
 							// ctx.beginPath();
 							// ctx.strokeStyle = "#0f0";
-							// ctx.lineWidth = 8;
-							// ctx.moveTo(pointC.x, pointC.y);
-							// ctx.lineTo(pointD.x, pointD.y);
+							// ctx.lineWidth = 2;
+							// ctx.moveTo(pointC.x * sw, pointC.y * sh);
+							// ctx.lineTo(pointD.x * sw, pointD.y * sh);
 							// ctx.stroke();
-							// con.log("intersects", intersects, pointA,pointB, pointC, pointD)
+							// con.log("fail - intersects", intersects, pointA, pointB, pointC, pointD)
+							return;
 						}
 					}
 				}
@@ -214,50 +214,45 @@ const reddit_proc_gen = function() {
 		sw = options.sw || size;
 		sh = options.sh || size;
 		colours.getRandomPalette();
-		stage.setSize(sw, sh);
-		cx = sw / 2;
-		cy = sh / 2;
+		bmp.setSize(sw, sh);
 		ctx.clearRect(0, 0, sw, sh);
 
-		const maxSize = size * size * 0.4;
+		border = -rand.getNumber(0.002, 0.01);
+		radius = rand.getNumber(0.3, 0.5);
+		cutHalf = rand.getNumber(0, 1) > 0.2; // cutting in half is nice!
 		minArea =
 			rand.getInteger(0, 1) === 0
 				? 0 // either 0, which means ignore minArea altogether
-				: rand.getInteger(maxSize * 0.05, maxSize); // or randomize it.
+				: rand.getNumber(0.05, radius * 0.8); // or randomize it.
 		maxDepth = rand.getInteger(2, 8);
 
-		// minArea = 0;
+		// minArea = 0.3;
 		// maxDepth = 8;
-		con.log(minArea, maxDepth);
+		// con.log(minArea, maxDepth);
 
-		border = -rand.getInteger(2, 8);
-		radius = size * rand.getNumber(0.3, 0.5);
-		cutHalf = rand.getNumber(0, 1) > 0.2; // cutting in half is nice!
-
-		const points = [];
 		const sides = rand.getInteger(3, 7);
 		const startAngle = rand.getNumber(0, 1);
 		// const startAngle = 1 / 12 * TAU;
-		for (var i = 0; i < sides; i++) {
+		const points = new Array(sides).fill().map((side, i) => {
 			const a = startAngle + (i / sides) * -TAU;
-			const x = cx + Math.sin(a) * radius; // * 0.6,
-			const y = cy + Math.cos(a) * radius;
-			points.push({ x, y });
-		}
+			const x = 0.5 + Math.sin(a) * radius; // * 0.6,
+			const y = 0.5 + Math.cos(a) * radius;
+			return { x, y };
+		});
 
 		// draw a border around shape
 		drawPolygon(points, {
 			strokeStyle: colours.getRandomColour(),
-			lineWidth: 1
+			lineWidth: 0.001
 		});
 		// inset the shape before recursion begins
 		drawAndSplit(geom.insetPoints(points, border), 0);
-		progress("render:complete", stage.canvas);
+		progress("render:complete", bmp.canvas);
 		console.log("calculations", c);
 	};
 
 	return {
-		stage: stage.canvas,
+		stage: bmp.canvas,
 		init
 	};
 };
