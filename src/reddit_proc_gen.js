@@ -14,6 +14,23 @@ const reddit_proc_gen = function() {
 	let size;
 	let sw;
 
+	var settings = {
+		rotation: {
+			type: "Number",
+			label: "Rotation",
+			min: 1,
+			max: 10,
+			cur: 10
+		},
+		maxDepth: {
+			type: "Number",
+			label: "Max Depth",
+			min: 2,
+			max: 8,
+			cur: 2
+		}
+	};
+
 	// been listening to GOTO80 for most of this: https://www.youtube.com/watch?v=2ZXlofdWtWw
 	// followed by tranan + hux flux
 	// next session: somfay
@@ -153,7 +170,7 @@ const reddit_proc_gen = function() {
 		depth++;
 		polygons.forEach(poly => {
 			if (
-				depth < maxDepth && // always honour max recursions else we crash...
+				depth < settings.maxDepth.cur && // always honour max recursions else we crash...
 				(minArea === 0 || geom.polygonArea(poly) > minArea) // only honour minArea if not zero!
 			) {
 				drawAndSplit(poly, depth);
@@ -226,12 +243,22 @@ const reddit_proc_gen = function() {
 				: rand.getNumber(0.05, radius * 0.8); // or randomize it.
 		maxDepth = rand.getInteger(2, 8);
 
+		settings.rotation.cur = rand.getInteger(0, 10);
+		// settings.minArea.cur = minArea;
+		settings.maxDepth.cur = maxDepth;
+		if (options.settings) {
+			settings = options.settings;
+		}
+
+		progress("settings:initialised", settings);
+
 		// minArea = 0.3;
 		// maxDepth = 8;
-		// con.log(minArea, maxDepth);
+		con.log(minArea, maxDepth);
 
 		const sides = rand.getInteger(3, 7);
-		const startAngle = rand.getNumber(0, 1);
+		const startAngle = (((settings.rotation.cur / 10) * 1) / sides) * TAU;
+		// const startAngle = rand.getNumber(0, 1);
 		// const startAngle = 1 / 12 * TAU;
 		const points = new Array(sides).fill().map((side, i) => {
 			const a = startAngle + (i / sides) * -TAU;
@@ -240,6 +267,7 @@ const reddit_proc_gen = function() {
 			return { x, y };
 		});
 
+		// perf.start('polygon')
 		// draw a border around shape
 		drawPolygon(points, {
 			strokeStyle: colours.getRandomColour(),
@@ -249,11 +277,20 @@ const reddit_proc_gen = function() {
 		drawAndSplit(geom.insetPoints(points, border), 0);
 		progress("render:complete", bmp.canvas);
 		console.log("calculations", c);
+		// perf.end('polygon')
 	};
+
+	const update = settings => {
+		con.log("update", settings);
+		init({ size, settings });
+	};
+	con.log("ok");
 
 	return {
 		stage: bmp.canvas,
-		init
+		init,
+		settings,
+		update
 	};
 };
 if (isNode) {
