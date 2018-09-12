@@ -3,7 +3,7 @@ define("bill_stevens", () => { // ... and jan
 
 	const stage = document.createElement("div");
 
-	var camera, scene, projector, renderer, holder;
+	var camera, controls, scene, projector, renderer, holder;
 	const mouse = { x: 0, y: 0 };
 	const sw = window.innerWidth, sh = window.innerHeight;
 	var theta = 0, gamma = 0;
@@ -13,7 +13,6 @@ define("bill_stevens", () => { // ... and jan
 
 	const available = Array(Math.pow(dim, 3)).fill(0);
 	const occupied = Array(Math.pow(dim, 3)).fill(0);
-	const positions = [];
 
 	const position = (grid) =>
 		// (index) => (index - grid / 2 + 0.5) * size;
@@ -32,8 +31,6 @@ define("bill_stevens", () => { // ... and jan
 	const getIndexFromPosition = ({x,y,z}) =>
 		x + y * dim + z * dim * dim;
 
-
-
 	const pieces = [
 		/*
 		{
@@ -48,7 +45,6 @@ define("bill_stevens", () => { // ... and jan
 				]
 			]
 		},
-		*/
 		{
 			id: 1,
 			structure: [
@@ -58,6 +54,7 @@ define("bill_stevens", () => { // ... and jan
 				]
 			]
 		},
+		*/
 		{
 			id: 3,
 			structure: [
@@ -105,91 +102,111 @@ define("bill_stevens", () => { // ... and jan
 		const mutated = colours.mutateColour(hex, 30);
 		const colour = Number("0x" + mutated.substr(1));
 
-		const block = new THREE.Group();
-		block.x = rand.getInteger(0, dim - piece.dimensions.w);
-		block.y = rand.getInteger(0, dim - piece.dimensions.h);
-		block.z = rand.getInteger(0, dim - piece.dimensions.d);
+		// trial container to dump blocks in and transform them
+		const containerTest = new THREE.Group();
+		// post transformation, get transformed coordinates and create blocks in here.
+		const containerReal = new THREE.Group();
 
-		block.rotation.set(
+		holder.add(containerTest);
+		holder.add(containerReal);
+
+		containerTest.x = rand.getInteger(0, dim - piece.dimensions.w);
+		containerTest.y = rand.getInteger(0, dim - piece.dimensions.h);
+		containerTest.z = rand.getInteger(0, dim - piece.dimensions.d);
+
+		containerTest.rotation.set(
 			rand.getInteger(-1, 1) * Math.PI / 2,
 			rand.getInteger(-1, 1) * Math.PI / 2,
 			rand.getInteger(-1, 1) * Math.PI / 2,
 		)
 
-		const positions = [], vectors = [];
-
+		// create initial guess at 0,0
 		structure.forEach((xLayer, x) => {
 			xLayer.forEach((yRow, y) => {
 				yRow.forEach((piece, z) => {
 					if (piece) {
-						var c = cube(1);
+						var c = cube(0.6);
 						c.position.set(p(x), p(y), p(z));
 						c.material.color.setHex(colour);
-						block.add(c);
-
-						const positionIndex = getIndexFromPosition({
-							x: x + block.x,
-							y: y + block.y,
-							z: z + block.z
-						});
-						positions.push(positionIndex);
-						populate(test, positionIndex);
+						containerTest.add(c);
 					}
 				});
 			});
 		});
 
-		if (test.some((item) => item > 1)) {
-			return con.log("invalid!");
-		}
-
-		block.position.set(
-			block.x * size,
-			block.y * size,
-			block.z * size
+		// now shift container within bounds
+		containerTest.position.set(
+			containerTest.x * size,
+			containerTest.y * size,
+			containerTest.z * size
 		);
-		// return block;
+		containerTest.updateMatrixWorld();
 
-		holder.add(block);
+		// calculate absolute positions using THREE's nested bodies calculation.
+		var min = {x: 10, y: 10, z: 10};
+		var max = {x: 0, y: 0, z: 0};
 
-		block.updateMatrixWorld();
-
-
-		// calculate absolute positions using THREE'S nested bodies calculation.
-		var min = {x: 0, y: 0, z: 0};
-
-		block.children.forEach((c, index) => {
+		const vectors = containerTest.children.map((c, index) => {
 			const vector = new THREE.Vector3();
 			vector.setFromMatrixPosition(c.matrixWorld);
 			const cleansed = {};
 			Object.entries(vector).forEach(([key,value]) => {
-				// remove inifitely small numbers created by matrix rotations.
+				// remove infinitely small numbers created by matrix rotations.
 				var v = ((value > 0 && value < 0.001) || (value < 0 && value > -0.001)) ? 0 : value;
 				cleansed[key] = v / size;
+				// work out if they are out of bounds.
 				min[key] = Math.min(min[key], cleansed[key]);
+				max[key] = Math.max(max[key], cleansed[key]);
 			});
-			vectors[index] = cleansed;
+			return cleansed;
 		});
 
-		//
-		TweenMax.to(block.rotation, 3.5, {x: 0, y:0, z: 0});
+		// con.log("min", min, "min", max);
+		const shift = (newV, oldV, d) => {
+			if (min[d] < 0) {
+				// con.log(`shifting ${d} up:`, - min[d]);
+				newV[d] = oldV[d] - min[d];
+			} else if (max[d] > dim - 1) {
+				// con.log(`shifting ${d} down:`, - (max[d] - dim + 1));
+				newV[d] = oldV[d] - (max[d] - dim + 1);
+			} else {
+				newV[d] = oldV[d];
+			}
+			return newV;
+		}
 
-		block.children.forEach((c, index) => {
-			const pos = vectors[index];
-			const newPos = {
-				x: (pos.x - min.x) * size,
-				y: (pos.y - min.y) * size,
-				z: (pos.z - min.z) * size,
-			};
-			TweenMax.to(c.position, 3.5, newPos);
-			con.log(pos, newPos);
+		// randomised rotation puts blocks outside of bounds,
+		// shift them back into bounds using min and max.
+		const shifted = vectors.map((oldV) => {
+			var newV = {};
+			shift(newV, oldV, "x");
+			shift(newV, oldV, "y");
+			shift(newV, oldV, "z");
+			return newV;
+		})
+
+		shifted.forEach((v) => {
+			const positionIndex = getIndexFromPosition(v);
+			populate(test, positionIndex);
 		});
 
-		positions.forEach((positionIndex) => {
+		// con.log("test", test);
+
+		if (test.some((item) => item > 1)) {
+			return con.log("invalid!");
+		}
+
+		// populate real!
+		shifted.forEach((v) => {
+			const {x, y, z} = v;
+			const c = cube(0.95);
+			c.position.set(p(x), p(y), p(z));
+			c.material.color.setHex("0x50ff50");
+			containerReal.add(c);
+			const positionIndex = getIndexFromPosition(v);
 			populate(occupied, positionIndex);
 		});
 
-		// con.log("occupied", occupied);
 	}
 
 	const init = () => {
@@ -213,14 +230,17 @@ define("bill_stevens", () => { // ... and jan
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( sw, sh );
 
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+
 		holder = new THREE.Group();
 		scene.add(holder);
 
+		// generate grid dots
 		let p = position(dim + 1);
 		for (var i = 0; i < Math.pow(dim + 1, 3); i++) {
 			var c = cube(0.1);
 			var {x, y, z} = getPositionFromIndex(dim + 1)(i);
-			c.position.set(p(x), p(y), p(z));
+			c.position.set(p(x) - size / 2, p(y) - size / 2, p(z) - size / 2);
 			c.material.color.setHex(0xff7700);
 			cubes.push(c);
 			holder.add(c);
@@ -228,7 +248,6 @@ define("bill_stevens", () => { // ... and jan
 
 		stage.appendChild(renderer.domElement);
 
-		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 		document.addEventListener( 'keydown', onKeyDown, false );
 
 		render();
@@ -246,16 +265,8 @@ define("bill_stevens", () => { // ... and jan
 
 		// con.log(available, occupied);
 		a++
-		if (a > 3) return; //1e3) return;
-		setTimeout(attemptBlock, 2000);
-	}
-
-
-
-	const onDocumentMouseMove = ( event ) => {
-		event.preventDefault();
-		mouse.x = ( event.clientX / sw ) * 2 - 1;
-		mouse.y = - ( event.clientY / sh ) * 2 + 1;
+		if (a > 10) return; //1e3) return;
+		setTimeout(attemptBlock, 20);
 	}
 
 	const onKeyDown = ( event ) => {
@@ -282,15 +293,7 @@ define("bill_stevens", () => { // ... and jan
 	}
 
 	const render = () => {
-
-		const camRadius = 300;
-
-		// theta += 0.3;// mouse.x * 4;
-		// gamma -= 0.435;//mouse.y * 2;
-
-		camera.position.x = 200;//camRadius * Math.sin( theta * Math.PI / 360 );
-		camera.position.y = 300;//mouse.y * 100;
-		camera.position.z = 400;//camRadius * Math.cos( theta * Math.PI / 360 );
+		controls.update();
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
 	}
