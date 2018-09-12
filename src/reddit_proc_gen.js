@@ -1,5 +1,13 @@
 const isNode = typeof module !== "undefined";
 
+if (isNode) {
+	var con = console;
+	var rand = require('./rand.js');
+	var dom = require('./dom.js');
+	var colours = require('./colours.js');
+	var geom = require('./geom.js');
+}
+
 const reddit_proc_gen = function() {
 	const TAU = Math.PI * 2;
 	const bmp = dom.canvas(1, 1);
