@@ -8,13 +8,12 @@ define("bill_stevens", () => { // ... and jan
 	var camera, controls, scene, projector, renderer, holder;
 	const mouse = { x: 0, y: 0 };
 	const sw = window.innerWidth, sh = window.innerHeight;
-	var theta = 0, gamma = 0;
 	const dim = 4;
 	const size = 30;
 	const cubes = [];
 
-	const available = Array(Math.pow(dim, 3)).fill(0);
-	const occupied = Array(Math.pow(dim, 3)).fill(0);
+	let available = Math.pow(dim, 3);
+	const occupied = Array(available).fill(0);
 
 	const position = (grid) =>
 		// (index) => (index - grid / 2 + 0.5) * size;
@@ -34,7 +33,7 @@ define("bill_stevens", () => { // ... and jan
 		x + y * dim + z * dim * dim;
 
 	const layouts = [
-		/*{
+		{
 			id: 0,
 			structure: [
 				[
@@ -46,7 +45,6 @@ define("bill_stevens", () => { // ... and jan
 				]
 			]
 		},
-		/*/
 		{
 			id: 1,
 			structure: [
@@ -84,7 +82,6 @@ define("bill_stevens", () => { // ... and jan
 		const { id, structure } = layout;
 
 		const p = position(dim);
-		const colour = Number(`0x${id * 50}`);
 		const transformations = rotations.map(([rx, ry, rz]) => {
 
 			const containerTest = new THREE.Group();
@@ -99,13 +96,14 @@ define("bill_stevens", () => { // ... and jan
 						if (piece) {
 							var c = cube(0.6);
 							c.position.set(p(x), p(y), p(z));
-							c.material.color.setHex(colour);
+							// c.material.color.setHex(colour);
 							containerTest.add(c);
 						}
 					});
 				});
 			});
 
+			// this is the magic part 1.
 			containerTest.updateMatrixWorld();
 
 			// calculate absolute positions using THREE's nested bodies calculation.
@@ -114,6 +112,7 @@ define("bill_stevens", () => { // ... and jan
 
 			const vectors = containerTest.children.map((c, index) => {
 				const vector = new THREE.Vector3();
+				// and the magic part 2. clap clap THREE!
 				vector.setFromMatrixPosition(c.matrixWorld);
 				// con.log("c", c);
 				const cleansed = {};
@@ -189,10 +188,11 @@ define("bill_stevens", () => { // ... and jan
 		// con.log(test);
 		const piece = pieces[Math.floor(Math.random() * pieces.length)];
 		const {id, transformations} = piece;
-		const transformation = transformations[Math.floor(Math.random() * piece.transformations.length)]
+		const transformationIndex = Math.floor(Math.random() * piece.transformations.length);
+		const transformation = transformations[transformationIndex];
 		const { dimensions, structure } = transformation;
 
-		con.log('piece', dimensions, structure);
+		// con.log('piece', dimensions, structure);
 
 		const p = position(dim);
 
@@ -221,25 +221,30 @@ define("bill_stevens", () => { // ... and jan
 			};
 		})
 
-		con.log('shifted!!!', shifted)
-
 		shifted.forEach((v) => {
 			const positionIndex = getIndexFromPosition(v);
 			populate(test, positionIndex);
 		});
 
 		// con.log("test", test);
-
+		// check if any space has more than one block!
 		if (test.some((item) => item > 1)) {
-			return con.log("invalid!");
+			return;// con.log("invalid!");
 		}
+		// if we get here we're good!
 
-		// populate real!
+		const hue = id * 0.1 + Math.random() * 0.1;
+		con.log("adding id", id, "at transformationIndex", transformationIndex);
+
+		// populate real and draw a block.!
 		shifted.forEach((v) => {
+			available--;
 			const {x, y, z} = v;
 			const c = cube(0.95);
 			c.position.set(p(x), p(y), p(z));
-			c.material.color.setHex(`0x${id * 50}ff50`);
+			// c.material.color.setHex(`0x${id * 50}ff50`);
+			// c.material.color.setHSL(id / layouts.length, 0.5, 0.5);
+			c.material.color.setHSL(hue, 0.7, 0.3);
 			containerReal.add(c);
 			const positionIndex = getIndexFromPosition(v);
 			populate(occupied, positionIndex);
@@ -274,7 +279,7 @@ define("bill_stevens", () => { // ... and jan
 		scene.add(holder);
 
 		pieces = layouts.map(calculateRotations);
-		con.log("pieces", pieces)
+		// con.log("pieces", pieces);
 
 		// generate grid dots
 		let p = position(dim + 1);
@@ -289,7 +294,7 @@ define("bill_stevens", () => { // ... and jan
 
 		stage.appendChild(renderer.domElement);
 
-		document.addEventListener( 'keydown', onKeyDown, false );
+		// document.addEventListener( 'keydown', onKeyDown, false );
 
 		render();
 
@@ -300,14 +305,12 @@ define("bill_stevens", () => { // ... and jan
 	let a = 0;
 	const attemptBlock = () => {
 		getBlock();
-
 		if (occupied.every((item) => item === 1)) {
-			return con.log("we're done here!!", occupied);
+			return con.log("holy fucking shit! we're done here!!", occupied);
 		}
-
 		// con.log(available, occupied);
 		a++
-		if (a > 10) return; //1e3) return;
+		if (a > 1000) return con.log("bailing!", available, occupied);
 		setTimeout(attemptBlock, 20);
 	}
 
