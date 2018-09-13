@@ -31,9 +31,9 @@ grunt.initConfig(
     babel:
       files: ["#{__dirname}/src/**/*.js"]
       tasks: ["newer:babel:compile"] # in turn runs: newer:uglify:separate
-    es5:
-      files: ["#{__dirname}/es5/**/*.js"]
-      tasks: ["newer:uglify:separate"]
+    # es5:
+    #   files: ["#{__dirname}/es5/**/*.js"]
+    #   tasks: ["newer:uglify:separate"]
 
 
   babel:
