@@ -5,7 +5,7 @@ define("bill_stevens", () => { // ... and jan
 
 	const RIGHT_ANGLE = Math.PI / 2;
 
-	var camera, controls, scene, projector, renderer, holder;
+	var camera, controls, scene, projector, renderer, holder, lights;
 	const mouse = { x: 0, y: 0 };
 	const sw = window.innerWidth, sh = window.innerHeight;
 	const dim = 4;
@@ -14,6 +14,7 @@ define("bill_stevens", () => { // ... and jan
 
 	let available = Math.pow(dim, 3);
 	const occupied = Array(available).fill(0);
+	const solution = Array(available).fill(null);
 
 	const position = (grid) =>
 		// (index) => (index - grid / 2 + 0.5) * size;
@@ -32,36 +33,171 @@ define("bill_stevens", () => { // ... and jan
 	const getIndexFromPosition = ({x,y,z}) =>
 		x + y * dim + z * dim * dim;
 
+	// comments behind ids are wear structure is in source photo
 	const layouts = [
 		{
-			id: 0,
+			id: 0, // top left
 			structure: [
 				[
 					[1,1],
 					[1,0],
 				],[
-					[1,0],
+					[0,1],
 					[0,0],
 				]
 			]
 		},
+
 		{
-			id: 1,
+			id: 1, // middle left
+			structure: [
+				[
+					[1,1,1],
+					[0,1,0],
+				],[
+					[0,0,0],
+					[0,1,0],
+				]
+			]
+		},
+
+		{
+			id: 2, // bottom left
+			structure: [
+				[
+					[0,1,1],
+					[0,1,0],
+				],[
+					[0,0,0],
+					[1,1,0],
+				]
+			]
+		},
+
+		{
+			id: 3, // top 2nd from left
+			structure: [
+				[
+					[1,1,0],
+					[0,1,0],
+				],[
+					[0,1,1],
+					[0,0,0],
+				]
+			]
+		},
+
+		{
+			id: 4, // middle 2nd from left
+			structure: [
+				[
+					[0,1,1],
+					[1,1,0],
+				],[
+					[0,0,1],
+					[0,0,0],
+				]
+			]
+		},
+
+		{
+			id: 5, // bottom 2nd from left
 			structure: [
 				[
 					[1,1,1],
 					[1,0,0],
+				],[
+					[0,0,1],
+					[0,0,0],
 				]
 			]
 		},
+
 		{
-			id: 3,
+			id: 6, // top centre
 			structure: [
 				[
-					[1,1,1,1],
+					[1,1,0],
+					[0,1,1],
+					[0,0,1],
 				]
 			]
-		}
+		},
+
+		{
+			id: 7, // top 2nd from right
+			structure: [
+				[
+					[1,1,1],
+					[1,0,0],
+				],[
+					[0,1,0],
+					[0,0,0],
+				],
+			]
+		},
+
+		{
+			id: 8, // middle 2nd from right
+			structure: [
+				[
+					[1,1,1],
+					[0,1,0],
+				],[
+					[0,1,0],
+					[0,0,0],
+				],
+			]
+		},
+
+		{
+			id: 9, // bottom 2nd from right
+			structure: [
+				[
+					[1,1,0],
+					[0,1,1],
+					[0,1,0],
+				],
+			]
+		},
+
+		{
+			id: 10, // top right
+			structure: [
+				[
+					[0,1,0],
+					[1,1,1],
+					[0,1,0],
+				],
+			]
+		},
+
+		{
+			id: 11, // middle right
+			structure: [
+				[
+					[1,1,1],
+					[0,0,1],
+				],[
+					[0,0,1],
+					[0,0,0],
+				],
+			]
+		},
+
+		{
+			id: 12, // bottom right
+			structure: [
+				[
+					[1,0,0],
+					[1,1,1],
+				],[
+					[1,0,0],
+					[0,0,0],
+				],
+			]
+		},
+
 	];
 
 
@@ -155,6 +291,8 @@ define("bill_stevens", () => { // ... and jan
 
 			const dimensions = calculateDimensions(shifted);
 
+			holder.remove(containerTest);
+
 			return {structure: shifted, dimensions};
 		});
 		return {
@@ -177,7 +315,7 @@ define("bill_stevens", () => { // ... and jan
 
 	const cube = (scale) => {
 		const d = scale * size;
-		const material = new THREE.MeshLambertMaterial({color: 0});
+		const material = new THREE.MeshPhongMaterial({color: 0});
 		const geometry = new THREE.BoxGeometry(d, d, d);
 		return new THREE.Mesh(geometry, material);
 	}
@@ -240,14 +378,13 @@ define("bill_stevens", () => { // ... and jan
 		shifted.forEach((v) => {
 			available--;
 			const {x, y, z} = v;
-			const c = cube(0.95);
+			const c = cube(0.8);
 			c.position.set(p(x), p(y), p(z));
-			// c.material.color.setHex(`0x${id * 50}ff50`);
-			// c.material.color.setHSL(id / layouts.length, 0.5, 0.5);
 			c.material.color.setHSL(hue, 0.7, 0.3);
 			containerReal.add(c);
 			const positionIndex = getIndexFromPosition(v);
 			populate(occupied, positionIndex);
+			solution[positionIndex] = id;
 		});
 
 	}
@@ -262,13 +399,17 @@ define("bill_stevens", () => { // ... and jan
 		camera.position.set( 0, 100, 500 );
 		scene.add( camera );
 
-		var light = new THREE.DirectionalLight( 0xffffff, 2 );
-		light.position.set( 1, 1, 1 ).normalize();
-		scene.add( light );
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  		scene.add(ambientLight);
 
-		var light = new THREE.DirectionalLight( 0xff00ff, 2 );
-		light.position.set( -1, 0, 0 ).normalize();
-		scene.add( light );
+		const light0 = new THREE.DirectionalLight( 0xffffff, 2 );
+		light0.position.set( 1, 1, 1 ).normalize();
+		scene.add( light0 );
+
+		const light1 = new THREE.DirectionalLight( 0xffffff, 2 );
+		light1.position.set( -1, 0, 0 ).normalize();
+		scene.add( light1 );
+		lights = [light0, light1];
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( sw, sh );
@@ -298,7 +439,7 @@ define("bill_stevens", () => { // ... and jan
 
 		render();
 
-		animate();
+		animate(0);
 		attemptBlock();
 	}
 
@@ -306,12 +447,12 @@ define("bill_stevens", () => { // ... and jan
 	const attemptBlock = () => {
 		getBlock();
 		if (occupied.every((item) => item === 1)) {
-			return con.log("holy fucking shit! we're done here!!", occupied);
+			return con.log("holy fucking shit! we're done here!!", solution);
 		}
 		// con.log(available, occupied);
 		a++
-		if (a > 1000) return con.log("bailing!", available, occupied);
-		setTimeout(attemptBlock, 20);
+		if (a > 1000) return con.log("bailing!", available, occupied, "\nsolved so far:\n", solution);
+		setTimeout(attemptBlock, 1);
 	}
 
 	const onKeyDown = ( event ) => {
@@ -337,15 +478,25 @@ define("bill_stevens", () => { // ... and jan
 		// event.preventDefault();
 	}
 
-	const render = () => {
+	const render = (time) => {
+
+		const t = time * 0.01;
+		lights.forEach((light, index)=> {
+			light.position.set(
+				Math.sin(t * 0.19 + index * 0.11),
+				Math.cos(t * 0.20 + index * 0.09),
+				Math.cos(t * 0.22 + index * 0.10)
+			);
+		});
+
 		controls.update();
 		camera.lookAt( scene.position );
 		renderer.render( scene, camera );
 	}
 
-	const animate = () => {
+	const animate = (time) => {
 		requestAnimationFrame( animate );
-		render();
+		render(time);
 	}
 
 	return {stage, init};
