@@ -308,6 +308,7 @@ define("bill_stevens", () => { // ... and jan
 
 			if (transformations.length && duplicate.length > 0) {
 				// con.log("transformations.. duplicate::", rotationIndex, rx, ry, rz);
+				// as you thought, rotation on z axis is not required. all unique transformations achieved by x and y...
 				return;
 			}
 			// con.log("transformations.. unique::", rotationIndex, rx, ry, rz);
