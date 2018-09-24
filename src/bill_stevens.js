@@ -33,7 +33,7 @@ define("bill_stevens", () => { // ... and jan
 	const getIndexFromPosition = ({x,y,z}) =>
 		x + y * dim + z * dim * dim;
 
-	// comments behind ids are wear structure is in source photo
+	// comments behind ids are where structure is in source photo
 	const layouts = [
 		{
 			id: 0, // top left
@@ -218,7 +218,8 @@ define("bill_stevens", () => { // ... and jan
 		const { id, structure } = layout;
 
 		const p = position(dim);
-		const transformations = rotations.map(([rx, ry, rz]) => {
+		const transformations = [];
+		rotations.map(([rx, ry, rz], rotationIndex) => {
 
 			const containerTest = new THREE.Group();
 			holder.add(containerTest);
@@ -289,12 +290,33 @@ define("bill_stevens", () => { // ... and jan
 				return newV;
 			})
 
-			const dimensions = calculateDimensions(shifted);
+			// check to see if this rotation is the same as any previous rotations
+			const duplicate = transformations.filter((transformation, ti) => {
+				// iterate through every previously stored transformation and check all vertices are againt 
+				// the new transformation
+				const allPointsSame = transformation.structure.every((A, index) => {
+					const B = shifted[index];
+					return A.x === B.x && A.y === B.y && A.z === B.z;
+				})
+				// if(allPointsSame) {
+				// 	con.log(allPointsSame, ti, transformation.structure, shifted);
+				// }
+				return allPointsSame;
+			})
 
 			holder.remove(containerTest);
 
-			return {structure: shifted, dimensions};
+			if (transformations.length && duplicate.length > 0) {
+				// con.log("transformations.. duplicate::", rotationIndex, rx, ry, rz);
+				return;
+			}
+			// con.log("transformations.. unique::", rotationIndex, rx, ry, rz);
+			const dimensions = calculateDimensions(shifted);
+			transformations.push({structure: shifted, dimensions});
 		});
+
+		con.log("transformations", transformations.length)
+
 		return {
 			id,
 			structure,
@@ -315,7 +337,11 @@ define("bill_stevens", () => { // ... and jan
 
 	const cube = (scale) => {
 		const d = scale * size;
-		const material = new THREE.MeshPhongMaterial({color: 0});
+		const material = new THREE.MeshPhongMaterial({
+			color: 0,
+			opacity: 0.5, //params.opacity,
+			transparent: true
+		});
 		const geometry = new THREE.BoxGeometry(d, d, d);
 		return new THREE.Mesh(geometry, material);
 	}
@@ -333,10 +359,6 @@ define("bill_stevens", () => { // ... and jan
 		// con.log('piece', dimensions, structure);
 
 		const p = position(dim);
-
-		const hex = colours.getNextColour();
-		const mutated = colours.mutateColour(hex, 30);
-		const colour = Number("0x" + mutated.substr(1));
 
 		// trial container to dump blocks in and transform them
 		const containerTest = new THREE.Group();
@@ -369,6 +391,23 @@ define("bill_stevens", () => { // ... and jan
 		if (test.some((item) => item > 1)) {
 			return;// con.log("invalid!");
 		}
+
+		if (available == 59) {
+			con.log("test", test)
+		for (var i = 0; i < Math.pow(dim, 3); i++) {
+			if (test[i] === 1) continue;
+			const {x, y, z} = getPositionFromIndex(dim)(i);
+			if (x > 0 && getIndexFromPosition({x: x - 1, y, z}) > 0) {
+				console.log('fuck');//how the fuck?
+			}
+
+
+			con.log("available", i, x,y,z);
+		}
+		}
+
+
+
 		// if we get here we're good!
 
 		const hue = id * 0.1 + Math.random() * 0.1;
@@ -480,12 +519,12 @@ define("bill_stevens", () => { // ... and jan
 
 	const render = (time) => {
 
-		const t = time * 0.01;
+		const t = time * 0.001;
 		lights.forEach((light, index)=> {
 			light.position.set(
-				Math.sin(t * 0.19 + index * 0.11),
-				Math.cos(t * 0.20 + index * 0.09),
-				Math.cos(t * 0.22 + index * 0.10)
+				200 * Math.sin(t * 0.19 + index * 0.11),
+				200 * Math.cos(t * 0.20 + index * 0.09),
+				200 * Math.cos(t * 0.22 + index * 0.10)
 			);
 		});
 
