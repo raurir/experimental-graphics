@@ -393,20 +393,46 @@ define("bill_stevens", () => { // ... and jan
 			return;// con.log("invalid!");
 		}
 
-		if (available == 59) {
-			con.log("test", test)
-		for (var i = 0; i < Math.pow(dim, 3); i++) {
-			if (test[i] === 1) continue;
-			const {x, y, z} = getPositionFromIndex(dim)(i);
-			if (x > 0 && getIndexFromPosition({x: x - 1, y, z}) > 0) {
-				console.log('fuck');//how the fuck?
+		let slotsOccupied = 0;
+		const checkOccupied = ({x, y, z}) => {
+			const slotIndex = getIndexFromPosition({x, y, z});
+			const slotOccupied = test[slotIndex] > 0;
+			if (slotOccupied) slotsOccupied++;
+		}
+
+		const checkNeighbours = (pos, axis) =>  {
+			const clonedPos = Object.assign({}, pos);
+			if (clonedPos[axis] > 0) {
+				const negativePos = Object.assign({}, clonedPos);
+				negativePos[axis]--;
+				// con.log("negativePos", negativePos);
+				checkOccupied(negativePos);
 			}
-
-
-			con.log("available", i, x,y,z);
+			if (clonedPos[axis] < dim - 1) {
+				const positivePos = Object.assign({}, clonedPos);
+				positivePos[axis]++;
+				checkOccupied(positivePos)
+			}
 		}
-		}
 
+		// looking for single blocks surrounded by occupied blocks
+		for (var i = 0; i < Math.pow(dim, 3); i++) {
+			slotsOccupied = 0;
+			if (test[i] === 1) continue; // this slot is occupied, don't bother checking it...
+			const pos = getPositionFromIndex(dim)(i);
+			checkNeighbours(pos, "x");
+			checkNeighbours(pos, "y");
+			checkNeighbours(pos, "z");
+			if (slotsOccupied === 6) {
+				con.log("slotsOccupied", slotsOccupied);
+				const c = cube(1.3);
+				const {x, y, z} = pos;
+				c.position.set(p(x), p(y), p(z));
+				c.material.color.setHSL(1, 1, 0.5);
+				containerReal.add(c);
+				return;
+			}
+		}
 
 
 		// if we get here we're good!
