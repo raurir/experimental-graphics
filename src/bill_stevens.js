@@ -5,12 +5,12 @@ define("bill_stevens", () => { // ... and jan
 
 	const RIGHT_ANGLE = Math.PI / 2;
 
-	var camera, controls, scene, projector, renderer, holder, lights;
+	var camera, controls, scene, projector, renderer, holder, debug, lights;
 	const mouse = { x: 0, y: 0 };
 	const sw = window.innerWidth, sh = window.innerHeight;
 	const dim = 4;
 	const size = 30;
-	const cubes = [];
+	// const cubes = [];
 
 	let available = Math.pow(dim, 3);
 	const occupied = Array(available).fill(0);
@@ -429,7 +429,7 @@ define("bill_stevens", () => { // ... and jan
 				const {x, y, z} = pos;
 				c.position.set(p(x), p(y), p(z));
 				c.material.color.setHSL(1, 1, 0.5);
-				containerReal.add(c);
+				debug.add(c);
 				return;
 			}
 		}
@@ -448,6 +448,12 @@ define("bill_stevens", () => { // ... and jan
 			c.position.set(p(x), p(y), p(z));
 			c.material.color.setHSL(hue, 0.7, 0.3);
 			containerReal.add(c);
+
+			// const f = cube(0.8);
+			// f.position.set(p(x), p(y), p(z));
+			// f.material.color.setHSL(hue, 0.7, 0.3);
+			// debug.add(f);
+
 			const positionIndex = getIndexFromPosition(v);
 			populate(occupied, positionIndex);
 			solution[positionIndex] = id;
@@ -484,6 +490,11 @@ define("bill_stevens", () => { // ... and jan
 
 		holder = new THREE.Group();
 		scene.add(holder);
+		holder.position.set(dim * -0.5 * size, 0, 0);
+
+		debug = new THREE.Group();
+		scene.add(debug);
+		debug.position.set(dim * 0.5 * size, 0, 0);
 
 		pieces = layouts.map(calculateRotations);
 		// con.log("pieces", pieces);
@@ -495,8 +506,13 @@ define("bill_stevens", () => { // ... and jan
 			var {x, y, z} = getPositionFromIndex(dim + 1)(i);
 			c.position.set(p(x) - size / 2, p(y) - size / 2, p(z) - size / 2);
 			c.material.color.setHex(0xff7700);
-			cubes.push(c);
+			// cubes.push(c);
 			holder.add(c);
+			//draw another bunch for
+			var d = cube(0.1);
+			d.position.set(p(x) - size / 2, p(y) - size / 2, p(z) - size / 2);
+			d.material.color.setHex(0x00ffff);
+			debug.add(d);
 		}
 
 		stage.appendChild(renderer.domElement);
