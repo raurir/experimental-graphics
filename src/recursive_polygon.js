@@ -63,6 +63,7 @@ var recursive_polygon = function() {
 			// bmp.ctx.fillRect(x * sw - 2, y * sh - 2, 4, 4);
 			points.push({x: x * sw, y: y * sh});
 		};
+
 		// drawPolygon(points, {strokeStyle: colour, lineWidth: 4});
 		drawNext({points: points, colour: colour, depth: 0});
 	}
@@ -133,17 +134,21 @@ var recursive_polygon = function() {
 
 	function drawSplit(parent, points, depth) {
 		// var colourA = "rgba(255,255,0,0.5)", colourB = "rgba(0,255,255,0.5)";
-		var colour = (mutateThreshold && rand.random() < mutateThreshold) ?
+		const colour = (mutateThreshold && rand.random() < mutateThreshold) ?
 			colours.mutateColour(parent.colour, mutateAmount) : colours.getNextColour();
 		// drawPolygon(points, {lineWidth: 1, strokeStyle: colour});
-		var inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
+		const inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
 		if (inset) {
-			var insetPoints = geom.insetPoints(points, insetDistance);
+			const insetPoints = geom.insetPoints(points, insetDistance);
 			if (insetPoints) {
+				const inOrder = pointsInOrder(points, insetPoints);
 				drawPolygon(points, {fillStyle: colour, strokeStyle: colour, lineWidth: 1});
-				bmp.ctx.globalCompositeOperation = "destination-out";
-				drawPolygon(insetPoints, {fillStyle: "black"});
-				bmp.ctx.globalCompositeOperation = "source-over";
+				if (inOrder) {
+					// only knock out the inset if the points are in the same order, see comment at fn:`pointsInOrder`
+					bmp.ctx.globalCompositeOperation = "destination-out";
+					drawPolygon(insetPoints, {fillStyle: "black"});
+					bmp.ctx.globalCompositeOperation = "source-over";
+				}
 				drawNext({points: points, colour: colour, depth: depth});
 			}
 		} else {
@@ -191,11 +196,12 @@ var recursive_polygon = function() {
 		bmp.ctx.stroke();
 	}
 
+	const getLength = (a, b) => {
+		const dx = a.x - b.x, dy = a.y - b.y;
+		return Math.hypot(dx, dy);
+	}
+
 	function getLongest(points) {
-		function getLength(p0, p1) {
-			var dx = p0.x - p1.x, dy = p0.y - p1.y;
-			return Math.sqrt(dx * dx + dy * dy);
-		}
 		var len = 0, edgeIndex = null;
 		for (var i = 0, il = points.length; i < il; i++) {
 			var p0 = points[i];
@@ -209,6 +215,63 @@ var recursive_polygon = function() {
 		// con.log(edgeIndex);
 		return edgeIndex;
 	}
+
+	const getDelta = (a, b) => {
+		return {
+			x: a.x - b.x,
+			y: a.y - b.y,
+		};
+	}
+
+	/*
+	when insetting a polygon if the inset amount exceeds a certain (abitrary?) value
+	the inset shape no longer represents the outer shape in a visually pleasing fashion.
+	originally i tried comparing all gradients, but gradient ab equals gradient ba.
+	next i just compared the dx and the dy or every point and its next,
+	if the deltas between all points of the two polygons (the original and the inset)
+	were of the same sign, the polygons are similar
+	https://www.reddit.com/user/raurir/comments/9mo1b9/insetting_polygon_issue/
+	https://i.redd.it/5pjqdydk15r11.jpg
+	*/
+	const pointsInOrder = (pointsA, pointsB) => {
+		if (pointsA.length != pointsB.length) {
+			con.warn("pointsInOrder invalid arrays, not equal in length!", pointsA, pointsB);
+			return false;
+		}
+		for (let i = 0, il = pointsA.length; i < il; i++) {
+			const pA0 = pointsA[i];
+			const pA1 = pointsA[(i + 1) % il];
+			const pB0 = pointsB[i];
+			const pB1 = pointsB[(i + 1) % il];
+
+			const dA = getDelta(pA0, pA1);
+			const dB = getDelta(pB0, pB1);
+
+			// how else would you like to write this?
+			if (dA.x < 0 && dB.x < 0) {
+
+			} else if (dA.x > 0 && dB.x > 0) {
+
+			} else if (dA.x == 0 && dB.x == 0) {
+
+			} else {
+				return false;
+			}
+
+			if (dA.y < 0 && dB.y < 0) {
+
+			} else if (dA.y > 0 && dB.y > 0) {
+
+			} else if (dA.y == 0 && dB.y == 0) {
+
+			} else {
+				return false;
+			}
+		};
+		return true;
+	}
+
+
 
 	function drawPoint(p, options) {
 		// con.log("drawPoint", p);

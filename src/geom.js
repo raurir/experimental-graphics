@@ -226,6 +226,8 @@ var geom = (function() {
       }
       // drawPoint(intersection);
     }
+    // this method shifted the inset points around one, so fixing that here:
+    insets.unshift(insets.pop());
     return insets;
   }
 
