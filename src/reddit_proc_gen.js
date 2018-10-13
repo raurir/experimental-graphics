@@ -2,10 +2,10 @@ const isNode = typeof module !== "undefined";
 
 if (isNode) {
 	var con = console;
-	var rand = require('./rand.js');
-	var dom = require('./dom.js');
-	var colours = require('./colours.js');
-	var geom = require('./geom.js');
+	var rand = require("./rand.js");
+	var dom = require("./dom.js");
+	var colours = require("./colours.js");
+	var geom = require("./geom.js");
 }
 
 const reddit_proc_gen = function() {
@@ -13,6 +13,7 @@ const reddit_proc_gen = function() {
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
 
+	let c = 0;
 	let border;
 	let cutHalf;
 	let maxDepth;
@@ -26,9 +27,9 @@ const reddit_proc_gen = function() {
 		rotation: {
 			type: "Number",
 			label: "Rotation",
-			min: 1,
-			max: 10,
-			cur: 10
+			min: 0,
+			max: 9, // 0-9 allows one edge to be parallel with T,R,B,L when cur is: 0..3..6..9
+			cur: 0
 		},
 		maxDepth: {
 			type: "Number",
@@ -168,7 +169,6 @@ const reddit_proc_gen = function() {
 		return style;
 	};
 
-	let c = 0;
 	const drawAndSplit = (points, depth) => {
 		// con.log("polygons", points)
 		// split the shape
@@ -235,6 +235,7 @@ const reddit_proc_gen = function() {
 	};
 
 	const init = options => {
+		c = 0;
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -262,10 +263,16 @@ const reddit_proc_gen = function() {
 
 		// minArea = 0.3;
 		// maxDepth = 8;
-		con.log(minArea, maxDepth);
+		// con.log(minArea, maxDepth);
 
 		const sides = rand.getInteger(3, 7);
-		const startAngle = (((settings.rotation.cur / 10) * 1) / sides) * TAU;
+		const angleInner = 180 * (sides - 2) / sides;
+		const rotRatio = settings.rotation.cur / settings.rotation.max;
+		const rotAmount = 90 - angleInner;
+		const startAngle = rotRatio * rotAmount / 180 * 3 * Math.PI;
+
+		con.log("settings.rotation", angleInner, rotRatio, rotAmount, startAngle);
+
 		// const startAngle = rand.getNumber(0, 1);
 		// const startAngle = 1 / 12 * TAU;
 		const points = new Array(sides).fill().map((side, i) => {
@@ -284,15 +291,14 @@ const reddit_proc_gen = function() {
 		// inset the shape before recursion begins
 		drawAndSplit(geom.insetPoints(points, border), 0);
 		progress("render:complete", bmp.canvas);
-		console.log("calculations", c);
+		// console.log("calculations", c);
 		// perf.end('polygon')
 	};
 
 	const update = settings => {
-		con.log("update", settings);
+		// con.log("update", settings);
 		init({ size, settings });
 	};
-	con.log("ok");
 
 	return {
 		stage: bmp.canvas,

@@ -1,9 +1,9 @@
 const isNode = typeof module !== "undefined";
-
 if (isNode) {
-	// var rand = require('./rand.js');
-	const dom = require("./dom.js");
-	// var colours = require('./colours.js');
+	var colours = require('./colours.js');
+	var dom = require('./dom.js');
+	var geom = require('./geom.js');
+	var rand = require('./rand.js');
 }
 
 const splitPolygon = (array, start, end) => {
@@ -17,20 +17,22 @@ const splitPolygon = (array, start, end) => {
 };
 
 const recursive_polygon = () => {
-	var sw = 700,
-		sh = 700;
+	var size = 500;
+	var sw = size;
+	var sh = size;
+
 	const bmp = dom.canvas(sw, sh);
 
 	var insetDistance;
-	var mutateThreshold;
-	var mutateAmount;
-	var maxDepth;
-	var sides;
-	var splitLongest;
-	var splitEdgeRatioLocked;
 	var insetLocked;
 	var insetLockedValue;
 	var insetThreshold;
+	var maxDepth;
+	var mutateAmount;
+	var mutateThreshold;
+	var sides;
+	var splitEdgeRatioLocked;
+	var splitLongest;
 	var wonky;
 
 	const generateParent = () => {
@@ -244,7 +246,12 @@ const recursive_polygon = () => {
 		return true;
 	};
 
-	const init = () => {
+	const init = (options) => {
+		size = options.size;
+		sw = options.sw || size;
+		sh = options.sh || size;
+		bmp.setSize(sw, sh);
+
 		// bias sides towards low polys.
 		sides =
 			3 + Math.round(rand.random() * rand.random() * rand.random() * 28);

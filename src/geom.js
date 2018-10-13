@@ -51,7 +51,7 @@ var geom = (function() {
     // occasionally finding an irregularity - turns out dx was 0.0000000000003141611368683772161603
     // which for all intents and purposes is 0.
     if (dx == 0 || dx > -0.000001 && dx < 0.000001) {
-      con.warn("divide by zero error in geom.linearEquationFromPoints");
+      // con.warn("divide by zero error in geom.linearEquationFromPoints");
       // equation is in the form x = number, rather than y = mx + c
       return {
         c: null,
@@ -221,7 +221,7 @@ var geom = (function() {
         insets.push(intersection);
       } else {
         // drawPolygon(points, {lineWidth: 1, strokeStyle: "blue"});
-        con.warn("geom.insetPoints fail, not inside");
+        // con.warn("geom.insetPoints fail, not inside");
         return null; // bail, we can't inset this shape!
       }
       // drawPoint(intersection);
