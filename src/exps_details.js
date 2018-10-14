@@ -50,6 +50,7 @@ define("exps_details", function() {
     ["perlin_grid", "THREE", "TweenMax"],
     ["perlin_leaves"],
     ["perlin_noise"],
+    ["polygon_slice"],
     ["polyhedra","3d"], // 3d is not moduled!
     ["polyhedra_three", "THREE", "../lib/stemkoski/polyhedra"],
     ["pine_three","THREE"],

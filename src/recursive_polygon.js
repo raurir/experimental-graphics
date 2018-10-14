@@ -1,9 +1,9 @@
 const isNode = typeof module !== "undefined";
 if (isNode) {
-	var colours = require('./colours.js');
-	var dom = require('./dom.js');
-	var geom = require('./geom.js');
-	var rand = require('./rand.js');
+	var colours = require("./colours.js");
+	var dom = require("./dom.js");
+	var geom = require("./geom.js");
+	var rand = require("./rand.js");
 }
 
 const splitPolygon = (array, start, end) => {
@@ -14,6 +14,12 @@ const splitPolygon = (array, start, end) => {
 	const arrayA = chunk1.concat(chunk3);
 	const arrayB = chunk2;
 	return [arrayA, arrayB];
+};
+
+// copied from polygon_slice, see comments there.
+const getRotationRange = sides => {
+	const rotationRange = 90 - (180 * (sides - 2)) / sides || 45;
+	return ((rotationRange * 3) / 180) * Math.PI;
 };
 
 const recursive_polygon = () => {
@@ -143,7 +149,7 @@ const recursive_polygon = () => {
 		if (rand.random() > 0.2) {
 			drawNext({ points: points, colour: colour, depth: depth });
 		}
-	}
+	};
 
 	const fillAndStroke = ({ lineWidth, strokeStyle, fillStyle }) => {
 		if (lineWidth && strokeStyle) {
@@ -178,7 +184,7 @@ const recursive_polygon = () => {
 		return Math.hypot(dx, dy);
 	};
 
-	const getLongest = (points) => {
+	const getLongest = points => {
 		var len = 0,
 			edgeIndex = null;
 		for (var i = 0, il = points.length; i < il; i++) {
@@ -191,7 +197,7 @@ const recursive_polygon = () => {
 			}
 		}
 		return edgeIndex;
-	}
+	};
 
 	const getDelta = (a, b) => {
 		return {
@@ -246,7 +252,7 @@ const recursive_polygon = () => {
 		return true;
 	};
 
-	const init = (options) => {
+	const init = options => {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
