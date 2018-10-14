@@ -1,6 +1,6 @@
 const geom = require("../src/geom.js");
 
-describe("geometry", () => {
+describe("geom.intersectionBetweenPoints", () => {
 	it("calculates intersection point between two lines", done => {
 		expect(
 			geom.intersectionBetweenPoints(

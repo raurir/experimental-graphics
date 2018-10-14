@@ -231,6 +231,77 @@ var geom = (function() {
     return insets;
   }
 
+  const deltaBetweenPoints = (a, b) => {
+    return {
+      x: a.x - b.x,
+      y: a.y - b.y
+    };
+  };
+
+  const polygonsSimilar = (pointsA, pointsB) => {
+    if (pointsA.length != pointsB.length) {
+      con.warn(
+        "geom.polygonsSimilar invalid arrays, not equal in length!",
+        pointsA,
+        pointsB
+      );
+      return false;
+    }
+    for (let i = 0, il = pointsA.length; i < il; i++) {
+      const pA0 = pointsA[i];
+      const pA1 = pointsA[(i + 1) % il];
+      const pB0 = pointsB[i];
+      const pB1 = pointsB[(i + 1) % il];
+
+      const dA = deltaBetweenPoints(pA0, pA1);
+      const dB = deltaBetweenPoints(pB0, pB1);
+
+      // how else would you like to write this?
+      if (dA.x < 0 && dB.x < 0) {
+      } else if (dA.x > 0 && dB.x > 0) {
+      } else if (dA.x == 0 && dB.x == 0) {
+      } else {
+        return false;
+      }
+
+      if (dA.y < 0 && dB.y < 0) {
+      } else if (dA.y > 0 && dB.y > 0) {
+      } else if (dA.y == 0 && dB.y == 0) {
+      } else {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // do any lines cross basically.
+  const polygonSelfIntersecting = (points) => {
+    const len = points.length;
+    for (var j = 0; j < len - 1; j++) {
+      const indexA = j;
+      const indexB = j + 1;
+      const pointA = points[indexA];
+      const pointB = points[indexB];
+
+      for (var i = indexB; i < len; i++) {
+        const indexC = i;
+        const indexD = (i + 1) % len;
+        const pointC = points[indexC];
+        const pointD = points[indexD];
+        const intersects = intersectionBetweenPoints(
+          pointA,
+          pointB,
+          pointC,
+          pointD
+        );
+        if (intersects) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   return {
     insetPoints,
     intersectionAnywhere,
@@ -242,7 +313,9 @@ var geom = (function() {
     perpendincularPoint,
     pointInPolygon,
     polygonArea,
+    polygonSelfIntersecting,
     polygonPerimeter,
+    polygonsSimilar,
   }
 
 })();

@@ -1,7 +1,7 @@
 const geom = require("../src/geom.js");
 
-describe("geometry", () => {
-	it("calculates if a point is within polygon", done => {
+describe("geom.pointInPolygon", () => {
+	it("should calculate if a point is within polygon", done => {
 		expect(geom.pointInPolygon({}, {})).toBe(null);
 		expect(geom.pointInPolygon([], {})).toBe(null);
 		expect(geom.pointInPolygon([], { a: 1, b: 2 })).toBe(null);

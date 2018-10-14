@@ -1,7 +1,7 @@
 const geom = require("../src/geom.js");
 
-describe("geometry", () => {
-	it("calculates area of a polygon", done => {
+describe("geom.polygonArea", () => {
+	it("should calculate the area of a polygon", done => {
 		expect(() => geom.polygonArea()).toThrow(
 			"Cannot read property 'length' of undefined"
 		);

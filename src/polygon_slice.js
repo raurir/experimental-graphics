@@ -28,6 +28,7 @@ const polygon_slice = function() {
 	let radius;
 	let sh;
 	let size;
+	let startAngle;
 	let sw;
 
 	var settings = {
@@ -177,13 +178,11 @@ const polygon_slice = function() {
 	};
 
 	const drawAndSplit = (points, depth) => {
-		// con.log("polygons", points)
 		// split the shape
 		const polygons = splitPolygon(points);
-
 		// recurse
 		depth++;
-		polygons.forEach(poly => {
+		polygons.forEach((poly, i) => {
 			if (
 				depth < settings.maxDepth.cur && // always honour max recursions else we crash...
 				(minArea === 0 || geom.polygonArea(poly) > minArea) // only honour minArea if not zero!
@@ -191,36 +190,12 @@ const polygon_slice = function() {
 				drawAndSplit(poly, depth);
 			} else {
 				const polyInset = geom.insetPoints(poly, border);
-
 				if (!polyInset) return;
-
+				// then check if they are similar, if not it has been inverted due to excessive inset.
+				if (!geom.polygonsSimilar(poly, polyInset)) return;
 				// check if polygon is self intersecting, if so, discard it...
 				// yup, this is O(n^2).
-
-				const len = polyInset.length;
-				for (var j = 0; j < len - 1; j++) {
-					const indexA = j;
-					const indexB = j + 1;
-					const pointA = polyInset[indexA];
-					const pointB = polyInset[indexB];
-
-					for (var i = indexB; i < len; i++) {
-						const indexC = i;
-						const indexD = (i + 1) % len;
-						const pointC = polyInset[indexC];
-						const pointD = polyInset[indexD];
-						const intersects = geom.intersectionBetweenPoints(
-							pointA,
-							pointB,
-							pointC,
-							pointD
-						);
-						if (intersects) {
-							return;
-						}
-					}
-				}
-
+				if (geom.polygonSelfIntersecting(polyInset)) return;
 				drawPolygon(polyInset, getStyle());
 			}
 		});
@@ -232,7 +207,6 @@ const polygon_slice = function() {
 		sh = options.sh || size;
 		colours.getRandomPalette();
 		bmp.setSize(sw, sh);
-		ctx.clearRect(0, 0, sw, sh);
 
 		border = -rand.getNumber(0.002, 0.01);
 		radius = rand.getNumber(0.3, 0.5);
@@ -244,7 +218,6 @@ const polygon_slice = function() {
 		maxDepth = rand.getInteger(2, 8);
 
 		settings.rotation.cur = rand.getInteger(0, 9);
-		// settings.minArea.cur = minArea;
 		settings.maxDepth.cur = maxDepth;
 		if (options.settings) {
 			settings = options.settings;
@@ -253,18 +226,22 @@ const polygon_slice = function() {
 		progress("settings:initialised", settings);
 
 		const sides = rand.getInteger(3, 7);
-		const startAngle =
+		startAngle =
 			(settings.rotation.cur / settings.rotation.max) *
 			getRotationRange(sides);
 
 		const points = new Array(sides).fill().map((side, i) => {
-			const a = startAngle + (i / sides) * -TAU;
-			const x = 0.5 + Math.sin(a) * radius; // * 0.6,
-			const y = 0.5 + Math.cos(a) * radius;
+			const a = (i / sides) * -TAU;
+			const x = Math.sin(a) * radius;
+			const y = Math.cos(a) * radius;
 			return { x, y };
 		});
 
 		// perf.start('polygon')
+		ctx.clearRect(0, 0, sw, sh);
+		ctx.save();
+		ctx.translate(sw * 0.5, sh * 0.5);
+		ctx.rotate(startAngle);
 		// draw a border around shape
 		drawPolygon(points, {
 			strokeStyle: colours.getRandomColour(),
@@ -273,6 +250,7 @@ const polygon_slice = function() {
 		// inset the shape before recursion begins
 		drawAndSplit(geom.insetPoints(points, border), 0);
 		progress("render:complete", bmp.canvas);
+		ctx.restore();
 		// perf.end('polygon')
 	};
 

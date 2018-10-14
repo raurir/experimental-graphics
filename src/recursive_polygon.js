@@ -47,6 +47,7 @@ const recursive_polygon = () => {
 
 
 	const bmp = dom.canvas(sw, sh);
+	const { ctx } = bmp;
 
 	var insetDistance;
 	var insetLocked;
@@ -61,30 +62,22 @@ const recursive_polygon = () => {
 	var wonky;
 
 	const generateParent = () => {
-		const colour = colours.getNextColour();
-		con.log("generateParent", colour);
+		const colour = colours.getRandomColour();
 		let i = 0;
-		const cx = 0.5;
-		const cy = 0.5;
-		const points = [];
 		const angles = [];
 		while (angles.length < sides) {
-			angles.push(i / sides);
+			angles.push(i / sides * Math.PI * 2);
 			i++;
 		}
 		// angles.sort();
-		const startAngle =
-			(settings.rotation.cur / settings.rotation.max) *
-			getRotationRange(sides);
-		for (i = 0; i < angles.length; i++) {
-			const angle = startAngle + angles[i] * Math.PI * 2;
+		const points = angles.map((angle) => {
 			const radius = wonky ? rand.getNumber(0.4, 0.45) : 0.45;
-			const x = cx + Math.sin(angle) * radius;
-			const y = cy + Math.cos(angle) * radius;
-			points.push({ x: x * sw, y: y * sh });
-		}
+			const x = Math.sin(angle) * radius;
+			const y = Math.cos(angle) * radius;
+			return { x, y };
+		})
 
-		drawNext({ points: points, colour: colour, depth: 0 });
+		drawNext({ points, colour, depth: 0 });
 	};
 
 	var iterations = 0;
@@ -156,47 +149,47 @@ const recursive_polygon = () => {
 		if (inset) {
 			const insetPoints = geom.insetPoints(points, insetDistance);
 			if (insetPoints) {
-				const inOrder = pointsInOrder(points, insetPoints);
+				const inOrder = geom.polygonsSimilar(points, insetPoints);
 				if (inOrder) {
 					// only knock out the inset if the points are in the same order
 					// see comment near fn:`pointsInOrder`
-					bmp.ctx.globalCompositeOperation = "destination-out";
+					ctx.globalCompositeOperation = "destination-out";
 					drawPolygon(insetPoints, { fillStyle: "black" });
-					bmp.ctx.globalCompositeOperation = "source-over";
+					ctx.globalCompositeOperation = "source-over";
 				}
 			}
 		}
 
-		// shall we dance?
+		// shall we go deeper?
 		if (rand.random() > 0.2) {
-			drawNext({ points: points, colour: colour, depth: depth });
+			drawNext({ points, colour, depth });
 		}
 	};
 
 	const fillAndStroke = ({ lineWidth, strokeStyle, fillStyle }) => {
 		if (lineWidth && strokeStyle) {
-			bmp.ctx.strokeStyle = strokeStyle;
-			bmp.ctx.lineWidth = lineWidth;
-			bmp.ctx.stroke();
+			ctx.strokeStyle = strokeStyle;
+			ctx.lineWidth = lineWidth;
+			ctx.stroke();
 		}
 		if (fillStyle) {
-			bmp.ctx.fillStyle = fillStyle;
-			bmp.ctx.fill();
+			ctx.fillStyle = fillStyle;
+			ctx.fill();
 		}
 	};
 
 	const drawPolygon = (points, options) => {
-		bmp.ctx.beginPath();
+		ctx.beginPath();
 		for (var i = 0; i < points.length; i++) {
 			var p = points[i];
-			bmp.ctx[i == 0 ? "moveTo" : "lineTo"](p.x, p.y);
+			ctx[i == 0 ? "moveTo" : "lineTo"](p.x * size, p.y * size);
 		}
-		bmp.ctx.closePath();
+		ctx.closePath();
 		fillAndStroke(options);
 		// points.forEach((p, i) => {
-		// 	bmp.ctx.fillStyle = "#FFF";
-		// 	bmp.ctx.font = '18px Helvetica';
-		// 	bmp.ctx.fillText("p" + i, p.x, p.y);
+		// 	ctx.fillStyle = "#FFF";
+		// 	ctx.font = '18px Helvetica';
+		// 	ctx.fillText("p" + i, p.x, p.y);
 		// });
 	};
 
@@ -278,10 +271,11 @@ const recursive_polygon = () => {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
+		con.log("rand.getSeed", rand.getSeed());
+		colours.getRandomPalette();
 		bmp.setSize(sw, sh);
 
 		settings.rotation.cur = rand.getInteger(0, 9);
-		con.log("settings.rotation.cur", settings.rotation.cur)
 		if (options.settings) {
 			settings = options.settings;
 		}
@@ -293,7 +287,7 @@ const recursive_polygon = () => {
 		if (sides < 5) {
 			wonky = rand.random() > 0.8;
 		}
-		insetDistance = rand.getNumber(2, 25);
+		insetDistance = rand.getNumber(0.001, 0.02);
 		mutateThreshold = rand.getNumber(0, 1);
 		mutateAmount = rand.getNumber(5, 30);
 		maxDepth = rand.getInteger(1, 10);
@@ -306,9 +300,17 @@ const recursive_polygon = () => {
 			insetThreshold = rand.random() * 0.5;
 		}
 
-		colours.getRandomPalette();
+		const startAngle =
+			(settings.rotation.cur / settings.rotation.max) *
+			getRotationRange(sides);
+
+		ctx.clearRect(0, 0, sw, sh);
+		ctx.save();
+		ctx.translate(sw * 0.5, sh * 0.5);
+		ctx.rotate(startAngle);
 		generateParent();
 		progress("render:complete", bmp.canvas);
+		ctx.restore();
 	};
 
 	const update = settings => {

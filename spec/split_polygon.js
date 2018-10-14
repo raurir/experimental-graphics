@@ -13,8 +13,8 @@ function splitPolygon(array, start, end) {
 	];
 }
 
-describe("test that", function() {
-	it("confirms the test suits is working", function(done) {
+describe("splitPolygon", function() {
+	it("should split an array into smaller arrays", function(done) {
 
 		// the test is testing s(p)licing arrays, but easier to test strings, so splitting and joining inside the test.
 		function runPolygonTest(input, start, end, outputA, outputB) {

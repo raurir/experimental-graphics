@@ -1,5 +1,5 @@
 var rand = require("../src/rand.js");
-describe("test rand", function() {
+describe("rand.getInteger", function() {
 
 	var random = 0, randoms = 10;
 	while (random++ < randoms) {
@@ -7,7 +7,7 @@ describe("test rand", function() {
 		var tolerance = 0.2;
 		rand.setSeed(seed);
 
-		it("expects rand.getInteger to return evenly between min and max with seed:" + seed + " and tolerance:" + tolerance, function(done) {
+		it("should return evenly between min and max with seed:" + seed + " and tolerance:" + tolerance, function(done) {
 
 			var bucket = [];
 
@@ -30,9 +30,10 @@ describe("test rand", function() {
 			done();
 		});
 	}
+});
 
-
-	it("expects random to convert an string to an integer", function(done) {
+describe("rand.alphaToInteger", function() {
+	it("should convert a string to an integer", function(done) {
 		var tests = [
 			{string: "a", integer: 3859429119},
 			{string: "b", integer: 578366046},
