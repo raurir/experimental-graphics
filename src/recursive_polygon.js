@@ -27,6 +27,25 @@ const recursive_polygon = () => {
 	var sw = size;
 	var sh = size;
 
+	var settings = {
+		// copied from polygon_slice
+		rotation: {
+			type: "Number",
+			label: "Rotation",
+			min: 0,
+			max: 9,
+			cur: 0
+		},
+		// maxDepth: {
+		// 	type: "Number",
+		// 	label: "Max Depth",
+		// 	min: 2,
+		// 	max: 8,
+		// 	cur: 2
+		// }
+	};
+
+
 	const bmp = dom.canvas(sw, sh);
 
 	var insetDistance;
@@ -43,7 +62,7 @@ const recursive_polygon = () => {
 
 	const generateParent = () => {
 		const colour = colours.getNextColour();
-		// con.log("generateParent");
+		con.log("generateParent", colour);
 		let i = 0;
 		const cx = 0.5;
 		const cy = 0.5;
@@ -53,9 +72,12 @@ const recursive_polygon = () => {
 			angles.push(i / sides);
 			i++;
 		}
-		angles.sort();
+		// angles.sort();
+		const startAngle =
+			(settings.rotation.cur / settings.rotation.max) *
+			getRotationRange(sides);
 		for (i = 0; i < angles.length; i++) {
-			const angle = angles[i] * Math.PI * 2;
+			const angle = startAngle + angles[i] * Math.PI * 2;
 			const radius = wonky ? rand.getNumber(0.4, 0.45) : 0.45;
 			const x = cx + Math.sin(angle) * radius;
 			const y = cy + Math.cos(angle) * radius;
@@ -86,10 +108,10 @@ const recursive_polygon = () => {
 			const edge = splitLongest
 				? getLongest(copied)
 				: rand.getInteger(0, 2); // pick which edge to split
-			var splitRatio = splitEdgeRatioLocked
+			const splitRatio = splitEdgeRatioLocked
 				? splitEdgeRatioLocked
 				: rand.getNumber(0.1, 0.9);
-			var newPoint;
+			let newPoint;
 			switch (edge) {
 				case 0:
 					newPoint = geom.lerp(copied[0], copied[1], splitRatio);
@@ -258,6 +280,13 @@ const recursive_polygon = () => {
 		sh = options.sh || size;
 		bmp.setSize(sw, sh);
 
+		settings.rotation.cur = rand.getInteger(0, 9);
+		con.log("settings.rotation.cur", settings.rotation.cur)
+		if (options.settings) {
+			settings = options.settings;
+		}
+		progress("settings:initialised", settings);
+
 		// bias sides towards low polys.
 		sides =
 			3 + Math.round(rand.random() * rand.random() * rand.random() * 28);
@@ -282,10 +311,15 @@ const recursive_polygon = () => {
 		progress("render:complete", bmp.canvas);
 	};
 
+	const update = settings => {
+		init({ size, settings });
+	};
+
 	return {
+		init,
+		settings,
 		stage: bmp.canvas,
-		init: init,
-		settings: {}
+		update,
 	};
 };
 

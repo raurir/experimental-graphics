@@ -243,7 +243,7 @@ const polygon_slice = function() {
 				: rand.getNumber(0.05, radius * 0.8); // or randomize it.
 		maxDepth = rand.getInteger(2, 8);
 
-		settings.rotation.cur = rand.getInteger(0, 10);
+		settings.rotation.cur = rand.getInteger(0, 9);
 		// settings.minArea.cur = minArea;
 		settings.maxDepth.cur = maxDepth;
 		if (options.settings) {
