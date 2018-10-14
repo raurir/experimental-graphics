@@ -1,3 +1,4 @@
+// Source now at [https://github.com/raurir/experimental-graphics/blob/master/src/polygon_slice.js](src/polygon_slice.js)
 const innerHTML = `
 <style>
 div#stage {
