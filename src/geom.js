@@ -63,8 +63,8 @@ const linearEquationFromPoints = (p0, p1) => {
   // intercept c = y - mx
   var c = p0.y - m * p0.x; // which is same as p1.y - slope * p1.x
   return {
-    c: c,
-    m: m
+    c,
+    m
   }
 }
 
@@ -134,8 +134,8 @@ const pointInPolygon = (polygon, point) => {
     }
     return null
   }
-
 }
+
 const polygonArea = points => {
   const len = points.length;
   const area = points.reduce((sum, point, index) => {
@@ -161,7 +161,6 @@ const linearInterpolate = (a, b, ratio) => {
     y: a.y + (b.y - a.y) * ratio
   };
 }
-
 
 // http://stackoverflow.com/questions/17195055/calculate-a-perpendicular-offset-from-a-diagonal-line
 const perpendincularPoint = (a, b, distance) => {
@@ -194,7 +193,6 @@ const parallelPoints = (p0, p1, offset) => {
   };
   return [parrallel0, parrallel1];
 }
-
 
 const insetPoints = (points, offset) => {
   var parallels = [], insets = [];

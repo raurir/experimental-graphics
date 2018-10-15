@@ -1,15 +1,6 @@
 const geom = require("../src/geom.js");
 
-const poly = (sides, jump) =>
-	Array(sides)
-		.fill()
-		.map((_, i) => {
-			const angle = ((jump * i) / sides) * Math.PI * 2;
-			return {
-				x: Math.sin(angle),
-				y: Math.cos(angle),
-			};
-		});
+const { poly } = require("./helpers");
 
 describe("geom.polygonSelfIntersecting", () => {
 	it("should return false if a polygon is not self intersecting", (done) => {
