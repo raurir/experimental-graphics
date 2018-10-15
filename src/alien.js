@@ -14,16 +14,21 @@ var alien = function() {
 
 	const numberOfRows = 10;
 	const numberOfColumns = 10;
-	const cellSize = Math.ceil(rand.getInteger(20, 60) / numberOfColumns);
 	const halfColumns = numberOfColumns / 2;
-	const canvasWidth = cellSize * (numberOfColumns + 2);
-	const canvasHeight = cellSize * (numberOfRows + 2);
+	let cellSize;
+	let canvasWidth;
+	let canvasHeight;
 
 	function init(options) {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
 		stage.setSize(sw, sh);
+
+		cellSize = Math.ceil(rand.getInteger(20, 60) / numberOfColumns);
+		canvasWidth = cellSize * (numberOfColumns + 2);
+		canvasHeight = cellSize * (numberOfRows + 2);
+
 		centre = sh / 2;
 		colours.getRandomPalette();
 		render();

@@ -271,7 +271,7 @@ const recursive_polygon = () => {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
-		con.log("rand.getSeed", rand.getSeed());
+		// con.log("rand.getSeed", rand.getSeed());
 		colours.getRandomPalette();
 		bmp.setSize(sw, sh);
 
