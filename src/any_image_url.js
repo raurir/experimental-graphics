@@ -6,12 +6,11 @@ if (isNode) {
   var Canvas = require('canvas');
   var Image = Canvas.Image;
   var dom = require('./dom.js');
-var http = require("http");
-var https = require("https");
-
+  var http = require("http");
+  var https = require("https");
 }
 
-var any_image_url = function() {
+var any_image_url = () => () => {
 
   // list a range of valid seeds.
   var allowed = {

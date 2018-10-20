@@ -8,8 +8,9 @@ if (isNode) {
 }
 
 
-var circle_packing = function() {
+var circle_packing = () => () => {
 
+	var progress;
 	var TAU = Math.PI * 2;
 	var sw, sh;
 	var cx = 0.5, cy = 0.5;
@@ -34,9 +35,9 @@ var circle_packing = function() {
 	// document.body.appendChild(threadOutput.canvas);
 
 	function init(options) {
-
 		console.time("process time");
 
+		progress = options.progress || (() => {con.log("circle_packing - no progress defined")});
 		var size = options.size;
 		sw = size;
 		sh = size;

@@ -6,8 +6,9 @@ if (isNode) {
   var dom = require('./dom.js');
 }
 
-var state_of_origin_52_6 = function() {
+var state_of_origin_52_6 = () => () => {
 
+  var progress;
   var QLD = "QLD", NSW = "NSW";
   var font = "180px helvetica" // impact";
   var red = "#f00";
@@ -170,7 +171,7 @@ var state_of_origin_52_6 = function() {
   }
 
   function init(options) {
-
+    progress = options.progress || (() => {con.log("state_of_origin_52_6 - no progress defined")});
     overScale = options.size / bmpSize;
     con.log("state of origin init", options, overScale);
     output.setSize(bmpSize * overScale, bmpSize * overScale);

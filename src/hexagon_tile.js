@@ -10,8 +10,8 @@ if (isNode) {
 
 // seed 3 is awesome.
 
-var hexagon_tile = function() {
-
+var hexagon_tile = () => () => {
+  var progress;
   var spreadSeed;
   var spreadGradient = 0.1;
   // need an alternate seeded random, based on input number.
@@ -69,7 +69,7 @@ var hexagon_tile = function() {
   }
 
   function init(options) {
-
+    progress = options.progress || (() => {con.log("hexagon_tile - no progress defined")});
     spreadSeed = rand.getSeed();
     spreadGradient = rand.getLastRandom() * 0.5;
     // con.log("spreadGradient", spreadGradient);
@@ -253,7 +253,7 @@ var hexagon_tile = function() {
 
   function batch() {
     var shouldRender = settings.spread.cur / settings.spread.max * 10;
-    con.log("shouldRender", shouldRender);
+    // con.log("shouldRender", shouldRender);
     var maxRender = hexagons;
     var loopStart = currentBatch * batchSize,
       loopEnd = loopStart + batchSize;
@@ -382,17 +382,16 @@ var hexagon_tile = function() {
   }
   */
 
-  function update(settings) {
-    init({size: size, settings: settings})
+  const update = (settings) => {
+    init({progress, size, settings})
   }
 
-
   var experiment = {
-    init: init,
-    render: render,
-    settings: settings,
+    init,
+    render,
+    settings,
     stage: vector ? stage : stage.canvas,
-    update: update
+    update,
   }
 
   return experiment;

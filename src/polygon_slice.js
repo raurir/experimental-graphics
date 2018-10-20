@@ -16,11 +16,12 @@ const getRotationRange = sides => {
 	return ((rotationRange * 3) / 180) * Math.PI;
 };
 
-const polygon_slice = function() {
+const polygon_slice = () => () => {
 	const TAU = Math.PI * 2;
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
 
+	let progress;
 	let border;
 	let cutHalf;
 	let maxDepth;
@@ -202,6 +203,7 @@ const polygon_slice = function() {
 	};
 
 	const init = options => {
+		progress = options.progress || (() => {con.log("circle_packing - no progress defined")});
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -256,7 +258,7 @@ const polygon_slice = function() {
 
 	const update = settings => {
 		// con.log("update", settings);
-		init({ size, settings });
+		init({ progress, size, settings });
 	};
 
 	return {

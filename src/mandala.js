@@ -1,7 +1,7 @@
 var isNode = (typeof module !== 'undefined');
 
-var mandala = function() {
-
+var mandala = () => () => {
+	var progress;
 
 	var settings = {
 		spread: {
@@ -19,6 +19,7 @@ var mandala = function() {
 	var ctx = stage.ctx;
 
  	function init(options) {
+ 		progress = options.progress || (() => {con.log("mandala - no progress defined")});
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -39,6 +40,7 @@ var mandala = function() {
 		progress('settings:initialised', settings);
 
 		render();
+		progress("render:complete", stage.canvas);
 	}
 
 	function render() {
@@ -81,7 +83,7 @@ var mandala = function() {
 		document.body.appendChild(pattern.canvas);
 
 		var max = 7;
-		
+
 		function sorter(a,b) { return a < b ? -1 : 1; }
 
 		function drawBands() {
@@ -241,7 +243,6 @@ var mandala = function() {
 			stage.ctx.drawImage(pattern.canvas, -maskBorder, -maskBorder);
 			stage.ctx.restore();
 		}
-		
 	}
 
 	function update(settings) {
@@ -255,8 +256,6 @@ var mandala = function() {
 		stage: stage.canvas,
 		update: update,
 	}
-
-	progress("render:complete", stage.canvas);
 
 	return experiment;
 

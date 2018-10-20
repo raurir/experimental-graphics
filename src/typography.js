@@ -7,9 +7,8 @@ if (isNode) {
   var colours = require('./colours.js');
 }
 
-var typography = function() {
-
-
+var typography = () => () => {
+  var progress;
   var settings = {
     boxes: {
       label: "Boxes",
@@ -49,11 +48,21 @@ var typography = function() {
   }
 
 
-  var numerals = [], numeralsLength = typoInteger(1, 5), n = 0;
-  while (n++ < numeralsLength) {
-    numerals.push(typoInteger(0, 9));
-  }
-  numerals = numerals.join("");
+  /*
+  and another bug, numerals should be defined in init function!
+  none of the numerals generation code works since rand's seed is not set at time of calling
+  typoInteger... since:
+  rand.number() returns `null`...
+  rand.getNumber(min, max) returns `min`...
+  typoInteger(0, whatever) returns `0`...
+  */
+  // var numerals = [], numeralsLength = typoInteger(1, 5), n = 0;
+  // while (n++ < numeralsLength) {
+  //   numerals.push(typoInteger(0, 9));
+  // }
+  // numerals = numerals.join("");
+  var numerals = "0";
+
   function getString() {
     var phrase = "Typography";
     // var strings = [settings.phrase.cur, numerals];
@@ -166,6 +175,7 @@ var typography = function() {
   }
 
   function init(options) {
+    progress = options.progress || (() => {con.log("typography - no progress defined")});
     size = options.size;
     sw = size;
     sh = size;
@@ -220,7 +230,7 @@ var typography = function() {
 
 
   function update(settings) {
-    init({size: size, settings: settings});
+    init({progress, size, settings});
   }
 
 

@@ -95,11 +95,11 @@ const intersectionAnywhere = (p0, p1, p2, p3) => {
       // con.log("intersectionAnywhere:", intersection_X, intersection_Y);
     }
   }
-  if (intersectionY == 0) {
-    con.log("intersectionY IS 0!", isLine1Vertical, isLine2Vertical, line0, line1);
-    con.log("intersectionY p0 p1", p0, p1);
-    con.log("intersectionY p2 p3", p2, p3);
-  }
+  // if (intersectionY == 0) {
+  //   con.log("intersectionY IS 0!", isLine1Vertical, isLine2Vertical, line0, line1);
+  //   con.log("intersectionY p0 p1", p0, p1);
+  //   con.log("intersectionY p2 p3", p2, p3);
+  // }
 
   return {
     x: intersectionX,

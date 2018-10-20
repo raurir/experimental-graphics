@@ -8,7 +8,10 @@ if (isNode) {
 }
 
 var corona_sine = function() {
+  return function() {
 
+  var test = Math.random();
+  var progress;
   var vector = false;
 
   var settings = {
@@ -55,6 +58,7 @@ var corona_sine = function() {
   var lastGenerate, colourLayers, lengthLayers, colourBG, oscillators, oscs;
 
   function init(options) {
+    progress = options.progress || (() => {con.log("corona_sine - no progress defined", arguments)});
     size = options.size;
     sw = options.sw || size;
     sh = options.sh || size;
@@ -237,7 +241,7 @@ var corona_sine = function() {
   }
 
   return experiment;
-
+  }
 };
 
 if (isNode) {
