@@ -37,6 +37,11 @@ const recursive_polygon = () => () => {
 			max: 9,
 			cur: 0,
 		},
+		background: {
+			type: "Boolean",
+			label: "Background",
+			cur: true,
+		},
 		// maxDepth: {
 		// 	type: "Number",
 		// 	label: "Max Depth",
@@ -49,6 +54,7 @@ const recursive_polygon = () => () => {
 	const bmp = dom.canvas(sw, sh);
 	const {ctx} = bmp;
 
+	var backgroundColour;
 	var insetDistance;
 	var insetLocked;
 	var insetLockedValue;
@@ -150,12 +156,16 @@ const recursive_polygon = () => () => {
 			const insetPoints = geom.insetPoints(points, insetDistance);
 			if (insetPoints) {
 				const inOrder = geom.polygonsSimilar(points, insetPoints);
+				// only knock out the inset if the points are in the same order
+				// see comment near fn:`pointsInOrder`
 				if (inOrder) {
-					// only knock out the inset if the points are in the same order
-					// see comment near fn:`pointsInOrder`
-					ctx.globalCompositeOperation = "destination-out";
-					drawPolygon(insetPoints, {fillStyle: "black"});
-					ctx.globalCompositeOperation = "source-over";
+					if (settings.background.cur) {
+						drawPolygon(insetPoints, {fillStyle: backgroundColour});
+					} else {
+						ctx.globalCompositeOperation = "destination-out";
+						drawPolygon(insetPoints, {fillStyle: "black"});
+						ctx.globalCompositeOperation = "source-over";
+					}
 				}
 			}
 		}
@@ -268,7 +278,11 @@ const recursive_polygon = () => () => {
 	};
 
 	const init = (options) => {
-		progress = options.progress || (() => {con.log("recursive_polygon - no progress defined")});
+		progress =
+			options.progress ||
+			(() => {
+				con.log("recursive_polygon - no progress defined");
+			});
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -277,6 +291,7 @@ const recursive_polygon = () => () => {
 		bmp.setSize(sw, sh);
 
 		settings.rotation.cur = rand.getInteger(0, 9);
+		settings.background.cur = rand.getInteger(0, 4) > 3;
 		if (options.settings) {
 			settings = options.settings;
 		}
@@ -305,8 +320,11 @@ const recursive_polygon = () => () => {
 			(settings.rotation.cur / settings.rotation.max) *
 			getRotationRange(sides);
 
-		ctx.fillStyle = colours.getRandomColour();
-		ctx.fillRect(0, 0, sw, sh);
+		backgroundColour = colours.getRandomColour();
+		if (settings.background.cur) {
+			ctx.fillStyle = backgroundColour;
+			ctx.fillRect(0, 0, sw, sh);
+		}
 		ctx.save();
 		ctx.translate(sw * 0.5, sh * 0.5);
 		ctx.rotate(startAngle);
