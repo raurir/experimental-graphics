@@ -212,7 +212,7 @@ const polygon_slice = () => () => {
 		progress =
 			options.progress ||
 			(() => {
-				con.log("circle_packing - no progress defined");
+				con.log("polygon_slice - no progress defined");
 			});
 		size = options.size;
 		sw = options.sw || size;
