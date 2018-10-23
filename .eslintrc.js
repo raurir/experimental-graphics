@@ -7,6 +7,7 @@ module.exports = {
 		con: true,
 		define: true,
 		dom: true,
+		module: true,
 		rand: true,
 		require: true
 	},

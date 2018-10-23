@@ -235,6 +235,16 @@ const deltaBetweenPoints = (a, b) => {
   };
 };
 
+/*
+when insetting a polygon if the inset amount exceeds a certain (arbitrary?) value
+the inset shape no longer represents the outer shape in a visually pleasing fashion.
+originally i tried comparing the gradientof all sides, but gradient ab equals gradient ba.
+next i just compared the dx and the dy or every point and its next,
+if the deltas between all points of the two polygons (the original and the inset)
+were of the same sign, the polygons are similar
+https://www.reddit.com/user/raurir/comments/9mo1b9/insetting_polygon_issue/
+https://i.redd.it/5pjqdydk15r11.jpg
+*/
 const polygonsSimilar = (pointsA, pointsB) => {
   if (pointsA.length != pointsB.length) {
     con.warn(
