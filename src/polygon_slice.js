@@ -149,6 +149,9 @@ const polygon_slice = () => () => {
 	const getStyle = () => {
 		const style = {};
 		const colourMode = rand.getInteger(0, 8);
+		let gradient;
+		let width = 0;
+		let height = 0;
 		switch (colourMode) {
 			// very rare stroke
 			case 0:
@@ -158,15 +161,13 @@ const polygon_slice = () => () => {
 			// rare gradient
 			case 1:
 			case 2:
-				let width = 0;
-				let height = 0;
 				// pick a gradient direction
 				if (rand.getInteger(0, 1) === 0) {
 					width = radius * 2; // horizontal
 				} else {
 					height = radius * 2; // vertical
 				}
-				const gradient = ctx.createLinearGradient(
+				gradient = ctx.createLinearGradient(
 					0.5 - radius,
 					0.5 - radius,
 					width * sw,
@@ -189,7 +190,7 @@ const polygon_slice = () => () => {
 		const polygons = splitPolygon(points);
 		// recurse
 		depth++;
-		polygons.forEach((poly, i) => {
+		polygons.forEach((poly) => {
 			if (
 				depth < settings.maxDepth.cur && // always honour max recursions else we crash...
 				(minArea === 0 || geom.polygonArea(poly) > minArea) // only honour minArea if not zero!

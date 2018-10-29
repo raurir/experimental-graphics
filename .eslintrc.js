@@ -12,7 +12,7 @@ module.exports = {
 		require: true
 	},
 	parserOptions: {
-		ecmaVersion: 7,
+		ecmaVersion: 8,
 	},
 	rules: {
 		indent: ["error", "tab", {SwitchCase: 1}],
