@@ -66,6 +66,7 @@ const recursive_polygon = () => () => {
 	var splitEdgeRatioLocked;
 	var splitLongest;
 	var wonky;
+	var isSierpinski;
 
 	const generateParent = () => {
 		const colour = colours.getRandomColour();
@@ -103,38 +104,65 @@ const recursive_polygon = () => () => {
 			slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
 			slicerEnd = rand.getInteger(2, len - 2);
 		} else {
+
 			// len is 3
-			const edge = splitLongest
-				? getLongest(copied)
-				: rand.getInteger(0, 2); // pick which edge to split
-			const splitRatio = splitEdgeRatioLocked
-				? splitEdgeRatioLocked
-				: rand.getNumber(0.1, 0.9);
-			let newPoint;
-			switch (edge) {
-				case 0:
-					newPoint = geom.lerp(copied[0], copied[1], splitRatio);
-					copied.splice(1, 0, newPoint);
-					slicerStart = 1;
-					slicerEnd = 3;
-					break;
-				case 1:
-					newPoint = geom.lerp(copied[1], copied[2], splitRatio);
-					copied.splice(2, 0, newPoint);
-					slicerStart = 0;
-					slicerEnd = 2;
-					break;
-				case 2:
-					newPoint = geom.lerp(copied[2], copied[0], splitRatio);
-					copied.push(newPoint);
-					slicerStart = 1;
-					slicerEnd = 3;
+
+			if (isSierpinski) {
+
+				var half01 = geom.lerp(copied[0], copied[1], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
+				var half12 = geom.lerp(copied[1], copied[2], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
+				var half20 = geom.lerp(copied[2], copied[0], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
+
+				var centreTriangle = [half01, half12, half20];
+				if (settings.background.cur) {
+					drawPolygon(centreTriangle, {fillStyle: backgroundColour});
+				} else {
+					bmp.ctx.globalCompositeOperation = "destination-out";
+					drawPolygon(centreTriangle, {fillStyle: "black"});
+					bmp.ctx.globalCompositeOperation = "source-over";
+				}
+				if (rand.random() > 0.01) drawSplit(parent, [copied[0], half01, half20], depth);
+				if (rand.random() > 0.01) drawSplit(parent, [copied[1], half12, half01], depth);
+				if (rand.random() > 0.01) drawSplit(parent, [copied[2], half20, half12], depth);
+
+			} else {
+
+				const edge = splitLongest
+					? getLongest(copied)
+					: rand.getInteger(0, 2); // pick which edge to split
+				const splitRatio = splitEdgeRatioLocked
+					? splitEdgeRatioLocked
+					: rand.getNumber(0.1, 0.9);
+				let newPoint;
+				switch (edge) {
+					case 0:
+						newPoint = geom.lerp(copied[0], copied[1], splitRatio);
+						copied.splice(1, 0, newPoint);
+						slicerStart = 1;
+						slicerEnd = 3;
+						break;
+					case 1:
+						newPoint = geom.lerp(copied[1], copied[2], splitRatio);
+						copied.splice(2, 0, newPoint);
+						slicerStart = 0;
+						slicerEnd = 2;
+						break;
+					case 2:
+						newPoint = geom.lerp(copied[2], copied[0], splitRatio);
+						copied.push(newPoint);
+						slicerStart = 1;
+						slicerEnd = 3;
+				}
+
 			}
+
 		}
 
-		const [arrayA, arrayB] = splitPolygon(copied, slicerStart, slicerEnd);
-		drawSplit(parent, arrayA, depth);
-		drawSplit(parent, arrayB, depth);
+		if (!isSierpinski) {
+			const [arrayA, arrayB] = splitPolygon(copied, slicerStart, slicerEnd);
+			drawSplit(parent, arrayA, depth);
+			drawSplit(parent, arrayB, depth);
+		}
 	};
 
 	const drawSplit = (parent, points, depth) => {
@@ -244,9 +272,12 @@ const recursive_polygon = () => () => {
 
 		// bias sides towards low polys.
 		sides =
-			3 + Math.round(rand.random() * rand.random() * rand.random() * 28);
+			3;// + Math.round(rand.random() * rand.random() * rand.random() * 28);
+		if (sides === 3) {
+			isSierpinski = true;//rand.random() > 0.8;
+		}
 		if (sides < 5) {
-			wonky = rand.random() > 0.8;
+			wonky = true;//rand.random() > 0.8;
 		}
 		insetDistance = rand.getNumber(0.001, 0.02);
 		mutateThreshold = rand.getNumber(0, 1);
