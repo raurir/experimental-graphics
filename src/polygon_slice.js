@@ -8,7 +8,7 @@ if (isNode) {
 	var geom = require("./geom.js");
 }
 
-const getRotationRange = sides => {
+const getRotationRange = (sides) => {
 	const angleInner = (180 * (sides - 2)) / sides;
 	// range a square, rotationRange would be zero, so set to 45 instead
 	const rotationRange = 90 - angleInner || 45;
@@ -16,11 +16,13 @@ const getRotationRange = sides => {
 	return ((rotationRange * 3) / 180) * Math.PI;
 };
 
-const polygon_slice = function() {
+const polygon_slice = () => () => {
 	const TAU = Math.PI * 2;
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
 
+	let backgroundColour;
+	let progress;
 	let border;
 	let cutHalf;
 	let maxDepth;
@@ -37,15 +39,20 @@ const polygon_slice = function() {
 			label: "Rotation",
 			min: 0,
 			max: 9, // 0-9 allows one edge to be parallel with T,R,B,L when cur is: 0..3..6..9
-			cur: 0
+			cur: 0,
 		},
 		maxDepth: {
 			type: "Number",
 			label: "Max Depth",
 			min: 2,
 			max: 8,
-			cur: 2
-		}
+			cur: 2,
+		},
+		background: {
+			type: "Boolean",
+			label: "Background",
+			cur: false,
+		},
 	};
 
 	// been listening to GOTO80 for most of this: https://www.youtube.com/watch?v=2ZXlofdWtWw
@@ -53,7 +60,7 @@ const polygon_slice = function() {
 	// next session: somfay
 
 	// copied from recursive_polygon
-	const drawPolygon = (points, { lineWidth, strokeStyle, fillStyle }) => {
+	const drawPolygon = (points, {lineWidth, strokeStyle, fillStyle}) => {
 		if (!points) {
 			return; // con.warn("null array", points)
 		}
@@ -75,7 +82,7 @@ const polygon_slice = function() {
 		}
 	};
 
-	const splitPolygon = array => {
+	const splitPolygon = (array) => {
 		// pick two edges to slice into.
 		// to do so we pick the corner of the start of the edge.
 		const cornerAlpha = rand.getInteger(0, array.length - 1);
@@ -97,12 +104,12 @@ const polygon_slice = function() {
 		const pointA = geom.lerp(
 			pointA0,
 			pointA1,
-			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9)
+			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9),
 		);
 		const pointB = geom.lerp(
 			pointB0,
 			pointB1,
-			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9)
+			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9),
 		);
 
 		// min and max are confusing, but one poly starts from 0 which is arrayMin.
@@ -142,6 +149,9 @@ const polygon_slice = function() {
 	const getStyle = () => {
 		const style = {};
 		const colourMode = rand.getInteger(0, 8);
+		let gradient;
+		let width = 0;
+		let height = 0;
 		switch (colourMode) {
 			// very rare stroke
 			case 0:
@@ -151,19 +161,17 @@ const polygon_slice = function() {
 			// rare gradient
 			case 1:
 			case 2:
-				let width = 0;
-				let height = 0;
 				// pick a gradient direction
 				if (rand.getInteger(0, 1) === 0) {
 					width = radius * 2; // horizontal
 				} else {
 					height = radius * 2; // vertical
 				}
-				const gradient = ctx.createLinearGradient(
+				gradient = ctx.createLinearGradient(
 					0.5 - radius,
 					0.5 - radius,
 					width * sw,
-					height * sh
+					height * sh,
 				);
 				gradient.addColorStop(0, colours.getRandomColour());
 				gradient.addColorStop(1, colours.getRandomColour());
@@ -182,7 +190,7 @@ const polygon_slice = function() {
 		const polygons = splitPolygon(points);
 		// recurse
 		depth++;
-		polygons.forEach((poly, i) => {
+		polygons.forEach((poly) => {
 			if (
 				depth < settings.maxDepth.cur && // always honour max recursions else we crash...
 				(minArea === 0 || geom.polygonArea(poly) > minArea) // only honour minArea if not zero!
@@ -201,7 +209,12 @@ const polygon_slice = function() {
 		});
 	};
 
-	const init = options => {
+	const init = (options) => {
+		progress =
+			options.progress ||
+			(() => {
+				con.log("polygon_slice - no progress defined");
+			});
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -219,6 +232,7 @@ const polygon_slice = function() {
 
 		settings.rotation.cur = rand.getInteger(0, 9);
 		settings.maxDepth.cur = maxDepth;
+		settings.background.cur = rand.getInteger(0, 4) > 3;
 		if (options.settings) {
 			settings = options.settings;
 		}
@@ -234,18 +248,24 @@ const polygon_slice = function() {
 			const a = (i / sides) * -TAU;
 			const x = Math.sin(a) * radius;
 			const y = Math.cos(a) * radius;
-			return { x, y };
+			return {x, y};
 		});
 
 		// perf.start('polygon')
-		ctx.clearRect(0, 0, sw, sh);
+		backgroundColour = colours.getRandomColour();
+		if (settings.background.cur) {
+			ctx.fillStyle = backgroundColour;
+			ctx.fillRect(0, 0, sw, sh);
+		} else {
+			ctx.clearRect(0, 0, sw, sh);
+		}
 		ctx.save();
 		ctx.translate(sw * 0.5, sh * 0.5);
 		ctx.rotate(startAngle);
 		// draw a border around shape
 		drawPolygon(points, {
-			strokeStyle: colours.getRandomColour(),
-			lineWidth: 0.001
+			strokeStyle: colours.getNextColour(),
+			lineWidth: 0.001,
 		});
 		// inset the shape before recursion begins
 		drawAndSplit(geom.insetPoints(points, border), 0);
@@ -254,16 +274,16 @@ const polygon_slice = function() {
 		// perf.end('polygon')
 	};
 
-	const update = settings => {
+	const update = (settings) => {
 		// con.log("update", settings);
-		init({ size, settings });
+		init({progress, size, settings});
 	};
 
 	return {
 		stage: bmp.canvas,
 		init,
 		settings,
-		update
+		update,
 	};
 };
 if (isNode) {

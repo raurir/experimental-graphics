@@ -17,12 +17,13 @@ const splitPolygon = (array, start, end) => {
 };
 
 // copied from polygon_slice, see comments there.
-const getRotationRange = sides => {
+const getRotationRange = (sides) => {
 	const rotationRange = 90 - (180 * (sides - 2)) / sides || 45;
 	return ((rotationRange * 3) / 180) * Math.PI;
 };
 
-const recursive_polygon = () => {
+const recursive_polygon = () => () => {
+	var progress;
 	var size = 500;
 	var sw = size;
 	var sh = size;
@@ -34,7 +35,12 @@ const recursive_polygon = () => {
 			label: "Rotation",
 			min: 0,
 			max: 9,
-			cur: 0
+			cur: 0,
+		},
+		background: {
+			type: "Boolean",
+			label: "Background",
+			cur: true,
 		},
 		// maxDepth: {
 		// 	type: "Number",
@@ -45,10 +51,10 @@ const recursive_polygon = () => {
 		// }
 	};
 
-
 	const bmp = dom.canvas(sw, sh);
-	const { ctx } = bmp;
+	const {ctx} = bmp;
 
+	var backgroundColour;
 	var insetDistance;
 	var insetLocked;
 	var insetLockedValue;
@@ -66,7 +72,7 @@ const recursive_polygon = () => {
 		let i = 0;
 		const angles = [];
 		while (angles.length < sides) {
-			angles.push(i / sides * Math.PI * 2);
+			angles.push((i / sides) * Math.PI * 2);
 			i++;
 		}
 		// angles.sort();
@@ -74,14 +80,14 @@ const recursive_polygon = () => {
 			const radius = wonky ? rand.getNumber(0.4, 0.45) : 0.45;
 			const x = Math.sin(angle) * radius;
 			const y = Math.cos(angle) * radius;
-			return { x, y };
-		})
+			return {x, y};
+		});
 
-		drawNext({ points, colour, depth: 0 });
+		drawNext({points, colour, depth: 0});
 	};
 
 	var iterations = 0;
-	const drawNext = parent => {
+	const drawNext = (parent) => {
 		const depth = parent.depth + 1;
 		if (depth > maxDepth) return;
 		iterations++;
@@ -143,7 +149,7 @@ const recursive_polygon = () => {
 		drawPolygon(points, {
 			fillStyle: colour,
 			strokeStyle: colour,
-			lineWidth: 0
+			lineWidth: 0,
 		});
 
 		if (inset) {
@@ -151,22 +157,24 @@ const recursive_polygon = () => {
 			if (insetPoints) {
 				const inOrder = geom.polygonsSimilar(points, insetPoints);
 				if (inOrder) {
-					// only knock out the inset if the points are in the same order
-					// see comment near fn:`pointsInOrder`
-					ctx.globalCompositeOperation = "destination-out";
-					drawPolygon(insetPoints, { fillStyle: "black" });
-					ctx.globalCompositeOperation = "source-over";
+					if (settings.background.cur) {
+						drawPolygon(insetPoints, {fillStyle: backgroundColour});
+					} else {
+						ctx.globalCompositeOperation = "destination-out";
+						drawPolygon(insetPoints, {fillStyle: "black"});
+						ctx.globalCompositeOperation = "source-over";
+					}
 				}
 			}
 		}
 
 		// shall we go deeper?
 		if (rand.random() > 0.2) {
-			drawNext({ points, colour, depth });
+			drawNext({points, colour, depth});
 		}
 	};
 
-	const fillAndStroke = ({ lineWidth, strokeStyle, fillStyle }) => {
+	const fillAndStroke = ({lineWidth, strokeStyle, fillStyle}) => {
 		if (lineWidth && strokeStyle) {
 			ctx.strokeStyle = strokeStyle;
 			ctx.lineWidth = lineWidth;
@@ -199,7 +207,7 @@ const recursive_polygon = () => {
 		return Math.hypot(dx, dy);
 	};
 
-	const getLongest = points => {
+	const getLongest = (points) => {
 		var len = 0,
 			edgeIndex = null;
 		for (var i = 0, il = points.length; i < il; i++) {
@@ -214,60 +222,12 @@ const recursive_polygon = () => {
 		return edgeIndex;
 	};
 
-	const getDelta = (a, b) => {
-		return {
-			x: a.x - b.x,
-			y: a.y - b.y
-		};
-	};
-
-	/*
-	when insetting a polygon if the inset amount exceeds a certain (arbitrary?) value
-	the inset shape no longer represents the outer shape in a visually pleasing fashion.
-	originally i tried comparing the gradientof all sides, but gradient ab equals gradient ba.
-	next i just compared the dx and the dy or every point and its next,
-	if the deltas between all points of the two polygons (the original and the inset)
-	were of the same sign, the polygons are similar
-	https://www.reddit.com/user/raurir/comments/9mo1b9/insetting_polygon_issue/
-	https://i.redd.it/5pjqdydk15r11.jpg
-	*/
-	const pointsInOrder = (pointsA, pointsB) => {
-		if (pointsA.length != pointsB.length) {
-			con.warn(
-				"pointsInOrder invalid arrays, not equal in length!",
-				pointsA,
-				pointsB
-			);
-			return false;
-		}
-		for (let i = 0, il = pointsA.length; i < il; i++) {
-			const pA0 = pointsA[i];
-			const pA1 = pointsA[(i + 1) % il];
-			const pB0 = pointsB[i];
-			const pB1 = pointsB[(i + 1) % il];
-
-			const dA = getDelta(pA0, pA1);
-			const dB = getDelta(pB0, pB1);
-
-			// how else would you like to write this?
-			if (dA.x < 0 && dB.x < 0) {
-			} else if (dA.x > 0 && dB.x > 0) {
-			} else if (dA.x == 0 && dB.x == 0) {
-			} else {
-				return false;
-			}
-
-			if (dA.y < 0 && dB.y < 0) {
-			} else if (dA.y > 0 && dB.y > 0) {
-			} else if (dA.y == 0 && dB.y == 0) {
-			} else {
-				return false;
-			}
-		}
-		return true;
-	};
-
-	const init = options => {
+	const init = (options) => {
+		progress =
+			options.progress ||
+			(() => {
+				con.log("recursive_polygon - no progress defined");
+			});
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
@@ -276,6 +236,7 @@ const recursive_polygon = () => {
 		bmp.setSize(sw, sh);
 
 		settings.rotation.cur = rand.getInteger(0, 9);
+		settings.background.cur = rand.getInteger(0, 4) > 3;
 		if (options.settings) {
 			settings = options.settings;
 		}
@@ -304,7 +265,13 @@ const recursive_polygon = () => {
 			(settings.rotation.cur / settings.rotation.max) *
 			getRotationRange(sides);
 
-		ctx.clearRect(0, 0, sw, sh);
+		backgroundColour = colours.getRandomColour();
+		if (settings.background.cur) {
+			ctx.fillStyle = backgroundColour;
+			ctx.fillRect(0, 0, sw, sh);
+		} else {
+			ctx.clearRect(0, 0, sw, sh);
+		}
 		ctx.save();
 		ctx.translate(sw * 0.5, sh * 0.5);
 		ctx.rotate(startAngle);
@@ -313,8 +280,8 @@ const recursive_polygon = () => {
 		ctx.restore();
 	};
 
-	const update = settings => {
-		init({ size, settings });
+	const update = (settings) => {
+		init({progress, size, settings});
 	};
 
 	return {

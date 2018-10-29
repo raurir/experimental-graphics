@@ -1,32 +1,37 @@
-var isNode = (typeof module !== 'undefined');
+var isNode = typeof module !== "undefined";
 
 if (isNode) {
 	var con = console;
-	var rand = require('./rand.js');
-	var dom = require('./dom.js');
-	var colours = require('./colours.js');
+	var rand = require("./rand.js");
+	var dom = require("./dom.js");
+	var colours = require("./colours.js");
 }
 
-
-var circle_packing = function() {
-
+var circle_packing = () => () => {
+	var progress;
 	var TAU = Math.PI * 2;
 	var sw, sh;
-	var cx = 0.5, cy = 0.5;
+	var cx = 0.5,
+		cy = 0.5;
 	var bmp = dom.canvas(1, 1);
 
 	function error(site, depth, err) {
 		return;
 		bmp.ctx.fillStyle = err || "green";
 		var siteSize = err ? 1 : 7;
-		bmp.ctx.fillRect(site.x * sw - siteSize / 2, site.y * sh - siteSize / 2, siteSize, siteSize);
+		bmp.ctx.fillRect(
+			site.x * sw - siteSize / 2,
+			site.y * sh - siteSize / 2,
+			siteSize,
+			siteSize,
+		);
 	}
 
 	var experiment = {
 		stage: bmp.canvas,
 		init: init,
-		settings: {} // or null
-	}
+		settings: {}, // or null
+	};
 
 	// var output = dom.element("div");
 	// document.body.appendChild(output);
@@ -34,9 +39,13 @@ var circle_packing = function() {
 	// document.body.appendChild(threadOutput.canvas);
 
 	function init(options) {
-
 		console.time("process time");
 
+		progress =
+			options.progress ||
+			(() => {
+				con.log("circle_packing - no progress defined");
+			});
 		var size = options.size;
 		sw = size;
 		sh = size;
@@ -47,7 +56,9 @@ var circle_packing = function() {
 
 		var threads = 0;
 		var iterations = 0;
-		var circles = 0, circlesLast = 0, circlesSame = 0;
+		var circles = 0,
+			circlesLast = 0,
+			circlesSame = 0;
 		var gap = rand.getNumber(0.001, 0.02);
 		// var gap = 0.0005;
 		con.log("gap", gap);
@@ -78,7 +89,7 @@ var circle_packing = function() {
 		var progressChecker = () => {
 			if (threads == -1) {
 				// threads
-				con.log("progressChecker", threads)
+				con.log("progressChecker", threads);
 				progress("render:complete", bmp.canvas);
 				bailed = true;
 			} else {
@@ -87,9 +98,8 @@ var circle_packing = function() {
 				setTimeout(progressChecker, 250);
 			}
 			// output.innerHTML = [circles, iterations, threads];
-		}
+		};
 		progressChecker();
-
 
 		function attemptNextCircle(parent, attempt) {
 			threads++;
@@ -103,10 +113,8 @@ var circle_packing = function() {
 				progress("render:progress", fakeProgress);
 			}
 
-
 			// con.log("attemptNextCircle", progressTicker / 1000, threads / 1000);
-			
-			
+
 			if (attempt < 5000) {
 				var delay = iterations % 100 ? 0 : 200;
 				// return attemptCircle(parent, attempt);
@@ -123,7 +131,6 @@ var circle_packing = function() {
 			}
 		}
 
-
 		function attemptCircle(parent, attempt, options) {
 			// con.log("attemptCircle")
 			threads--;
@@ -131,8 +138,8 @@ var circle_packing = function() {
 
 			var colour, depth, distance, dx, dy, other, r, radius, site, y, x;
 			if (parent) {
-
-				if (!parent.sites.length) { // no sites left
+				if (!parent.sites.length) {
+					// no sites left
 					return;
 				}
 
@@ -166,21 +173,21 @@ var circle_packing = function() {
 
 				switch (limitMaxRadius) {
 					// case 0 - ignore, adopt global maxRadius
-					case 1 : // set a varying maxRadius based on distance, growing smaller towards edges
-						maxRadius = 0.01 + Math.pow(0.5 - distance, powerMaxRadius);
+					case 1: // set a varying maxRadius based on distance, growing smaller towards edges
+						maxRadius =
+							0.01 + Math.pow(0.5 - distance, powerMaxRadius);
 						break;
-					case 2 : // set a varying maxRadius based on distance, growing larger towards edges
+					case 2: // set a varying maxRadius based on distance, growing larger towards edges
 						maxRadius = 0.01 + Math.pow(distance, powerMaxRadius);
 						break;
 				}
-				
+
 				switch (limitMinRadius) {
 					// case 0 : ignore, adopt global minRadius
-					case 1 : // set a varying minRadius based on maxRadius
+					case 1: // set a varying minRadius based on maxRadius
 						minRadius = maxRadius * 0.1;
 						break;
 				}
-
 
 				// choose a randomised radius
 				// r = rand.random() * radius * (parent.r - distance - gap);
@@ -199,11 +206,16 @@ var circle_packing = function() {
 					// return attemptNextCircle(parent, attempt);
 				}
 
-
 				if (options) {
-					if (options.r) { /* con.log("overriding r"); */ r = options.r; }
-					if (options.x) { /* con.log("overriding x"); */ x = options.x; }
-					if (options.y) { /* con.log("overriding y"); */ y = options.y; }
+					if (options.r) {
+						/* con.log("overriding r"); */ r = options.r;
+					}
+					if (options.x) {
+						/* con.log("overriding x"); */ x = options.x;
+					}
+					if (options.y) {
+						/* con.log("overriding y"); */ y = options.y;
+					}
 				}
 
 				if (r - gap < minRadius) {
@@ -214,7 +226,11 @@ var circle_packing = function() {
 
 				// check all other children
 				var ok = true;
-				for (var i = 0, il = parent.children.length; i < il && ok; i++) {
+				for (
+					var i = 0, il = parent.children.length;
+					i < il && ok;
+					i++
+				) {
 					other = parent.children[i];
 					dx = x - other.x;
 					dy = y - other.y;
@@ -232,30 +248,30 @@ var circle_packing = function() {
 					error(site, depth, "yellow");
 					return attemptNextCircle(parent, attempt);
 				}
-
 			} else {
 				// the host container, typically want it centred (cx, cy) and half of canvas (0.5)
-				x = cx;//rand.random();
-				y = cy;//rand.random();
-				r = 0.5;//rand.random() / 2;
+				x = cx; //rand.random();
+				y = cy; //rand.random();
+				r = 0.5; //rand.random() / 2;
 				depth = 0;
 			}
 
 			if (options && options.colour) {
 				colour = options.colour;
 			} else {
-				colour = colours.getRandomColour();//"#fff";//colour;
-				while (parent && parent.colour == colour) { // don't allow same colour as parent
+				colour = colours.getRandomColour(); //"#fff";//colour;
+				while (parent && parent.colour == colour) {
+					// don't allow same colour as parent
 					colour = colours.getNextColour();
 				}
 			}
 
 			// if (depth > 1) return
 
-			if (alternatePunchOut) { // every second level punch the circle out rather than draw on top.
-				bmp.ctx.globalCompositeOperation = (depth + 1) % 2
-					? "destination-out"
-					: "source-over";
+			if (alternatePunchOut) {
+				// every second level punch the circle out rather than draw on top.
+				bmp.ctx.globalCompositeOperation =
+					(depth + 1) % 2 ? "destination-out" : "source-over";
 			}
 			bmp.ctx.beginPath();
 			bmp.ctx.fillStyle = colour;
@@ -278,18 +294,23 @@ var circle_packing = function() {
 				for (var segment = 0; segment < segments; segment++) {
 					// vary siteRadius and siteAngle by rand.getNumber(0, 1) for some jitter
 					var siteRadius = (ring + rand.getNumber(0, 1)) * grid,
-						siteAngle = (segment + rand.getNumber(0, 1)) / segments * TAU,
+						siteAngle =
+							((segment + rand.getNumber(0, 1)) / segments) * TAU,
 						siteX = x + Math.sin(siteAngle) * siteRadius,
 						siteY = y + Math.cos(siteAngle) * siteRadius,
 						site = {
 							x: siteX,
-							y: siteY
+							y: siteY,
 						};
 					// if (Math.sin(siteAngle) < 0.75) { // pacman
 					// if (Math.sin(siteAngle) > 0) { // semi circle
 					// if (parseInt(siteAngle) % 2 == 0) // radioactive sign
 					if (banding) {
-						if (parseInt(siteRadius * bandScale) % bandModulo == 0) {
+						if (
+							parseInt(siteRadius * bandScale) %
+							bandModulo ==
+							0
+						) {
 							sites.push(site);
 						}
 					} else {
@@ -309,8 +330,8 @@ var circle_packing = function() {
 				y: y,
 				r: r,
 				children: [],
-				sites: sites
-			}
+				sites: sites,
+			};
 			// con.log(r, circle.childrenMax);
 
 			circles++;
@@ -323,17 +344,13 @@ var circle_packing = function() {
 					attemptNextCircle(circle, 0);
 				}
 			}
-
 		}
 
 		var container = attemptCircle(null, 0, {colour: "transparent"});
 		// var inner = attemptCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
 		// var inner2 = attemptCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
-
-		
 	}
 	return experiment;
-
 };
 
 if (isNode) {
