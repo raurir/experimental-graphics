@@ -59,6 +59,7 @@ const recursive_polygon = () => () => {
 	var insetLocked;
 	var insetLockedValue;
 	var insetThreshold;
+	var depthLocked;
 	var maxDepth;
 	var mutateAmount;
 	var mutateThreshold;
@@ -104,11 +105,9 @@ const recursive_polygon = () => () => {
 			slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
 			slicerEnd = rand.getInteger(2, len - 2);
 		} else {
-
 			// len is 3
 
 			if (isSierpinski) {
-
 				var half01 = geom.lerp(copied[0], copied[1], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
 				var half12 = geom.lerp(copied[1], copied[2], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
 				var half20 = geom.lerp(copied[2], copied[0], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
@@ -121,18 +120,12 @@ const recursive_polygon = () => () => {
 					drawPolygon(centreTriangle, {fillStyle: "black"});
 					bmp.ctx.globalCompositeOperation = "source-over";
 				}
-				if (rand.random() > 0.01) drawSplit(parent, [copied[0], half01, half20], depth);
-				if (rand.random() > 0.01) drawSplit(parent, [copied[1], half12, half01], depth);
-				if (rand.random() > 0.01) drawSplit(parent, [copied[2], half20, half12], depth);
-
+				drawSplit(parent, [copied[0], half01, half20], depth);
+				drawSplit(parent, [copied[1], half12, half01], depth);
+				drawSplit(parent, [copied[2], half20, half12], depth);
 			} else {
-
-				const edge = splitLongest
-					? getLongest(copied)
-					: rand.getInteger(0, 2); // pick which edge to split
-				const splitRatio = splitEdgeRatioLocked
-					? splitEdgeRatioLocked
-					: rand.getNumber(0.1, 0.9);
+				const edge = splitLongest ? getLongest(copied) : rand.getInteger(0, 2); // pick which edge to split
+				const splitRatio = splitEdgeRatioLocked ? splitEdgeRatioLocked : rand.getNumber(0.1, 0.9);
 				let newPoint;
 				switch (edge) {
 					case 0:
@@ -153,9 +146,7 @@ const recursive_polygon = () => () => {
 						slicerStart = 1;
 						slicerEnd = 3;
 				}
-
 			}
-
 		}
 
 		if (!isSierpinski) {
@@ -166,13 +157,8 @@ const recursive_polygon = () => () => {
 	};
 
 	const drawSplit = (parent, points, depth) => {
-		const colour =
-			mutateThreshold && rand.random() < mutateThreshold
-				? colours.mutateColour(parent.colour, mutateAmount)
-				: colours.getNextColour();
-		const inset = insetLocked
-			? insetLockedValue
-			: rand.random() > insetThreshold;
+		const colour = mutateThreshold && rand.random() < mutateThreshold ? colours.mutateColour(parent.colour, mutateAmount) : colours.getRandomColour();
+		const inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
 
 		drawPolygon(points, {
 			fillStyle: colour,
@@ -197,7 +183,7 @@ const recursive_polygon = () => () => {
 		}
 
 		// shall we go deeper?
-		if (rand.random() > 0.2) {
+		if (depthLocked || rand.random() > 0.2) {
 			drawNext({points, colour, depth});
 		}
 	};
@@ -216,10 +202,9 @@ const recursive_polygon = () => () => {
 
 	const drawPolygon = (points, options) => {
 		ctx.beginPath();
-		for (var i = 0; i < points.length; i++) {
-			var p = points[i];
-			ctx[i == 0 ? "moveTo" : "lineTo"](p.x * size, p.y * size);
-		}
+		points.forEach(({x, y}, i) => {
+			ctx[i == 0 ? "moveTo" : "lineTo"](x * size, y * size);
+		});
 		ctx.closePath();
 		fillAndStroke(options);
 		// points.forEach((p, i) => {
@@ -271,18 +256,18 @@ const recursive_polygon = () => () => {
 		progress("settings:initialised", settings);
 
 		// bias sides towards low polys.
-		sides =
-			3;// + Math.round(rand.random() * rand.random() * rand.random() * 28);
+		sides = 3 + Math.round(rand.random() * rand.random() * rand.random() * 28);
 		if (sides === 3) {
-			isSierpinski = true;//rand.random() > 0.8;
+			isSierpinski = rand.random() > 0.8;
 		}
 		if (sides < 5) {
-			wonky = true;//rand.random() > 0.8;
+			wonky = rand.random() > 0.8;
 		}
 		insetDistance = rand.getNumber(0.001, 0.02);
-		mutateThreshold = rand.getNumber(0, 1);
+		mutateThreshold = rand.getInteger(0, 1) && rand.getNumber(0, 1); // 0 or any number `between 0 and 1`, since `between 0 and 1` does not include 0!
 		mutateAmount = rand.getNumber(5, 30);
-		maxDepth = rand.getInteger(1, 10);
+		maxDepth = rand.getInteger(1, 8);
+		depthLocked = rand.getNumber(0, 1) > 0.5;
 		splitLongest = rand.random() > 0.5;
 		splitEdgeRatioLocked = rand.random() > 0.5 ? 0.5 : false;
 		insetLocked = rand.random() > 0.5;
@@ -292,9 +277,7 @@ const recursive_polygon = () => () => {
 			insetThreshold = rand.random() * 0.5;
 		}
 
-		const startAngle =
-			(settings.rotation.cur / settings.rotation.max) *
-			getRotationRange(sides);
+		const startAngle = (settings.rotation.cur / settings.rotation.max) * getRotationRange(sides);
 
 		backgroundColour = colours.getRandomColour();
 		if (settings.background.cur) {
