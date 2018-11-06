@@ -1,6 +1,7 @@
 {
 	"arrowParens": "always",
 	"bracketSpacing": false,
+	"printWidth": 160,
 	"trailingComma": "all",
 	"semi": true,
 	"useTabs": true
