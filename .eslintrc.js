@@ -6,7 +6,10 @@ module.exports = {
 	globals: {
 		con: true,
 		define: true,
+		describe: true,
 		dom: true,
+		expect: true,
+		it: true,
 		module: true,
 		rand: true,
 		require: true

@@ -115,6 +115,8 @@ const dom = {
 	element,
 	off,
 	on,
+	setProps,
+	setAttributes,
 	svg,
 	trigger,
 };
