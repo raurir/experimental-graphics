@@ -9,6 +9,8 @@ if (isNode) {
 
 var corona_sine = function() {
 	return function() {
+		var r = rand();
+		var c;
 		var progress;
 		var vector = false;
 
@@ -61,14 +63,17 @@ var corona_sine = function() {
 				(() => {
 					con.log("corona_sine - no progress defined", arguments);
 				});
+
+			r.setSeed(options.seed);
+
 			size = options.size;
 			sw = options.sw || size;
 			sh = options.sh || size;
 			bmp.setSize(sw, sh);
 			lastGenerate = new Date().getTime();
 
-			settings.layers.cur = ~~(1 + rand.random() * 4);
-			settings.rays.cur = ~~(12 + rand.random() * 300);
+			settings.layers.cur = ~~(1 + r.random() * 4);
+			settings.rays.cur = ~~(12 + r.random() * 300);
 			if (options.settings) {
 				settings = options.settings;
 			}
@@ -191,18 +196,21 @@ var corona_sine = function() {
 			}
 		}
 
-		function update(s) {
-			rand.random();
-			rand.random();
-			settings = s;
+		function update(options) {
+			con.log("update", options);
+			r.setSeed(options.seed);
+			r.random();
+			r.random();
+			settings = options;
 			render();
 		}
 
 		function render(time) {
 			if (!time) time = 0;
 
-			colours.getRandomPalette();
-			colourBG = colours.getRandomColour();
+			c = colours(r);
+			c.getRandomPalette();
+			colourBG = c.getRandomColour();
 
 			var layers = settings.layers.cur;
 			var rays = settings.rays.cur;
@@ -210,21 +218,21 @@ var corona_sine = function() {
 			colourLayers = [];
 			lengthLayers = [0]; //-0.2];
 			for (var l = 0; l < layers; l++) {
-				colourLayers.push(colours.getNextColour());
-				lengthLayers.push(rand.random()); // push in random lengths, sort afterwards.
+				colourLayers.push(c.getNextColour());
+				lengthLayers.push(r.random()); // push in random lengths, sort afterwards.
 			}
 			lengthLayers.sort();
 			lengthLayers[layers] = 1;
 
 			// colourLayers = ["red", "green", "blue", "yellow", "white"];
 
-			oscillators = ~~(1 + rand.random() * 13);
+			oscillators = ~~(1 + r.random() * 13);
 			oscs = [];
 			for (var o = 0; o < oscillators; o++) {
 				oscs.push({
-					offset: rand.random() * Math.PI * 2,
-					phase: ~~(rand.random() * 6),
-					speed: rand.random() * 0.003,
+					offset: r.random() * Math.PI * 2,
+					phase: ~~(r.random() * 6),
+					speed: r.random() * 0.003,
 				});
 			}
 

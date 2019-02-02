@@ -1,12 +1,18 @@
 var con = console;
 var isNode = (typeof module !== 'undefined');
-if (isNode) {
-	var rand = require('./rand.js');
-}
+// if (isNode) {
+// 	var rand = require('./rand.js');
+// }
 
-var colours = (function() {
+var colours = function(rand) {
 
-	var random; if (rand) { random = rand.random; } else { random = Math.random; con.warn("!!!! colours is using native random"); }
+	var random;
+	if (rand && rand.random) {
+		random = rand.random;
+	} else {
+		random = Math.random;
+		con.warn("!!!! colours is using native random");
+	}
 	var paletteIndex = -1, currentPalette = null;
 	var colourIndex = 0;
 	var previewCSSAdded = false;
@@ -325,6 +331,6 @@ var colours = (function() {
 		mixColours: mixColours
 	}
 
-})();
+};
 
 if(typeof module !== 'undefined') module.exports = colours;
