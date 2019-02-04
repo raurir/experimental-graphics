@@ -11,6 +11,10 @@ var colours = (function() {
 	var colourIndex = 0;
 	var previewCSSAdded = false;
 
+	function getPalette() {
+		return currentPalette;
+	}
+
 	function getRandomPalette(warning) {
 		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
@@ -18,6 +22,7 @@ var colours = (function() {
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
 	}
+
 	function setRandomPalette(_paletteIndex) {
 		paletteIndex = _paletteIndex;
 		currentPalette = palettes[paletteIndex];
@@ -303,6 +308,7 @@ var colours = (function() {
 	// showColours();
 
 	return {
+		getPalette: getPalette,
 		getRandomPalette: getRandomPalette,
 		getRandomColour: getRandomColour,
 		getCurrentColour: getCurrentColour,
