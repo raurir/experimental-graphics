@@ -85,6 +85,16 @@ describe("rand", function() {
 			done();
 
 		});
-
 	});
+
+	describe("shuffle", function() {
+		it("should shuffle an array", function() {
+			expect(rand.shuffle(["a"])).toEqual(["a"]);
+			expect(rand.shuffle(["a", "b", "c"])).toEqual(["b", "c", "a"]);
+			expect(rand.shuffle("0123456789".split("")).join("")).toEqual("5617923480");
+			// and i googled very large array, but obviously there is no point in having a really large one, so here we have an excerpt of https://en.wikipedia.org/wiki/Very_Large_Array:
+			expect(rand.shuffle("The Karl G. Jansky Very Large Array (VLA) is a centimeter-wavelength radio astronomy observatory located in central New Mexico on the Plains of San Agustin, between the towns of Magdalena and Datil, ~50 miles (80 km) west of Socorro. The VLA comprises twenty-seven 25-meter radio telescopes deployed in a Y-shaped array.".split(" ")).join(" ")).toEqual("a twenty-seven San (80 miles located between VLA Karl Datil, central astronomy comprises 25-meter Y-shaped is The on of and radio the observatory array. (VLA) Plains the Mexico towns ~50 a Jansky west of Magdalena in Array New The Very telescopes deployed centimeter-wavelength G. in km) Socorro. Large radio Agustin, of");
+		});
+	});
+
 });
