@@ -1,12 +1,7 @@
 // eslint-disable-next-line no-console
 var con = console;
 // from https://gist.github.com/Protonk/5367430
-var instance = 0;
 var rand = function(isInstance) {
-	// return function() {
-	instance++;
-	con.log("instance!!!!!!!!", isInstance, instance);
-
 	// Set to values from http://en.wikipedia.org/wiki/Numerical_Recipes
 	// m is basically chosen to be large (as it is the max period)
 	// and for its relationships to a and c
@@ -30,7 +25,7 @@ var rand = function(isInstance) {
 
 	return {
 		setSeed: function(val) {
-			con.log("setSeed", instance, val);
+			// con.log("setSeed", isInstance, val);
 			var valDefined = val || val === 0;
 			if (valDefined) {
 				if (/[^\d]/.test(val)) {
@@ -76,9 +71,15 @@ var rand = function(isInstance) {
 
 		alphaToInteger: alphaToInteger, // for testability
 
-		instance: function() {
+		instance: function(seed) {
 			// this is the preferred method, call rand.instance() for a unique instance...
-			return rand(true);
+			// with this you can run multiple seeded randoms in parallel if needed.
+			// optional set seed
+			var r = rand(true);
+			if (typeof seed === "number" || typeof seed === "string") {
+				r.setSeed(seed);
+			}
+			return r;
 		},
 
 		shuffle: function(array) {
