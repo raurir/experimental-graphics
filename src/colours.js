@@ -4,16 +4,19 @@ var isNode = typeof module !== "undefined";
 // 	var rand = require('./rand.js');
 // }
 
-var colours = function(rand) {
+var colours = function(rand, isInstance) {
 	var random;
 	if (rand && rand.random) {
-		if (rand.random === Math.random) {
-			con.warn("!!!! colours is using native random");
-		}
 		random = rand.random;
 	} else {
-		throw new Error();
+		random = Math.random;
+		if (isInstance) {
+			// probably no point in having an instance of colours with Math.random?
+			// no point in parallelism...
+			con.warn("!!!! colours is using native random");
+		}
 	}
+
 	var paletteIndex = -1,
 		currentPalette = null;
 	var colourIndex = 0;
@@ -323,7 +326,7 @@ var colours = function(rand) {
 			return paletteIndex;
 		},
 		instance: function instance(newRand) {
-			return colours(newRand);
+			return colours(newRand, true);
 		},
 		setPalette: function(p) {
 			currentPalette = p;
@@ -339,4 +342,4 @@ var colours = function(rand) {
 	};
 };
 
-if (isNode) module.exports = colours(Math); // export default colours with dependency on Math.random
+if (isNode) module.exports = colours(Math, false); // export default colours, default to Math.random

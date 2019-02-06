@@ -9,8 +9,8 @@ if (isNode) {
 
 var corona_sine = function() {
 	return function() {
-		var r = rand();
-		var c;
+		var r = rand().instance();
+		var c = colours().instance(r);
 		var progress;
 		var vector = false;
 
@@ -86,12 +86,7 @@ var corona_sine = function() {
 		function oscillate(rotation, time) {
 			var t = 0;
 			for (var o = 0; o < oscillators; o++) {
-				t +=
-					(Math.sin(
-						oscs[o].offset + time * oscs[o].speed + rotation * oscs[o].phase,
-					) +
-						1) /
-					2;
+				t += (Math.sin(oscs[o].offset + time * oscs[o].speed + rotation * oscs[o].phase) + 1) / 2;
 			}
 			return t / oscillators;
 		}
@@ -150,12 +145,7 @@ var corona_sine = function() {
 					d: d,
 					fill: colour,
 					// stroke: "red", "stroke-width": 1,
-					transform:
-						"translate(" +
-						[sw / 2, sh / 2] +
-						") rotate(" +
-						(rotation * 180) / Math.PI +
-						")",
+					transform: "translate(" + [sw / 2, sh / 2] + ") rotate(" + (rotation * 180) / Math.PI + ")",
 				});
 				inner.appendChild(path);
 			} else {
@@ -186,29 +176,23 @@ var corona_sine = function() {
 			var rotation = frac * Math.PI * 2;
 			var oscLength = oscillate(rotation, time);
 			for (var l = 0; l < layers; l++) {
-				var start =
-					innerRadius + oscLength * maxRadius * lengthLayers[l] + lineWidth * 2;
-				var end =
-					innerRadius +
-					oscLength * maxRadius * lengthLayers[l + 1] -
-					lineWidth * 2;
+				var start = innerRadius + oscLength * maxRadius * lengthLayers[l] + lineWidth * 2;
+				var end = innerRadius + oscLength * maxRadius * lengthLayers[l + 1] - lineWidth * 2;
 				renderLine(rotation, start, end, lineWidth, colourLayers[l]);
 			}
 		}
 
-		function update(options) {
-			con.log("update", options);
-			r.setSeed(options.seed);
+		function update(updatedSettings, seed) {
+			r.setSeed(seed);
 			r.random();
 			r.random();
-			settings = options;
+			settings = updatedSettings;
 			render();
 		}
 
 		function render(time) {
 			if (!time) time = 0;
 
-			c = colours(r);
 			c.getRandomPalette();
 			colourBG = c.getRandomColour();
 

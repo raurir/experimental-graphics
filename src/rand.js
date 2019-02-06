@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-console
 var con = console;
 // from https://gist.github.com/Protonk/5367430
+var instanceCount = 0;
 var rand = function(isInstance) {
 	// Set to values from http://en.wikipedia.org/wiki/Numerical_Recipes
 	// m is basically chosen to be large (as it is the max period)
@@ -72,9 +73,11 @@ var rand = function(isInstance) {
 		alphaToInteger: alphaToInteger, // for testability
 
 		instance: function(seed) {
+			instanceCount++;
+			con.log("rand.creating new instance", instanceCount);
 			// this is the preferred method, call rand.instance() for a unique instance...
 			// with this you can run multiple seeded randoms in parallel if needed.
-			// optional set seed
+			// optionally set seed
 			var r = rand(true);
 			if (typeof seed === "number" || typeof seed === "string") {
 				r.setSeed(seed);
