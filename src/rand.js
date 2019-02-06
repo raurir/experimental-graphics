@@ -2,10 +2,10 @@
 var con = console;
 // from https://gist.github.com/Protonk/5367430
 var instance = 0;
-var rand = function() {
+var rand = function(isInstance) {
 	// return function() {
 	instance++;
-	con.log("instance!!!!!!!!", instance);
+	con.log("instance!!!!!!!!", isInstance, instance);
 
 	// Set to values from http://en.wikipedia.org/wiki/Numerical_Recipes
 	// m is basically chosen to be large (as it is the max period)
@@ -17,7 +17,7 @@ var rand = function() {
 	var c = 1013904223;
 	var seed, z;
 
-	var alphaToInteger = function(s){
+	var alphaToInteger = function(s) {
 		var num = 0;
 		for (var i = 0, il = s.length; i < il; i++) {
 			num += s.charCodeAt(i) * c;
@@ -29,8 +29,8 @@ var rand = function() {
 	};
 
 	return {
-		setSeed : function(val) {
-			con.log("setSeed", val);
+		setSeed: function(val) {
+			con.log("setSeed", instance, val);
 			var valDefined = val || val === 0;
 			if (valDefined) {
 				if (/[^\d]/.test(val)) {
@@ -47,10 +47,10 @@ var rand = function() {
 			}
 			z = seed = val;
 		},
-		getSeed : function() {
+		getSeed: function() {
 			return seed;
 		},
-		random : function() {
+		random: function() {
 			if (z === undefined) {
 				con.warn("no seed set");
 				return null;
@@ -76,6 +76,11 @@ var rand = function() {
 
 		alphaToInteger: alphaToInteger, // for testability
 
+		instance: function() {
+			// this is the preferred method, call rand.instance() for a unique instance...
+			return rand(true);
+		},
+
 		shuffle: function(array) {
 			for (var i = array.length - 1; i > 0; i--) {
 				var j = Math.floor(this.random() * (i + 1));
@@ -84,13 +89,8 @@ var rand = function() {
 				array[j] = temp;
 			}
 			return array;
-		}
-
+		},
 	};
 };
 
-rand.setSeed = function() {
-	throw new Error("you're doing it wrong!");
-};
-
-if (typeof module !== "undefined") module.exports = rand;
+if (typeof module !== "undefined") module.exports = rand(false); // export rand as a global

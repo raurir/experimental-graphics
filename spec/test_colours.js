@@ -1,5 +1,5 @@
-var colours = require("../src/colours.js");
 var rand = require("../src/rand.js");
+var colours = require("../src/colours.js").instance(rand);
 
 describe("colours", function() {
 	// untested methods:
@@ -67,7 +67,6 @@ describe("colours", function() {
 			expect(colours.getCurrentColour()).toEqual("#110088");
 			expect(colours.getNextColour()).toEqual("#22FF44");
 			expect(colours.getNextColour()).toEqual("#110088");
-
 		});
 	});
 
