@@ -23,6 +23,8 @@ const getRotationRange = (sides) => {
 };
 
 const recursive_polygon = () => () => {
+	const r = rand.instance();
+	const c = colours.instance(r);
 	var progress;
 	var size = 500;
 	var sw = size;
@@ -70,7 +72,7 @@ const recursive_polygon = () => () => {
 	var isSierpinski;
 
 	const generateParent = () => {
-		const colour = colours.getRandomColour();
+		const colour = c.getRandomColour();
 		let i = 0;
 		const angles = [];
 		while (angles.length < sides) {
@@ -79,7 +81,7 @@ const recursive_polygon = () => () => {
 		}
 		// angles.sort();
 		const points = angles.map((angle) => {
-			const radius = wonky ? rand.getNumber(0.4, 0.45) : 0.45;
+			const radius = wonky ? r.getNumber(0.4, 0.45) : 0.45;
 			const x = Math.sin(angle) * radius;
 			const y = Math.cos(angle) * radius;
 			return {x, y};
@@ -98,19 +100,19 @@ const recursive_polygon = () => () => {
 		const len = copied.length;
 		let slicerStart, slicerEnd;
 		if (len > 3) {
-			const offset = rand.getInteger(0, len);
+			const offset = r.getInteger(0, len);
 			// shift array around offset
 			const shifted = copied.splice(0, offset);
 			copied = copied.concat(shifted);
 			slicerStart = 0; // always slice from 0, no need to randomise this, array has been shifted around.
-			slicerEnd = rand.getInteger(2, len - 2);
+			slicerEnd = r.getInteger(2, len - 2);
 		} else {
 			// len is 3
 
 			if (isSierpinski) {
-				var half01 = geom.lerp(copied[0], copied[1], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
-				var half12 = geom.lerp(copied[1], copied[2], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
-				var half20 = geom.lerp(copied[2], copied[0], wonky ? rand.getNumber(0.4, 0.6) : 0.5);
+				var half01 = geom.lerp(copied[0], copied[1], wonky ? r.getNumber(0.4, 0.6) : 0.5);
+				var half12 = geom.lerp(copied[1], copied[2], wonky ? r.getNumber(0.4, 0.6) : 0.5);
+				var half20 = geom.lerp(copied[2], copied[0], wonky ? r.getNumber(0.4, 0.6) : 0.5);
 
 				var centreTriangle = [half01, half12, half20];
 				if (settings.background.cur) {
@@ -124,8 +126,8 @@ const recursive_polygon = () => () => {
 				drawSplit(parent, [copied[1], half12, half01], depth);
 				drawSplit(parent, [copied[2], half20, half12], depth);
 			} else {
-				const edge = splitLongest ? getLongest(copied) : rand.getInteger(0, 2); // pick which edge to split
-				const splitRatio = splitEdgeRatioLocked ? splitEdgeRatioLocked : rand.getNumber(0.1, 0.9);
+				const edge = splitLongest ? getLongest(copied) : r.getInteger(0, 2); // pick which edge to split
+				const splitRatio = splitEdgeRatioLocked ? splitEdgeRatioLocked : r.getNumber(0.1, 0.9);
 				let newPoint;
 				switch (edge) {
 					case 0:
@@ -157,8 +159,8 @@ const recursive_polygon = () => () => {
 	};
 
 	const drawSplit = (parent, points, depth) => {
-		const colour = mutateThreshold && rand.random() < mutateThreshold ? colours.mutateColour(parent.colour, mutateAmount) : colours.getRandomColour();
-		const inset = insetLocked ? insetLockedValue : rand.random() > insetThreshold;
+		const colour = mutateThreshold && r.random() < mutateThreshold ? c.mutateColour(parent.colour, mutateAmount) : c.getRandomColour();
+		const inset = insetLocked ? insetLockedValue : r.random() > insetThreshold;
 
 		drawPolygon(points, {
 			fillStyle: colour,
@@ -183,7 +185,7 @@ const recursive_polygon = () => () => {
 		}
 
 		// shall we go deeper?
-		if (depthLocked || rand.random() > 0.2) {
+		if (depthLocked || r.random() > 0.2) {
 			drawNext({points, colour, depth});
 		}
 	};
@@ -244,42 +246,42 @@ const recursive_polygon = () => () => {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
-		// con.log("rand.getSeed", rand.getSeed());
-		colours.getRandomPalette();
+		r.setSeed(options.seed);
+		c.getRandomPalette();
 		bmp.setSize(sw, sh);
 
-		settings.rotation.cur = rand.getInteger(0, 9);
-		settings.background.cur = rand.getInteger(0, 4) > 3;
+		settings.rotation.cur = r.getInteger(0, 9);
+		settings.background.cur = r.getInteger(0, 4) > 3;
 		if (options.settings) {
 			settings = options.settings;
 		}
 		progress("settings:initialised", settings);
 
 		// bias sides towards low polys.
-		sides = 3 + Math.round(rand.random() * rand.random() * rand.random() * 28);
+		sides = 3 + Math.round(r.random() * r.random() * r.random() * 28);
 		if (sides === 3) {
-			isSierpinski = rand.random() > 0.8;
+			isSierpinski = r.random() > 0.8;
 		}
 		if (sides < 5) {
-			wonky = rand.random() > 0.8;
+			wonky = r.random() > 0.8;
 		}
-		insetDistance = rand.getNumber(0.001, 0.02);
-		mutateThreshold = rand.getInteger(0, 1) && rand.getNumber(0, 1); // 0 or any number `between 0 and 1`, since `between 0 and 1` does not include 0!
-		mutateAmount = rand.getNumber(5, 30);
-		maxDepth = rand.getInteger(1, 8);
-		depthLocked = rand.getNumber(0, 1) > 0.5;
-		splitLongest = rand.random() > 0.5;
-		splitEdgeRatioLocked = rand.random() > 0.5 ? 0.5 : false;
-		insetLocked = rand.random() > 0.5;
+		insetDistance = r.getNumber(0.001, 0.02);
+		mutateThreshold = r.getInteger(0, 1) && r.getNumber(0, 1); // 0 or any number `between 0 and 1`, since `between 0 and 1` does not include 0!
+		mutateAmount = r.getNumber(5, 30);
+		maxDepth = r.getInteger(1, 8);
+		depthLocked = r.getNumber(0, 1) > 0.5;
+		splitLongest = r.random() > 0.5;
+		splitEdgeRatioLocked = r.random() > 0.5 ? 0.5 : false;
+		insetLocked = r.random() > 0.5;
 		if (insetLocked) {
-			insetLockedValue = rand.random() > 0.5;
+			insetLockedValue = r.random() > 0.5;
 		} else {
-			insetThreshold = rand.random() * 0.5;
+			insetThreshold = r.random() * 0.5;
 		}
 
 		const startAngle = (settings.rotation.cur / settings.rotation.max) * getRotationRange(sides);
 
-		backgroundColour = colours.getRandomColour();
+		backgroundColour = c.getRandomColour();
 		if (settings.background.cur) {
 			ctx.fillStyle = backgroundColour;
 			ctx.fillRect(0, 0, sw, sh);
@@ -294,8 +296,8 @@ const recursive_polygon = () => () => {
 		ctx.restore();
 	};
 
-	const update = (settings) => {
-		init({progress, size, settings});
+	const update = (settings, seed) => {
+		init({progress, seed, size, settings});
 	};
 
 	return {

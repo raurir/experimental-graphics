@@ -1,8 +1,10 @@
 // eslint-disable-next-line no-console
 var con = console;
 // from https://gist.github.com/Protonk/5367430
-var instanceCount = 0;
 var rand = function(isInstance) {
+	var instanceCount = 0;
+	var instances = {};
+
 	// Set to values from http://en.wikipedia.org/wiki/Numerical_Recipes
 	// m is basically chosen to be large (as it is the max period)
 	// and for its relationships to a and c
@@ -70,8 +72,20 @@ var rand = function(isInstance) {
 			return Math.floor(this.getNumber(min, max + 1));
 		},
 
-		alphaToInteger: alphaToInteger, // for testability
+		shuffle: function(array) {
+			for (var i = array.length - 1; i > 0; i--) {
+				var j = Math.floor(this.random() * (i + 1));
+				var temp = array[i];
+				array[i] = array[j];
+				array[j] = temp;
+			}
+			return array;
+		},
 
+		// for testability
+		alphaToInteger: alphaToInteger,
+
+		// instance control
 		instance: function(seed) {
 			instanceCount++;
 			con.log("rand.creating new instance", instanceCount);
@@ -82,17 +96,17 @@ var rand = function(isInstance) {
 			if (typeof seed === "number" || typeof seed === "string") {
 				r.setSeed(seed);
 			}
+			instances[instanceCount] = r;
 			return r;
 		},
 
-		shuffle: function(array) {
-			for (var i = array.length - 1; i > 0; i--) {
-				var j = Math.floor(this.random() * (i + 1));
-				var temp = array[i];
-				array[i] = array[j];
-				array[j] = temp;
+		// use this to discover a seed if unknown...
+		getInstanceById: function(id) {
+			var randInstance = instances[id];
+			if (id && randInstance) {
+				return randInstance;
 			}
-			return array;
+			return "Can't find that rand instance, available ids are: " + Object.keys(instances);
 		},
 	};
 };

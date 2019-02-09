@@ -9,8 +9,8 @@ if (isNode) {
 }
 
 var hexagon_tile = () => () => {
-	var r = rand().instance();
-	var c = colours().instance(r);
+	var r = rand.instance();
+	var c = colours.instance(r);
 
 	var progress;
 	var spreadSeed;

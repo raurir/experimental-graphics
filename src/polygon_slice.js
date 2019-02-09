@@ -17,6 +17,9 @@ const getRotationRange = (sides) => {
 };
 
 const polygon_slice = () => () => {
+	const r = rand.instance();
+	const c = colours.instance(r);
+
 	const TAU = Math.PI * 2;
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
@@ -85,9 +88,8 @@ const polygon_slice = () => () => {
 	const splitPolygon = (array) => {
 		// pick two edges to slice into.
 		// to do so we pick the corner of the start of the edge.
-		const cornerAlpha = rand.getInteger(0, array.length - 1);
-		const cornerBeta =
-			(cornerAlpha + rand.getInteger(1, array.length - 1)) % array.length;
+		const cornerAlpha = r.getInteger(0, array.length - 1);
+		const cornerBeta = (cornerAlpha + r.getInteger(1, array.length - 1)) % array.length;
 
 		const cornerMin = Math.min(cornerAlpha, cornerBeta);
 		const cornerMax = Math.max(cornerAlpha, cornerBeta);
@@ -101,16 +103,8 @@ const polygon_slice = () => () => {
 		// pick actual slice points somewhere along each edge
 		// it is quite pleasant to slice the polygon half way along an edge
 		// so going to bias towards that with `cutHalf`
-		const pointA = geom.lerp(
-			pointA0,
-			pointA1,
-			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9),
-		);
-		const pointB = geom.lerp(
-			pointB0,
-			pointB1,
-			cutHalf ? 0.5 : rand.getNumber(0.1, 0.9),
-		);
+		const pointA = geom.lerp(pointA0, pointA1, cutHalf ? 0.5 : r.getNumber(0.1, 0.9));
+		const pointB = geom.lerp(pointB0, pointB1, cutHalf ? 0.5 : r.getNumber(0.1, 0.9));
 
 		// min and max are confusing, but one poly starts from 0 which is arrayMin.
 		const arrayMin = [];
@@ -148,7 +142,7 @@ const polygon_slice = () => () => {
 
 	const getStyle = () => {
 		const style = {};
-		const colourMode = rand.getInteger(0, 8);
+		const colourMode = r.getInteger(0, 8);
 		let gradient;
 		let width = 0;
 		let height = 0;
@@ -156,30 +150,25 @@ const polygon_slice = () => () => {
 			// very rare stroke
 			case 0:
 				style.lineWidth = 0.001;
-				style.strokeStyle = colours.getRandomColour();
+				style.strokeStyle = c.getRandomColour();
 				break;
 			// rare gradient
 			case 1:
 			case 2:
 				// pick a gradient direction
-				if (rand.getInteger(0, 1) === 0) {
+				if (r.getInteger(0, 1) === 0) {
 					width = radius * 2; // horizontal
 				} else {
 					height = radius * 2; // vertical
 				}
-				gradient = ctx.createLinearGradient(
-					0.5 - radius,
-					0.5 - radius,
-					width * sw,
-					height * sh,
-				);
-				gradient.addColorStop(0, colours.getRandomColour());
-				gradient.addColorStop(1, colours.getRandomColour());
+				gradient = ctx.createLinearGradient(0.5 - radius, 0.5 - radius, width * sw, height * sh);
+				gradient.addColorStop(0, c.getRandomColour());
+				gradient.addColorStop(1, c.getRandomColour());
 				style.fillStyle = gradient;
 				break;
 			// default to simple colour fill
 			default:
-				style.fillStyle = colours.getRandomColour();
+				style.fillStyle = c.getRandomColour();
 		}
 
 		return style;
@@ -215,34 +204,33 @@ const polygon_slice = () => () => {
 			(() => {
 				con.log("polygon_slice - no progress defined");
 			});
+		r.setSeed(options.seed);
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
-		colours.getRandomPalette();
+		c.getRandomPalette();
 		bmp.setSize(sw, sh);
 
-		border = -rand.getNumber(0.002, 0.01);
-		radius = rand.getNumber(0.3, 0.5);
-		cutHalf = rand.getNumber(0, 1) > 0.2; // cutting in half is nice!
+		border = -r.getNumber(0.002, 0.01);
+		radius = r.getNumber(0.3, 0.5);
+		cutHalf = r.getNumber(0, 1) > 0.2; // cutting in half is nice!
 		minArea =
-			rand.getInteger(0, 1) === 0
+			r.getInteger(0, 1) === 0
 				? 0 // either 0, which means ignore minArea altogether
-				: rand.getNumber(0.05, radius * 0.8); // or randomize it.
-		maxDepth = rand.getInteger(2, 8);
+				: r.getNumber(0.05, radius * 0.8); // or randomize it.
+		maxDepth = r.getInteger(2, 8);
 
-		settings.rotation.cur = rand.getInteger(0, 9);
+		settings.rotation.cur = r.getInteger(0, 9);
 		settings.maxDepth.cur = maxDepth;
-		settings.background.cur = rand.getInteger(0, 4) > 3;
+		settings.background.cur = r.getInteger(0, 4) > 3;
 		if (options.settings) {
 			settings = options.settings;
 		}
 
 		progress("settings:initialised", settings);
 
-		const sides = rand.getInteger(3, 7);
-		startAngle =
-			(settings.rotation.cur / settings.rotation.max) *
-			getRotationRange(sides);
+		const sides = r.getInteger(3, 7);
+		startAngle = (settings.rotation.cur / settings.rotation.max) * getRotationRange(sides);
 
 		const points = new Array(sides).fill().map((side, i) => {
 			const a = (i / sides) * -TAU;
@@ -252,7 +240,7 @@ const polygon_slice = () => () => {
 		});
 
 		// perf.start('polygon')
-		backgroundColour = colours.getRandomColour();
+		backgroundColour = c.getRandomColour();
 		if (settings.background.cur) {
 			ctx.fillStyle = backgroundColour;
 			ctx.fillRect(0, 0, sw, sh);
@@ -264,7 +252,7 @@ const polygon_slice = () => () => {
 		ctx.rotate(startAngle);
 		// draw a border around shape
 		drawPolygon(points, {
-			strokeStyle: colours.getNextColour(),
+			strokeStyle: c.getNextColour(),
 			lineWidth: 0.001,
 		});
 		// inset the shape before recursion begins
@@ -274,9 +262,9 @@ const polygon_slice = () => () => {
 		// perf.end('polygon')
 	};
 
-	const update = (settings) => {
+	const update = (settings, seed) => {
 		// con.log("update", settings);
-		init({progress, size, settings});
+		init({progress, seed, size, settings});
 	};
 
 	return {
