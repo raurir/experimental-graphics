@@ -4,6 +4,7 @@ module.exports = {
 	},
 	extends: "eslint:recommended",
 	globals: {
+		beforeEach: true,
 		con: true,
 		define: true,
 		describe: true,
@@ -12,7 +13,7 @@ module.exports = {
 		it: true,
 		module: true,
 		rand: true,
-		require: true
+		require: true,
 	},
 	parserOptions: {
 		ecmaVersion: 8,

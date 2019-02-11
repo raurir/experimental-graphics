@@ -88,7 +88,7 @@ var rand = function(isInstance) {
 		// instance control
 		instance: function(seed) {
 			instanceCount++;
-			con.log("rand.creating new instance", instanceCount);
+			// con.log("rand.creating new instance", instanceCount);
 			// this is the preferred method, call rand.instance() for a unique instance...
 			// with this you can run multiple seeded randoms in parallel if needed.
 			// optionally set seed

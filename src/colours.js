@@ -4,7 +4,7 @@ var isNode = typeof module !== "undefined";
 // 	var rand = require('./rand.js');
 // }
 
-var colours = function(rand, isInstance) {
+var colours = function(rand, isInstance, version) {
 	var random;
 	if (rand && rand.random) {
 		random = rand.random;
@@ -183,7 +183,7 @@ var colours = function(rand, isInstance) {
 		previewCSSAdded = true;
 	}
 
-	var palettes = [
+	var palettesComplete = [
 		["#333", "#ccc"],
 
 		// from kuler
@@ -312,6 +312,15 @@ var colours = function(rand, isInstance) {
 		["#793A57", "#4D3339", "#8C873E", "#D1C5A5", "#A38A5F"], // id:716114
 	];
 
+	var palettes = palettesComplete; // default to latest version, with the complete palette list...
+	if (version === "v0") {
+		// there is no reason to use v0, this is just to aid backwards compatibility tests.
+		palettes = palettesComplete.slice(0, 10);
+	} else if (version === "v1") {
+		// v1 is the version that these experiments were built on: hexagonal_tile, corona_sine, typography
+		palettes = palettesComplete.slice(0, 121);
+	}
+
 	// showColours();
 
 	return {
@@ -325,8 +334,8 @@ var colours = function(rand, isInstance) {
 		getPalleteIndex: function() {
 			return paletteIndex;
 		},
-		instance: function instance(newRand) {
-			return colours(newRand, true);
+		instance: function instance(newRand, _, version) {
+			return colours(newRand, true, version);
 		},
 		setPalette: function(p) {
 			currentPalette = p;
