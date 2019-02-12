@@ -9,7 +9,7 @@ if (isNode) {
 
 var typography = () => () => {
 	var r = rand.instance();
-	var c = colours.instance(r);
+	var c = colours.instance(r, "v1");
 
 	var progress;
 	var settings = {

@@ -4,17 +4,12 @@ var isNode = typeof module !== "undefined";
 // 	var rand = require('./rand.js');
 // }
 
-var colours = function(rand, isInstance, version) {
+var colours = function(rand, version) {
 	var random;
 	if (rand && rand.random) {
 		random = rand.random;
 	} else {
 		random = Math.random;
-		if (isInstance) {
-			// probably no point in having an instance of colours with Math.random?
-			// no point in parallelism...
-			con.warn("!!!! colours is using native random");
-		}
 	}
 
 	// default to latest version, with the complete palette list...
@@ -36,6 +31,7 @@ var colours = function(rand, isInstance, version) {
 		if (warning) con.warn("Ensure you call getRandomPalette!");
 		paletteIndex = ~~(random() * palettes.length);
 		// con.log("getRandomPalette", paletteIndex, palettes.length);
+		// TODO surely colourIndex should be set to 0 here?
 		currentPalette = palettes[paletteIndex];
 		return currentPalette;
 	}
@@ -209,9 +205,7 @@ var colours = function(rand, isInstance, version) {
 		getPalleteIndex: function() {
 			return paletteIndex;
 		},
-		instance: function instance(newRand, _, version) {
-			return colours(newRand, true, version);
-		},
+		instance: colours, // how self referential is this? circular
 		setPalette: function(p) {
 			currentPalette = p;
 		},
@@ -652,4 +646,4 @@ var palettesComplete = [
 	["#aec8ba", "#ffe2c9", "#fba79d", "#988c81", "#fbc8b3"],
 ];
 
-if (isNode) module.exports = colours(Math, false); // export default colours, default to Math.random
+if (isNode) module.exports = colours(Math); // export default colours, default to Math.random

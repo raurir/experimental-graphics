@@ -10,7 +10,7 @@ if (isNode) {
 var corona_sine = function() {
 	return function() {
 		var r = rand.instance();
-		var c = colours.instance(r);
+		var c = colours.instance(r, "v1");
 		var progress;
 		var vector = false;
 

@@ -8,7 +8,7 @@ describe("colours", () => {
 	// show* - for showcasing colours, no point
 
 	// all tests were written on colours v1:
-	var colours = coloursGlobal.instance(rand, null, "v1");
+	var colours = coloursGlobal.instance(rand, "v1");
 
 	describe("getPalette", () => {
 		it("should return the current palette", () => {
@@ -106,13 +106,13 @@ describe("colours", () => {
 		var colV0, colV1, colV2;
 		beforeEach(() => {
 			var randA = rand.instance(200);
-			colV0 = colours.instance(randA, null, "v0");
+			colV0 = colours.instance(randA, "v0");
 
 			var randB = rand.instance(200);
-			colV1 = colours.instance(randB, null, "v1");
+			colV1 = colours.instance(randB, "v1");
 
 			var randC = rand.instance(200);
-			colV2 = colours.instance(randC, null, "v2"); // this version doesn't exist right now!
+			colV2 = colours.instance(randC); // this is "v2"
 		});
 
 		it("should not have the same random colours", () => {
@@ -138,12 +138,44 @@ describe("colours", () => {
 		// everything else should behave as normal but, let's find a seed that gives a palette outside v1's range...
 		// turns out 20000 works.
 		var r = rand.instance(20000);
-		var colours = coloursGlobal.instance(r, null, "v2");
+		var colours = coloursGlobal.instance(r, "v2");
 
 		colours.getRandomPalette();
 
 		expect(colours.getPalleteIndex()).toBe(417); // 417 is way outside v1's range of 121!
 		expect(colours.getPalette()).toEqual(["#fec998", "#76c9a3", "#423a3b", "#f8f0a3", "#b9c99a"]);
 		expect(colours.getNextColour()).toEqual("#76c9a3");
+	});
+
+	describe("even distribution", () => {
+		var distribution = [];
+		var iterations = 10000;
+		Array(iterations)
+			.fill()
+			.forEach(() => {
+				var r = rand.instance(Math.round(Math.random() * 1e10));
+				var colours = coloursGlobal.instance(r, "v2");
+				colours.getRandomPalette();
+				var index = colours.getPalleteIndex();
+				if (!distribution[index]) {
+					distribution[index] = 1;
+				} else {
+					distribution[index]++;
+				}
+			});
+		expect(distribution).toBeTruthy();
+
+		var total = 0,
+			max = -1,
+			min = 1e5;
+		distribution.forEach((val) => {
+			total += val;
+			max = Math.max(val, max);
+			min = Math.min(val, min);
+		});
+		var average = total / distribution.length;
+		expect(distribution.length).toBe(423);
+		expect(average).toBe(23.64066193853428); // ok 23.6yadayada * 423 === iterations... too tired now
+		// console.log(min, max, average);
 	});
 });
