@@ -1,6 +1,6 @@
 # TODO subfolders in src, es5 & jsmin don't work
 
-version = "1.5"
+version = "1.6"
 buildOptions = {}
 buildOptions["main.#{version}.js"] = "main.js"
 

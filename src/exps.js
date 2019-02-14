@@ -24,6 +24,7 @@ const exps = (experimentsDetails) => {
 		var interactedShowing = false;
 		var currentExperiment;
 		var viewSource = false;
+		var seed;
 
 		progressBar = dom.element("div", {
 			id: "progress",
@@ -119,9 +120,7 @@ const exps = (experimentsDetails) => {
 <h4>Experimental Graphics</h4>
 <h1>${info.title}</h1>
 ${info.description}
-<p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/${
-	info.key
-}.js' target='_blank'>SRC on Github</a></p>`;
+<p><a href='https://github.com/raurir/experimental-graphics/blob/master/js/${info.key}.js' target='_blank'>SRC on Github</a></p>`;
 		};
 
 		const hideInfo = () => {
@@ -142,7 +141,7 @@ ${info.description}
 					key = params[0],
 					index = 0,
 					found = false,
-					seed = key.split(",");
+					keyWithSeed = key.split(",");
 				viewSource = params.filter((param) => param === "src").length;
 				if (viewSource) {
 					con.log("`src` in url: Experimental graphics in SRC mode...");
@@ -151,12 +150,13 @@ ${info.description}
 					// if first key showbuttons...
 					return showButtons();
 				}
-				if (seed[1]) {
-					key = seed[0];
-					seed = seed[1];
+				if (keyWithSeed[1]) {
+					key = keyWithSeed[0];
+					seed = keyWithSeed[1];
 					rand.setSeed(seed);
+					con.log("found key, seed", rand);
 				} else {
-					rand.setSeed();
+					// seed =
 				}
 
 				while (index < experiments.length && found == false) {
@@ -224,7 +224,7 @@ ${info.description}
 			// initRenderProgress(); // experiments_progress
 			// con.log("inittted!!!!!!");
 			initWindowListener();
-			currentExperiment.init({progress, size: 800});
+			currentExperiment.init({progress, seed, size: 800});
 			resize();
 		};
 
