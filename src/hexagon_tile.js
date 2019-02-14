@@ -1,4 +1,3 @@
-var con = console;
 var isNode = typeof module !== "undefined";
 
 if (isNode) {
@@ -66,7 +65,7 @@ var hexagon_tile = () => () => {
 		progress =
 			options.progress ||
 			(() => {
-				con.log("hexagon_tile - no progress defined");
+				console.log("hexagon_tile - no progress defined");
 			});
 		r.setSeed(options.seed);
 		spreadSeed = r.getSeed();
@@ -78,7 +77,7 @@ var hexagon_tile = () => () => {
 		//   max = Math.max(max, out);
 		//   min = Math.min(min, out);
 		// };
-		// con.log(min, max);
+		// console.log(min, max);
 
 		size = options.size;
 		sw = options.sw || size;
@@ -204,7 +203,7 @@ var hexagon_tile = () => () => {
 
 			group.index = i;
 			group.addEventListener("mouseover", function() {
-				con.log(this.index, hexs[this.index].neighbours);
+				console.log(this.index, hexs[this.index].neighbours);
 				var neighbours = hexs[this.index].neighbours;
 				for (var j = 0; j < neighbours.length; j++) {
 					var neighbour = hexs[neighbours[j]];
@@ -239,15 +238,15 @@ var hexagon_tile = () => () => {
 		}
 		randomHexes = r.shuffle(hexs.slice());
 
-		// con.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
-		// con.log('randomHexes', randomHexes.length, hexs.length);
+		// console.log('cols', cols, 'rows', rows, 'hexagons', hexagons);
+		// console.log('randomHexes', randomHexes.length, hexs.length);
 
 		render();
 	}
 
 	function batch() {
 		var shouldRender = (settings.spread.cur / settings.spread.max) * 10;
-		// con.log("shouldRender", shouldRender);
+		// console.log("shouldRender", shouldRender);
 		var maxRender = hexagons;
 		var loopStart = currentBatch * batchSize,
 			loopEnd = loopStart + batchSize;
@@ -259,7 +258,7 @@ var hexagon_tile = () => () => {
 			// var neighbours = [];
 			// for(var i = 0; i < item.neighbours.length; i++) {
 			//   var otherItemIndex = item.neighbours[i];
-			//   // con.log(otherItemIndex);
+			//   // console.log(otherItemIndex);
 			//   var otherItem = hexs[otherItemIndex];
 			//   if (otherItem.rendered) {
 			//     neighbours.push(otherItem.colour);
@@ -282,7 +281,7 @@ var hexagon_tile = () => () => {
 				}
 			}
 
-			// con.log(neighbours.length,close.length);
+			// console.log(neighbours.length,close.length);
 			var colour;
 			if (close.length > 0) {
 				colour = c.mixColours(close);
@@ -318,12 +317,12 @@ var hexagon_tile = () => () => {
 			// stage.ctx.font = "18px Helvetica";
 			// stage.ctx.fillStyle = "#FFF";
 			// stage.ctx.fillText(distanceFromCenter, item.x * size - 4, item.y * size + 4);
-			// con.log(dx, dy);
+			// console.log(dx, dy);
 
 			hexs[index].rendered = true;
 			hexs[index].colour = colour;
 		}
-		// con.log("doing batch", currentBatch, batches);
+		// console.log("doing batch", currentBatch, batches);
 
 		currentBatch++;
 		if (currentBatch == batches) {

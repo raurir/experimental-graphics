@@ -1,5 +1,4 @@
 var isNode = typeof module !== "undefined";
-var con = console;
 
 if (isNode) {
 	var rand = require("./rand.js");
@@ -61,7 +60,7 @@ var corona_sine = function() {
 			progress =
 				options.progress ||
 				(() => {
-					con.log("corona_sine - no progress defined", arguments);
+					console.log("corona_sine - no progress defined", arguments);
 				});
 
 			r.setSeed(options.seed);
@@ -94,7 +93,7 @@ var corona_sine = function() {
 		function renderLine(rotation, start, end, width, colour) {
 			if (end - start < width / 4) return;
 
-			// con.log("rotation, start, end, width, colour", rotation, start, end, width, colour);
+			// console.log("rotation, start, end, width, colour", rotation, start, end, width, colour);
 
 			if (vector) {
 				var curve = 1.6; // aprox hack to make a bezier like a circle
@@ -220,7 +219,7 @@ var corona_sine = function() {
 				});
 			}
 
-			// con.log("render", time);
+			// console.log("render", time);
 			if (settings.background.cur) {
 				ctx.fillStyle = colourBG;
 				ctx.fillRect(0, 0, sw, sh);
@@ -246,7 +245,7 @@ var corona_sine = function() {
 
 			var batchSize = 100;
 			function renderBatch(batch) {
-				// con.log("renderBatch", batch);
+				// console.log("renderBatch", batch);
 				var start = batch * batchSize,
 					end = start + batchSize;
 				if (end > rays) end = rays;

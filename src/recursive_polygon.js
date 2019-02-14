@@ -241,7 +241,7 @@ const recursive_polygon = () => () => {
 		progress =
 			options.progress ||
 			(() => {
-				con.log("recursive_polygon - no progress defined");
+				console.log("recursive_polygon - no progress defined");
 			});
 		size = options.size;
 		sw = options.sw || size;
