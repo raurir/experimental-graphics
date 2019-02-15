@@ -1,4 +1,3 @@
-var con = console;
 var isNode = typeof module !== "undefined";
 
 if (isNode) {
@@ -72,7 +71,7 @@ var typography = () => () => {
 		var ss = Math.round(r.random() * str.length);
 		var se = ss + Math.round(r.random() * (str.length - ss));
 		str = str.substr(ss, se);
-		// con.log(ss, se);
+		// console.log(ss, se);
 		var textCase = Math.floor(r.random() * 3);
 		switch (textCase) {
 			case 0:
@@ -100,35 +99,35 @@ var typography = () => () => {
 				drawInnerBlock();
 			}
 		} catch (err) {
-			con.log("err drawInnerBlock", err);
+			console.log("err drawInnerBlock", err);
 		}
 		try {
 			if (r.random() > 0.9) {
 				drawSubdivion();
 			}
 		} catch (err) {
-			con.log("err drawSubdivion", err);
+			console.log("err drawSubdivion", err);
 		}
 		try {
 			if (r.random() > 0.9) {
 				drawPattern();
 			}
 		} catch (err) {
-			con.log("err drawPattern", err);
+			console.log("err drawPattern", err);
 		}
 		try {
 			if (r.random() > 0.8) {
 				drawRuler();
 			}
 		} catch (err) {
-			con.log("err drawRuler", err);
+			console.log("err drawRuler", err);
 		}
 		try {
 			if (r.random() > 0.4) {
 				drawText();
 			}
 		} catch (err) {
-			con.log("err drawText", err);
+			console.log("err drawText", err);
 		}
 
 		ctx.restore();
@@ -199,7 +198,7 @@ var typography = () => () => {
 		var xo = r.random() * block;
 		var yo = r.random() * block;
 		var fontSize = Math.round((Math.pow(2, 2 + r.random() * 6) * size) / 400);
-		// con.log(fontSize);
+		// console.log(fontSize);
 		var font = "Helvetica";
 		ctx.rotate(angle * Math.PI * 2);
 		ctx.translate(xo, yo);
@@ -209,11 +208,11 @@ var typography = () => () => {
 	}
 
 	function init(options) {
-		con.log("typography", options);
+		console.log("typography", options);
 		progress =
 			options.progress ||
 			(() => {
-				con.log("typography - no progress defined");
+				console.log("typography - no progress defined");
 			});
 		r.setSeed(options.seed);
 		size = options.size;

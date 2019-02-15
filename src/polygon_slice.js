@@ -1,7 +1,6 @@
 const isNode = typeof module !== "undefined";
 
 if (isNode) {
-	var con = console;
 	var rand = require("./rand.js");
 	var dom = require("./dom.js");
 	var colours = require("./colours.js");
@@ -65,7 +64,7 @@ const polygon_slice = () => () => {
 	// copied from recursive_polygon
 	const drawPolygon = (points, {lineWidth, strokeStyle, fillStyle}) => {
 		if (!points) {
-			return; // con.warn("null array", points)
+			return; // console.warn("null array", points)
 		}
 		ctx.beginPath();
 		// ctx.lineCap = "round";
@@ -202,7 +201,7 @@ const polygon_slice = () => () => {
 		progress =
 			options.progress ||
 			(() => {
-				con.log("polygon_slice - no progress defined");
+				console.log("polygon_slice - no progress defined");
 			});
 		r.setSeed(options.seed);
 		size = options.size;
@@ -263,7 +262,7 @@ const polygon_slice = () => () => {
 	};
 
 	const update = (settings, seed) => {
-		// con.log("update", settings);
+		// console.log("update", settings);
 		init({progress, seed, size, settings});
 	};
 

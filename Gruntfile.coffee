@@ -50,11 +50,13 @@ grunt.initConfig(
 
 
   uglify:
-    options:
-      # beautify: true
-      mangle: false
-      minify: true
     separate:
+      options:
+        # beautify: true
+        compress:
+          drop_console: true
+        mangle: false
+        minify: true
       files: [{
         expand: true
         cwd: "es5"
