@@ -56,6 +56,7 @@ const recursive_polygon = () => () => {
 	const bmp = dom.canvas(sw, sh);
 	const {ctx} = bmp;
 
+	var iterations;
 	var backgroundColour;
 	var insetDistance;
 	var insetLocked;
@@ -90,7 +91,6 @@ const recursive_polygon = () => () => {
 		drawNext({points, colour, depth: 0});
 	};
 
-	var iterations = 0;
 	const drawNext = (parent) => {
 		const depth = parent.depth + 1;
 		if (depth > maxDepth) return;
@@ -238,6 +238,7 @@ const recursive_polygon = () => () => {
 	};
 
 	const init = (options) => {
+		iterations = 0;
 		progress =
 			options.progress ||
 			(() => {
