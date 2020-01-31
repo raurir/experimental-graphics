@@ -9,7 +9,7 @@ var perlin_dots = function(perlin) {
 	const d = c.ctx;
 
 	let dots = [];
-	const numDots = 1e2;
+	const numDots = 4e2;
 
 	// const logger = document.createElement("div");
 	// document.body.appendChild(logger);
@@ -78,14 +78,33 @@ var perlin_dots = function(perlin) {
 					return;
 				}
 				const pb = dotB.position();
-				const dx = pa.x - pb.x;
-				const dy = pa.y - pb.y;
+				const dx = pb.x - pa.x;
+				const dy = pb.y - pa.y;
 				const d = Math.hypot(dx, dy);
-				if (d < 50) {
-					pressure.x += (50 - Math.abs(dx)) * (dx < 0 ? -1 : 1) * 0.01;
-					pressure.y += (50 - Math.abs(dy)) * (dy < 0 ? -1 : 1) * 0.01;
-				}
+				if (Math.abs(d) < 1) return;
+				// if (d > 10 && d < 100) {
+				const xi = Math.floor((pa.x + dx / 2) / pixel);
+				const yi = Math.floor((pa.y + dy / 2) / pixel);
+				const i = yi * w + xi;
+
+				if (!red[i]) return;
+
+				const attraction = (red[i] - 0.5) * 0.008;
+
+				// pressure.x += (50 - Math.abs(dx)) * (dx < 0 ? -1 : 1) * 0.01;
+				// pressure.y += (50 - Math.abs(dy)) * (dy < 0 ? -1 : 1) * 0.01;
+				pressure.x += (dx / d) * attraction; // (50 - Math.abs(dx)) * (dx < 0 ? -1 : 1) * 0.01;
+				pressure.y += (dy / d) * attraction; //(50 - Math.abs(dy)) * (dy < 0 ? -1 : 1) * 0.01;
+
+				// if (isNaN(pressure.x)) {
+				// 	console.log(pressure, dx, d, attraction);
+				// 	throw new Error();
+				// }
+
+				// }
 			});
+
+			// console.log("pressure", pressure.x, pressure.y);
 			dotA.move(pressure);
 			dotA.draw();
 			return dotA;
