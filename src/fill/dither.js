@@ -75,15 +75,18 @@ varyRotation`
 		3, // diamond
 		4, // dither alg 1
 		5, // dither alg 2
+		6, // cross hatches
 	];
-	const shape = 3; // shapes[r.getInteger(0, shapes.length - 1)];
+	const shape = 6; // shapes[r.getInteger(0, shapes.length - 1)];
 	const diamondScale = r.getNumber(0.5, 1);
 
 	const alternate = r.getNumber(0, 1) > 0.5;
 
-	const colour = c.getRandomColour(true);
-	ctx.fillStyle = colour;
+	const fg = c.getRandomColour(true);
+	ctx.fillStyle = fg;
+	ctx.strokeStyle = fg;
 
+	let i;
 	let y = min;
 	let row = 0;
 	while (y < max) {
@@ -125,33 +128,59 @@ varyRotation`
 				ctx.restore();
 			} else if (shape === 4) {
 				// dither - alg 1, randomly distribute
-				for (var i = 0; i < ditherAmount * 5; i++) {
+				for (i = 0; i < ditherAmount * 5; i++) {
 					const xd = x + Math.random() * xJump;
 					const yd = y + Math.random() * yJump;
 					ctx.fillRect(xd, yd, 2, 2);
 				}
 			} else if (shape === 5) {
-				// dither - alg 1, randomly fill all cells.
+				// dither - alg 2, randomly fill all cells.
 				const blocksize = 2;
 				const blocks = jump / blocksize;
-				for (var j = 0; j < Math.pow(blocks, 2); j++) {
+				for (i = 0; i < Math.pow(blocks, 2); i++) {
 					if (Math.random() > ditherRatio) continue;
 					const overlap = 0.3; // slight bleed
-					const xd = x + (j % blocks) * blocksize;
-					const yd = y + Math.floor(j / blocks) * blocksize;
+					const xd = x + (i % blocks) * blocksize;
+					const yd = y + Math.floor(i / blocks) * blocksize;
 					ctx.fillRect(xd - overlap, yd - overlap, blocksize + overlap * 2, blocksize + overlap * 2);
 				}
 			} else if (shape === 6) {
-				// dither - alg 1, randomly fill all cells.
-				const blocksize = 2;
-				const blocks = jump / blocksize;
-				for (var j = 0; j < Math.pow(blocks, 2); j++) {
-					if (Math.random() > ditherRatio) continue;
-					const overlap = 0.3; // slightl bleed
-					const xd = x + (j % blocks) * blocksize;
-					const yd = y + Math.floor(j / blocks) * blocksize;
-					ctx.fillRect(xd - overlap, yd - overlap, blocksize + overlap * 2, blocksize + overlap * 2);
+				// dither - crosshatches
+				for (i = 0; i < ditherAmount; i++) {
+					const angle = r.getNumber(0, Math.PI * 2);
+					const distance = ditherRatio * jump * 3;
+					const d1 = r.getNumber(1, 1) * Math.sin(angle) * distance;
+					const d2 = r.getNumber(1, 1) * Math.cos(angle) * distance;
+
+					const xs = x + xJump / 2 - d1;
+					const ys = y + yJump / 2 - d2;
+					const xe = x + xJump / 2 + d1;
+					const ye = y + xJump / 2 + d2;
+
+					const isForeground = r.random() < ditherRatio;
+
+					ctx.strokeStyle = isForeground ? fg : bg;
+					ctx.lineWidth = isForeground ? 4 : 2;
+					ctx.beginPath();
+					ctx.moveTo(xs, ys);
+					ctx.lineTo(xe, ye);
+					ctx.stroke();
 				}
+			} else if (shape === 80) {
+				// failed but nice
+				// dither - crosshatches
+				/*for (i = 0; i < 2; i++) {
+					const xs = x + xJump / 2;
+					const ys = y + yJump / 2; // + r.getNumber(0, yJump);
+					const angle = rand.getNumber(0, Math.PI * 2);
+					const xe = xs; // + r.getNumber(0, Math.sin(angle) * ditherRatio * jump * 3);
+					const ye = ys + r.getNumber(0, Math.cos(angle) * ditherRatio * jump * 3);
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.moveTo(xs, ys);
+					ctx.lineTo(xe, ye);
+					ctx.stroke();
+				}*/
 			} else {
 				throw new Error("no shape!");
 			}
