@@ -45,6 +45,7 @@ define("exps_details", function() {
 		["overflow"],
 		["pattern_check", "css:pattern_check"],
 		["pattern_circles"],
+		["perlin_dots"],
 		["perlin_grid", "THREE", "TweenMax"],
 		["perlin_leaves"],
 		["perlin_noise"],
