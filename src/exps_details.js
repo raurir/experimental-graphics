@@ -63,6 +63,7 @@ define("exps_details", function() {
 		["seven_four_sevens"],
 		["spiral_even"],
 		["squaretracer"],
+		["squash_match_shirt", "fill/stripes", "fill/dither"],
 		["synth_ambient", "Tone"],
 		["tea"],
 		["tentacle"],

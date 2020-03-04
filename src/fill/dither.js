@@ -13,35 +13,11 @@ const fillDither = (args) => {
 	const checkSettings = Object.keys(settings)
 		.sort()
 		.join("\n");
-	if (
-		checkSettings !==
-		`baseRotation
-lineGap
-lineScale
-lineSize
-overallScale
-pointBias
-pointMethod
-sites
-varyDuotone
-varyPerLine
-varyPerRegion
-varyRotation`
-	) {
+	if (checkSettings !== "baseRotation\nvaryRotation") {
 		console.warn("fillDither argument `settings` is not ok... received:", checkSettings);
 	}
 
-	const {
-		baseRotation, // comment prevents prettier onelining these.
-		// lineGap,
-		// lineScale,
-		// lineSize,
-		// overallScale,
-		// varyDuotone,
-		// varyPerLine,
-		// varyPerRegion,
-		varyRotation,
-	} = settings;
+	const {baseRotation, varyRotation} = settings;
 
 	const half = size / 2;
 	const padding = Math.sqrt(half * half * 2) - half; // the gaps between the corner when rotated 45 degrees
@@ -50,7 +26,7 @@ varyRotation`
 
 	const stage = dom.canvas(size, size);
 	const {ctx, canvas} = stage;
-	document.body.appendChild(canvas);
+	// document.body.appendChild(canvas);
 
 	ctx.translate(half, half);
 	ctx.rotate(baseRotation + r.getNumber(0, varyRotation));
@@ -60,7 +36,7 @@ varyRotation`
 	// ctx.fillRect(half - 25, half - 25, 50, 50);
 
 	// draw background
-	const bg = c.getRandomColour();
+	const bg = "white"; //c.getRandomColour();
 	ctx.fillStyle = bg;
 	ctx.fillRect(min, min, max, max);
 
@@ -77,12 +53,13 @@ varyRotation`
 		5, // dither alg 2
 		6, // cross hatches
 	];
-	const shape = 6; // shapes[r.getInteger(0, shapes.length - 1)];
+	// const shape = shapes[r.getInteger(0, shapes.length - 1)];
+	const shape = 1;
 	const diamondScale = r.getNumber(0.5, 1);
 
 	const alternate = r.getNumber(0, 1) > 0.5;
 
-	const fg = c.getRandomColour(true);
+	const fg = "#F4502B"; //c.getRandomColour(true);
 	ctx.fillStyle = fg;
 	ctx.strokeStyle = fg;
 
@@ -112,7 +89,7 @@ varyRotation`
 			if (shape === 1) {
 				// circle
 				ctx.beginPath();
-				ctx.drawCircle(x + wiggleX, y + wiggleY, ditherAmount);
+				ctx.drawCircle(x + wiggleX, y + wiggleY, Math.pow(ditherAmount, 2) / 10);
 				ctx.closePath();
 				ctx.fill();
 			} else if (shape === 2) {

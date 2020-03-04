@@ -4,6 +4,7 @@ module.exports = {
 	},
 	extends: "eslint:recommended",
 	globals: {
+		Buffer: true,
 		beforeEach: true,
 		con: true,
 		define: true,

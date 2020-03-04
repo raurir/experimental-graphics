@@ -31,6 +31,8 @@ varyRotation`
 		console.warn("fillStripes argument `settings` is not ok... received:", checkSettings);
 	}
 
+	console.log("checkSettings", checkSettings);
+
 	const {
 		baseRotation, // comment prevents prettier onelining these.
 		lineGap,
