@@ -21,12 +21,20 @@ const squash_match_shirt = () => () => {
 	let sizeX;
 	let sizeY;
 
+	const sectors = 10;
+	// angle of each sector
+	const angle = (1 / sectors) * Math.PI * 2;
+
 	function renderRegion(rot) {
 		const settings = {
-			baseRotation: (rand.getNumber(4, 6) / 16) * Math.PI * 2, // 5/16 is perfect... so randomise a bit around that.
+			alternate: true,
+			baseRotation: (1 / 4 + 1 / sectors / 2) * Math.PI * 2,
+			shape: 1,
 			varyRotation: false,
+			wiggle: 0,
 		};
-		const d = Math.sqrt(Math.pow(size / 2, 2) * 2) * 1; // diagonal distance
+		const d = size / 2;
+		// Math.sqrt(Math.pow(size / 2, 2) * 2); // diagonal distance
 		const pattern = fillDither({c, r, size: d, settings});
 		const patternFill = ctx.createPattern(pattern, "no-repeat");
 
@@ -37,15 +45,30 @@ const squash_match_shirt = () => () => {
 		ctx.beginPath();
 		ctx.moveTo(0, 0);
 		ctx.lineTo(d, 0);
-		ctx.lineTo(d, d);
-		// ctx.lineTo(size / 2, size / 2);
-		// ctx.rect(0, 0, size, size);
+		ctx.lineTo(Math.cos(angle) * d, Math.sin(angle) * d);
 		ctx.closePath();
 		ctx.fill();
 		// ctx.strokeStyle = "white";
 		// ctx.lineWidth = 10;
 		// ctx.stroke();
 		ctx.restore();
+	}
+
+	function renderSquare() {
+		const settings = {
+			baseRotation: 0,
+			varyRotation: false,
+		};
+		const d = size;
+		const pattern = fillDither({c, r, size: d, settings});
+		const patternFill = ctx.createPattern(pattern, "no-repeat");
+
+		ctx.fillStyle = patternFill;
+		ctx.rect(0, 0, size, size);
+		ctx.fill();
+		// ctx.strokeStyle = "white";
+		// ctx.lineWidth = 10;
+		ctx.stroke();
 	}
 
 	function renderBMPFromURL(url, scale) {
@@ -100,7 +123,7 @@ const squash_match_shirt = () => () => {
 		protocol.get(url, function(res) {
 			var buffers = [];
 			res.on("data", function(chunk) {
-				length += chunk.length;
+				// length += chunk.length;
 				// con.log("loadImageURL data", length);
 				buffers.push(chunk);
 			});
@@ -127,8 +150,13 @@ const squash_match_shirt = () => () => {
 		}
 	}
 	function generate() {
-		for (var i = 0; i < 8; i++) {
-			renderRegion(i / 8);
+		// renderSquare();
+
+		ctx.fillStyle = "white";
+		ctx.rect(0, 0, size, size);
+		ctx.fill();
+		for (var i = 0; i < sectors; i++) {
+			renderRegion(i / sectors);
 		}
 		renderBMPFromURL("./SquashMatchIconCircle.png", 0.5);
 	}

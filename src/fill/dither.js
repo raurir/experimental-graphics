@@ -1,6 +1,15 @@
 /* eslint-disable no-console */
 const isNode = typeof module !== "undefined";
 
+const shapes = [
+	1, // circle
+	2, // square
+	3, // diamond
+	4, // dither alg 1
+	5, // dither alg 2
+	6, // cross hatches
+];
+
 const fillDither = (args) => {
 	const {c, r, size, settings} = args;
 	const checkArgs = Object.keys(args)
@@ -17,7 +26,14 @@ const fillDither = (args) => {
 		console.warn("fillDither argument `settings` is not ok... received:", checkSettings);
 	}
 
-	const {baseRotation, varyRotation} = settings;
+	const {
+		// wrap?
+		alternate = r.getNumber(0, 1) > 0.5,
+		baseRotation,
+		shape = shapes[r.getInteger(0, shapes.length - 1)],
+		varyRotation,
+		wiggle = 10,
+	} = settings;
 
 	const half = size / 2;
 	const padding = Math.sqrt(half * half * 2) - half; // the gaps between the corner when rotated 45 degrees
@@ -36,7 +52,7 @@ const fillDither = (args) => {
 	// ctx.fillRect(half - 25, half - 25, 50, 50);
 
 	// draw background
-	const bg = "white"; //c.getRandomColour();
+	const bg = "transparent"; //c.getRandomColour();
 	ctx.fillStyle = bg;
 	ctx.fillRect(min, min, max, max);
 
@@ -45,19 +61,7 @@ const fillDither = (args) => {
 	const yJump = jump;
 	const xJump = jump;
 
-	const shapes = [
-		1, // circle
-		2, // square
-		3, // diamond
-		4, // dither alg 1
-		5, // dither alg 2
-		6, // cross hatches
-	];
-	// const shape = shapes[r.getInteger(0, shapes.length - 1)];
-	const shape = 1;
 	const diamondScale = r.getNumber(0.5, 1);
-
-	const alternate = r.getNumber(0, 1) > 0.5;
 
 	const fg = "#F4502B"; //c.getRandomColour(true);
 	ctx.fillStyle = fg;
@@ -83,8 +87,8 @@ const fillDither = (args) => {
 
 		let x = min - (alternate && row % 2 === 0 ? xJump / 2 : 0);
 		while (x < max) {
-			const wiggleX = r.getNumber(-xJump, xJump) / 2;
-			const wiggleY = r.getNumber(-yJump, yJump) / 2;
+			const wiggleX = (wiggle * r.getNumber(-xJump, xJump)) / 2;
+			const wiggleY = (wiggle * r.getNumber(-yJump, yJump)) / 2;
 
 			if (shape === 1) {
 				// circle
