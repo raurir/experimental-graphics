@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
 const isNode = typeof module !== "undefined";
+if (isNode) {
+	var dom = require("../dom.js");
+}
 
 const shapes = [
 	1, // circle
@@ -22,7 +25,16 @@ const fillDither = (args) => {
 	const checkSettings = Object.keys(settings)
 		.sort()
 		.join("\n");
-	if (checkSettings !== "baseRotation\nvaryRotation") {
+	if (
+		checkSettings !==
+		`alternate
+baseRotation
+bg
+fg
+shape
+varyRotation
+wiggle`
+	) {
 		console.warn("fillDither argument `settings` is not ok... received:", checkSettings);
 	}
 
@@ -30,6 +42,8 @@ const fillDither = (args) => {
 		// wrap?
 		alternate = r.getNumber(0, 1) > 0.5,
 		baseRotation,
+		bg = c.getRandomColour(),
+		fg = c.getRandomColour(true),
 		shape = shapes[r.getInteger(0, shapes.length - 1)],
 		varyRotation,
 		wiggle = 10,
@@ -52,18 +66,16 @@ const fillDither = (args) => {
 	// ctx.fillRect(half - 25, half - 25, 50, 50);
 
 	// draw background
-	const bg = "transparent"; //c.getRandomColour();
 	ctx.fillStyle = bg;
 	ctx.fillRect(min, min, max, max);
 
 	// draw dither
-	const jump = 10;
+	const jump = size / 40;
 	const yJump = jump;
 	const xJump = jump;
 
 	const diamondScale = r.getNumber(0.5, 1);
 
-	const fg = "#F4502B"; //c.getRandomColour(true);
 	ctx.fillStyle = fg;
 	ctx.strokeStyle = fg;
 
@@ -93,7 +105,7 @@ const fillDither = (args) => {
 			if (shape === 1) {
 				// circle
 				ctx.beginPath();
-				ctx.drawCircle(x + wiggleX, y + wiggleY, Math.pow(ditherAmount, 2) / 10);
+				ctx.drawCircle(x + wiggleX, y + wiggleY, ditherAmount * 0.7);
 				ctx.closePath();
 				ctx.fill();
 			} else if (shape === 2) {
