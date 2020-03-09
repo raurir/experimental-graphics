@@ -152,13 +152,23 @@ const squash_match_shirt = () => () => {
 	function generate() {
 		// renderSquare();
 
-		ctx.fillStyle = "white";
-		ctx.rect(0, 0, size, size);
-		ctx.fill();
+		// ctx.fillStyle = "transparent";
+		// ctx.rect(0, 0, size, size);
+		// ctx.fill();
 		for (var i = 0; i < sectors; i++) {
 			renderRegion(i / sectors);
 		}
-		renderBMPFromURL("./SquashMatchIconCircle.png", 0.5);
+		// renderBMPFromURL("./SquashMatchIconCircle.png", 0.5);
+		// made with https://ezgif.com/crop/
+
+		ctx.globalCompositeOperation = "destination-out";
+		ctx.beginPath();
+		ctx.drawCircle(size / 2, size / 2, (size / 2) * 0.6);
+		ctx.closePath();
+		ctx.fill();
+		ctx.globalCompositeOperation = "source-over";
+
+		renderBMPFromURL("./SquashMatchIconCircleHiRes.png", 0.3);
 	}
 
 	return {
