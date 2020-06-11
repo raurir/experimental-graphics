@@ -67,6 +67,7 @@ define("exps_details", function() {
 		["synth_ambient", "Tone"],
 		["tea"],
 		["tentacle"],
+		["tessellation"],
 		["tetris_cube", "THREE", "TweenMax"],
 		["text_grid"],
 		["triangles", "THREE", "TweenMax"],

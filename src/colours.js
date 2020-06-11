@@ -147,8 +147,6 @@ var colours = function(rand, version) {
 		}
 		throw new Error("colours.mutateColour - invalid colour type:" + colour);
 		// TODO mutateRGB..., 3 digit hex
-		con.warn("colours.mutateColour unable to mutate that colour:", colour);
-		return colour;
 	}
 
 	function mixColours(colours) {
@@ -250,7 +248,7 @@ var colours = function(rand, version) {
 		document.head.appendChild(style);
 	}
 
-	showColours();
+	// showColours();
 
 	// var t = new Date().getTime();
 	// for (var i = 0; i < 1e5; i++) {
