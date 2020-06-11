@@ -11,7 +11,7 @@ var colours = function(rand, version) {
 	} else {
 		random = Math.random;
 	}
-
+	// version = "v0";
 	// default to latest version, with the complete palette list...
 	var palettes = palettesComplete;
 	if (version === "v0") {
@@ -25,7 +25,6 @@ var colours = function(rand, version) {
 	var paletteIndex = -1,
 		currentPalette = null;
 	var colourIndex = 0;
-	var previewCSSAdded = false;
 
 	function getRandomPalette(warning) {
 		if (warning) con.warn("Ensure you call getRandomPalette!");
@@ -72,6 +71,15 @@ var colours = function(rand, version) {
 		return currentPalette[colourIndex];
 	}
 
+	// https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
+	function getBrightness(hex) {
+		var rgb = hexToRgb(hex),
+			r = rgb.r,
+			g = rgb.g,
+			b = rgb.b;
+		return Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
+	}
+
 	function channelToHex(c) {
 		var hex = c.toString(16);
 		return hex.length == 1 ? "0" + hex : hex;
@@ -86,6 +94,18 @@ var colours = function(rand, version) {
 			g = parseInt(hex.substr(3, 2), 16),
 			b = parseInt(hex.substr(5, 2), 16);
 		return {r: r, g: g, b: b};
+	}
+
+	function convertHex3To6(hex) {
+		if (hex.substr(0, 1) === "#") {
+			if (hex.length === 4) {
+				var r = hex.substr(1, 1).toLowerCase(),
+					g = hex.substr(2, 1).toLowerCase(),
+					b = hex.substr(3, 1).toLowerCase();
+				return "#" + r + r + g + g + b + b;
+			}
+		}
+		throw new Error("colours.convertHex3To6 - invalid colour type:" + hex + " - expected three digit hex value!");
 	}
 
 	function mutateChannel(channel, amount, direction) {
@@ -106,9 +126,16 @@ var colours = function(rand, version) {
 	}
 
 	function mutateColour(colour, amount) {
-		if (colour.substr(0, 1) === "#" && colour.length === 7) {
-			return mutateHex(colour, amount);
+		if (colour.substr(0, 1) === "#") {
+			var len = colour.length;
+			if (len === 7) {
+				return mutateHex(colour, amount);
+			}
+			if (len === 4) {
+				return mutateHex(convertHex3To6(colour), amount);
+			}
 		}
+		throw new Error("colours.mutateColour - invalid colour type:" + colour);
 		// TODO mutateRGB..., 3 digit hex
 		con.warn("colours.mutateColour unable to mutate that colour:", colour);
 		return colour;
@@ -158,7 +185,29 @@ var colours = function(rand, version) {
 		for (var i = 0; i < palettes.length; i++) {
 			paletteIndex = i;
 			currentPalette = palettes[i];
-			h.appendChild(showPalette());
+			var p = showPalette();
+			var darkest = currentPalette
+				.map((colour, index) => {
+					return {
+						colour,
+						brightness: getBrightness(colour.length === 4 ? convertHex3To6(colour) : colour),
+						index,
+					};
+				})
+				.sort((a, b) => a.brightness - b.brightness)[0]; // get the first!
+			// console.log(darkest, currentPalette);
+
+			var testButton = dom.element("button", {
+				innerHTML: darkest.colour + " (" + ~~darkest.brightness + ")",
+				style: {
+					color: "white",
+					background: darkest.colour,
+					padding: "10px 20px",
+				},
+			});
+			p.appendChild(testButton);
+
+			h.appendChild(p);
 		}
 		document.body.appendChild(h);
 		return h;
@@ -189,10 +238,17 @@ var colours = function(rand, version) {
 			style.appendChild(document.createTextNode(css));
 		}
 		document.head.appendChild(style);
-		previewCSSAdded = true;
 	}
 
-	// showColours();
+	showColours();
+
+	// var t = new Date().getTime();
+	// for (var i = 0; i < 1e5; i++) {
+	// 	var p = palettes[Math.floor(Math.random() * palettes.length)];
+	// 	var c = p[Math.floor(Math.random() * p.length)];
+	// 	convertHex3To6(c.substring(0, 4));
+	// }
+	// console.log("time:", new Date().getTime() - t);
 
 	return {
 		getPalette: function getPalette() {
@@ -214,6 +270,9 @@ var colours = function(rand, version) {
 		setPaletteRange: setPaletteRange,
 		showPalette: showPalette,
 		showColours: showColours,
+
+		// convertHex3To6 test this.
+		convertHex3To6: convertHex3To6,
 
 		mutateColour: mutateColour,
 		mixColours: mixColours,

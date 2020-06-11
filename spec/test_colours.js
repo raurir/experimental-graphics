@@ -83,12 +83,37 @@ describe("colours", () => {
 	});
 
 	describe("mutateColour", () => {
+		it("should throw an error for invalid colours types", () => {
+			expect(() => colours.mutateColour("#8de3", 1)).toThrow();
+			expect(() => colours.mutateColour("#83", 2)).toThrow();
+			expect(() => colours.mutateColour("#8de3457", 3)).toThrow();
+			expect(() => colours.mutateColour("giraffe", 4)).toThrow();
+			expect(() => colours.mutateColour("rgba(2,3,100,2)", 4)).toThrow();
+		});
 		it("should mutate a colour by the specified amount", () => {
 			rand.setSeed(500);
 			expect(colours.mutateColour("#1b69ff", 2)).toBe("#1b69fe");
 			expect(colours.mutateColour("#1b69ff", 20)).toBe("#156bff");
 			expect(colours.mutateColour("#1b69ff", 200)).toBe("#6394ff");
 			expect(colours.mutateColour("#1b69ff", 2000)).toBe("#00ff00");
+			expect(colours.mutateColour("#faf", 0)).toBe("#ffaaff");
+			expect(colours.mutateColour("#8de", 1)).toBe("#88ddee");
+			expect(colours.mutateColour("#8de", 6)).toBe("#89daeb");
+			expect(colours.mutateColour("#8de", 101)).toBe("#b6dfc6");
+			expect(colours.mutateColour("#8de", 1001)).toBe("#ff00ff");
+		});
+	});
+
+	describe("convertHex3To6", () => {
+		it("should throw an error for invalid colours types", () => {
+			expect(() => colours.convertHex3To6("#a8")).toThrow();
+			expect(() => colours.convertHex3To6("rgb(1,2,3)")).toThrow();
+		});
+		it("should convert a 3 character hex to the correct 6 character hex", () => {
+			expect(colours.convertHex3To6("#8de")).toBe("#88ddee");
+			expect(colours.convertHex3To6("#abc")).toBe("#aabbcc");
+			expect(colours.convertHex3To6("#FfF")).toBe("#ffffff");
+			expect(colours.convertHex3To6("#010")).toBe("#001100");
 		});
 	});
 
