@@ -1,5 +1,17 @@
 /* eslint-disable no-console */
 const isNode = typeof module !== "undefined";
+if (isNode) {
+	var dom = require("../dom.js");
+}
+
+const shapes = [
+	1, // circle
+	2, // square
+	3, // diamond
+	4, // dither alg 1
+	5, // dither alg 2
+	6, // cross hatches
+];
 
 const fillDither = (args) => {
 	const {c, r, size, settings} = args;
@@ -15,32 +27,26 @@ const fillDither = (args) => {
 		.join("\n");
 	if (
 		checkSettings !==
-		`baseRotation
-lineGap
-lineScale
-lineSize
-overallScale
-pointBias
-pointMethod
-sites
-varyDuotone
-varyPerLine
-varyPerRegion
-varyRotation`
+		`alternate
+baseRotation
+bg
+fg
+shape
+varyRotation
+wiggle`
 	) {
 		console.warn("fillDither argument `settings` is not ok... received:", checkSettings);
 	}
 
 	const {
-		baseRotation, // comment prevents prettier onelining these.
-		// lineGap,
-		// lineScale,
-		// lineSize,
-		// overallScale,
-		// varyDuotone,
-		// varyPerLine,
-		// varyPerRegion,
+		// wrap?
+		alternate = r.getNumber(0, 1) > 0.5,
+		baseRotation,
+		bg = c.getRandomColour(),
+		fg = c.getRandomColour(true),
+		shape = shapes[r.getInteger(0, shapes.length - 1)],
 		varyRotation,
+		wiggle = 10,
 	} = settings;
 
 	const half = size / 2;
@@ -50,7 +56,7 @@ varyRotation`
 
 	const stage = dom.canvas(size, size);
 	const {ctx, canvas} = stage;
-	document.body.appendChild(canvas);
+	// document.body.appendChild(canvas);
 
 	ctx.translate(half, half);
 	ctx.rotate(baseRotation + r.getNumber(0, varyRotation));
@@ -60,29 +66,16 @@ varyRotation`
 	// ctx.fillRect(half - 25, half - 25, 50, 50);
 
 	// draw background
-	const bg = c.getRandomColour();
 	ctx.fillStyle = bg;
 	ctx.fillRect(min, min, max, max);
 
 	// draw dither
-	const jump = 10;
+	const jump = size / 40;
 	const yJump = jump;
 	const xJump = jump;
 
-	const shapes = [
-		1, // circle
-		2, // square
-		3, // diamond
-		4, // dither alg 1
-		5, // dither alg 2
-		6, // cross hatches
-	];
-	const shape = 6; // shapes[r.getInteger(0, shapes.length - 1)];
 	const diamondScale = r.getNumber(0.5, 1);
 
-	const alternate = r.getNumber(0, 1) > 0.5;
-
-	const fg = c.getRandomColour(true);
 	ctx.fillStyle = fg;
 	ctx.strokeStyle = fg;
 
@@ -106,13 +99,13 @@ varyRotation`
 
 		let x = min - (alternate && row % 2 === 0 ? xJump / 2 : 0);
 		while (x < max) {
-			const wiggleX = r.getNumber(-xJump, xJump) / 2;
-			const wiggleY = r.getNumber(-yJump, yJump) / 2;
+			const wiggleX = (wiggle * r.getNumber(-xJump, xJump)) / 2;
+			const wiggleY = (wiggle * r.getNumber(-yJump, yJump)) / 2;
 
 			if (shape === 1) {
 				// circle
 				ctx.beginPath();
-				ctx.drawCircle(x + wiggleX, y + wiggleY, ditherAmount);
+				ctx.drawCircle(x + wiggleX, y + wiggleY, ditherAmount * 0.7);
 				ctx.closePath();
 				ctx.fill();
 			} else if (shape === 2) {
