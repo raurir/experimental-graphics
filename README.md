@@ -5,11 +5,6 @@ This repository is an absolute mess. Part of the Infinite Print project, all the
 
 It is also occasionally viewable on [raurir.github.io](http://raurir.github.io/)
 
-Get started
------------
-
-run `yarn develop` then start a server, eg. `http-server .` - remember to append `&src` to the url for non minified code
-
 Dec 18, 2014
 ------------
 
