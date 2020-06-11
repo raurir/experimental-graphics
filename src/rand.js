@@ -50,7 +50,7 @@ var rand = function(isInstance) {
 		},
 		random: function() {
 			if (z === undefined) {
-				con.warn("no seed set");
+				con.warn("no seed set - are you calling rand itself of an instance of rand?");
 				return null;
 			}
 			// define the recurrence relationship

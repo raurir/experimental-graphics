@@ -47,10 +47,20 @@ var colours = function(rand, version) {
 		return currentPalette;
 	}
 
-	function getRandomColour() {
+	function getRandomColour(differentToLast) {
 		// con.log("getRandomColour", currentPalette);
 		if (currentPalette == null) getRandomPalette(true);
-		colourIndex = ~~(random() * currentPalette.length);
+		if (differentToLast) {
+			// enforce a new colour, ie. disallows 2 of the same consecutively
+			var ci = ~~(random() * currentPalette.length);
+			if (ci === colourIndex) {
+				return getRandomColour(true);
+			}
+			colourIndex = ci;
+		} else {
+			colourIndex = ~~(random() * currentPalette.length);
+		}
+
 		return currentPalette[colourIndex];
 	}
 
