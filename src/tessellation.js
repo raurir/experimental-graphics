@@ -163,16 +163,16 @@ const tessellation = () => () => {
 					return true;
 				}
 				// check horizontal 2 blocks
-				const isHorizontalDouble = top && topRight && rightPlusTwo && bottomRight && bottom && left;
+				const isHorizontalDouble = top && topRight && bottomRight && bottom && left;
 				if (isHorizontalDouble) {
 					return true;
 				}
 				// check vertical 2 blocks
-				const isVerticalDouble = top && right && bottomRight && bottomPlusTwo && bottomLeft && left;
+				const isVerticalDouble = top && right && bottomRight && bottomLeft && left;
 				if (isVerticalDouble) {
 					return true;
 				}
-
+				/*
 				// check horizontal 3 blocks
 				const isHorizontalTriple = top && topRight && topRightPlusTwo && rightPlusThree && bottomRightPlusTwo && bottomRight && bottom && left;
 				if (isHorizontalTriple) {
@@ -184,6 +184,7 @@ const tessellation = () => () => {
 				if (isVerticalTriple) {
 					return true;
 				}
+				*/
 			}
 			return false;
 		});
