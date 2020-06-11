@@ -1,7 +1,7 @@
 var con = console;
 var isNode = typeof module !== "undefined";
 // if (isNode) {
-// 	var rand = require('./rand.js');
+//   var rand = require('./rand.js');
 // }
 
 var colours = function(rand, version) {
@@ -224,17 +224,17 @@ var colours = function(rand, version) {
 	function addPreviewCSS() {
 		var css = [
 			".palette {",
-			"	clear: both;",
-			"	height: 50px;",
+			"  clear: both;",
+			"  height: 50px;",
 			" margin-bottom: 20px",
 			"}",
 			".colour {",
-			"	width: 100px;",
-			"	height: 50px;",
-			"	float: left;",
-			"	text-align: center;",
-			"	font-size: 10px;",
-			"	line-height: 50px;",
+			"  width: 100px;",
+			"  height: 50px;",
+			"  float: left;",
+			"  text-align: center;",
+			"  font-size: 10px;",
+			"  line-height: 50px;",
 			"}",
 		].join("");
 
@@ -252,9 +252,9 @@ var colours = function(rand, version) {
 
 	// var t = new Date().getTime();
 	// for (var i = 0; i < 1e5; i++) {
-	// 	var p = palettes[Math.floor(Math.random() * palettes.length)];
-	// 	var c = p[Math.floor(Math.random() * p.length)];
-	// 	convertHex3To6(c.substring(0, 4));
+	//   var p = palettes[Math.floor(Math.random() * palettes.length)];
+	//   var c = p[Math.floor(Math.random() * p.length)];
+	//   convertHex3To6(c.substring(0, 4));
 	// }
 	// console.log("time:", new Date().getTime() - t);
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const isNode = typeof module !== "undefined";
 
 if (isNode) {
@@ -6,6 +7,73 @@ if (isNode) {
 	// var colours = require("./colours.js");
 	// var geom = require("./geom.js");
 }
+
+const SHAPE_L = {
+	0: {
+		blocks: [
+			//
+			[1, 1],
+			[0, 1],
+		],
+		points: [
+			//
+			{x: 0, y: 0},
+			{x: 2, y: 0},
+			{x: 2, y: 2},
+			{x: 1, y: 2},
+			{x: 1, y: 1},
+			{x: 0, y: 1},
+		],
+	},
+	1: {
+		blocks: [
+			//
+			[0, 1],
+			[1, 1],
+		],
+		points: [
+			//
+			{x: 1, y: 0},
+			{x: 2, y: 0},
+			{x: 2, y: 2},
+			{x: 0, y: 2},
+			{x: 0, y: 1},
+			{x: 1, y: 1},
+		],
+	},
+	2: {
+		blocks: [
+			//
+			[1, 0],
+			[1, 1],
+		],
+		points: [
+			//
+			{x: 0, y: 0},
+			{x: 1, y: 0},
+			{x: 1, y: 1},
+			{x: 2, y: 1},
+			{x: 2, y: 2},
+			{x: 0, y: 2},
+		],
+	},
+	3: {
+		blocks: [
+			//
+			[1, 1],
+			[1, 0],
+		],
+		points: [
+			//
+			{x: 0, y: 0},
+			{x: 2, y: 0},
+			{x: 2, y: 1},
+			{x: 1, y: 1},
+			{x: 1, y: 2},
+			{x: 0, y: 2},
+		],
+	},
+};
 
 const tessellation = () => () => {
 	const r = rand.instance();
@@ -19,11 +87,25 @@ const tessellation = () => () => {
 	let sw;
 	let size;
 
+	let attempt = 0;
+	let maxAttempts = 1e5;
+
+	let blocks = 32;
+	let block = 1 / blocks;
+
+	let occupied = new Array(blocks * blocks).fill(0);
+
 	var settings = {};
 
 	const dots = [];
 
-	const dotLine = ([a, b], {lineWidth, strokeStyle, fillStyle}) => {
+	const dotLine = (
+		[a, b],
+		{
+			//lineWidth, strokeStyle,
+			fillStyle,
+		},
+	) => {
 		const dx = a.x - b.x;
 		const dy = a.y - b.y;
 		const jumps = Math.ceil(Math.hypot(dx, dy) / 0.0288);
@@ -35,17 +117,83 @@ const tessellation = () => () => {
 		}
 	};
 
+	const isBusy = (nextOccupied, x, y) => {
+		if (x < 0) return false;
+		if (x > blocks - 1) return false;
+		if (y < 0) return false;
+		if (y > blocks - 1) return false;
+		const index = y * blocks + x;
+		return nextOccupied[index] === 1;
+	};
+
+	const testNeighbours = (nextOccupied) => {
+		const hmm = nextOccupied.some((o, i) => {
+			if (o === 0) {
+				// this block is empty, coordinates are:
+				const x = i % blocks;
+				const y = Math.floor(i / blocks);
+
+				const left = isBusy(nextOccupied, x - 1, y);
+				const right = isBusy(nextOccupied, x + 1, y);
+				const top = isBusy(nextOccupied, x, y - 1);
+				const bottom = isBusy(nextOccupied, x, y + 1);
+				const isSingleBlock = left && right && top && bottom;
+				// console.log("allBusy", allBusy);
+				if (isSingleBlock) {
+					return true;
+				}
+				return false;
+			}
+			return false;
+		});
+		// console.log("nextOccupied", nextOccupied, hmm);
+		return hmm;
+	};
+
+	const testPolygon = (shapeBlocks, position) => {
+		// console.log("------");
+		const test = occupied.slice();
+		// shapeBlocks.forEach((row, rowIndex) => {
+		for (var i = 0; i < shapeBlocks.length; i++) {
+			const row = shapeBlocks[i];
+			for (var j = 0; j < row.length; j++) {
+				const col = row[j];
+				if (col === 1) {
+					const x = position.x + j;
+					const y = position.y + i;
+					// console.log(x, y);
+					// console.log(x,y)
+					const blockIndex = y * blocks + x;
+					if (test[blockIndex] === 1) {
+						// console.log("bailing");
+						return false;
+					}
+					test[blockIndex] = 1;
+				}
+			}
+		}
+		const problem = testNeighbours(test);
+		if (problem) {
+			return false;
+		}
+
+		occupied = test;
+		return true;
+	};
+
 	// copied from recursive_polygon
 	const drawPolygon = (points, {lineWidth, strokeStyle, fillStyle}) => {
 		if (!points || points.length < 2) {
 			return;
 		}
+
+		// console.log(points);
 		const len = points.length;
 		ctx.beginPath();
 		// ctx.lineCap = "round";
 		// ctx.lineJoin = "round";
-		points.forEach((p, i) => {
-			ctx[i == 0 ? "moveTo" : "lineTo"](p.x * sw, p.y * sh);
+		points.forEach(({x, y}, i) => {
+			ctx[i == 0 ? "moveTo" : "lineTo"](x * sw, y * sh);
 		});
 		ctx.closePath();
 		if (lineWidth && strokeStyle) {
@@ -63,7 +211,7 @@ const tessellation = () => () => {
 	};
 
 	const populated = [];
-	const hashPolygon = () => {
+	const hashPolygon = () => () => {
 		const startIndex = r.getInteger(0, dots.length);
 		const otherIndex = r.getInteger(0, dots.length);
 
@@ -72,7 +220,7 @@ const tessellation = () => () => {
 		let bIncrementing = otherIndex;
 		let bDecrementing = otherIndex + 1;
 		let iterations = 0;
-		const maxIterations = 200;
+		const maxIterations = 20;
 		while (populated.length < dots.length && iterations < maxIterations) {
 			aIncrementing++;
 			aDecrementing--;
@@ -108,14 +256,85 @@ const tessellation = () => () => {
 			populated.push("d");
 			iterations++;
 		}
-		console.log("finished", dots, populated);
+		// console.log("finished", dots, populated);
+	};
+
+	const drawShape = (rotation, position) => {
+		const {blocks, points} = SHAPE_L[rotation];
+
+		const ok = testPolygon(blocks, position);
+		if (!ok) {
+			return false;
+		}
+		ctx.save();
+		ctx.scale(block, block);
+		ctx.translate(position.x * sw, position.y * sh);
+		// ctx.rotate((rotation / 4) * TAU);
+
+		drawPolygon(points, {
+			fillStyle: c.getNextColour(),
+			lineWidth: 0.1,
+			strokeStyle: "#0003",
+		});
+		ctx.restore();
+		return true;
+	};
+
+	const drawSet = (rotation) => {
+		attempt++;
+		const ratioComplete = attempt / maxAttempts;
+		// console.log(attempt);
+		if (attempt > maxAttempts) {
+			console.log("all done...");
+			return;
+		}
+		// drawShape(0, {x: 0, y: 0});
+
+		const unoccupiedPos = occupied
+			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
+			.filter(({occupied}) => occupied === 0); // list only available slots
+		const unoccupiedPosIndex = r.getInteger(0, unoccupiedPos.length - 1);
+		const positionIndex = unoccupiedPos[unoccupiedPosIndex].index;
+		// const x = positionIndex % blocks;
+		// const y = Math.floor(positionIndex / blocks);
+
+		const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+
+		const pos = {x, y};
+		// const rot = typeof rotation !== "undefined" ? rotation : r.getInteger(0, 3);
+		const rot = r.getInteger(0, 3);
+
+		drawShape(rot, pos);
+		/*
+		if (!ok) {
+			ok = drawShape((r + 1) % 4, p);
+			if (!ok) {
+				ok = drawShape((r + 2) % 4, p);
+				if (!ok) {
+					drawShape((r + 3) % 4, p);
+				}
+			}
+
+			return;
+		}
+		*/
+		// hashPolygon();
+
+		// progress("render:complete", bmp.canvas);
+
+		if (attempt % 1000 === 0) {
+			// progress("render:progress", ratioComplete);
+			setTimeout(() => drawSet(), 10);
+		} else {
+			drawSet();
+		}
 	};
 
 	const init = (options) => {
 		progress =
 			options.progress ||
 			(() => {
-				// eslint-disable-next-line no-console
 				console.log("tessellation - no progress defined");
 			});
 		r.setSeed(options.seed);
@@ -127,16 +346,11 @@ const tessellation = () => () => {
 
 		progress("settings:initialised", settings);
 
-		const backgroundColour = c.getRandomColour();
+		const backgroundColour = "#333";
 		ctx.fillStyle = backgroundColour;
 		ctx.fillRect(0, 0, sw, sh);
 
-		drawPolygon([{x: 0.2, y: 0.2}, {x: 0.8, y: 0.2}, {x: 0.8, y: 0.8}, {x: 0.5, y: 0.8}, {x: 0.5, y: 0.5}, {x: 0.2, y: 0.5}], {fillStyle: c.getNextColour()});
-
-		hashPolygon();
-
-		progress("render:complete", bmp.canvas);
-		// ctx.restore();
+		drawSet();
 	};
 
 	const update = (settings, seed) => {
