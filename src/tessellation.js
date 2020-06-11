@@ -133,16 +133,57 @@ const tessellation = () => () => {
 				const x = i % blocks;
 				const y = Math.floor(i / blocks);
 
-				const left = isBusy(nextOccupied, x - 1, y);
-				const right = isBusy(nextOccupied, x + 1, y);
+				/*
+				TL  T   TR  TR2
+				L       R   R2  R3
+				BL  B   BR  BR2
+				B2L B2  B2R
+            B3
+				*/
+
 				const top = isBusy(nextOccupied, x, y - 1);
+				const topRight = isBusy(nextOccupied, x + 1, y - 1);
+				const topRightPlusTwo = isBusy(nextOccupied, x + 2, y - 1);
+				const right = isBusy(nextOccupied, x + 1, y);
+				const rightPlusTwo = isBusy(nextOccupied, x + 2, y);
+				const rightPlusThree = isBusy(nextOccupied, x + 3, y);
+				const bottomRight = isBusy(nextOccupied, x + 1, y + 1);
+				const bottomRightPlusTwo = isBusy(nextOccupied, x + 2, y + 1);
+				const bottomPlusTwoRight = isBusy(nextOccupied, x + 2, y + 1);
 				const bottom = isBusy(nextOccupied, x, y + 1);
+				const bottomPlusTwo = isBusy(nextOccupied, x, y + 2);
+				const bottomPlusThree = isBusy(nextOccupied, x, y + 3);
+				const bottomPlusTwoLeft = isBusy(nextOccupied, x - 1, y + 2);
+				const bottomLeft = isBusy(nextOccupied, x - 1, y + 1);
+				const left = isBusy(nextOccupied, x - 1, y);
+
 				const isSingleBlock = left && right && top && bottom;
 				// console.log("allBusy", allBusy);
 				if (isSingleBlock) {
 					return true;
 				}
-				return false;
+				// check horizontal 2 blocks
+				const isHorizontalDouble = top && topRight && rightPlusTwo && bottomRight && bottom && left;
+				if (isHorizontalDouble) {
+					return true;
+				}
+				// check vertical 2 blocks
+				const isVerticalDouble = top && right && bottomRight && bottomPlusTwo && bottomLeft && left;
+				if (isVerticalDouble) {
+					return true;
+				}
+
+				// check horizontal 3 blocks
+				const isHorizontalTriple = top && topRight && topRightPlusTwo && rightPlusThree && bottomRightPlusTwo && bottomRight && bottom && left;
+				if (isHorizontalTriple) {
+					return true;
+				}
+
+				// check vertical 3 blocks
+				const isVerticalTriple = top && right && bottomRight && bottomPlusTwoRight && bottomPlusThree && bottomPlusTwoLeft && bottomLeft && left;
+				if (isVerticalTriple) {
+					return true;
+				}
 			}
 			return false;
 		});
