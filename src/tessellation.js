@@ -88,7 +88,7 @@ const tessellation = () => () => {
 	let size;
 
 	let attempt = 0;
-	let maxAttempts = 1e5;
+	let maxAttempts = 1e6;
 
 	let blocks = 32;
 	let block = 1 / blocks;
@@ -157,6 +157,11 @@ const tessellation = () => () => {
 				const bottomLeft = isBusy(nextOccupied, x - 1, y + 1);
 				const left = isBusy(nextOccupied, x - 1, y);
 
+				if (right || bottom) {
+					return true;
+				}
+
+				/*
 				const isSingleBlock = left && right && top && bottom;
 				// console.log("allBusy", allBusy);
 				if (isSingleBlock) {
@@ -172,6 +177,8 @@ const tessellation = () => () => {
 				if (isVerticalDouble) {
 					return true;
 				}
+				*/
+
 				/*
 				// check horizontal 3 blocks
 				const isHorizontalTriple = top && topRight && topRightPlusTwo && rightPlusThree && bottomRightPlusTwo && bottomRight && bottom && left;
@@ -238,14 +245,14 @@ const tessellation = () => () => {
 			ctx[i == 0 ? "moveTo" : "lineTo"](x * sw, y * sh);
 		});
 		ctx.closePath();
+		if (fillStyle) {
+			ctx.fillStyle = fillStyle;
+			ctx.fill();
+		}
 		if (lineWidth && strokeStyle) {
 			ctx.strokeStyle = strokeStyle;
 			ctx.lineWidth = lineWidth * size;
 			ctx.stroke();
-		}
-		if (fillStyle) {
-			ctx.fillStyle = fillStyle;
-			ctx.fill();
 		}
 		for (var i = 0; i < len; i++) {
 			dotLine([points[i], points[(i + 1) % len]], {fillStyle: "#000"});
@@ -332,16 +339,51 @@ const tessellation = () => () => {
 		}
 		// drawShape(0, {x: 0, y: 0});
 
-		const unoccupiedPos = occupied
-			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
-			.filter(({occupied}) => occupied === 0); // list only available slots
-		const unoccupiedPosIndex = r.getInteger(0, unoccupiedPos.length - 1);
-		const positionIndex = unoccupiedPos[unoccupiedPosIndex].index;
+		// :option 1 - pick from onoccupied spots
+		// const unoccupiedPos = occupied
+		// 	.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
+		// 	.filter(({occupied}) => occupied === 0); // list only available slots
+		// const unoccupiedPosIndex = r.getInteger(0, unoccupiedPos.length - 1);
+		// const positionIndex = unoccupiedPos[unoccupiedPosIndex].index;
 		// const x = positionIndex % blocks;
 		// const y = Math.floor(positionIndex / blocks);
 
-		const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
-		const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		// :option 2 - anywhere
+		// const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		// const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+
+		// :option 3 - pick occupied and shift up or down, relies on drawing one in top left first
+		const occupiedPos = occupied
+			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
+			.filter(({occupied}) => occupied === 1); // list only occupied slots
+		const occupiedPosIndex = r.getInteger(0, occupiedPos.length - 1);
+		const positionIndex = occupiedPos[occupiedPosIndex].index;
+		const xp = positionIndex % blocks;
+		const yp = Math.floor(positionIndex / blocks);
+
+		const checkNext = (xd, yd) => {
+			const xn = xp + xd;
+			const yn = yp + yd;
+			if (xn > blocks) return false;
+			if (yn > blocks) return false;
+			if (isBusy(xn, yn)) {
+				console.log("trying again");
+				return checkNext(xn + xd, yn + yd);
+			}
+			return {x: xn, y: yn};
+		};
+
+		const xd = r.getInteger(0, 1); // go right
+		const yd = xd ? 0 : 1; //         or down
+		const ok = checkNext(xd, yd);
+		if (!ok) {
+			drawSet();
+			return "no good";
+		}
+		const {x, y} = ok;
+
+		// const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		// const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
 
 		const pos = {x, y};
 		// const rot = typeof rotation !== "undefined" ? rotation : r.getInteger(0, 3);
@@ -391,6 +433,8 @@ const tessellation = () => () => {
 		const backgroundColour = "#333";
 		ctx.fillStyle = backgroundColour;
 		ctx.fillRect(0, 0, sw, sh);
+
+		drawShape(3, {x: 0, y: 0});
 
 		drawSet();
 	};
