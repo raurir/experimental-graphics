@@ -7,6 +7,7 @@ if (isNode) {
 	// var colours = require("./colours.js");
 	// var geom = require("./geom.js");
 }
+// let cool = false;
 
 const SHAPE_L = {
 	0: {
@@ -81,6 +82,7 @@ const tessellation = () => () => {
 
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
+	const backgroundColour = "#000";
 
 	let progress;
 	let sh;
@@ -88,18 +90,21 @@ const tessellation = () => () => {
 	let size;
 
 	let attempt = 0;
-	let maxAttempts = 1e6;
+	let maxAttempts = 1e5;
 
-	let blocks = 32;
-	let block = 1 / blocks;
+	let blocks;
+	let block;
 
-	let occupied = new Array(blocks * blocks).fill(0);
+	let occupied;
+	let spots = [];
+	let spotId = 1;
 
-	var settings = {};
+	let settings = {};
 
 	const dots = [];
 
 	const dotLine = (
+		ctx,
 		[a, b],
 		{
 			//lineWidth, strokeStyle,
@@ -108,125 +113,116 @@ const tessellation = () => () => {
 	) => {
 		const dx = a.x - b.x;
 		const dy = a.y - b.y;
-		const jumps = Math.ceil(Math.hypot(dx, dy) / 0.0288);
+		const jumps = Math.ceil(Math.hypot(dx, dy) / 0.35);
+		ctx.fillStyle = fillStyle;
 		for (var i = 0; i < jumps; i++) {
 			const {x, y} = geom.lerp(a, b, i / jumps);
 			dots.push({x, y});
-			ctx.fillStyle = fillStyle;
-			ctx.fillRect(x * sw - 3, y * sh - 3, 6, 6);
+			ctx.fillRect(x * block * sw - 2, y * block * sw - 2, 4, 4);
 		}
 	};
 
 	const isBusy = (nextOccupied, x, y) => {
-		if (x < 0) return false;
-		if (x > blocks - 1) return false;
-		if (y < 0) return false;
-		if (y > blocks - 1) return false;
+		if (x < 0) return 0;
+		if (x > blocks - 1) return 0;
+		if (y < 0) return 0;
+		if (y > blocks - 1) return 0;
 		const index = y * blocks + x;
-		return nextOccupied[index] === 1;
+		return nextOccupied[index];
 	};
 
 	const testNeighbours = (nextOccupied) => {
-		const hmm = nextOccupied.some((o, i) => {
-			if (o === 0) {
-				// this block is empty, coordinates are:
-				const x = i % blocks;
-				const y = Math.floor(i / blocks);
+		return nextOccupied.some(({occupied, x, y}) => {
+			// if (cool) {
+			// 	ctx.fillStyle = "red"
+			// 	ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
+			// }
 
-				/*
-				TL  T   TR  TR2
-				L       R   R2  R3
-				BL  B   BR  BR2
-				B2L B2  B2R
-            B3
-				*/
-
+			if (occupied === 0) {
+				// this block is empty
 				const top = isBusy(nextOccupied, x, y - 1);
 				const topRight = isBusy(nextOccupied, x + 1, y - 1);
-				const topRightPlusTwo = isBusy(nextOccupied, x + 2, y - 1);
 				const right = isBusy(nextOccupied, x + 1, y);
-				const rightPlusTwo = isBusy(nextOccupied, x + 2, y);
-				const rightPlusThree = isBusy(nextOccupied, x + 3, y);
 				const bottomRight = isBusy(nextOccupied, x + 1, y + 1);
-				const bottomRightPlusTwo = isBusy(nextOccupied, x + 2, y + 1);
-				const bottomPlusTwoRight = isBusy(nextOccupied, x + 2, y + 1);
 				const bottom = isBusy(nextOccupied, x, y + 1);
-				const bottomPlusTwo = isBusy(nextOccupied, x, y + 2);
-				const bottomPlusThree = isBusy(nextOccupied, x, y + 3);
-				const bottomPlusTwoLeft = isBusy(nextOccupied, x - 1, y + 2);
 				const bottomLeft = isBusy(nextOccupied, x - 1, y + 1);
 				const left = isBusy(nextOccupied, x - 1, y);
 
-				if (right || bottom) {
-					return true;
-				}
-
-				/*
 				const isSingleBlock = left && right && top && bottom;
-				// console.log("allBusy", allBusy);
 				if (isSingleBlock) {
 					return true;
 				}
 				// check horizontal 2 blocks
-				const isHorizontalDouble = top && topRight && bottomRight && bottom && left;
+				const isHorizontalDouble = top && topRight && bottomRight && bottom;
 				if (isHorizontalDouble) {
 					return true;
 				}
 				// check vertical 2 blocks
-				const isVerticalDouble = top && right && bottomRight && bottomLeft && left;
+				const isVerticalDouble = right && bottomRight && bottomLeft && left;
 				if (isVerticalDouble) {
 					return true;
 				}
-				*/
-
-				/*
-				// check horizontal 3 blocks
-				const isHorizontalTriple = top && topRight && topRightPlusTwo && rightPlusThree && bottomRightPlusTwo && bottomRight && bottom && left;
-				if (isHorizontalTriple) {
-					return true;
-				}
-
-				// check vertical 3 blocks
-				const isVerticalTriple = top && right && bottomRight && bottomPlusTwoRight && bottomPlusThree && bottomPlusTwoLeft && bottomLeft && left;
-				if (isVerticalTriple) {
-					return true;
-				}
-				*/
 			}
 			return false;
 		});
-		// console.log("nextOccupied", nextOccupied, hmm);
-		return hmm;
 	};
 
-	const testPolygon = (shapeBlocks, position) => {
-		// console.log("------");
-		const test = occupied.slice();
-		// shapeBlocks.forEach((row, rowIndex) => {
+	const getBlocks = (shapeBlocks, position) => {
+		const blocks = [];
 		for (var i = 0; i < shapeBlocks.length; i++) {
 			const row = shapeBlocks[i];
 			for (var j = 0; j < row.length; j++) {
-				const col = row[j];
-				if (col === 1) {
+				if (row[j] === 1) {
 					const x = position.x + j;
 					const y = position.y + i;
-					// console.log(x, y);
-					// console.log(x,y)
-					const blockIndex = y * blocks + x;
-					if (test[blockIndex] === 1) {
-						// console.log("bailing");
-						return false;
-					}
-					test[blockIndex] = 1;
+					blocks.push({x, y});
 				}
 			}
 		}
-		const problem = testNeighbours(test);
+		return blocks;
+	};
+
+	const testPolygon = (shapeBlocks, position) => {
+		const test = occupied.slice();
+		const testZone = [];
+		let t = 0;
+		for (var i = -2; i < 4; i++) {
+			for (var j = -2; j < 4; j++) {
+				const x = position.x + j;
+				const y = position.y + i;
+
+				if (x < 0) continue;
+				if (x > blocks - 1) continue;
+				if (y < 0) continue;
+				if (y > blocks - 1) continue;
+
+				const testIndex = y * blocks + x;
+				t++;
+				testZone[t] = {occupied: test[testIndex], x, y};
+
+				if (i > -1 && i < 2 && j > -1 && j < 2) {
+					const col = shapeBlocks[i][j];
+					if (col === 0) continue;
+					// const x = position.x + j;
+					// const y = position.y + i;
+
+					const blockIndex = y * blocks + x;
+					if (test[blockIndex] > 0) {
+						// console.log("bailing");
+						return false;
+					}
+					test[blockIndex] = spotId;
+					testZone[t] = {occupied: spotId, x, y};
+				}
+			}
+		}
+
+		const problem = testNeighbours(testZone);
 		if (problem) {
 			return false;
 		}
 
-		occupied = test;
+		occupied = test.slice();
 		return true;
 	};
 
@@ -236,30 +232,37 @@ const tessellation = () => () => {
 			return;
 		}
 
-		// console.log(points);
-		const len = points.length;
-		ctx.beginPath();
-		// ctx.lineCap = "round";
-		// ctx.lineJoin = "round";
+		const polygon = dom.canvas(2 * block * sw, 2 * block * sw);
+		// document.body.appendChild(polygon.canvas);
+		polygon.ctx.beginPath();
 		points.forEach(({x, y}, i) => {
-			ctx[i == 0 ? "moveTo" : "lineTo"](x * sw, y * sh);
+			polygon.ctx[i == 0 ? "moveTo" : "lineTo"](x * block * sw, y * block * sh);
 		});
-		ctx.closePath();
-		if (fillStyle) {
-			ctx.fillStyle = fillStyle;
-			ctx.fill();
-		}
-		if (lineWidth && strokeStyle) {
-			ctx.strokeStyle = strokeStyle;
-			ctx.lineWidth = lineWidth * size;
-			ctx.stroke();
-		}
+		polygon.ctx.closePath();
+
+		const gradient = polygon.ctx.createLinearGradient(0, 0, r.getNumber(block, 2 * block), r.getNumber(block, 2 * block));
+		gradient.addColorStop(0, fillStyle);
+		gradient.addColorStop(1, c.mutateColour(fillStyle, 20));
+
+		polygon.ctx.fillStyle = gradient;
+		polygon.ctx.fill();
+
+		polygon.ctx.strokeStyle = strokeStyle;
+		polygon.ctx.lineWidth = lineWidth;
+		polygon.ctx.stroke();
+
+		const len = points.length;
+		const dotFillStyle = `#000${r.getInteger(10, 16).toString(16)}`;
 		for (var i = 0; i < len; i++) {
-			dotLine([points[i], points[(i + 1) % len]], {fillStyle: "#000"});
+			dotLine(polygon.ctx, [points[i], points[(i + 1) % len]], {fillStyle: dotFillStyle});
 		}
+
+		return polygon;
 	};
 
+	/*
 	const populated = [];
+	// the origianl idea. sucked.
 	const hashPolygon = () => () => {
 		const startIndex = r.getInteger(0, dots.length);
 		const otherIndex = r.getInteger(0, dots.length);
@@ -307,112 +310,160 @@ const tessellation = () => () => {
 		}
 		// console.log("finished", dots, populated);
 	};
+	*/
 
 	const drawShape = (rotation, position) => {
-		const {blocks, points} = SHAPE_L[rotation];
+		const shape = SHAPE_L[rotation];
 
-		const ok = testPolygon(blocks, position);
+		const ok = testPolygon(shape.blocks, position);
 		if (!ok) {
+			// drawPolygon(shape.points, {fillStyle: "#f0f"});
+			// console.log("failing");
 			return false;
 		}
-		ctx.save();
-		ctx.scale(block, block);
-		ctx.translate(position.x * sw, position.y * sh);
-		// ctx.rotate((rotation / 4) * TAU);
 
-		drawPolygon(points, {
+		const polygon = drawPolygon(shape.points, {
 			fillStyle: c.getNextColour(),
 			lineWidth: 0.1,
-			strokeStyle: "#0003",
+			strokeStyle: "#000",
 		});
+
+		ctx.save();
+		ctx.translate((position.x / blocks) * sw, (position.y / blocks) * sh);
+		ctx.drawImage(polygon.canvas, 0, 0);
 		ctx.restore();
+
+		const sp = getBlocks(shape.blocks, position);
+		spots.push({id: spotId, blocks: sp});
+		spotId++;
+
+		// ctx.font = "12px Helvetica";
+		// ctx.fillStyle = "white";
+		// sp.forEach(({x, y}) => {
+		// 	ctx.fillText(spotId, ((x + 0.1) / blocks) * sw, ((y - 0.5) / blocks) * sw + 40);
+		// });
+
 		return true;
 	};
 
-	const drawSet = (rotation) => {
+	const getPosFromUnoccupied = () => {
+		// :option 1 - pick from onoccupied spots
+		const unoccupiedPos = occupied
+			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
+			.filter(({occupied}) => occupied === 0); // list only available slots
+		const unoccupiedPosIndex = r.getInteger(0, unoccupiedPos.length - 1);
+		const positionIndex = unoccupiedPos[unoccupiedPosIndex].index;
+		const x = positionIndex % blocks;
+		const y = Math.floor(positionIndex / blocks);
+		return {x, y};
+	};
+
+	const getPosFromLeadingEdge = (ratioComplete) => {
+		// :option 2 - anywhere
+		const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
+		return {x, y};
+	};
+
+	const getPosFromWithinOccupied = () => {
+		// :option 3 - pick occupied and shift up or down, relies on drawing one in top left first
+		const occupiedPos = occupied
+			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
+			.filter(({occupied}) => occupied > 0); // list only occupied slots
+		const occupiedPosIndex = r.getInteger(0, occupiedPos.length - 1);
+
+		const position = occupiedPos[occupiedPosIndex];
+		const positionIndex = position ? position.index : 0;
+		const x = positionIndex % blocks;
+		const y = Math.floor(positionIndex / blocks);
+
+		const dir = r.getInteger(0, 3);
+		const xd = dir === 0 ? 1 : dir === 2 ? -1 : 0;
+		const yd = dir === 1 ? 1 : dir === 3 ? -1 : 0;
+
+		const checkNext = (x, y) => {
+			x += xd;
+			y += yd;
+			// console.log("checkNext", xd, yd, xn, yn);
+			if (x < 0) return false;
+			if (y < 0) return false;
+			if (x > blocks - 1) return false;
+			if (y > blocks - 1) return false;
+			if (isBusy(occupied, x, y)) {
+				return checkNext(x, y);
+			}
+			// console.log("Ok", xn, yn);
+			return {x, y};
+		};
+
+		return checkNext(x, y);
+	};
+
+	const drawSet = () => {
 		attempt++;
 		const ratioComplete = attempt / maxAttempts;
 		// console.log(attempt);
 		if (attempt > maxAttempts) {
-			console.log("all done...");
-			return;
-		}
-		// drawShape(0, {x: 0, y: 0});
-
-		// :option 1 - pick from onoccupied spots
-		// const unoccupiedPos = occupied
-		// 	.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
-		// 	.filter(({occupied}) => occupied === 0); // list only available slots
-		// const unoccupiedPosIndex = r.getInteger(0, unoccupiedPos.length - 1);
-		// const positionIndex = unoccupiedPos[unoccupiedPosIndex].index;
-		// const x = positionIndex % blocks;
-		// const y = Math.floor(positionIndex / blocks);
-
-		// :option 2 - anywhere
-		// const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
-		// const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
-
-		// :option 3 - pick occupied and shift up or down, relies on drawing one in top left first
-		const occupiedPos = occupied
-			.map((b, index) => ({index, occupied: b})) // convert to list of position indexes.
-			.filter(({occupied}) => occupied === 1); // list only occupied slots
-		const occupiedPosIndex = r.getInteger(0, occupiedPos.length - 1);
-		const positionIndex = occupiedPos[occupiedPosIndex].index;
-		const xp = positionIndex % blocks;
-		const yp = Math.floor(positionIndex / blocks);
-
-		const checkNext = (xd, yd) => {
-			const xn = xp + xd;
-			const yn = yp + yd;
-			if (xn > blocks) return false;
-			if (yn > blocks) return false;
-			if (isBusy(xn, yn)) {
-				console.log("trying again");
-				return checkNext(xn + xd, yn + yd);
-			}
-			return {x: xn, y: yn};
-		};
-
-		const xd = r.getInteger(0, 1); // go right
-		const yd = xd ? 0 : 1; //         or down
-		const ok = checkNext(xd, yd);
-		if (!ok) {
+			console.log("all done... spots:", spots.length, "occupied:", occupied.filter((b) => b === 0).length);
+			cleanUp();
+			attempt = 0;
 			drawSet();
-			return "no good";
-		}
-		const {x, y} = ok;
-
-		// const x = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
-		// const y = r.getInteger(0, (blocks - 2) * ratioComplete + 1);
-
-		const pos = {x, y};
-		// const rot = typeof rotation !== "undefined" ? rotation : r.getInteger(0, 3);
-		const rot = r.getInteger(0, 3);
-
-		drawShape(rot, pos);
-		/*
-		if (!ok) {
-			ok = drawShape((r + 1) % 4, p);
-			if (!ok) {
-				ok = drawShape((r + 2) % 4, p);
-				if (!ok) {
-					drawShape((r + 3) % 4, p);
-				}
-			}
-
 			return;
 		}
-		*/
+
+		// const pos = ratioComplete < 0.9 ? getPosFromLeadingEdge(ratioComplete) : r.getNumber() > 0.5 ? getPosFromWithinOccupied() : getPosFromUnoccupied();
+		// const pos = getPosFromLeadingEdge(ratioComplete);
+		const pos = getPosFromUnoccupied();
+
+		// ctx.fillStyle = "blue";
+		// ctx.fillRect((pos.x / blocks) * sw, (pos.y / blocks) * sh, block * sw, block * sh);
+
+		if (!pos) {
+			drawSet();
+			return;
+		}
+		const rot = r.getInteger(0, 3);
+		!drawShape(rot, pos) && //
+			!drawShape((rot + 1) % 4, pos) &&
+			!drawShape((rot + 2) % 4, pos) &&
+			!drawShape((rot + 3) % 4, pos);
+
+		// console.log(pos);
 		// hashPolygon();
 
 		// progress("render:complete", bmp.canvas);
 
-		if (attempt % 1000 === 0) {
+		if (attempt % 100 === 0) {
 			// progress("render:progress", ratioComplete);
 			setTimeout(() => drawSet(), 10);
+			// console.log(occupied);
 		} else {
 			drawSet();
 		}
+	};
+
+	const clear = (spot) => {
+		spot.blocks.forEach(({x, y}) => {
+			const pi = y * blocks + x;
+			occupied[pi] = 0;
+			ctx.fillStyle = backgroundColour;
+			ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
+		});
+	};
+
+	const cleanUp = () => {
+		const {x, y} = getPosFromUnoccupied();
+		// ctx.fillStyle = "red";
+		// ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
+		const top = isBusy(occupied, x, y - 1);
+		const right = isBusy(occupied, x + 1, y);
+		const bottom = isBusy(occupied, x, y + 1);
+		const left = isBusy(occupied, x - 1, y);
+		const ids = [top, right, bottom, left].filter((id) => Boolean(id) && r.getNumber(0, 1) > 0.5);
+		const found = spots.filter((spot) => ids.includes(spot.id));
+		found.forEach(clear);
+		const newSpots = spots.filter((spot) => ids.includes(spot.id) === false);
+		spots = newSpots;
 	};
 
 	const init = (options) => {
@@ -426,17 +477,37 @@ const tessellation = () => () => {
 		sw = options.sw || size;
 		sh = options.sh || size;
 		c.getRandomPalette();
+
+		blocks = r.getInteger(6, 48);
+		block = 1 / blocks;
+		occupied = new Array(blocks * blocks).fill(0);
+
 		bmp.setSize(sw, sh);
 
 		progress("settings:initialised", settings);
 
-		const backgroundColour = "#333";
 		ctx.fillStyle = backgroundColour;
 		ctx.fillRect(0, 0, sw, sh);
 
-		drawShape(3, {x: 0, y: 0});
+		// drawShape(0, {x: 0, y: 0});
+		// drawShape(r.getInteger(0, 3), {x: -1, y: -1});
+		// drawShape(0, {x: Math.floor(0.5 * blocks), y: Math.floor(0.5 * blocks)});
 
 		drawSet();
+
+		document.addEventListener("mousedown", () => {
+			// cool = true;
+			// render onocuppied
+			// occupied
+			// 	.map((v, index) => ({index, v}))
+			// 	.filter(({v}) => v === 0)
+			// 	.forEach(({index}) => {
+			// 		const x = index % blocks;
+			// 		const y = Math.floor(index / blocks);
+			// 		ctx.fillStyle = "black";
+			// 		ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
+			// 	});
+		});
 	};
 
 	const update = (settings, seed) => {
