@@ -7,7 +7,6 @@ if (isNode) {
 	// var colours = require("./colours.js");
 	// var geom = require("./geom.js");
 }
-// let cool = false;
 
 const SHAPE_L = {
 	0: {
@@ -82,7 +81,7 @@ const tessellation = () => () => {
 
 	const bmp = dom.canvas(1, 1);
 	const ctx = bmp.ctx;
-	const backgroundColour = "#000";
+	const backgroundColour = "#0f0";
 
 	let progress;
 	let sh;
@@ -90,7 +89,7 @@ const tessellation = () => () => {
 	let size;
 
 	let attempt = 0;
-	let maxAttempts = 1e5;
+	let maxAttempts = 2e4;
 
 	let blocks;
 	let block;
@@ -128,15 +127,15 @@ const tessellation = () => () => {
 		if (y < 0) return 0;
 		if (y > blocks - 1) return 0;
 		const index = y * blocks + x;
-		return nextOccupied[index];
+		return nextOccupied[index] > 0;
 	};
 
 	const testNeighbours = (nextOccupied) => {
-		return nextOccupied.some(({occupied, x, y}) => {
-			// if (cool) {
-			// 	ctx.fillStyle = "red"
-			// 	ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
-			// }
+		// console.log(nextOccupied);
+		// const test = nextOccupied.some(({occupied, x, y}, subIndex) => {
+		const test = nextOccupied.some((occupied, positionIndex) => {
+			const x = positionIndex % blocks;
+			const y = Math.floor(positionIndex / blocks);
 
 			if (occupied === 0) {
 				// this block is empty
@@ -165,6 +164,8 @@ const tessellation = () => () => {
 			}
 			return false;
 		});
+		// console.log(test);
+		return test; // > ;
 	};
 
 	const getBlocks = (shapeBlocks, position) => {
@@ -197,7 +198,7 @@ const tessellation = () => () => {
 				if (y > blocks - 1) continue;
 
 				const testIndex = y * blocks + x;
-				t++;
+
 				testZone[t] = {occupied: test[testIndex], x, y};
 
 				if (i > -1 && i < 2 && j > -1 && j < 2) {
@@ -214,10 +215,12 @@ const tessellation = () => () => {
 					test[blockIndex] = spotId;
 					testZone[t] = {occupied: spotId, x, y};
 				}
+				t++;
 			}
 		}
 
-		const problem = testNeighbours(testZone);
+		// console.log(testZone);
+		const problem = testNeighbours(test);
 		if (problem) {
 			return false;
 		}
@@ -340,7 +343,7 @@ const tessellation = () => () => {
 		// ctx.font = "12px Helvetica";
 		// ctx.fillStyle = "white";
 		// sp.forEach(({x, y}) => {
-		// 	ctx.fillText(spotId, ((x + 0.1) / blocks) * sw, ((y - 0.5) / blocks) * sw + 40);
+		// 	ctx.fillText(spotId, ((x + 0.4) / blocks) * sw, ((y - 1) / blocks) * sw + 40);
 		// });
 
 		return true;
@@ -399,26 +402,35 @@ const tessellation = () => () => {
 		return checkNext(x, y);
 	};
 
+	const getPosFromRadial = (ratioComplete) => {
+		const p = ratioComplete * 9;
+		const r = ((p * blocks) / 2) * 0.1;
+		const a = p * 20;
+		const x = Math.round(blocks / 2 + Math.sin(a) * r);
+		const y = Math.round(blocks / 2 + Math.cos(a) * r);
+		return {x, y};
+	};
+
 	const drawSet = () => {
+		// console.log("drawSet");
 		attempt++;
 		const ratioComplete = attempt / maxAttempts;
-		// console.log(attempt);
-		if (attempt > maxAttempts) {
+		const occComplete = occupied.filter((b) => b > 1).length / occupied.length;
+		// console.log(occComplete);
+
+		// if (ratioComplete >= 1) {
+		if (ratioComplete >= 1) {
 			console.log("all done... spots:", spots.length, "occupied:", occupied.filter((b) => b === 0).length);
-			cleanUp();
-			attempt = 0;
-			drawSet();
+			// cleanUp();
+			// attempt = 0;
+			// drawSet();
 			return;
 		}
 
-		// const pos = ratioComplete < 0.9 ? getPosFromLeadingEdge(ratioComplete) : r.getNumber() > 0.5 ? getPosFromWithinOccupied() : getPosFromUnoccupied();
-		// const pos = getPosFromLeadingEdge(ratioComplete);
-		const pos = getPosFromUnoccupied();
-
-		// ctx.fillStyle = "blue";
-		// ctx.fillRect((pos.x / blocks) * sw, (pos.y / blocks) * sh, block * sw, block * sh);
+		const pos = getPosFromRadial(ratioComplete);
 
 		if (!pos) {
+			console.log("not pos");
 			drawSet();
 			return;
 		}
@@ -494,20 +506,6 @@ const tessellation = () => () => {
 		// drawShape(0, {x: Math.floor(0.5 * blocks), y: Math.floor(0.5 * blocks)});
 
 		drawSet();
-
-		document.addEventListener("mousedown", () => {
-			// cool = true;
-			// render onocuppied
-			// occupied
-			// 	.map((v, index) => ({index, v}))
-			// 	.filter(({v}) => v === 0)
-			// 	.forEach(({index}) => {
-			// 		const x = index % blocks;
-			// 		const y = Math.floor(index / blocks);
-			// 		ctx.fillStyle = "black";
-			// 		ctx.fillRect((x / blocks) * sw, (y / blocks) * sh, block * sw, block * sh);
-			// 	});
-		});
 	};
 
 	const update = (settings, seed) => {
