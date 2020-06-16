@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+/* eslint-disable indent */
 const isNode = typeof module !== "undefined";
 
 if (isNode) {
@@ -8,72 +9,72 @@ if (isNode) {
 	// var geom = require("./geom.js");
 }
 
-const SHAPE_L = {
-	0: {
-		blocks: [
-			//
-			[1, 1],
-			[0, 1],
-		],
-		points: [
-			//
-			{x: 0, y: 0},
-			{x: 2, y: 0},
-			{x: 2, y: 2},
-			{x: 1, y: 2},
-			{x: 1, y: 1},
-			{x: 0, y: 1},
-		],
-	},
-	1: {
-		blocks: [
-			//
-			[0, 1],
-			[1, 1],
-		],
-		points: [
-			//
-			{x: 1, y: 0},
-			{x: 2, y: 0},
-			{x: 2, y: 2},
-			{x: 0, y: 2},
-			{x: 0, y: 1},
-			{x: 1, y: 1},
-		],
-	},
-	2: {
-		blocks: [
-			//
-			[1, 0],
-			[1, 1],
-		],
-		points: [
-			//
-			{x: 0, y: 0},
-			{x: 1, y: 0},
-			{x: 1, y: 1},
-			{x: 2, y: 1},
-			{x: 2, y: 2},
-			{x: 0, y: 2},
-		],
-	},
-	3: {
-		blocks: [
-			//
-			[1, 1],
-			[1, 0],
-		],
-		points: [
-			//
-			{x: 0, y: 0},
-			{x: 2, y: 0},
-			{x: 2, y: 1},
-			{x: 1, y: 1},
-			{x: 1, y: 2},
-			{x: 0, y: 2},
-		],
-	},
-};
+// prettier-ignore
+const SHAPE_L  =
+
+
+
+
+{"0":{"blocks":[
+[1, 1], [0, 1]],
+"points":[{"x":0
+,y: 0},{"x":2,y:
+0},{"x":2,"y":2}
+        ,{"x":1,
+        "y":2},{
+        "x":1, y
+        :1},{"x"
+        :0,"y":1
+
+
+
+
+        }]},"1":
+        {blocks:
+        [[0, 1],
+        [1, 1]],
+        "points"
+:[{"x":1,"y":0},
+{"x":2,"y":0},{x
+:2,"y":2},{"x":0
+,"y":2},{"x":0,y
+:1},{"x":1,"y":1
+
+
+
+
+}]},"2":
+{blocks:
+[[1, 0],
+[1, 1]],
+"points"
+:[{"x":0,"y":0},
+{"x":1,"y":0},{x
+:1,"y":1},{"x":2
+,"y":1},{"x":2,y
+:2},{"x":0,y:2}]
+
+
+
+
+},3:{blocks:[[1,
+1],[1,0]],points
+:[{"x":0,"y":0},
+{x:2,y:0},{x:2,y
+        :1},{x:1
+        ,"y":1},
+        {x:1, y:
+        2},{x:0,
+        y:2}]}};
+
+/*
+
+^ homage to @aemkei
+
+indeed 'points' are no longer needed but the original idea with dotLine and hashPolygon (removed)
+needed to draw around the perimeter
+
+*/
 
 const tessellation = () => () => {
 	const r = rand.instance();
@@ -231,7 +232,7 @@ const tessellation = () => () => {
 		// const len = points.length;
 		// const dotFillStyle = `rgba(0,0,0,${r.getInteger(50, 255)}`;
 		// for (var i = 0; i < len; i++) {
-		// 	dotLine(polygon.ctx, [points[i], points[(i + 1) % len]], {fillStyle: dotFillStyle});
+		//   dotLine(polygon.ctx, [points[i], points[(i + 1) % len]], {fillStyle: dotFillStyle});
 		// }
 
 		return polygon;
@@ -275,7 +276,7 @@ const tessellation = () => () => {
 		// ctx.font = "12px Helvetica";
 		// ctx.fillStyle = "white";
 		// sp.forEach(({x, y}) => {
-		// 	ctx.fillText(spotId, ((x + 0.4) / blocks) * sw, ((y - 1) / blocks) * sw + 40);
+		//   ctx.fillText(spotId, ((x + 0.4) / blocks) * sw, ((y - 1) / blocks) * sw + 40);
 		// });
 
 		return true;
