@@ -89,7 +89,7 @@ const tessellation = () => () => {
 	let size;
 
 	let attempt = 0;
-	let maxAttempts = 2e4;
+	let maxAttempts = 1e5;
 
 	let blocks;
 	let block;
@@ -124,7 +124,7 @@ const tessellation = () => () => {
 		if (y < 0) return 0;
 		if (y > blocks - 1) return 0;
 		const index = y * blocks + x;
-		return nextOccupied[index] > 0;
+		return nextOccupied[index];
 	};
 
 	const testNeighbours = (nextOccupied) => {
@@ -162,7 +162,7 @@ const tessellation = () => () => {
 	};
 
 	const getBlocks = (shapeBlocks, position) => {
-		const blocks = [];
+		const blocks = []; // shapeBlocks.reduce blah blah
 		for (var i = 0; i < shapeBlocks.length; i++) {
 			const row = shapeBlocks[i];
 			for (var j = 0; j < row.length; j++) {
@@ -204,7 +204,7 @@ const tessellation = () => () => {
 			return false;
 		}
 
-		occupied = test; //.slice();
+		occupied = test;
 		return true;
 	};
 
@@ -249,19 +249,29 @@ const tessellation = () => () => {
 
 		const polygon = drawPolygon(shape.points, {
 			fillStyle: c.getNextColour(),
+			// fillStyle: c.getRandomColour(),
 			lineWidth: 0.1,
 			strokeStyle: "#000",
 		});
 
+		const x = (position.x / blocks) * sw;
+		const y = (position.y / blocks) * sh;
+
 		ctx.save();
-		ctx.translate(Math.floor((position.x / blocks) * sw), Math.floor((position.y / blocks) * sh));
+		ctx.translate(x - sw / 2, y - sh / 2);
 		ctx.drawImage(polygon.canvas, 0, 0);
 		ctx.restore();
+
+		// center point
+		// ctx.fillStyle = "white";
+		// ctx.fillRect(0 - 10, 0 - 10, 20, 20);
 
 		const sp = getBlocks(shape.blocks, position);
 		spots.push({id: spotId, blocks: sp});
 		spotId++;
 
+		// !! invalid due to restore() above.
+		// draw ids of each spot
 		// ctx.font = "12px Helvetica";
 		// ctx.fillStyle = "white";
 		// sp.forEach(({x, y}) => {
@@ -271,34 +281,60 @@ const tessellation = () => () => {
 		return true;
 	};
 
+	let complete = false;
+
 	const getPosFromRadial = (ratioComplete) => {
-		const p = ratioComplete * 8;
-		const r = ((p * blocks) / 2) * 0.1;
-		const a = p * 20;
-		const x = Math.round(blocks / 2 + Math.sin(a) * r);
-		const y = Math.round(blocks / 2 + Math.cos(a) * r);
+		const p = ratioComplete * 50;
+		const diagonal = Math.ceil(Math.hypot(blocks / 2, blocks / 2)); // + 2);
+		const r = p * blocks * 0.04;
+
+		if (r > diagonal) {
+			complete = true;
+		}
+
+		const a = (p / (1 + r * -0)) * 20;
+		const x = Math.floor(blocks / 2 + Math.sin(a) * r);
+		const y = Math.floor(blocks / 2 + Math.cos(a) * r);
+
+		// const r = p * 0.5;
+		// const a = (z / 180) * Math.PI * 137.5;
+
 		return {x, y};
+	};
+
+	const jitter = (rot, pos) => {
+		let go = true;
+		for (var x = -1; x < 2 && go; x++) {
+			for (var y = -1; y < 2 && go; y++) {
+				for (var r = 0; r < 4 && go; r++) {
+					go = !drawShape((rot + r) % 4, {x: pos.x + x, y: pos.y + y});
+				}
+			}
+		}
 	};
 
 	const drawSet = () => {
 		// console.log("drawSet");
 		attempt++;
 		const ratioComplete = attempt / maxAttempts;
-		const occComplete = occupied.filter((b) => b > 1).length / occupied.length;
-		// console.log(occComplete);
+		const occComplete = occupied.filter((b) => b > 0).length / occupied.length === 1;
 
+		if (complete || occComplete) {
+			console.log("complete");
+			return;
+		}
 		if (ratioComplete >= 1) {
-			console.log("all done... spots:", spots.length, "occupied:", occupied.filter((b) => b === 0).length);
+			// does it happen? hmmm, stop recursion
 			return;
 		}
 
 		const pos = getPosFromRadial(ratioComplete);
 		const rot = r.getInteger(0, 3);
-		!drawShape(rot, pos) && //
-			!drawShape((rot + 1) % 4, pos) &&
-			!drawShape((rot + 2) % 4, pos) &&
-			!drawShape((rot + 3) % 4, pos);
+		jitter(rot, pos);
 
+		// const {x, y} = pos;
+		// ctx.fillStyle = "red";
+		// ctx.fillRect((x / blocks) * sw, (y / blocks) * sw, 4, 4);
 		// progress("render:complete", bmp.canvas);
 
 		if (attempt % 100 === 0) {
@@ -320,32 +356,34 @@ const tessellation = () => () => {
 		size = options.size;
 		sw = options.sw || size;
 		sh = options.sh || size;
+		bmp.setSize(sw, sh);
 
-		console.log(size);
 		c.getRandomPalette();
 
 		const ranges = [];
-		for (var i = 4; i < size / 8; i++) {
+		for (var i = 8; i < size / 8; i++) {
 			const d = size / i;
 			if (Math.round(d) === d) {
 				ranges.push(d);
 			}
 		}
-		console.log(ranges);
+		// console.log(ranges);
 
 		blocks = ranges[r.getInteger(0, ranges.length - 1)];
 		block = 1 / blocks;
 
-		console.log(blocks, block);
+		// console.log(blocks, block);
 
 		occupied = new Array(blocks * blocks).fill(0);
-
-		bmp.setSize(sw, sh);
 
 		progress("settings:initialised", settings);
 
 		ctx.fillStyle = backgroundColour;
 		ctx.fillRect(0, 0, sw, sh);
+		ctx.translate(sw / 2, sh / 2); // compensated for in drawImage
+		ctx.rotate(r.getNumber(0, Math.PI * 2));
+		const scale = r.getNumber(1.3, 1.6);
+		ctx.scale(scale, scale);
 
 		drawSet();
 	};
