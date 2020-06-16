@@ -2,6 +2,7 @@
 var con = console;
 // from https://gist.github.com/Protonk/5367430
 var rand = function(isInstance) {
+	var errors = 0;
 	var instanceCount = 0;
 	var instances = {};
 
@@ -50,7 +51,9 @@ var rand = function(isInstance) {
 		},
 		random: function() {
 			if (z === undefined) {
-				con.warn("no seed set - are you calling rand itself of an instance of rand?");
+				con.warn("no seed set - are you calling rand itself or an instance of rand?");
+				errors++;
+				if (errors > 1000) throw new Error("rand bailing because no seed");
 				return null;
 			}
 			// define the recurrence relationship
