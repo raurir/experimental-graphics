@@ -8,6 +8,8 @@ if (isNode) {
 }
 
 var circle_packing = () => () => {
+	var rnd = rand.instance();
+	var c = colours.instance(rnd);
 	var progress;
 	var TAU = Math.PI * 2;
 	var sw, sh;
@@ -19,12 +21,7 @@ var circle_packing = () => () => {
 		return;
 		bmp.ctx.fillStyle = err || "green";
 		var siteSize = err ? 1 : 7;
-		bmp.ctx.fillRect(
-			site.x * sw - siteSize / 2,
-			site.y * sh - siteSize / 2,
-			siteSize,
-			siteSize,
-		);
+		bmp.ctx.fillRect(site.x * sw - siteSize / 2, site.y * sh - siteSize / 2, siteSize, siteSize);
 	}
 
 	var experiment = {
@@ -50,37 +47,41 @@ var circle_packing = () => () => {
 		sw = size;
 		sh = size;
 		bmp.setSize(sw, sh);
-		// rand.setSeed(4);
-		colours.getRandomPalette();
-		bmp.ctx.clearRect(0, 0, sw, sh);
+		rnd.setSeed(options.seed);
+		console.log("setting seed.", rnd.getSeed());
+
+		c.getRandomPalette();
+		// bmp.ctx.clearRect(0, 0, sw, sh);
+		bmp.ctx.fillStyle = "#000";
+		bmp.ctx.fillRect(0, 0, sw, sh);
 
 		var threads = 0;
 		var iterations = 0;
 		var circles = 0,
 			circlesLast = 0,
 			circlesSame = 0;
-		var gap = rand.getNumber(0.001, 0.02);
+		var gap = rnd.getNumber(0.001, 0.02);
 		// var gap = 0.0005;
 		con.log("gap", gap);
-		var minRadius = rand.getNumber(0.001, 0.01);
+		var minRadius = rnd.getNumber(0.001, 0.01);
 		// var minRadius = 0.0002;
-		var maxRadius = rand.getNumber(minRadius + 0.02, 0.5);
+		var maxRadius = rnd.getNumber(minRadius + 0.02, 0.5);
 		// var maxRadius = minRadius + 0.02;
-		var maxDepth = rand.getInteger(1, 10);
+		var maxDepth = rnd.getInteger(1, 10);
 		// var maxDepth = 1;
 
-		var limitMaxRadius = rand.getInteger(0, 2);
-		var powerMaxRadius = rand.getNumber(0.8, 3);
-		var limitMinRadius = rand.getInteger(0, 1);
+		var limitMaxRadius = rnd.getInteger(0, 2);
+		var powerMaxRadius = rnd.getNumber(0.8, 3);
+		var limitMinRadius = rnd.getInteger(0, 1);
 		con.log("limitMaxRadius", limitMaxRadius);
 		con.log("powerMaxRadius", powerMaxRadius);
 		con.log("limitMinRadius", limitMinRadius);
 
-		var banding = rand.getNumber() > 0.7;
-		var bandScale = rand.getInteger(4, 20);
-		var bandModulo = rand.getInteger(2, 10);
+		var banding = rnd.getNumber() > 0.7;
+		var bandScale = rnd.getInteger(4, 20);
+		var bandModulo = rnd.getInteger(2, 10);
 
-		var alternatePunchOut = rand.getNumber() > 0.7;
+		var alternatePunchOut = rnd.getNumber() > 0.7;
 
 		// brutal seeds: 454163889, 3575304202
 		var bailed = false;
@@ -120,7 +121,7 @@ var circle_packing = () => () => {
 				// return attemptCircle(parent, attempt);
 				if (delay) {
 					// con.log("ok")
-					setTimeout(function() {
+					setTimeout(function () {
 						attemptCircle(parent, attempt);
 					}, delay);
 				} else {
@@ -146,13 +147,13 @@ var circle_packing = () => () => {
 				depth = parent.depth + 1;
 
 				// distance from centre of parent
-				// distance = rand.getInteger(1, 5) / 5 * parent.r + rand.random() * 0.03;
+				// distance = rnd.getInteger(1, 5) / 5 * parent.r + rnd.random() * 0.03;
 
-				// distance = rand.random() * parent.r;
+				// distance = rnd.random() * parent.r;
 				// banding
 
 				// pick a sot
-				var index = Math.floor(rand.random() * parent.sites.length);
+				var index = Math.floor(rnd.random() * parent.sites.length);
 				site = parent.sites.splice(index, 1)[0];
 				x = site.x;
 				y = site.y;
@@ -174,8 +175,7 @@ var circle_packing = () => () => {
 				switch (limitMaxRadius) {
 					// case 0 - ignore, adopt global maxRadius
 					case 1: // set a varying maxRadius based on distance, growing smaller towards edges
-						maxRadius =
-							0.01 + Math.pow(0.5 - distance, powerMaxRadius);
+						maxRadius = 0.01 + Math.pow(0.5 - distance, powerMaxRadius);
 						break;
 					case 2: // set a varying maxRadius based on distance, growing larger towards edges
 						maxRadius = 0.01 + Math.pow(distance, powerMaxRadius);
@@ -190,8 +190,8 @@ var circle_packing = () => () => {
 				}
 
 				// choose a randomised radius
-				// r = rand.random() * radius * (parent.r - distance - gap);
-				r = rand.random() * radius;
+				// r = rnd.random() * radius * (parent.r - distance - gap);
+				r = rnd.random() * radius;
 				// r = parent.r - distance - gap;
 				// r = radius;
 				// r = 0.005;
@@ -226,11 +226,7 @@ var circle_packing = () => () => {
 
 				// check all other children
 				var ok = true;
-				for (
-					var i = 0, il = parent.children.length;
-					i < il && ok;
-					i++
-				) {
+				for (var i = 0, il = parent.children.length; i < il && ok; i++) {
 					other = parent.children[i];
 					dx = x - other.x;
 					dy = y - other.y;
@@ -250,19 +246,19 @@ var circle_packing = () => () => {
 				}
 			} else {
 				// the host container, typically want it centred (cx, cy) and half of canvas (0.5)
-				x = cx; //rand.random();
-				y = cy; //rand.random();
-				r = 0.5; //rand.random() / 2;
+				x = cx; //rnd.random();
+				y = cy; //rnd.random();
+				r = 0.5; //rnd.random() / 2;
 				depth = 0;
 			}
 
 			if (options && options.colour) {
 				colour = options.colour;
 			} else {
-				colour = colours.getRandomColour(); //"#fff";//colour;
+				colour = c.getRandomColour(); //"#fff";//colour;
 				while (parent && parent.colour == colour) {
 					// don't allow same colour as parent
-					colour = colours.getNextColour();
+					colour = c.getNextColour();
 				}
 			}
 
@@ -270,8 +266,7 @@ var circle_packing = () => () => {
 
 			if (alternatePunchOut) {
 				// every second level punch the circle out rather than draw on top.
-				bmp.ctx.globalCompositeOperation =
-					(depth + 1) % 2 ? "destination-out" : "source-over";
+				bmp.ctx.globalCompositeOperation = (depth + 1) % 2 ? "destination-out" : "source-over";
 			}
 			bmp.ctx.beginPath();
 			bmp.ctx.fillStyle = colour;
@@ -292,10 +287,9 @@ var circle_packing = () => () => {
 				var perimeter = ring * grid * TAU;
 				var segments = Math.ceil(perimeter / grid) || 6;
 				for (var segment = 0; segment < segments; segment++) {
-					// vary siteRadius and siteAngle by rand.getNumber(0, 1) for some jitter
-					var siteRadius = (ring + rand.getNumber(0, 1)) * grid,
-						siteAngle =
-							((segment + rand.getNumber(0, 1)) / segments) * TAU,
+					// vary siteRadius and siteAngle by rnd.getNumber(0, 1) for some jitter
+					var siteRadius = (ring + rnd.getNumber(0, 1)) * grid,
+						siteAngle = ((segment + rnd.getNumber(0, 1)) / segments) * TAU,
 						siteX = x + Math.sin(siteAngle) * siteRadius,
 						siteY = y + Math.cos(siteAngle) * siteRadius,
 						site = {
@@ -306,11 +300,7 @@ var circle_packing = () => () => {
 					// if (Math.sin(siteAngle) > 0) { // semi circle
 					// if (parseInt(siteAngle) % 2 == 0) // radioactive sign
 					if (banding) {
-						if (
-							parseInt(siteRadius * bandScale) %
-							bandModulo ==
-							0
-						) {
+						if (parseInt(siteRadius * bandScale) % bandModulo == 0) {
 							sites.push(site);
 						}
 					} else {
@@ -348,7 +338,7 @@ var circle_packing = () => () => {
 
 		var container = attemptCircle(null, 0, {colour: "transparent"});
 		// var inner = attemptCircle(parent, 0, {x: 0.5, y: 0.5, r: 0.3, colour: "rgba(0,0,0,0)"});
-		// var inner2 = attemptCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: colours.getNextColour()});
+		// var inner2 = attemptCircle(inner, 0, {x: 0.5, y: 0.5, r: 0.1, colour: c.getNextColour()});
 	}
 	return experiment;
 };
