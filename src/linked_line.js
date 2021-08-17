@@ -2,6 +2,10 @@ const linked_line = () => {
 	// con.log('linked_line');
 	const TAU = Math.PI * 2;
 
+	var rnd = rand.instance();
+	rnd.setSeed();
+	// var c = colours.instance(rnd);
+
 	const generate = (size, preoccupied, debug = false) => {
 		/*
 		param `preoccupied` hahahaha!
@@ -10,7 +14,7 @@ const linked_line = () => {
 		return new Promise((resolve, reject) => {
 			if (Math.round(size / 2) === size / 2 || Math.round(size) !== size) {
 				alert("linked_line - invalid size, needs to be odd integer - you supplied: " + size);
-				return con.warn("linked_line - invalid size, needs to be odd integer - you supplied:", size);
+				reject("linked_line - invalid size, needs to be odd integer - you supplied:", size);
 			}
 			// size has to be odd, want the maze to start and end in the middle of a bouding wall.
 			// con.log('linked_line generate', size);
@@ -53,35 +57,35 @@ const linked_line = () => {
 				backup.oneD = occupied.oneD.slice();
 				// backup.neighbourless = occupied.neighbourless.slice();
 				// backup.twoD = occupied.twoD.slice();
-			}
+			};
 			const restore = () => {
 				occupied.array = backup.array.slice();
 				occupied.oneD = backup.oneD.slice();
 				// occupied.neighbourless = backup.neighbourless.slice();
 				// occupied.twoD = backup.twoD.slice();
-			}
+			};
 
 			const preoccupy = (options) => {
 				const item = {
 					x: options.x,
 					y: options.y,
-					type: "NULL"
+					type: "NULL",
 				};
 				occupied.oneD[getIndex(item.x, item.y)] = item;
 				occupied.array.push(item);
-			}
+			};
 
 			const makeItem = (options) => {
-				const x = (options.x == undefined) ? rand.random() : options.x;
-				const y = (options.y == undefined) ? rand.random() : options.y;
+				const x = options.x == undefined ? rnd.random() : options.x;
+				const y = options.y == undefined ? rnd.random() : options.y;
 				let item = {
 					x,
 					y,
 					type: "TUNNEL",
 					surrounded: false,
 					prev: options.prev,
-					next: options.next
-				}
+					next: options.next,
+				};
 
 				// occupied.twoD[y][x] = item;
 				occupied.oneD[getIndex(x, y)] = item;
@@ -89,17 +93,16 @@ const linked_line = () => {
 				// occupied.neighbourless.push(item);
 
 				return item;
-			}
+			};
 
 			var first, last;
 
 			const getIndex = (x, y) => y * wid + x;
 			const getXY = (index) => {
 				return {x: index % sw, y: Math.floor(index / sw)};
-			}
+			};
 
 			const start = () => {
-
 				// con.log("linked_line init");
 				for (var y = 0; y < hei; y++) {
 					for (var x = 0; x < wid; x++) {
@@ -113,13 +116,12 @@ const linked_line = () => {
 					preoccupied.forEach(preoccupy);
 				}
 
-
 				var newItem, lastItem;
 				for (var i = 0; i < hei; i++) {
 					// right angle
 					if (i < hei / 2) {
 						x = i;
-						y = hei / 2 - 0.5;//rand.getInteger(0, wid - 1);
+						y = hei / 2 - 0.5; //rnd.getInteger(0, wid - 1);
 					} else {
 						x = wid / 2 - 0.5;
 						y = i;
@@ -128,11 +130,11 @@ const linked_line = () => {
 					// x = wid / 2 - 0.5;
 					// y = i;
 
-
-					if (i == 0) { // first
+					if (i == 0) {
+						// first
 						newItem = makeItem({x, y});
 						first = newItem;
-					} else{
+					} else {
 						newItem = makeItem({x, y, prev: lastItem});
 						lastItem.next = newItem;
 					}
@@ -142,13 +144,14 @@ const linked_line = () => {
 				// con.log(occupied.oneD);
 				// con.log(occupied.twoD);
 				render(0);
-			}
+			};
 
 			const checkSurrounded = (item) => {
 				for (var i = -1; i < 2; i++) {
 					for (var j = -1; j < 2; j++) {
 						//if (i == 0 && j == 0) continue; // same as item.
-						var x = item.x + i, y = item.y + j;
+						var x = item.x + i,
+							y = item.y + j;
 						if (x >= 0 && x < wid && y >= 0 && y < hei) {
 							var index = getIndex(x, y);
 							// con.log(occupied.oneD[index])
@@ -159,15 +162,22 @@ const linked_line = () => {
 				// con.log("surrounded")x`x``
 				item.surrounded = true;
 				return true;
-			}
-
+			};
 
 			const checkDir = (x, y, dir) => {
-				switch(dir) {
-					case 0 /* up */ : y--; break;
-					case 1 /* right */ : x++; break;
-					case 2 /* down */ : y++; break;
-					case 3 /* left */ : x--; break;
+				switch (dir) {
+					case 0 /* up */:
+						y--;
+						break;
+					case 1 /* right */:
+						x++;
+						break;
+					case 2 /* down */:
+						y++;
+						break;
+					case 3 /* left */:
+						x--;
+						break;
 				}
 				var index = getIndex(x, y);
 
@@ -178,27 +188,27 @@ const linked_line = () => {
 					// ok: !!(occupied.twoD[y] && occupied.twoD[y][x] === -1),
 					ok: x >= 0 && x < wid && y >= 0 && y < hei && occupied.oneD[index] === -1,
 					x,
-					y
+					y,
 				};
-			}
+			};
 
 			const checkPoints = (...points) => {
 				for (var i = 0, il = points.length - 1; i < il; i++) {
-					var p0 = points[i], p1 = points[i + 1];
+					var p0 = points[i],
+						p1 = points[i + 1];
 					if (Math.abs(p0.x - p1.x) !== 0 && Math.abs(p0.y - p1.y) !== 0) {
 						return false;
 					}
 				}
 				// TODO this condition!
-				if (points[0].x === points[1].x && points[1].x === points[2].x ) return false ;//&& points[2].x === points[3].x) return false;
-				if (points[0].y === points[1].y && points[1].y === points[2].y ) return false ;//&& points[2].y === points[3].y) return false;
+				if (points[0].x === points[1].x && points[1].x === points[2].x) return false; //&& points[2].x === points[3].x) return false;
+				if (points[0].y === points[1].y && points[1].y === points[2].y) return false; //&& points[2].y === points[3].y) return false;
 
 				return true;
-			}
-
+			};
 
 			const insertItemAnywhere = () => {
-				var index = rand.getInteger(0, occupied.array.length - 1);
+				var index = rnd.getInteger(0, occupied.array.length - 1);
 				var item = occupied.array[index];
 				if (!item) return;
 
@@ -213,11 +223,9 @@ const linked_line = () => {
 				} else {
 					// console.log("null", item);
 				}
-			}
+			};
 
-
-			const insertItemAfter = afterItem => {
-
+			const insertItemAfter = (afterItem) => {
 				store();
 
 				var prev = afterItem;
@@ -226,15 +234,14 @@ const linked_line = () => {
 				// con.log(afterItem)
 				var x = afterItem.x;
 				var y = afterItem.y;
-				var startDir = rand.getInteger(0, 3);
-				var nextDir = rand.getInteger(0, 3);
+				var startDir = rnd.getInteger(0, 3);
+				var nextDir = rnd.getInteger(0, 3);
 
 				var pending0 = checkDir(x, y, startDir);
 				var pending1 = checkDir(pending0.x, pending0.y, nextDir);
 				var inline = checkPoints(prev, pending0, pending1, next);
 
 				if (pending0.ok && pending1.ok && inline) {
-
 					// con.log("pending0", pending0, pending1)
 					var newItem0 = makeItem({x: pending0.x, y: pending0.y});
 
@@ -254,12 +261,10 @@ const linked_line = () => {
 					// checkSurrounded(newItem0);
 					// checkSurrounded(newItem1);
 					// checkSurrounded(next);
-
 				} else {
 					restore();
 				}
-
-			}
+			};
 
 			const extractWalls = () => {
 				// discover a more efficient method of drawing walls rather than block by block
@@ -288,12 +293,15 @@ const linked_line = () => {
 				var w;
 				for (i = 0, il = walls.length; i < il; i++) {
 					w = walls[i];
-					if (row != w.y) { // new row - add a block
+					if (row != w.y) {
+						// new row - add a block
 						row = w.y;
-						wallrects.push({x: w.x, y: w.y, w:1, h: 1});
-					} else { // check if the previous x is the same...
-						if (walls[i - 1].x == w.x - 1) { // if it's the same block widen it.
-							wallrects[wallrects.length - 1].w ++;
+						wallrects.push({x: w.x, y: w.y, w: 1, h: 1});
+					} else {
+						// check if the previous x is the same...
+						if (walls[i - 1].x == w.x - 1) {
+							// if it's the same block widen it.
+							wallrects[wallrects.length - 1].w++;
 						} else {
 							wallrects.push({x: w.x, y: w.y, w: 1, h: 1}); // add a new one.
 						}
@@ -324,7 +332,7 @@ const linked_line = () => {
 					w = wallrects[i];
 					if (w) {
 						ctxR.beginPath();
-						ctxR.rect((w.x * blockZoom) + 2, (w.y * blockZoom) + 2, (w.w * blockZoom) - 4, (w.h * blockZoom) - 4);
+						ctxR.rect(w.x * blockZoom + 2, w.y * blockZoom + 2, w.w * blockZoom - 4, w.h * blockZoom - 4);
 						ctxR.lineWidth = 1;
 						ctxR.lineStyle = "rgba(0,0,0,0.00)";
 						ctxR.closePath();
@@ -334,18 +342,17 @@ const linked_line = () => {
 
 				// con.log("extractWalls");
 				resolve({walls, wallrects});
-			}
-
+			};
 
 			ctxZ.scale(blockZoom, blockZoom);
 			ctxZ.imageSmoothingEnabled = false;
 			ctxW.scale(blockZoom, blockZoom);
 			ctxW.imageSmoothingEnabled = false;
 
-			var arrLen = 0, done = 0;
+			var arrLen = 0,
+				done = 0;
 
 			const render = (time) => {
-
 				attempts++;
 
 				ctx.fillStyle = "#fff";
@@ -354,16 +361,17 @@ const linked_line = () => {
 				for (var i = 0; i < 40; i++) insertItemAnywhere();
 
 				ctx.beginPath();
-				ctx.lineWidth = block / 2 * 0.25;
+				ctx.lineWidth = (block / 2) * 0.25;
 				var item = first;
-				while(item) {
+				while (item) {
 					var x = (item.x + 3 / 4) * block;
 					var y = (item.y + 3 / 4) * block;
 
 					if (item == first) {
 						ctx.moveTo(x - block, y); // hack to draw off screen - right angle
 						// ctx.moveTo(x, y - block); // hack to draw off screen - straight down
-					} else if (!item.next) { // hack last one
+					} else if (!item.next) {
+						// hack last one
 						ctx.lineTo(x, y);
 						ctx.lineTo(x, y + block);
 					} else {
@@ -378,20 +386,21 @@ const linked_line = () => {
 				}
 				ctx.stroke();
 
-
 				for (var i = 0; i < occupied.array.length; i++) {
 					var item = occupied.array[i];
 					ctx.fillStyle = item.type == "NULL" ? "#f00" : "#00ff00";
 					ctx.fillRect(item.x * 2 + 1, item.y * 2 + 1, 1, 1);
-				};
-
-
-
+				}
 
 				ctxZ.drawImage(bmp.canvas, 0, 0);
 
 				// some dodgy logic to know if we're done yet.
-				if (arrLen === occupied.array.length) { done++; } else { arrLen = occupied.array.length; done = 0; }
+				if (arrLen === occupied.array.length) {
+					done++;
+				} else {
+					arrLen = occupied.array.length;
+					done = 0;
+				}
 
 				if (done < 300) {
 					// requestAnimationFrame(render);
@@ -401,18 +410,14 @@ const linked_line = () => {
 					} else {
 						render();
 					}
-
 				} else {
 					extractWalls();
 				}
-
 			};
 
 			start();
-
 		});
-
-	}
+	};
 
 	const init = (options) => {
 		const size = 39; // options.size passed in is massive stage size...
@@ -421,41 +426,52 @@ const linked_line = () => {
 
 		const polygon = (cx, cy, r, sides) => {
 			const points = [];
-			for(var i = 0; i < sides; i++) {
-				const angle = i / sides * TAU; // + TAU / 4,
+			for (var i = 0; i < sides; i++) {
+				const angle = (i / sides) * TAU; // + TAU / 4,
 				points.push({
 					x: size * cx + Math.cos(angle) * size * r,
-					y: size * cy + Math.sin(angle) * size * r
+					y: size * cy + Math.sin(angle) * size * r,
 				});
 			}
 			return (x, y) => geom.pointInPolygon(points, {x, y});
-		}
+		};
 
 		const circle = (cx, cy, r) => {
 			cx = size * cx;
 			cy = size * cy;
 			r = size * r;
 			return (x, y) => Math.hypot(x - cx, y - cy) < r;
-		}
+		};
 
-		const triangle = polygon(.5, .5, .4, 3);
-		const pentagon = polygon(.5, .5, .25, 5);
-		const hexagon = polygon(.5, .5, .4, 6);
+		const triangle = polygon(0.5, 0.5, 0.4, 3);
+		const pentagon = polygon(0.5, 0.5, 0.25, 5);
+		const hexagon = polygon(0.5, 0.5, 0.4, 6);
 
-		const circleTR5 = circle(3 / 4, 1 / 4, 1 / 5);// circle top right corner
-		const circleBL6 = circle(1 / 4, 3 / 4, 1 / 6);// circle bottom left corner
+		const circleTR5 = circle(3 / 4, 1 / 4, 1 / 5); // circle top right corner
+		const circleBL6 = circle(1 / 4, 3 / 4, 1 / 6); // circle bottom left corner
 
 		let fn;
-		switch (rand.getInteger(0, 3)) {
-			case 0 : fn = (x, y) => circleTR5(x, y) || circleBL6(x, y); break;
-			case 1 : fn = (x, y) => triangle(x, y); break;
-			case 2 : fn = (x, y) => pentagon(x, y); break;
-			case 3 : fn = (x, y) => hexagon(x, y); break;
-			case 4 : fn = (x, y) => false; break;
+		switch (rnd.getInteger(0, 3)) {
+			case 0:
+				fn = (x, y) => circleTR5(x, y) || circleBL6(x, y);
+				break;
+			case 1:
+				fn = (x, y) => triangle(x, y);
+				break;
+			case 2:
+				fn = (x, y) => pentagon(x, y);
+				break;
+			case 3:
+				fn = (x, y) => hexagon(x, y);
+				break;
+			case 4:
+				fn = (x, y) => false;
+				break;
 		}
 
 		for (var i = 0; i < size * size; i++) {
-			var x = i % size, y = Math.floor(i / size);
+			var x = i % size,
+				y = Math.floor(i / size);
 			if (fn(x, y)) {
 				preoccupied.push({x, y});
 			}
@@ -463,11 +479,11 @@ const linked_line = () => {
 		generate(size, preoccupied, true).then(({walls, wallrects}) => {
 			// con.log(walls, wallrects);
 		});
-	}
+	};
 
 	return {
 		generate,
-		init
+		init,
 	};
 };
 

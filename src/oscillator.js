@@ -1,4 +1,4 @@
-define("oscillator", function() {
+define("oscillator", function () {
 	// one of my favourite ever 2d graphics generations - from circa 2010
 	// original file location: Dropbox/Esquemedia/2015/funkyvector/flash/experiments
 
@@ -7,9 +7,13 @@ define("oscillator", function() {
 
 	var size = 800;
 
-	var cols = colours.getRandomPalette();
-	var bg = colours.getRandomColour();
-	var fg = colours.getNextColour();
+	var r = rand.instance();
+	r.setSeed();
+	var c = colours.instance(r);
+
+	c.getRandomPalette();
+	var bg = c.getRandomColour();
+	var fg = c.getNextColour();
 	var canvas = dom.canvas(sw, sh);
 	var ctx = canvas.ctx;
 
@@ -31,10 +35,10 @@ define("oscillator", function() {
 	function genOsc() {
 		for (var o = 0; o < oscillators; o++) {
 			oscs[o] = [];
-			oscs[o][0] = rand.getNumber(0, 0.1);
-			oscs[o][1] = rand.getNumber(0, 0.1);
-			oscs[o][2] = rand.getNumber(0, 0.1);
-			oscs[o][3] = rand.getNumber(0, 0.1);
+			oscs[o][0] = r.getNumber(0, 0.1);
+			oscs[o][1] = r.getNumber(0, 0.1);
+			oscs[o][2] = r.getNumber(0, 0.1);
+			oscs[o][3] = r.getNumber(0, 0.1);
 		}
 	}
 
@@ -47,7 +51,7 @@ define("oscillator", function() {
 		return temp; //oscillators;
 	}
 
-	var start = rand.getInteger(0, 1e6);
+	var start = r.getInteger(0, 1e6);
 
 	function onLoop(time) {
 		// requestAnimationFrame(onLoop);
@@ -59,15 +63,14 @@ define("oscillator", function() {
 		h = time * 0.02;
 		calcs = 0;
 		var rows = 0;
-		while(rows < range) {
-
+		while (rows < range) {
 			for (var i = 0; i < range; i++) {
-				var t = start + i;// + time * 0.01;
+				var t = start + i; // + time * 0.01;
 				var j = getOsc(t, 0, oscRange);
 				var k = getOsc(t, 1, oscRange);
 				var l = getOsc(t + h, 2, oscRange);
 				var m = getOsc(t - h, 3, oscRange);
-				var xp = (l + j + xGap * i);// * 1.1;
+				var xp = l + j + xGap * i; // * 1.1;
 				var yp = m + k + yo;
 				ctx.beginPath();
 				ctx.drawCircle(xp, yp, circleSize);
@@ -76,7 +79,7 @@ define("oscillator", function() {
 
 			h += 0.4;
 			yo += yGap;
-			rows ++;
+			rows++;
 		}
 		// if (time < 1000) con.log(range, rows, range * rows, calcs)
 	}
@@ -87,6 +90,6 @@ define("oscillator", function() {
 	}
 	return {
 		init: init,
-		stage: canvas.canvas
+		stage: canvas.canvas,
 	};
 });

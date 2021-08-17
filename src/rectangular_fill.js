@@ -113,7 +113,6 @@ var rectangular_fill = function () {
 	}
 
 	function init(options) {
-		con.log("Rectangular fill init", options);
 		r = rand.instance();
 		r.setSeed(options.seed);
 		c = colours.instance(r);
