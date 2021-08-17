@@ -25,7 +25,7 @@
     "load-grunt-tasks": "^3.1.0"
   },
   "scripts": {
-    "develop": "grunt",
+    "dev": "grunt",
     "build": "grunt deploy",
     "test": "jasmine-node spec --matchall --verbose",
     "test:watch": "jasmine-node spec --matchall --color --watch src/* --autotest"

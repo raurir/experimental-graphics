@@ -1,208 +1,208 @@
 var con = console;
-var isNode = (typeof module !== 'undefined');
+var isNode = typeof module !== "undefined";
 
 if (isNode) {
-  // Canvas = require('canvas');
-  var rand = require('./rand.js');
-  var dom = require('./dom.js');
-  var colours = require('./colours.js');
+	// Canvas = require('canvas');
+	var rand = require("./rand.js");
+	var dom = require("./dom.js");
+	var colours = require("./colours.js");
 }
 
+var rectangular_fill = function () {
+	var block, stroke;
 
-var rectangular_fill = function() {
+	var c;
+	var r;
+	var rows = 30;
+	var cols = 20;
+	var populated = [];
+	var available = [];
+	var squares = [];
+	var total = 0;
 
-  var size = 800, sw = size, sh = size;
+	var mainBmp = dom.canvas(1, 1);
+	var bmp = dom.canvas(1, 1);
 
-  var block, stroke;
+	function setBlock(size) {
+		var width = Math.ceil(r.random() * size);
+		var height = Math.ceil(r.random() * size);
+		var colour = c.getRandomColour();
 
-  var rows = 30;
-  var cols = 20;
-  var populated = [];
-  var available = [];
-  var squares = [];
-  var total = 0;
+		var startIndex = Math.floor(available.length * r.random());
+		var start = available[startIndex];
+		var y = start % rows;
+		var x = Math.floor(start / rows);
 
-  var bmp = dom.canvas(1, 1);
+		// con.log("setBlock", x, y, width, height)
 
-  function setBlock(size) {
+		var ok = true;
 
-    var width = Math.ceil(rand.random() * size);
-    var height = Math.ceil(rand.random() * size);
-    var colour = colours.getRandomColour();
+		var xxe = x + width;
+		if (xxe > cols) {
+			xxe = cols;
+			width = cols - x;
+		}
+		var yye = y + height;
+		if (yye > rows) {
+			yye = rows;
+			height = rows - y;
+		}
 
-    var startIndex = Math.floor(available.length * rand.random());
-    var start = available[startIndex];
-    var y = start % rows;
-    var x = Math.floor(start/rows);
+		for (var xx = x; xx < xxe && ok; xx++) {
+			for (var yy = y; yy < yye && ok; yy++) {
+				if (populated[xx][yy]) ok = false;
+			}
+		}
+		if (ok) {
+			for (xx = x; xx < xxe && ok; xx++) {
+				for (yy = y; yy < yye && ok; yy++) {
+					populated[xx][yy] = colour;
 
-    // con.log("setBlock", x, y, width, height)
+					// var id = [xx,yy].join(":");
+					// var id = xx+":"+yy;
+					var id = xx * rows + yy;
+					var availIndex = available.indexOf(id);
+					available.splice(availIndex, 1);
+				}
+			}
 
-    var ok = true;
+			squares.push({
+				colour: colour,
+				x: x * block + stroke,
+				y: y * block + stroke,
+				w: width * block - 2 * stroke,
+				h: height * block - 2 * stroke,
+			});
+		}
 
-    var xxe = x + width;
-    if (xxe > cols) {
-      xxe = cols;
-      width = cols - x;
-    }
-    var yye = y + height;
-    if (yye > rows) {
-      yye = rows;
-      height = rows - y;
-    }
+		// con.log("tryPosition", available.length, x, y);
+	}
 
-    for (var xx = x; xx < xxe && ok; xx++) {
-      for (var yy = y; yy < yye && ok; yy++) {
-        if (populated[xx][yy]) ok = false;
-      }
-    }
-    if (ok) {
-      for (var xx = x; xx < xxe && ok; xx++) {
-        for (var yy = y; yy < yye && ok; yy++) {
-          populated[xx][yy] = colour;
+	var attempts = 0;
+	var lastProgress = 0;
+	function tryPosition() {
+		attempts++;
 
-          // var id = [xx,yy].join(":");
-          // var id = xx+":"+yy;
-          var id = xx * rows + yy;
-          var availIndex = available.indexOf(id);
-          available.splice(availIndex, 1);
+		var size = 17;
 
-        }
-      }
+		if (attempts > 1e4 / 2) {
+			size = 1;
+		} else if (attempts > 1e4) {
+			render();
+			return con.warn("bailing!", attempts);
+		}
 
-      squares.push({
-        colour: colour,
-        x: x * block + stroke,
-        y: y * block + stroke,
-        w: width * block - 2 * stroke,
-        h: height * block - 2 * stroke
-      });
+		if (attempts % 1e2 == 0) {
+			var currentProgress = (total - available.length) / total;
+			if (lastProgress !== currentProgress) progress("render:progress", currentProgress);
+			lastProgress = currentProgress;
+		}
 
-    }
+		setBlock(size);
 
-    // con.log("tryPosition", available.length, x, y);
+		if (available.length) {
+			if ((attempts + 1) % 1e3 == 0) {
+				// con.log("delaying call");
+				setTimeout(tryPosition, 100);
+			} else {
+				tryPosition();
+			}
+		} else {
+			render();
+		}
+	}
 
+	function init(options) {
+		con.log("Rectangular fill init", options);
+		r = rand.instance();
+		r.setSeed(options.seed);
+		c = colours.instance(r);
+		mainBmp.setSize(options.size, options.size);
 
-  }
+		c.getRandomPalette();
 
-  var attempts = 0;
-  var lastProgress = 0;
-  function tryPosition() {
+		block = Math.round(20 * (0.2 + r.random() * 0.8));
+		stroke = block * (0.1 + r.random()) * 0.4;
 
-    attempts++;
+		bmp.setSize(block * cols, block * rows);
 
-    var size = 17;
+		for (var x = 0; x < cols; x++) {
+			populated[x] = [];
+			for (var y = 0; y < rows; y++) {
+				populated[x][y] = 0;
+				// available.push([x,y].join(":"));
+				available.push(x * rows + y);
+			}
+		}
 
-    if (attempts > 1e4 / 2) {
-      size = 1;
-    } else if (attempts > 1e4) {
-      render();
-      return con.warn("bailing!", attempts);
-    }
+		total = cols * rows;
 
-    if (attempts % 1e2 == 0) {
-      var currentProgress = (total - available.length) / total;
-      if (lastProgress !== currentProgress) progress("render:progress", currentProgress);
-      lastProgress = currentProgress;
-    }
+		// con.log("available", available)
 
-    setBlock(size) ;
+		tryPosition();
+	}
 
-    if (available.length) {
-      if ((attempts + 1) % 1e3 == 0) {
-        // con.log("delaying call");
-        setTimeout(tryPosition, 100);
-      } else {
-        tryPosition();
-      }
-    } else {
-      render();
-    }
+	function render() {
+		// con.log(populated, available)
 
-  }
+		// for (var x = 0; x < cols; x++) {
+		//   for (var y = 0; y < rows; y++) {
+		//     bmp.ctx.fillStyle = populated[x][y];
+		//     bmp.ctx.fillRect(x * block, y * block, block, block);
+		//   }
+		// }
 
-  function init() {
-    // con.log("Rectangular fill init");
+		for (var s = 0, sl = squares.length; s < sl; s++) {
+			var rect = squares[s];
 
-    colours.getRandomPalette();
+			var colourStart = c.mutateColour(rect.colour, 40); // "red";//
+			var colourEnd = c.mutateColour(rect.colour, 40); // "blue";//
+			var gradient;
+			if (rect.w === rect.h) {
+				gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+			} else if (rect.w > rect.h) {
+				gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y);
+			} else {
+				gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x, rect.y + rect.h);
+			}
+			gradient.addColorStop(0.0, colourStart);
+			gradient.addColorStop(1.0, colourEnd);
+			bmp.ctx.fillStyle = gradient;
 
-    block = Math.round(20 * (0.2 + rand.random() * 0.8));
-    stroke = block * (0.1 + rand.random()) * 0.4;
+			// bmp.ctx.fillStyle = rect.colour;
+			bmp.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+		}
 
-    bmp.setSize(block * cols, block * rows);
+		var pattern = bmp.ctx.createPattern(bmp.canvas, "repeat");
 
-    for (var x = 0; x < cols; x++) {
-      populated[x] = [];
-      for (var y = 0; y < rows; y++) {
-        populated[x][y] = 0;
-        // available.push([x,y].join(":"));
-        available.push(x * rows + y);
-      }
-    }
+		// bmp.ctx.fillStyle = colours.mutateColour(c.getRandomColour(), 50);
+		mainBmp.ctx.fillStyle = "#000";
+		mainBmp.ctx.fillRect(0, 0, 1000, 1000);
+		mainBmp.ctx.setTransform(1, r.random() * 0.2 - 0.1, r.random() * 0.2 - 0.1, 1, 0, 0);
+		mainBmp.ctx.fillStyle = pattern;
+		mainBmp.ctx.fillRect(-200, -200, 2000, 2000);
 
-    total = cols * rows;
+		progress("render:complete", mainBmp.canvas);
+	}
 
-    // con.log("available", available)
-
-    tryPosition();
-  }
-
-  function render() {
-
-    // con.log(populated, available)
-
-    // for (var x = 0; x < cols; x++) {
-    //   for (var y = 0; y < rows; y++) {
-    //     bmp.ctx.fillStyle = populated[x][y];
-    //     bmp.ctx.fillRect(x * block, y * block, block, block);
-    //   }
-    // }
-
-    bmp.ctx.setTransform(1, rand.random() * 0.2 - 0.1, rand.random() * 0.2 - 0.1, 1, 0, 0);
-
-    for (var s = 0, sl = squares.length; s < sl; s++) {
-      var rect = squares[s];
-
-      // var colourStart = colours.mutateColour(rect.colour, 40);// "red";//
-      // var colourEnd = colours.mutateColour(rect.colour, 40);// "blue";//
-      // var gradient;
-      // if (rect.w === rect.h) {
-      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
-      // } else if (rect.w > rect.h) {
-      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y );
-      // } else {
-      //   gradient = bmp.ctx.createLinearGradient(rect.x, rect.y, rect.x, rect.y + rect.h);
-      // }
-      // gradient.addColorStop(0.0, colourStart);
-      // gradient.addColorStop(1.0, colourEnd);
-      // bmp.ctx.fillStyle = gradient;
-
-      bmp.ctx.fillStyle = rect.colour;
-      bmp.ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-    }
-
-    progress("render:complete", bmp.canvas);
-
-  }
-
-  return {
-    name: "Rectangular Fill",
-    stage: bmp.canvas,
-    resize: function(w,h) {
-      // bmp.c(w, h);
-      bmp.setSize(w, h, true);
-      // sw = w;
-      // sh = h;
-      // bmp.canvas.style.width = sw + "px";
-      // bmp.canvas.style.height = sh + "px";
-    },
-    init: init,
-    kill: function() {}
-  };
-
+	return {
+		name: "Rectangular Fill",
+		stage: mainBmp.canvas,
+		resize: function (w, h) {
+			// bmp.c(w, h);
+			// bmp.setSize(w, h);
+			// sw = w;
+			// sh = h;
+			// bmp.canvas.style.width = sw + "px";
+			// bmp.canvas.style.height = sh + "px";
+		},
+		init: init,
+		kill: function () {},
+	};
 };
 
 if (isNode) {
-  module.exports = rectangular_fill();
+	module.exports = rectangular_fill();
 } else {
-  define("rectangular_fill", rectangular_fill);
+	define("rectangular_fill", rectangular_fill);
 }
