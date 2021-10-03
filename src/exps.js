@@ -175,7 +175,7 @@ ${info.description}
 					buttonsNav.removeChild(buttonInfo);
 				}
 				// showInfo();
-				dom.on(document.body, ["click", "touchstart"], function() {
+				dom.on(document.body, ["click", "touchstart"], function () {
 					if (interactedShowing) return;
 					interactedShowing = true;
 					buttonsNav.classList.add("interacted");

@@ -1,10 +1,16 @@
-define("frame_inverse", function() {
+define("frame_inverse", function () {
 	var sw = window.innerWidth;
 	var sh = window.innerHeight;
-	var maxSize = rand.getInteger(100, 300);
-	var minSize = rand.getInteger(4, 10);
-	var maxBoxes = Math.floor(sw * sh / 200);
-	var cols = colours.getRandomPalette();
+
+	var r = rand.instance();
+	r.setSeed();
+	var c = colours.instance(r);
+
+	var maxSize = r.getInteger(100, 300);
+	var minSize = r.getInteger(4, 10);
+	var maxBoxes = Math.floor((sw * sh) / 200);
+
+	var cols = c.getRandomPalette();
 	var canvas = dom.canvas(sw, sh);
 	var ctx = canvas.ctx;
 	var pixels = [];
@@ -12,7 +18,7 @@ define("frame_inverse", function() {
 	var renders = 0;
 	var col;
 
-	var f = rand.getNumber(0, 1);
+	var f = r.getNumber(0, 1);
 	var force = null;
 	var VERTICAL = 1,
 		HORIZONTAL = 2,
@@ -74,13 +80,13 @@ define("frame_inverse", function() {
 	}
 
 	function hitit() {
-		var i = rand.getInteger(0, sw - 1);
-		var j = rand.getInteger(0, sh - 1);
+		var i = r.getInteger(0, sw - 1);
+		var j = r.getInteger(0, sh - 1);
 
 		var targColor = getPixel(i, j);
 
-		var dimLarge = rand.getNumber(minSize, maxSize);
-		var dimSmall = rand.getNumber(1, minSize);
+		var dimLarge = r.getNumber(minSize, maxSize);
+		var dimSmall = r.getNumber(1, minSize);
 		var sizeX = dimLarge;
 		var sizeY = dimSmall;
 		switch (force) {
@@ -96,7 +102,7 @@ define("frame_inverse", function() {
 				sizeY = dimLarge;
 				break;
 			default:
-				if (rand.getNumber(0, 1) > 0.5) {
+				if (r.getNumber(0, 1) > 0.5) {
 					// flip them
 					sizeX = dimSmall;
 					sizeY = dimLarge;
@@ -133,7 +139,7 @@ define("frame_inverse", function() {
 	}
 
 	function init() {
-		var bg = colours.getRandomColour();
+		var bg = c.getRandomColour();
 		cols.splice(cols.indexOf(bg), 1);
 		ctx.fillStyle = bg;
 		ctx.fillRect(0, 0, sw, sh);
@@ -141,6 +147,6 @@ define("frame_inverse", function() {
 	}
 	return {
 		init: init,
-		stage: canvas.canvas
+		stage: canvas.canvas,
 	};
 });
