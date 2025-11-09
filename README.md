@@ -10,6 +10,11 @@ Get started
 
 run `yarn develop` then start a server, eg. `http-server .` - remember to append `&src` to the url for non minified code
 
+Early 2022
+----------
+
+I cloned this to a private due to NFTs. Some people stole my shit.
+
 Dec 18, 2014
 ------------
 
